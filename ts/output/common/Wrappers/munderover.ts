@@ -25,6 +25,7 @@
 import {AnyWrapper, Constructor} from '../Wrapper.js';
 import {CommonScriptbase, ScriptbaseConstructor} from './scriptbase.js';
 import {MmlMunderover, MmlMunder, MmlMover} from '../../../core/MmlTree/MmlNodes/munderover.js';
+import {CommonMo} from './mo.js';
 import {BBox} from '../../../util/BBox.js';
 
 /*****************************************************************/
@@ -60,7 +61,7 @@ export function CommonMunderMixin<
     /**
      * @override
      */
-    public get script() {
+    public get scriptChild() {
       return this.childNodes[(this.node as MmlMunder).under];
     }
 
@@ -83,9 +84,9 @@ export function CommonMunderMixin<
       }
       bbox.empty();
       const basebox = this.baseChild.getBBox();
-      const underbox = this.script.getBBox();
+      const underbox = this.scriptChild.getBBox();
       const v = this.getUnderKV(basebox, underbox)[1];
-      const delta = this.getDelta(true);
+      const delta = (this.isLineBelow ? 0 : this.getDelta(true));
       const [bw, uw] = this.getDeltaW([basebox, underbox], [0, -delta]);
       bbox.combine(basebox, bw, 0);
       bbox.combine(underbox, uw, v);
@@ -132,7 +133,7 @@ export function CommonMoverMixin<
     /**
      * @override
      */
-    public get script() {
+    public get scriptChild() {
       return this.childNodes[(this.node as MmlMover).over];
     }
 
@@ -142,6 +143,10 @@ export function CommonMoverMixin<
      */
     constructor(...args: any[]) {
       super(...args);
+      if (this.baseCore && 'noIC' in this.baseCore && this.isCharBase() &&
+          this.scriptChild.node.getProperty('mathaccent')) {
+        (this.baseCore as undefined as CommonMo).noIC = true;
+      }
       this.stretchChildren();
     }
 
@@ -155,9 +160,9 @@ export function CommonMoverMixin<
       }
       bbox.empty();
       const basebox = this.baseChild.getBBox();
-      const overbox = this.script.getBBox();
+      const overbox = this.scriptChild.getBBox();
       const u = this.getOverKU(basebox, overbox)[1];
-      const delta = this.getDelta();
+      const delta = (this.isLineAbove ? 0 : this.getDelta());
       const [bw, ow] = this.getDeltaW([basebox, overbox], [0, delta]);
       bbox.combine(basebox, bw, 0);
       bbox.combine(overbox, ow, u);
@@ -267,7 +272,8 @@ export function CommonMunderoverMixin<
       const u = this.getOverKU(basebox, overbox)[1];
       const v = this.getUnderKV(basebox, underbox)[1];
       const delta = this.getDelta();
-      const [bw, uw, ow] = this.getDeltaW([basebox, underbox, overbox], [0, -delta, delta]);
+      const [bw, uw, ow] = this.getDeltaW([basebox, underbox, overbox],
+                                          [0, this.isLineBelow ? 0 : -delta, this.isLineAbove ? 0 : delta]);
       bbox.combine(basebox, bw, 0);
       bbox.combine(overbox, ow, u);
       bbox.combine(underbox, uw, v);

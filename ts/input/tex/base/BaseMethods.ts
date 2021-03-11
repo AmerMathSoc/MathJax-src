@@ -589,8 +589,7 @@ BaseMethods.Accent = function(parser: TexParser, name: string, accent: string, s
   // @test Vector
   const c = parser.ParseArg(name);
   // @test Vector Font
-  const def = ParseUtil.getFontDef(parser);
-  def['accent'] = true;
+  const def = {...ParseUtil.getFontDef(parser), accent: true, mathaccent: true};
   const entity = NodeUtil.createEntity(accent);
   const moNode = parser.create('token', 'mo', def, entity);
   const mml = moNode;
@@ -617,9 +616,8 @@ BaseMethods.Accent = function(parser: TexParser, name: string, accent: string, s
  * @param {string} name The macro name.
  * @param {string} c Character to stack.
  * @param {boolean} stack True if stacked operator.
- * @param {boolean} noaccent True if not an accent.
  */
-BaseMethods.UnderOver = function(parser: TexParser, name: string, c: string, stack: boolean, noaccent: boolean) {
+BaseMethods.UnderOver = function(parser: TexParser, name: string, c: string, stack: boolean) {
   // @test Overline
   let base = parser.ParseArg(name);
   let symbol = NodeUtil.getForm(base);
@@ -638,7 +636,7 @@ BaseMethods.UnderOver = function(parser: TexParser, name: string, c: string, sta
   }
   const mml = parser.create('node', 'munderover', [base]) as MmlMunderover;
   const entity = NodeUtil.createEntity(c);
-  mo = parser.create('token', 'mo', {stretchy: true, accent: !noaccent}, entity);
+  mo = parser.create('token', 'mo', {stretchy: true, accent: true}, entity);
 
   NodeUtil.setChild(mml, name.charAt(1) === 'o' ?  mml.over : mml.under, mo);
   let node: MmlNode = mml;

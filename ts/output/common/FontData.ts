@@ -217,7 +217,8 @@ export type FontParameters = {
   delimiterfactor: number,
   delimitershortfall: number,
 
-  min_rule_thickness: number
+  min_rule_thickness: number,
+  separation_factor: number
 };
 
 /****************************************************************************/
@@ -451,7 +452,8 @@ export class FontData<C extends CharOptions, V extends VariantData<C>, D extends
     delimiterfactor:     901,
     delimitershortfall:   .3,
 
-    min_rule_thickness:  1.25     // in pixels
+    min_rule_thickness:  1.25,     // in pixels
+    separation_factor:   1.75      // expansion factor for spacing e.g. between accents and base
   };
 
   /**
@@ -517,6 +519,11 @@ export class FontData<C extends CharOptions, V extends VariantData<C>, D extends
    * The actual font parameters for this font
    */
   public params: FontParameters;
+
+  /**
+   * Factor to multiply italic correction by for delta computations for munderover
+   */
+  public skewIcFactor: number = .75;
 
   /**
    * Any styles needed for the font
