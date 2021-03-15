@@ -10,3 +10,5 @@ issue2519
 issue2554
 xarrows
 fn-op
+fix-smallmatrix
+fix-svg-not
