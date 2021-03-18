@@ -58,6 +58,11 @@ export function CommonMsubMixin<
   return class extends Base {
 
     /**
+     * Do not include italic correction
+     */
+    public static useIC: boolean = false;
+
+    /**
      * @override
      */
     public get scriptChild() {
@@ -70,7 +75,7 @@ export function CommonMsubMixin<
      * @override
      */
     public getOffset() {
-      return [this.baseHasIc ? -this.baseIc : 0, -this.getV()];
+      return [0, -this.getV()];
     }
 
   };
@@ -120,7 +125,7 @@ export function CommonMsupMixin<
      * @override
      */
     public getOffset() {
-      const x = this.getAdjustedIc() - this.baseIc;
+      const x = this.getAdjustedIc() - (this.baseRemoveIc ? 0 : this.baseIc);
       return [x, this.getU()];
     }
 
@@ -182,6 +187,11 @@ export function CommonMsubsupMixin<
 >(Base: T): MsubsupConstructor<W> & T {
 
   return class extends Base {
+
+    /**
+     * Do not include italic correction
+     */
+    public static useIC: boolean = false;
 
     /**
      *  Cached values for the script offsets and separation (so if they are
