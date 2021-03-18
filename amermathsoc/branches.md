@@ -13,3 +13,4 @@ fn-op
 fix-smallmatrix
 fix-svg-not
 mathaccent-ic
+issue2617
