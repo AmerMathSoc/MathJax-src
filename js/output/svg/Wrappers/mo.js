@@ -163,7 +163,7 @@ var SVGmo = (function (_super) {
         });
         this.addGlyph(n, v, 0, 0, svg);
         var glyph = adaptor.lastChild(svg);
-        adaptor.setAttribute(glyph, 'transform', 'scale(1,${this.jax.fixed(s)})');
+        adaptor.setAttribute(glyph, 'transform', "scale(1," + this.jax.fixed(s) + ")");
         adaptor.append(this.element, svg);
     };
     SVGmo.prototype.addBot = function (n, v, D, W) {
