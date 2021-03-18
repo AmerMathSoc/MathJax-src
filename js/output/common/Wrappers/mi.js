@@ -18,17 +18,12 @@ function CommonMiMixin(Base) {
     return (function (_super) {
         __extends(class_1, _super);
         function class_1() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.noIC = false;
-            return _this;
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         class_1.prototype.computeBBox = function (bbox, _recompute) {
             if (_recompute === void 0) { _recompute = false; }
             _super.prototype.computeBBox.call(this, bbox);
             this.copySkewIC(bbox);
-            if (this.noIC) {
-                bbox.w -= bbox.ic;
-            }
         };
         return class_1;
     }(Base));

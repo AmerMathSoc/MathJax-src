@@ -41,7 +41,6 @@ var CHTMLmsub = (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     CHTMLmsub.kind = msubsup_js_4.MmlMsub.prototype.kind;
-    CHTMLmsub.useIC = false;
     return CHTMLmsub;
 }(msubsup_js_1.CommonMsubMixin(scriptbase_js_1.CHTMLscriptbase)));
 exports.CHTMLmsub = CHTMLmsub;
@@ -51,7 +50,6 @@ var CHTMLmsup = (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     CHTMLmsup.kind = msubsup_js_4.MmlMsup.prototype.kind;
-    CHTMLmsup.useIC = true;
     return CHTMLmsup;
 }(msubsup_js_2.CommonMsupMixin(scriptbase_js_1.CHTMLscriptbase)));
 exports.CHTMLmsup = CHTMLmsup;
@@ -79,7 +77,7 @@ var CHTMLmsubsup = (function (_super) {
         if (ic) {
             adaptor.setStyle(sup.chtml, 'marginLeft', this.em(ic / sup.bbox.rscale));
         }
-        if (this.baseHasIc) {
+        if (this.baseRemoveIc) {
             adaptor.setStyle(stack, 'marginLeft', this.em(-this.baseIc));
         }
     };
@@ -93,7 +91,6 @@ var CHTMLmsubsup = (function (_super) {
             display: 'block'
         }
     };
-    CHTMLmsubsup.useIC = false;
     return CHTMLmsubsup;
 }(msubsup_js_3.CommonMsubsupMixin(scriptbase_js_1.CHTMLscriptbase)));
 exports.CHTMLmsubsup = CHTMLmsubsup;

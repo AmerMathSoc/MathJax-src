@@ -42,7 +42,6 @@ var CHTMLmunder = (function (_super) {
         this.adaptor.setStyle(under, 'paddingTop', this.em(k));
         this.setDeltaW([base, under], this.getDeltaW([basebox, underbox], [0, -delta]));
         this.adjustUnderDepth(under, underbox);
-        this.adjustBaseWidth();
     };
     CHTMLmunder.kind = munderover_js_4.MmlMunder.prototype.kind;
     CHTMLmunder.styles = {
@@ -85,7 +84,6 @@ var CHTMLmover = (function (_super) {
         this.adaptor.setStyle(over, 'paddingBottom', this.em(k));
         this.setDeltaW([base, over], this.getDeltaW([basebox, overbox], [0, delta]));
         this.adjustOverDepth(over, overbox);
-        this.adjustBaseWidth();
     };
     CHTMLmover.kind = munderover_js_4.MmlMover.prototype.kind;
     CHTMLmover.styles = {
@@ -130,7 +128,6 @@ var CHTMLmunderover = (function (_super) {
         this.setDeltaW([base, under, over], this.getDeltaW([basebox, underbox, overbox], [0, this.isLineBelow ? 0 : -delta, this.isLineAbove ? 0 : delta]));
         this.adjustOverDepth(over, overbox);
         this.adjustUnderDepth(under, underbox);
-        this.adjustBaseWidth();
     };
     CHTMLmunderover.kind = munderover_js_4.MmlMunderover.prototype.kind;
     CHTMLmunderover.styles = {

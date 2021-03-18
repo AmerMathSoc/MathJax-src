@@ -63,7 +63,6 @@ function CommonMoMixin(Base) {
                     args[_i] = arguments[_i];
                 }
                 var _this = _super.apply(this, __spread(args)) || this;
-                _this.noIC = false;
                 _this.size = null;
                 _this.isAccent = _this.node.isAccent;
                 return _this;
@@ -91,9 +90,6 @@ function CommonMoMixin(Base) {
                     return;
                 _super.prototype.computeBBox.call(this, bbox);
                 this.copySkewIC(bbox);
-                if (this.noIC) {
-                    bbox.w -= bbox.ic;
-                }
             };
             Mo.prototype.getAccentOffset = function () {
                 var bbox = BBox_js_1.BBox.empty();

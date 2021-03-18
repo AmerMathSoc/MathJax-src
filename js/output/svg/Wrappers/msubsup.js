@@ -41,7 +41,6 @@ var SVGmsub = (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     SVGmsub.kind = msubsup_js_4.MmlMsub.prototype.kind;
-    SVGmsub.useIC = false;
     return SVGmsub;
 }(msubsup_js_1.CommonMsubMixin(scriptbase_js_1.SVGscriptbase)));
 exports.SVGmsub = SVGmsub;
@@ -51,7 +50,6 @@ var SVGmsup = (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     SVGmsup.kind = msubsup_js_4.MmlMsup.prototype.kind;
-    SVGmsup.useIC = true;
     return SVGmsup;
 }(msubsup_js_2.CommonMsupMixin(scriptbase_js_1.SVGscriptbase)));
 exports.SVGmsup = SVGmsup;
@@ -73,7 +71,6 @@ var SVGmsubsup = (function (_super) {
         sup.place(w + x, u);
     };
     SVGmsubsup.kind = msubsup_js_4.MmlMsubsup.prototype.kind;
-    SVGmsubsup.useIC = false;
     return SVGmsubsup;
 }(msubsup_js_3.CommonMsubsupMixin(scriptbase_js_1.SVGscriptbase)));
 exports.SVGmsubsup = SVGmsubsup;

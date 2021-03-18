@@ -39,15 +39,13 @@ var SVGscriptbase = (function (_super) {
     }
     SVGscriptbase.prototype.toSVG = function (parent) {
         var svg = this.standardSVGnode(parent);
-        var bbox = this.baseChild.getBBox();
-        var w = bbox.w * bbox.rscale;
+        var w = this.getBaseWidth();
         var _a = __read(this.getOffset(), 2), x = _a[0], v = _a[1];
         this.baseChild.toSVG(svg);
         this.scriptChild.toSVG(svg);
         this.scriptChild.place(w + x, v);
     };
     SVGscriptbase.kind = 'scriptbase';
-    SVGscriptbase.useIC = false;
     return SVGscriptbase;
 }(scriptbase_js_1.CommonScriptbaseMixin(Wrapper_js_1.SVGWrapper)));
 exports.SVGscriptbase = SVGscriptbase;

@@ -5,7 +5,6 @@ export declare const DirectionVH: {
     [n: number]: string;
 };
 export interface CommonMo extends AnyWrapper {
-    noIC: boolean;
     size: number;
     isAccent: boolean;
     protoBBox(bbox: BBox): void;

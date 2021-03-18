@@ -5,7 +5,7 @@ export interface CommonScriptbase<W extends AnyWrapper> extends AnyWrapper {
     readonly baseChild: W;
     readonly baseScale: number;
     readonly baseIc: number;
-    readonly baseHasIc: boolean;
+    readonly baseRemoveIc: boolean;
     readonly baseIsChar: boolean;
     readonly baseHasAccentOver: boolean;
     readonly baseHasAccentUnder: boolean;
@@ -23,7 +23,6 @@ export interface CommonScriptbase<W extends AnyWrapper> extends AnyWrapper {
     checkLineAccents(): void;
     isLineAccent(script: W): boolean;
     getBaseWidth(): number;
-    baseWidthAdjust(): number;
     getOffset(): number[];
     baseCharZero(n: number): number;
     getV(): number;

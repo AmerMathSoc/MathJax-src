@@ -324,7 +324,7 @@ var CHTMLFontData = (function (_super) {
         styles['mjx-stretchy-h' + c + ' mjx-' + part + ' mjx-c::before'] = css;
     };
     CHTMLFontData.prototype.addCharStyles = function (styles, vletter, n, data) {
-        var _a = __read(data, 4), w = _a[2], options = _a[3];
+        var options = data[3];
         if (this.options.adaptiveCSS && !options.used)
             return;
         var letter = (options.f !== undefined ? options.f : vletter);
@@ -333,11 +333,6 @@ var CHTMLFontData = (function (_super) {
             padding: this.padding(data, 0, options.ic || 0),
             content: (options.c != null ? '"' + options.c + '"' : this.charContent(n))
         };
-        if (options.ic) {
-            styles['[noIC] ' + selector + ':last-child::before'] = {
-                'padding-right': this.em(w)
-            };
-        }
     };
     CHTMLFontData.prototype.getDelimiterData = function (n) {
         return this.getChar('-smallop', n);

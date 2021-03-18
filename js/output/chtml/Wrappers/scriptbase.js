@@ -51,9 +51,10 @@ var CHTMLscriptbase = (function (_super) {
     CHTMLscriptbase.prototype.toCHTML = function (parent) {
         this.chtml = this.standardCHTMLnode(parent);
         var _a = __read(this.getOffset(), 2), x = _a[0], v = _a[1];
+        var dx = x - (this.baseRemoveIc ? this.baseIc : 0);
         var style = { 'vertical-align': this.em(v) };
-        if (x) {
-            style['margin-left'] = this.em(x);
+        if (dx) {
+            style['margin-left'] = this.em(dx);
         }
         this.baseChild.toCHTML(this.chtml);
         this.scriptChild.toCHTML(this.adaptor.append(this.chtml, this.html('mjx-script', { style: style })));
@@ -92,14 +93,7 @@ var CHTMLscriptbase = (function (_super) {
         }
         adaptor.append(adaptor.firstChild(under), box);
     };
-    CHTMLscriptbase.prototype.adjustBaseWidth = function () {
-        var w = this.baseWidthAdjust();
-        if (w) {
-            this.adaptor.setStyle(this.chtml, 'paddingRight', this.em(w));
-        }
-    };
     CHTMLscriptbase.kind = 'scriptbase';
-    CHTMLscriptbase.useIC = false;
     return CHTMLscriptbase;
 }(scriptbase_js_1.CommonScriptbaseMixin(Wrapper_js_1.CHTMLWrapper)));
 exports.CHTMLscriptbase = CHTMLscriptbase;

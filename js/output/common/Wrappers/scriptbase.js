@@ -57,7 +57,7 @@ function CommonScriptbaseMixin(Base) {
                 var _this = _super.apply(this, __spread(args)) || this;
                 _this.baseScale = 1;
                 _this.baseIc = 0;
-                _this.baseHasIc = false;
+                _this.baseRemoveIc = false;
                 _this.baseIsChar = false;
                 _this.baseHasAccentOver = null;
                 _this.baseHasAccentUnder = null;
@@ -73,15 +73,9 @@ function CommonScriptbaseMixin(Base) {
                 _this.baseIsChar = _this.isCharBase();
                 _this.isMathAccent = _this.baseIsChar &&
                     (_this.scriptChild && !!_this.scriptChild.coreMO().node.getProperty('mathaccent'));
-                var useIC = _this.constructor.useIC;
-                if (!useIC || _this.isMathAccent) {
-                    core.noIC = true;
-                    core.invalidateBBox();
-                }
-                else {
-                    _this.baseHasIc = useIC && !_this.baseCore.node.attributes.get('largeop');
-                }
                 _this.checkLineAccents();
+                _this.baseRemoveIc = !_this.isLineAbove && !_this.isLineBelow &&
+                    (!_this.constructor.useIC || _this.isMathAccent);
                 return _this;
             }
             Object.defineProperty(class_1.prototype, "baseChild", {
@@ -111,13 +105,11 @@ function CommonScriptbaseMixin(Base) {
                 }
                 if (!core) {
                     this.baseHasAccentOver = this.baseHasAccentUnder = false;
-                    this.baseHasIc = false;
                 }
                 return core || this.childNodes[0];
             };
             class_1.prototype.setBaseAccentsFor = function (core) {
                 if (core.node.isKind('munderover')) {
-                    this.baseHasIc = true;
                     if (this.baseHasAccentOver === null) {
                         this.baseHasAccentOver = !!core.node.attributes.get('accent');
                     }
@@ -193,9 +185,6 @@ function CommonScriptbaseMixin(Base) {
                     this.isLineAbove = this.isLineAccent(mml.overChild);
                     this.isLineBelow = this.isLineAccent(mml.underChild);
                 }
-                if (this.isLineAbove || this.isLineBelow) {
-                    this.baseHasIc = false;
-                }
             };
             class_1.prototype.isLineAccent = function (script) {
                 var node = script.coreMO().node;
@@ -203,17 +192,14 @@ function CommonScriptbaseMixin(Base) {
             };
             class_1.prototype.getBaseWidth = function () {
                 var bbox = this.baseChild.getBBox();
-                return bbox.w * bbox.rscale - (this.baseHasIc ? this.baseIc : 0);
-            };
-            class_1.prototype.baseWidthAdjust = function () {
-                return (!this.baseHasIc && !this.isLineAbove && !this.isLineBelow ?
-                    this.baseCore.getBBox().ic * this.baseScale : 0);
+                return bbox.w * bbox.rscale - (this.baseRemoveIc ? this.baseIc : 0);
             };
             class_1.prototype.computeBBox = function (bbox, recompute) {
                 if (recompute === void 0) { recompute = false; }
+                var w = this.getBaseWidth();
                 var _a = __read(this.getOffset(), 2), x = _a[0], y = _a[1];
                 bbox.append(this.baseChild.getBBox());
-                bbox.combine(this.scriptChild.getBBox(), bbox.w + x, y);
+                bbox.combine(this.scriptChild.getBBox(), w + x, y);
                 bbox.w += this.font.params.scriptspace;
                 bbox.clean();
                 this.setChildPWidths(recompute);
@@ -273,7 +259,7 @@ function CommonScriptbaseMixin(Base) {
                 if (delta === void 0) { delta = [0, 0, 0]; }
                 var align = this.node.attributes.get('align');
                 var widths = boxes.map(function (box) { return box.w * box.rscale; });
-                widths[0] -= (this.baseHasIc ? this.baseIc : 0);
+                widths[0] -= (this.baseRemoveIc && !this.baseCore.node.attributes.get('largeop') ? this.baseIc : 0);
                 var w = Math.max.apply(Math, __spread(widths));
                 var dw = [];
                 var m = 0;
@@ -375,7 +361,7 @@ function CommonScriptbaseMixin(Base) {
             };
             return class_1;
         }(Base)),
-        _a.useIC = false,
+        _a.useIC = true,
         _a;
 }
 exports.CommonScriptbaseMixin = CommonScriptbaseMixin;

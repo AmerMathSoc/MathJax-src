@@ -22,12 +22,6 @@ var CHTMLmi = (function (_super) {
     function CHTMLmi() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    CHTMLmi.prototype.toCHTML = function (parent) {
-        _super.prototype.toCHTML.call(this, parent);
-        if (this.noIC) {
-            this.adaptor.setAttribute(this.chtml, 'noIC', 'true');
-        }
-    };
     CHTMLmi.kind = mi_js_2.MmlMi.prototype.kind;
     return CHTMLmi;
 }(mi_js_1.CommonMiMixin(Wrapper_js_1.CHTMLWrapper)));

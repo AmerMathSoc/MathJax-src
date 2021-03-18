@@ -62,7 +62,7 @@ var MmlMi = (function (_super) {
     };
     MmlMi.defaults = __assign({}, MmlNode_js_1.AbstractMmlTokenNode.defaults);
     MmlMi.operatorName = /^[a-z][a-z0-9]*$/i;
-    MmlMi.singleCharacter = /^[\uD800-\uDBFF]?.$/;
+    MmlMi.singleCharacter = /^[\uD800-\uDBFF]?.[\u0300-\u036F\u1AB0-\u1ABE\u1DC0-\u1DFF\u20D0-\u20EF]*$/;
     return MmlMi;
 }(MmlNode_js_1.AbstractMmlTokenNode));
 exports.MmlMi = MmlMi;
