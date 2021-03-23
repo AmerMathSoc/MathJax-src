@@ -86,9 +86,8 @@ function AssistiveMmlMathItemMixin(BaseMathItem) {
                 var mml = document.toMML(this.root).replace(/\n */g, '').replace(/<!--.*?-->/g, '');
                 var mmlNodes = adaptor.firstChild(adaptor.body(adaptor.parse(mml, 'text/html')));
                 var node = adaptor.node('mjx-assistive-mml', {
-                    role: 'presentation', unselectable: 'on', display: (this.display ? 'block' : 'inline')
+                    unselectable: 'on', display: (this.display ? 'block' : 'inline')
                 }, [mmlNodes]);
-                adaptor.setAttribute(this.typesetRoot, 'role', 'presentation');
                 adaptor.setAttribute(adaptor.firstChild(this.typesetRoot), 'aria-hidden', 'true');
                 adaptor.setStyle(this.typesetRoot, 'position', 'relative');
                 adaptor.append(this.typesetRoot, node);

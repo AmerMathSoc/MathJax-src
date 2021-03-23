@@ -15,6 +15,7 @@ export interface CommonMo extends AnyWrapper {
     getWH(WH: number[]): number;
     getStretchBBox(WHD: number[], D: number, C: DelimiterData): void;
     getBaseline(WHD: number[], HD: number, C: DelimiterData): number[];
+    checkExtendedHeight(D: number, C: DelimiterData): number;
 }
 export declare type MoConstructor = Constructor<CommonMo>;
 export declare function CommonMoMixin<T extends WrapperConstructor>(Base: T): MoConstructor & T;

@@ -192,7 +192,7 @@ function CommonScriptbaseMixin(Base) {
             };
             class_1.prototype.getBaseWidth = function () {
                 var bbox = this.baseChild.getBBox();
-                return bbox.w * bbox.rscale - (this.baseRemoveIc ? this.baseIc : 0);
+                return bbox.w * bbox.rscale - (this.baseRemoveIc ? this.baseIc : 0) + this.font.params.extra_ic;
             };
             class_1.prototype.computeBBox = function (bbox, recompute) {
                 if (recompute === void 0) { recompute = false; }

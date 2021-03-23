@@ -52,37 +52,37 @@ var SVGmtr = (function (_super) {
         var cSpace = this.parent.getColumnHalfSpacing();
         var cLines = __spread([this.parent.fLine], this.parent.cLines, [this.parent.fLine]);
         var cWidth = this.parent.getComputedWidths();
-        var scale = this.getBBox().rscale;
+        var scale = 1 / this.getBBox().rscale;
         var x = cLines[0];
         for (var i = 0; i < this.numCells; i++) {
             var child = this.getChild(i);
             child.toSVG(svg);
             x += this.placeCell(child, {
-                x: x, y: 0, lSpace: cSpace[i] / scale, rSpace: cSpace[i + 1] / scale, w: cWidth[i] / scale,
-                lLine: cLines[i] / scale, rLine: cLines[i + 1] / scale
+                x: x, y: 0, lSpace: cSpace[i] * scale, rSpace: cSpace[i + 1] * scale, w: cWidth[i] * scale,
+                lLine: cLines[i] * scale, rLine: cLines[i + 1] * scale
             });
         }
     };
     SVGmtr.prototype.placeCell = function (cell, sizes) {
         var x = sizes.x, y = sizes.y, lSpace = sizes.lSpace, w = sizes.w, rSpace = sizes.rSpace, lLine = sizes.lLine, rLine = sizes.rLine;
-        var scale = this.getBBox().rscale;
-        var _a = __read([this.H / scale, this.D / scale], 2), h = _a[0], d = _a[1];
-        var _b = __read([this.tSpace / scale, this.bSpace / scale], 2), t = _b[0], b = _b[1];
+        var scale = 1 / this.getBBox().rscale;
+        var _a = __read([this.H * scale, this.D * scale], 2), h = _a[0], d = _a[1];
+        var _b = __read([this.tSpace * scale, this.bSpace * scale], 2), t = _b[0], b = _b[1];
         var _c = __read(cell.placeCell(x + lSpace, y, w, h, d), 2), dx = _c[0], dy = _c[1];
         var W = lSpace + w + rSpace;
         cell.placeColor(-(dx + lSpace + lLine / 2), -(d + b + dy), W + (lLine + rLine) / 2, h + d + t + b);
         return W + rLine;
     };
     SVGmtr.prototype.placeColor = function () {
-        var scale = this.getBBox().rscale;
+        var scale = 1 / this.getBBox().rscale;
         var adaptor = this.adaptor;
         var child = adaptor.firstChild(this.element);
         if (child && adaptor.kind(child) === 'rect' && adaptor.getAttribute(child, 'data-bgcolor')) {
-            var _a = __read([this.tLine / 2 / scale, this.bLine / 2 / scale], 2), TL = _a[0], BL = _a[1];
-            var _b = __read([this.tSpace / scale, this.bSpace / scale], 2), TS = _b[0], BS = _b[1];
-            var _c = __read([this.H / scale, this.D / scale], 2), H = _c[0], D = _c[1];
+            var _a = __read([(this.tLine / 2) * scale, (this.bLine / 2) * scale], 2), TL = _a[0], BL = _a[1];
+            var _b = __read([this.tSpace * scale, this.bSpace * scale], 2), TS = _b[0], BS = _b[1];
+            var _c = __read([this.H * scale, this.D * scale], 2), H = _c[0], D = _c[1];
             adaptor.setAttribute(child, 'y', this.fixed(-(D + BS + BL)));
-            adaptor.setAttribute(child, 'width', this.fixed(this.parent.getWidth() / scale));
+            adaptor.setAttribute(child, 'width', this.fixed(this.parent.getWidth() * scale));
             adaptor.setAttribute(child, 'height', this.fixed(TL + TS + H + D + BS + BL));
         }
     };

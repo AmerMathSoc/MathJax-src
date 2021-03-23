@@ -246,8 +246,8 @@ var Menu = (function () {
                             ['clearspeak-default', 'Auto']
                         ])),
                         this.submenu('ChromeVox', 'ChromeVox Rules', this.radioGroup('speechRules', [
-                            ['default-default', 'Standard'],
-                            ['default-alternative', 'Alternative']
+                            ['chromevox-default', 'Standard'],
+                            ['chromevox-alternative', 'Alternative']
                         ]))
                     ]),
                     this.submenu('Highlight', 'Highlight', [
@@ -622,9 +622,27 @@ var Menu = (function () {
             (!this.settings.shift || event.shiftKey));
     };
     Menu.prototype.rerender = function (start) {
+        var e_6, _a;
         if (start === void 0) { start = MathItem_js_1.STATE.TYPESET; }
         this.rerenderStart = Math.min(start, this.rerenderStart);
         if (!Menu.loading) {
+            if (this.rerenderStart <= MathItem_js_1.STATE.COMPILED) {
+                try {
+                    for (var _b = __values(this.document.inputJax), _c = _b.next(); !_c.done; _c = _b.next()) {
+                        var jax = _c.value;
+                        if (jax.name === 'TeX') {
+                            jax.parseOptions.tags.reset(0);
+                        }
+                    }
+                }
+                catch (e_6_1) { e_6 = { error: e_6_1 }; }
+                finally {
+                    try {
+                        if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                    }
+                    finally { if (e_6) throw e_6.error; }
+                }
+            }
             this.document.rerender(this.rerenderStart);
             this.rerenderStart = MathItem_js_1.STATE.LAST;
         }
@@ -633,10 +651,10 @@ var Menu = (function () {
         this.copyToClipboard(this.toMML(this.menu.mathItem));
     };
     Menu.prototype.copyOriginal = function () {
-        this.copyToClipboard(this.menu.mathItem.math);
+        this.copyToClipboard(this.menu.mathItem.math.trim());
     };
     Menu.prototype.copyAnnotation = function () {
-        this.copyToClipboard(this.menu.annotation);
+        this.copyToClipboard(this.menu.annotation.trim());
     };
     Menu.prototype.copyToClipboard = function (text) {
         var input = document.createElement('textarea');
@@ -692,7 +710,7 @@ var Menu = (function () {
         };
     };
     Menu.prototype.submenu = function (id, content, entries, disabled) {
-        var e_6, _a;
+        var e_7, _a;
         if (entries === void 0) { entries = []; }
         if (disabled === void 0) { disabled = false; }
         var items = [];
@@ -707,12 +725,12 @@ var Menu = (function () {
                 }
             }
         }
-        catch (e_6_1) { e_6 = { error: e_6_1 }; }
+        catch (e_7_1) { e_7 = { error: e_7_1 }; }
         finally {
             try {
                 if (entries_1_1 && !entries_1_1.done && (_a = entries_1.return)) _a.call(entries_1);
             }
-            finally { if (e_6) throw e_6.error; }
+            finally { if (e_7) throw e_7.error; }
         }
         return { type: 'submenu', id: id, content: content, menu: { items: items }, disabled: (items.length === 0) || disabled };
     };

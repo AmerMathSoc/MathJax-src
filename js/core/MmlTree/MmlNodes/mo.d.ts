@@ -8,6 +8,11 @@ export declare class MmlMo extends AbstractMmlTokenNode {
     static OPTABLE: {
         [form: string]: OperatorList;
     };
+    static pseudoScripts: RegExp;
+    protected static primes: RegExp;
+    protected static remapPrimes: {
+        [n: number]: number;
+    };
     _texClass: number;
     get texClass(): number;
     set texClass(value: number);
@@ -23,7 +28,10 @@ export declare class MmlMo extends AbstractMmlTokenNode {
     setTeXclass(prev: MmlNode): MmlNode;
     adjustTeXclass(prev: MmlNode): MmlNode;
     setInheritedAttributes(attributes?: AttributeList, display?: boolean, level?: number, prime?: boolean): void;
+    protected checkOperatorTable(mo: string): void;
     getForms(): [string, string, string];
     protected handleExplicitForm(forms: string[]): string[];
     protected getRange(mo: string): RangeDef;
+    protected checkPseudoScripts(mo: string): void;
+    protected checkPrimes(mo: string): void;
 }

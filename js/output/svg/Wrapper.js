@@ -240,7 +240,7 @@ var SVGWrapper = (function (_super) {
         return this.svg('path', { 'data-c': C, d: path });
     };
     SVGWrapper.prototype.useNode = function (variant, C, path) {
-        var use = this.svg('use');
+        var use = this.svg('use', { 'data-c': C });
         var id = '#' + this.jax.fontCache.cachePath(variant, C, path);
         this.adaptor.setAttribute(use, 'href', id, svg_js_1.XLINKNS);
         return use;

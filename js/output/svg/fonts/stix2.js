@@ -129,7 +129,7 @@ var STIX2Font = (function (_super) {
         0x030C: '\u02C7',
         0x2192: '\u20D7'
     };
-    STIX2Font.defaultParams = __assign(__assign({}, FontData_js_1.SVGFontData.defaultParams), { separation_factor: 1 });
+    STIX2Font.defaultParams = __assign(__assign({}, FontData_js_1.SVGFontData.defaultParams), { separation_factor: 1.5 });
     STIX2Font.defaultDelimiters = delimiters_js_1.delimiters;
     STIX2Font.defaultVariants = __spread(FontData_js_1.SVGFontData.defaultVariants, [
         ['-tex-calligraphic', 'normal'],

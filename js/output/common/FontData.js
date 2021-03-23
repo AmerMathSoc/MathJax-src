@@ -55,7 +55,6 @@ var FontData = (function () {
         this.delimiters = {};
         this.cssFontMap = {};
         this.remapChars = {};
-        this.primes = /^$/;
         this.skewIcFactor = .75;
         var CLASS = this.constructor;
         this.options = Options_js_1.userOptions(Options_js_1.defaultOptions({}, CLASS.OPTIONS), options);
@@ -95,10 +94,8 @@ var FontData = (function () {
             finally { if (e_2) throw e_2.error; }
         }
         this.defineRemap('accent', CLASS.defaultAccentMap);
-        this.defineRemap('primes', CLASS.defaultPrimeMap);
         this.defineRemap('mo', CLASS.defaultMoMap);
         this.defineRemap('mn', CLASS.defaultMnMap);
-        this.primes = CLASS.defaultPrimes;
     }
     FontData.charOptions = function (font, n) {
         var char = font[n];
@@ -382,24 +379,6 @@ var FontData = (function () {
         0x20EE: '\u2190',
         0x20EF: '\u2192'
     };
-    FontData.defaultPrimes = new RegExp([
-        '^["\'`',
-        '\u2018-\u201F',
-        ']+$'
-    ].join(''));
-    FontData.defaultPrimeMap = {
-        0x0022: '\u2033',
-        0x0027: '\u2032',
-        0x0060: '\u2035',
-        0x2018: '\u2035',
-        0x2019: '\u2032',
-        0x201A: '\u2032',
-        0x201B: '\u2035',
-        0x201C: '\u2036',
-        0x201D: '\u2033',
-        0x201E: '\u2033',
-        0x201F: '\u2036',
-    };
     FontData.defaultMoMap = {
         0x002D: '\u2212'
     };
@@ -436,7 +415,8 @@ var FontData = (function () {
         delimiterfactor: 901,
         delimitershortfall: .3,
         min_rule_thickness: 1.25,
-        separation_factor: 1.75
+        separation_factor: 1.75,
+        extra_ic: .033
     };
     FontData.defaultDelimiters = {};
     FontData.defaultChars = {};

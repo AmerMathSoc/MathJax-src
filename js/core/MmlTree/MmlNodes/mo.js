@@ -54,6 +54,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MmlMo = void 0;
 var MmlNode_js_1 = require("../MmlNode.js");
 var OperatorDictionary_js_1 = require("../OperatorDictionary.js");
+var string_js_1 = require("../../../util/string.js");
 var MmlMo = (function (_super) {
     __extends(MmlMo, _super);
     function MmlMo() {
@@ -222,13 +223,18 @@ var MmlMo = (function (_super) {
         return this;
     };
     MmlMo.prototype.setInheritedAttributes = function (attributes, display, level, prime) {
-        var e_1, _a;
         if (attributes === void 0) { attributes = {}; }
         if (display === void 0) { display = false; }
         if (level === void 0) { level = 0; }
         if (prime === void 0) { prime = false; }
         _super.prototype.setInheritedAttributes.call(this, attributes, display, level, prime);
         var mo = this.getText();
+        this.checkOperatorTable(mo);
+        this.checkPseudoScripts(mo);
+        this.checkPrimes(mo);
+    };
+    MmlMo.prototype.checkOperatorTable = function (mo) {
+        var e_1, _a;
         var _b = __read(this.handleExplicitForm(this.getForms()), 3), form1 = _b[0], form2 = _b[1], form3 = _b[2];
         this.attributes.setInherited('form', form1);
         var OPTABLE = this.constructor.OPTABLE;
@@ -318,10 +324,62 @@ var MmlMo = (function (_super) {
         }
         return null;
     };
+    MmlMo.prototype.checkPseudoScripts = function (mo) {
+        var PSEUDOSCRIPTS = this.constructor.pseudoScripts;
+        if (!mo.match(PSEUDOSCRIPTS))
+            return;
+        var parent = this.coreParent().Parent;
+        var isPseudo = !parent || !(parent.isKind('msubsup') && !parent.isKind('msub'));
+        this.setProperty('pseudoscript', isPseudo);
+        if (isPseudo) {
+            this.attributes.setInherited('lspace', 0);
+            this.attributes.setInherited('rspace', 0);
+        }
+    };
+    MmlMo.prototype.checkPrimes = function (mo) {
+        var PRIMES = this.constructor.primes;
+        var REMAP = this.constructor.remapPrimes;
+        if (!mo.match(PRIMES))
+            return;
+        var primes = string_js_1.unicodeString(string_js_1.unicodeChars(mo).map(function (c) { return REMAP[c]; }));
+        this.setProperty('primes', primes);
+    };
     MmlMo.defaults = __assign(__assign({}, MmlNode_js_1.AbstractMmlTokenNode.defaults), { form: 'infix', fence: false, separator: false, lspace: 'thickmathspace', rspace: 'thickmathspace', stretchy: false, symmetric: false, maxsize: 'infinity', minsize: '0em', largeop: false, movablelimits: false, accent: false, linebreak: 'auto', lineleading: '1ex', linebreakstyle: 'before', indentalign: 'auto', indentshift: '0', indenttarget: '', indentalignfirst: 'indentalign', indentshiftfirst: 'indentshift', indentalignlast: 'indentalign', indentshiftlast: 'indentshift' });
     MmlMo.RANGES = OperatorDictionary_js_1.RANGES;
     MmlMo.MMLSPACING = OperatorDictionary_js_1.MMLSPACING;
     MmlMo.OPTABLE = OperatorDictionary_js_1.OPTABLE;
+    MmlMo.pseudoScripts = new RegExp([
+        '^["\'*`',
+        '\u00AA',
+        '\u00B0',
+        '\u00B2-\u00B4',
+        '\u00B9',
+        '\u00BA',
+        '\u2018-\u201F',
+        '\u2032-\u2037\u2057',
+        '\u2070\u2071',
+        '\u2074-\u207F',
+        '\u2080-\u208E',
+        ']+$'
+    ].join(''));
+    MmlMo.primes = new RegExp([
+        '^["\'`',
+        '\u2018-\u201F',
+        ']+$'
+    ].join(''));
+    MmlMo.remapPrimes = {
+        0x0022: 0x2033,
+        0x0027: 0x2032,
+        0x0060: 0x2035,
+        0x2018: 0x2035,
+        0x2019: 0x2032,
+        0x201A: 0x2032,
+        0x201B: 0x2035,
+        0x201C: 0x2036,
+        0x201D: 0x2033,
+        0x201E: 0x2033,
+        0x201F: 0x2036,
+    };
     return MmlMo;
 }(MmlNode_js_1.AbstractMmlTokenNode));
 exports.MmlMo = MmlMo;

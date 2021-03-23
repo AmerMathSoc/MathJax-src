@@ -92,7 +92,7 @@ exports.delimiters = {
     0x21DB: { dir: FontData_js_1.H, sizes: [1], stretch: [0, 0x2261, 0x21DB], HDW: [.464, -0.036, .5] },
     0x2212: DELIM2212,
     0x2215: DELIM2F,
-    0x221A: { dir: FontData_js_1.V, sizes: exports.VSIZES, stretch: [0xE001, 0xE000, 0x23B7], HDW: [.85, .35, 1.056] },
+    0x221A: { dir: FontData_js_1.V, sizes: exports.VSIZES, stretch: [0xE001, 0xE000, 0x23B7], fullExt: [.65, 2.3], HDW: [.85, .35, 1.056] },
     0x2223: DELIM2223,
     0x2225: { dir: FontData_js_1.V, sizes: [1], stretch: [0, 0x2225], HDW: [.627, .015, .556] },
     0x2308: { dir: FontData_js_1.V, sizes: exports.VSIZES, stretch: [0x23A1, 0x23A2], HDW: exports.HDW2 },

@@ -85,7 +85,8 @@ var CHTMLmsubsup = (function (_super) {
     CHTMLmsubsup.styles = {
         'mjx-script': {
             display: 'inline-block',
-            'padding-right': '.05em'
+            'padding-right': '.05em',
+            'padding-left': '.033em'
         },
         'mjx-script > *': {
             display: 'block'

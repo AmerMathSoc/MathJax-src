@@ -91,7 +91,7 @@ function RequireLoad(parser, name) {
     var allowed = (allow.hasOwnProperty(extension) ? allow[extension] :
         allow.hasOwnProperty(name) ? allow[name] : options.defaultAllow);
     if (!allowed) {
-        throw new TexError_js_1.default('BadRequire', 'Extension "%1" is now allowed to be loaded', extension);
+        throw new TexError_js_1.default('BadRequire', 'Extension "%1" is not allowed to be loaded', extension);
     }
     if (package_js_1.Package.packages.has(extension)) {
         RegisterExtension(parser.configuration.packageData.get('require').jax, extension);

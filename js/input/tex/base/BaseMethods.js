@@ -697,13 +697,18 @@ BaseMethods.Cr = function (parser, name) {
 BaseMethods.CrLaTeX = function (parser, name, nobrackets) {
     if (nobrackets === void 0) { nobrackets = false; }
     var n;
-    if (!nobrackets && parser.string.charAt(parser.i) === '[') {
-        var dim = parser.GetBrackets(name, '');
-        var _a = __read(ParseUtil_js_1.default.matchDimen(dim), 2), value = _a[0], unit = _a[1];
-        if (dim && !value) {
-            throw new TexError_js_1.default('BracketMustBeDimension', 'Bracket argument to %1 must be a dimension', parser.currentCS);
+    if (!nobrackets) {
+        if (parser.string.charAt(parser.i) === '*') {
+            parser.i++;
         }
-        n = value + unit;
+        if (parser.string.charAt(parser.i) === '[') {
+            var dim = parser.GetBrackets(name, '');
+            var _a = __read(ParseUtil_js_1.default.matchDimen(dim), 2), value = _a[0], unit = _a[1];
+            if (dim && !value) {
+                throw new TexError_js_1.default('BracketMustBeDimension', 'Bracket argument to %1 must be a dimension', parser.currentCS);
+            }
+            n = value + unit;
+        }
     }
     parser.Push(parser.itemFactory.create('cell').setProperties({ isCR: true, name: name, linebreak: true }));
     var top = parser.stack.Top();

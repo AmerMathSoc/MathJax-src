@@ -61,7 +61,7 @@ var SVGTextNode = (function (_super) {
     };
     SVGTextNode.kind = MmlNode_js_1.TextNode.prototype.kind;
     SVGTextNode.styles = {
-        '.MathJax path': {
+        'mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c]': {
             'stroke-width': 3
         }
     };

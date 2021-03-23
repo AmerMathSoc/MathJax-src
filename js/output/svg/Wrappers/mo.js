@@ -66,7 +66,7 @@ var SVGmo = (function (_super) {
             var u = (symmetric || attributes.get('largeop') ? this.fixed(this.getCenterOffset()) : '0');
             var v = (this.node.getProperty('mathaccent') ? this.fixed(this.getAccentOffset()) : '0');
             if (u !== '0' || v !== '0') {
-                this.adaptor.setAttribute(svg, 'transform', 'translate(' + v + ' ' + u + ')');
+                this.adaptor.setAttribute(svg, 'transform', "translate(" + v + " " + u + ")");
             }
             this.addChildren(svg);
         }

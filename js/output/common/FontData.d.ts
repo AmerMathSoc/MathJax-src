@@ -50,6 +50,7 @@ export declare type DelimiterData = {
     HDW?: number[];
     min?: number;
     c?: number;
+    fullExt?: [number, number];
 };
 export declare type DelimiterMap<D extends DelimiterData> = {
     [n: number]: D;
@@ -97,6 +98,7 @@ export declare type FontParameters = {
     delimitershortfall: number;
     min_rule_thickness: number;
     separation_factor: number;
+    extra_ic: number;
 };
 export declare class FontData<C extends CharOptions, V extends VariantData<C>, D extends DelimiterData> {
     static OPTIONS: OptionList;
@@ -111,8 +113,6 @@ export declare class FontData<C extends CharOptions, V extends VariantData<C>, D
     static SmpRemapGreekU: SmpMap;
     static SmpRemapGreekL: SmpMap;
     protected static defaultAccentMap: RemapMap;
-    protected static defaultPrimes: RegExp;
-    protected static defaultPrimeMap: RemapMap;
     protected static defaultMoMap: RemapMap;
     protected static defaultMnMap: RemapMap;
     static defaultParams: FontParameters;
@@ -128,7 +128,6 @@ export declare class FontData<C extends CharOptions, V extends VariantData<C>, D
     protected cssFontMap: CssFontMap;
     cssFamilyPrefix: string;
     protected remapChars: RemapMapMap;
-    primes: RegExp;
     params: FontParameters;
     skewIcFactor: number;
     protected _styles: StyleList;
