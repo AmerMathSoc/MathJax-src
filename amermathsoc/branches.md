@@ -14,3 +14,4 @@ fix-smallmatrix
 fix-svg-not
 mathaccent-ic
 issue2617
+issue2658
