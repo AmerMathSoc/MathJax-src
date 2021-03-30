@@ -338,9 +338,9 @@ var MmlMo = (function (_super) {
     };
     MmlMo.prototype.checkPrimes = function (mo) {
         var PRIMES = this.constructor.primes;
-        var REMAP = this.constructor.remapPrimes;
         if (!mo.match(PRIMES))
             return;
+        var REMAP = this.constructor.remapPrimes;
         var primes = string_js_1.unicodeString(string_js_1.unicodeChars(mo).map(function (c) { return REMAP[c]; }));
         this.setProperty('primes', primes);
     };

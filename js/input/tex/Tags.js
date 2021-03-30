@@ -148,7 +148,7 @@ var AbstractTags = (function () {
     AbstractTags.prototype.clearTag = function () {
         this.label = '';
         this.tag(null, true);
-        this.currentTag.tagId = '';
+        this.currentTag = new TagInfo('', undefined, undefined);
     };
     AbstractTags.prototype.getTag = function (force) {
         if (force === void 0) { force = false; }
@@ -181,6 +181,9 @@ var AbstractTags = (function () {
         this.allIds = {};
     };
     AbstractTags.prototype.startEquation = function (math) {
+        this.history = [];
+        this.stack = [];
+        this.clearTag();
         this.labels = {};
         this.ids = {};
         this.counter = this.allCounter;

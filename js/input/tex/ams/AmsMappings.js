@@ -136,7 +136,7 @@ new sm.CharacterMap('AMSsymbols-mathchar0mi', ParseMethods_js_1.default.mathchar
     checkmark: '\u2713',
     maltese: '\u2720'
 });
-new sm.CharacterMap('AMSsymbols-mathchar0m0', ParseMethods_js_1.default.mathchar0mo, {
+new sm.CharacterMap('AMSsymbols-mathchar0mo', ParseMethods_js_1.default.mathchar0mo, {
     dotplus: '\u2214',
     ltimes: '\u22C9',
     smallsetminus: ['\u2216', { variantForm: true }],

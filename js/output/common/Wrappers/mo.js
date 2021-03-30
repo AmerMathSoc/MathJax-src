@@ -154,6 +154,9 @@ function CommonMoMixin(Base) {
                                 }
                                 this.variant = this.font.getSizeVariant(c, i);
                                 this.size = i;
+                                if (delim.schar && delim.schar[i]) {
+                                    this.stretch.c = delim.schar[i];
+                                }
                                 return;
                             }
                             i++;
@@ -242,9 +245,9 @@ function CommonMoMixin(Base) {
         class_1.prototype.remapChars = function (chars) {
             var primes = this.node.getProperty('primes');
             if (primes) {
-                chars = string_js_1.unicodeChars(primes);
+                return string_js_1.unicodeChars(primes);
             }
-            else if (chars.length === 1) {
+            if (chars.length === 1) {
                 var parent_1 = this.node.coreParent().parent;
                 var isAccent = this.isAccent && !parent_1.isKind('mrow');
                 var map = (isAccent ? 'accent' : 'mo');

@@ -56,7 +56,7 @@ var CHTML = (function (_super) {
     };
     CHTML.prototype.styleSheet = function (html) {
         if (this.chtmlStyles && !this.options.adaptiveCSS) {
-            return null;
+            return this.chtmlStyles;
         }
         var sheet = this.chtmlStyles = _super.prototype.styleSheet.call(this, html);
         this.adaptor.setAttribute(sheet, 'id', CHTML.STYLESHEETID);

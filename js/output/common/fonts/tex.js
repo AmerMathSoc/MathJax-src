@@ -70,7 +70,7 @@ function CommonTeXFontMixin(Base) {
             ['-tex-variant', 'normal']
         ]),
         _a.defaultCssFonts = __assign(__assign({}, Base.defaultCssFonts), { '-smallop': ['serif', false, false], '-largeop': ['serif', false, false], '-size3': ['serif', false, false], '-size4': ['serif', false, false], '-tex-calligraphic': ['cursive', true, false], '-tex-bold-calligraphic': ['cursive', true, true], '-tex-oldstyle': ['serif', false, false], '-tex-bold-oldstyle': ['serif', false, true], '-tex-mathit': ['serif', true, false] }),
-        _a.defaultSizeVariants = ['normal', '-smallop', '-largeop', '-size3', '-size4'],
+        _a.defaultSizeVariants = ['normal', '-smallop', '-largeop', '-size3', '-size4', '-tex-variant'],
         _a.defaultStretchVariants = ['-size4'],
         _a;
 }

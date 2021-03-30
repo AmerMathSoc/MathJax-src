@@ -80,7 +80,7 @@ var SVG = (function (_super) {
     };
     SVG.prototype.styleSheet = function (html) {
         if (this.svgStyles) {
-            return null;
+            return this.svgStyles;
         }
         var sheet = this.svgStyles = _super.prototype.styleSheet.call(this, html);
         this.adaptor.setAttribute(sheet, 'id', SVG.STYLESHEETID);

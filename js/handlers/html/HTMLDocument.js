@@ -185,14 +185,15 @@ var HTMLDocument = (function (_super) {
     };
     HTMLDocument.prototype.addStyleSheet = function () {
         var sheet = this.documentStyleSheet();
-        if (sheet) {
-            var head = this.adaptor.head(this.document);
-            var styles = this.findSheet(head, this.adaptor.getAttribute(sheet, 'id'));
+        var adaptor = this.adaptor;
+        if (sheet && !adaptor.parent(sheet)) {
+            var head = adaptor.head(this.document);
+            var styles = this.findSheet(head, adaptor.getAttribute(sheet, 'id'));
             if (styles) {
-                this.adaptor.replace(sheet, styles);
+                adaptor.replace(sheet, styles);
             }
             else {
-                this.adaptor.append(head, sheet);
+                adaptor.append(head, sheet);
             }
         }
     };
