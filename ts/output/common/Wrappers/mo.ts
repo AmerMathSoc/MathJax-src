@@ -272,6 +272,9 @@ export function CommonMoMixin<T extends WrapperConstructor>(Base: T): MoConstruc
               }
               this.variant = this.font.getSizeVariant(c, i);
               this.size = i;
+              if (delim.schar && delim.schar[i]) {
+                this.stretch.c = delim.schar[i];
+              }
               return;
             }
             i++;
@@ -374,11 +377,7 @@ export function CommonMoMixin<T extends WrapperConstructor>(Base: T): MoConstruc
     }
 
     /**
-     * Determine the size of the delimiter based on whether full extenders should be used or not.
-     *
-     * @param {number} D          The requested size of the delimiter
-     * @param {DelimiterData} C   The data for the delimiter
-     * @return {number}           The final size of the assembly
+     * @override
      */
     public checkExtendedHeight(D: number, C: DelimiterData): number {
       if (C.fullExt) {
@@ -395,8 +394,9 @@ export function CommonMoMixin<T extends WrapperConstructor>(Base: T): MoConstruc
     public remapChars(chars: number[]) {
       const primes = this.node.getProperty('primes') as string;
       if (primes) {
-        chars = unicodeChars(primes);
-      } else if (chars.length === 1) {
+        return unicodeChars(primes);
+      }
+      if (chars.length === 1) {
         const parent = (this.node as MmlMo).coreParent().parent;
         const isAccent = this.isAccent && !parent.isKind('mrow');
         const map = (isAccent ? 'accent' : 'mo');
