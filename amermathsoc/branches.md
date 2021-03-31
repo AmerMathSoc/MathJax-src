@@ -15,3 +15,4 @@ fix-svg-not
 mathaccent-ic
 issue2617
 issue2658
+issue2643
