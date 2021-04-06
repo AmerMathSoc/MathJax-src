@@ -27,6 +27,13 @@ var ParseMethods;
 (function (ParseMethods) {
     function variable(parser, c) {
         var def = ParseUtil_js_1.default.getFontDef(parser);
+        if (parser.stack.env.multiLetterIdentifiers && parser.stack.env.font !== '') {
+            c = parser.string.substr(parser.i - 1).match(/^[a-z]+/i)[0];
+            parser.i += c.length - 1;
+            if (def.mathvariant === TexConstants_js_1.TexConstant.Variant.NORMAL) {
+                def.autoOP = false;
+            }
+        }
         var node = parser.create('token', 'mi', def, c);
         parser.Push(node);
     }

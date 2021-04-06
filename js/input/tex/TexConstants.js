@@ -23,7 +23,10 @@ var TexConstant;
         LOOPED: 'looped',
         STRETCHED: 'stretched',
         CALLIGRAPHIC: '-tex-calligraphic',
-        OLDSTYLE: '-tex-oldstyle'
+        BOLDCALLIGRAPHIC: '-tex-bold-calligraphic',
+        OLDSTYLE: '-tex-oldstyle',
+        BOLDOLDSTYLE: '-tex-bold-oldstyle',
+        MATHITALIC: '-tex-mathit'
     };
     TexConstant.Form = {
         PREFIX: 'prefix',

@@ -175,6 +175,14 @@ BaseMethods.Comment = function (parser, _c) {
 BaseMethods.Hash = function (_parser, _c) {
     throw new TexError_js_1.default('CantUseHash1', 'You can\'t use \'macro parameter character #\' in math mode');
 };
+BaseMethods.MathFont = function (parser, name, variant) {
+    var text = parser.GetArgument(name);
+    var mml = new TexParser_js_1.default(text, __assign(__assign({}, parser.stack.env), { font: variant, multiLetterIdentifiers: true }), parser.configuration).mml();
+    if (mml.isKind('inferredMrow')) {
+        mml = parser.create('node', 'mrow', mml.childNodes);
+    }
+    parser.Push(mml);
+};
 BaseMethods.SetFont = function (parser, _name, font) {
     parser.stack.env['font'] = font;
 };

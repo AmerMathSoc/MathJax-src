@@ -366,7 +366,7 @@ exports.delimiters = {
         sizes: [.839],
         stretch: [0x21D1, 0x21D1],
         stretchv: [1, 0],
-        HDW: [.678, .16, .701]
+        HDW: [.678, .16, .72]
     },
     0x21D2: {
         dir: FontData_js_1.H,
@@ -380,7 +380,7 @@ exports.delimiters = {
         sizes: [.839],
         stretch: [0, 0x21D1, 0x21D3],
         stretchv: [0, 0, 1],
-        HDW: [.678, .16, .701]
+        HDW: [.678, .16, .72]
     },
     0x21D4: {
         dir: FontData_js_1.H,
@@ -394,7 +394,7 @@ exports.delimiters = {
         sizes: [.978],
         stretch: [0x21D1, 0x21D1, 0x21D3],
         stretchv: [1, 0, 1],
-        HDW: [.747, .23, .701]
+        HDW: [.747, .23, .72]
     },
     0x21DA: {
         dir: FontData_js_1.H,

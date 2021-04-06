@@ -112,6 +112,9 @@ var MathMLCompile = (function () {
                     else if (name_2 === 'data-mjx-accent') {
                         mml.setProperty('mathaccent', value === 'true');
                     }
+                    else if (name_2 === 'data-mjx-auto-op') {
+                        mml.setProperty('autoOP', value === 'true');
+                    }
                 }
                 else if (name_2 !== 'class') {
                     var val = value.toLowerCase();

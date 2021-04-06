@@ -54,7 +54,10 @@ var MmlMi = (function (_super) {
     MmlMi.prototype.setTeXclass = function (prev) {
         this.getPrevClass(prev);
         var name = this.getText();
-        if (name.length > 1 && name.match(MmlMi.operatorName) && this.getProperty('texClass') === undefined) {
+        if (name.length > 1 && name.match(MmlMi.operatorName) &&
+            this.attributes.get('mathvariant') === 'normal' &&
+            this.getProperty('autoOP') === undefined &&
+            this.getProperty('texClass') === undefined) {
             this.texClass = MmlNode_js_1.TEXCLASS.OP;
             this.setProperty('autoOP', true);
         }

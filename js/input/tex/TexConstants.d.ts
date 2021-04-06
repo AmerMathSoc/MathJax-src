@@ -19,7 +19,10 @@ export declare namespace TexConstant {
         LOOPED: string;
         STRETCHED: string;
         CALLIGRAPHIC: string;
+        BOLDCALLIGRAPHIC: string;
         OLDSTYLE: string;
+        BOLDOLDSTYLE: string;
+        MATHITALIC: string;
     };
     const Form: {
         PREFIX: string;

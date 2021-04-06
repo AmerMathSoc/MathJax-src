@@ -150,6 +150,7 @@ var SerializedMmlVisitor = (function (_super) {
         node.getProperty('variantForm') && this.setDataAttribute(data, 'alternate', '1');
         node.getProperty('pseudoscript') && this.setDataAttribute(data, 'pseudoscript', 'true');
         node.getProperty('mathaccent') && this.setDataAttribute(data, 'accent', 'true');
+        node.getProperty('autoOP') === false && this.setDataAttribute(data, 'auto-op', 'false');
         var texclass = node.getProperty('texClass');
         if (texclass !== undefined) {
             var setclass = true;
@@ -176,9 +177,9 @@ var SerializedMmlVisitor = (function (_super) {
     };
     SerializedMmlVisitor.variants = {
         '-tex-calligraphic': 'script',
-        '-tex-calligraphic-bold': 'bold-script',
+        '-tex-bold-calligraphic': 'bold-script',
         '-tex-oldstyle': 'normal',
-        '-tex-oldstyle-bold': 'bold',
+        '-tex-bold-oldstyle': 'bold',
         '-tex-mathit': 'italic'
     };
     SerializedMmlVisitor.defaultAttributes = {
