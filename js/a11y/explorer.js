@@ -441,6 +441,8 @@ function setA11yOption(document, option, value) {
                     break;
             }
             break;
+        case 'locale':
+            SRE.setupEngine({ locale: value });
         default:
             document.options.a11y[option] = value;
     }
