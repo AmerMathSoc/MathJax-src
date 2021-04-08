@@ -32,7 +32,7 @@ var SVGmglyph = (function (_super) {
             width: w, height: h,
             transform: 'translate(0 ' + y + ') matrix(1 0 0 -1 0 0)',
             preserveAspectRatio: 'none',
-            alt: alt, title: alt,
+            'aria-label': alt,
             href: src
         };
         var img = this.svg('image', properties);
