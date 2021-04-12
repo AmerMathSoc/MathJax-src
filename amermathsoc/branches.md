@@ -17,3 +17,4 @@ issue2617
 issue2658
 issue2643
 issue2595
+mathaccent-fix
