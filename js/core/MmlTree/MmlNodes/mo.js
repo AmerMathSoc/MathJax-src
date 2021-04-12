@@ -346,7 +346,7 @@ var MmlMo = (function (_super) {
         this.setProperty('primes', primes);
     };
     MmlMo.prototype.checkMathAccent = function (mo) {
-        if (this.getProperty('mathaccent') !== undefined || !this.Parent.isKind('munderover'))
+        if (this.getProperty('mathaccent') !== undefined || !this.Parent || !this.Parent.isKind('munderover'))
             return;
         var MATHACCENT = this.constructor.mathaccents;
         if (mo.match(MATHACCENT)) {
