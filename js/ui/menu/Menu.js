@@ -417,7 +417,10 @@ var Menu = (function () {
     };
     Menu.prototype.getA11y = function (option) {
         if (MathJax._.a11y && MathJax._.a11y.explorer) {
-            return this.document.options.a11y[option];
+            if (this.document.options.a11y[option] !== undefined) {
+                return this.document.options.a11y[option];
+            }
+            return this.document.options.sre[option];
         }
     };
     Menu.prototype.setScale = function (scale) {
@@ -622,26 +625,11 @@ var Menu = (function () {
             (!this.settings.shift || event.shiftKey));
     };
     Menu.prototype.rerender = function (start) {
-        var e_6, _a;
         if (start === void 0) { start = MathItem_js_1.STATE.TYPESET; }
         this.rerenderStart = Math.min(start, this.rerenderStart);
         if (!Menu.loading) {
             if (this.rerenderStart <= MathItem_js_1.STATE.COMPILED) {
-                try {
-                    for (var _b = __values(this.document.inputJax), _c = _b.next(); !_c.done; _c = _b.next()) {
-                        var jax = _c.value;
-                        if (jax.name === 'TeX') {
-                            jax.parseOptions.tags.reset(0);
-                        }
-                    }
-                }
-                catch (e_6_1) { e_6 = { error: e_6_1 }; }
-                finally {
-                    try {
-                        if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-                    }
-                    finally { if (e_6) throw e_6.error; }
-                }
+                this.document.reset({ inputJax: [] });
             }
             this.document.rerender(this.rerenderStart);
             this.rerenderStart = MathItem_js_1.STATE.LAST;
@@ -710,7 +698,7 @@ var Menu = (function () {
         };
     };
     Menu.prototype.submenu = function (id, content, entries, disabled) {
-        var e_7, _a;
+        var e_6, _a;
         if (entries === void 0) { entries = []; }
         if (disabled === void 0) { disabled = false; }
         var items = [];
@@ -725,12 +713,12 @@ var Menu = (function () {
                 }
             }
         }
-        catch (e_7_1) { e_7 = { error: e_7_1 }; }
+        catch (e_6_1) { e_6 = { error: e_6_1 }; }
         finally {
             try {
                 if (entries_1_1 && !entries_1_1.done && (_a = entries_1.return)) _a.call(entries_1);
             }
-            finally { if (e_7) throw e_7.error; }
+            finally { if (e_6) throw e_6.error; }
         }
         return { type: 'submenu', id: id, content: content, menu: { items: items }, disabled: (items.length === 0) || disabled };
     };

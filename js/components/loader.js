@@ -11,12 +11,40 @@ var __values = (this && this.__values) || function(o) {
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CONFIG = exports.MathJax = exports.Loader = exports.PackageError = exports.Package = void 0;
+exports.CONFIG = exports.MathJax = exports.Loader = exports.PathFilters = exports.PackageError = exports.Package = void 0;
 var global_js_1 = require("./global.js");
 var package_js_1 = require("./package.js");
 var package_js_2 = require("./package.js");
 Object.defineProperty(exports, "Package", { enumerable: true, get: function () { return package_js_2.Package; } });
 Object.defineProperty(exports, "PackageError", { enumerable: true, get: function () { return package_js_2.PackageError; } });
+var FunctionList_js_1 = require("../util/FunctionList.js");
+exports.PathFilters = {
+    source: function (data) {
+        if (exports.CONFIG.source.hasOwnProperty(data.name)) {
+            data.name = exports.CONFIG.source[data.name];
+        }
+        return true;
+    },
+    normalize: function (data) {
+        var name = data.name;
+        if (!name.match(/^(?:[a-z]+:\/)?\/|[a-z]:\\|\[/i)) {
+            data.name = '[mathjax]/' + name.replace(/^\.\//, '');
+        }
+        if (data.addExtension && !name.match(/\.[^\/]+$/)) {
+            data.name += '.js';
+        }
+        return true;
+    },
+    prefix: function (data) {
+        var match;
+        while ((match = data.name.match(/^\[([^\]]*)\]/))) {
+            if (!exports.CONFIG.paths.hasOwnProperty(match[1]))
+                break;
+            data.name = exports.CONFIG.paths[match[1]] + data.name.substr(match[0].length);
+        }
+        return true;
+    }
+};
 var Loader;
 (function (Loader) {
     function ready() {
@@ -122,6 +150,10 @@ var Loader;
         return root;
     }
     Loader.getRoot = getRoot;
+    Loader.pathFilters = new FunctionList_js_1.FunctionList();
+    Loader.pathFilters.add(exports.PathFilters.source, 1);
+    Loader.pathFilters.add(exports.PathFilters.normalize, 2);
+    Loader.pathFilters.add(exports.PathFilters.prefix, 5);
 })(Loader = exports.Loader || (exports.Loader = {}));
 exports.MathJax = global_js_1.MathJax;
 if (typeof exports.MathJax.loader === 'undefined') {

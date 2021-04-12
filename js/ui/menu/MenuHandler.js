@@ -152,7 +152,7 @@ function MenuMathDocumentMixin(BaseDocument) {
             };
             return class_2;
         }(BaseDocument)),
-        _a.OPTIONS = __assign(__assign({}, BaseDocument.OPTIONS), { MenuClass: Menu_js_1.Menu, menuOptions: Menu_js_1.Menu.OPTIONS, enableMenu: true, a11y: (BaseDocument.OPTIONS.a11y || Options_js_1.expandable({})), renderActions: Options_js_1.expandable(__assign(__assign({}, BaseDocument.OPTIONS.renderActions), { addMenu: [MathItem_js_1.STATE.CONTEXT_MENU], checkLoading: [MathItem_js_1.STATE.UNPROCESSED + 1] })) }),
+        _a.OPTIONS = __assign(__assign({}, BaseDocument.OPTIONS), { MenuClass: Menu_js_1.Menu, menuOptions: Menu_js_1.Menu.OPTIONS, enableMenu: true, sre: (BaseDocument.OPTIONS.sre || Options_js_1.expandable({})), a11y: (BaseDocument.OPTIONS.a11y || Options_js_1.expandable({})), renderActions: Options_js_1.expandable(__assign(__assign({}, BaseDocument.OPTIONS.renderActions), { addMenu: [MathItem_js_1.STATE.CONTEXT_MENU], checkLoading: [MathItem_js_1.STATE.UNPROCESSED + 1] })) }),
         _a;
 }
 exports.MenuMathDocumentMixin = MenuMathDocumentMixin;

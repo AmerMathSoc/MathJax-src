@@ -302,6 +302,10 @@ var CommonWrapper = (function (_super) {
     };
     CommonWrapper.prototype.getMathMLSpacing = function () {
         var node = this.node.coreMO();
+        var child = node.coreParent();
+        var parent = child.parent;
+        if (!parent || !parent.isKind('mrow') || parent.childNodes.length === 1)
+            return;
         var attributes = node.attributes;
         var isScript = (attributes.get('scriptlevel') > 0);
         this.bbox.L = (attributes.isSet('lspace') ?
@@ -310,6 +314,16 @@ var CommonWrapper = (function (_super) {
         this.bbox.R = (attributes.isSet('rspace') ?
             Math.max(0, this.length2em(attributes.get('rspace'))) :
             MathMLSpace(isScript, node.rspace));
+        var n = parent.childIndex(child);
+        if (n === 0)
+            return;
+        var prev = parent.childNodes[n - 1];
+        if (!prev.isEmbellished)
+            return;
+        var bbox = this.jax.nodeMap.get(prev).getBBox();
+        if (bbox.R) {
+            this.bbox.L = Math.max(0, this.bbox.L - bbox.R);
+        }
     };
     CommonWrapper.prototype.getTeXSpacing = function (isTop, hasSpacing) {
         if (!hasSpacing) {
@@ -330,7 +344,7 @@ var CommonWrapper = (function (_super) {
     };
     CommonWrapper.prototype.isTopEmbellished = function () {
         return (this.node.isEmbellished &&
-            !(this.node.Parent && this.node.Parent.isEmbellished));
+            !(this.node.parent && this.node.parent.isEmbellished));
     };
     CommonWrapper.prototype.core = function () {
         return this.jax.nodeMap.get(this.node.core());

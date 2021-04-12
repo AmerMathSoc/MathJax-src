@@ -96,8 +96,9 @@ var CHTMLmenclose = (function (_super) {
             finally { if (e_2) throw e_2.error; }
         }
     };
-    CHTMLmenclose.prototype.arrow = function (w, a, double) {
-        if (double === void 0) { double = false; }
+    CHTMLmenclose.prototype.arrow = function (w, a, double, offset, dist) {
+        if (offset === void 0) { offset = ''; }
+        if (dist === void 0) { dist = 0; }
         var W = this.getBBox().w;
         var style = { width: this.em(w) };
         if (W !== w) {
@@ -115,6 +116,7 @@ var CHTMLmenclose = (function (_super) {
             this.adaptor.setAttribute(arrow, 'double', 'true');
         }
         this.adjustArrow(arrow, double);
+        this.moveArrow(arrow, offset, dist);
         return arrow;
     };
     CHTMLmenclose.prototype.adjustArrow = function (arrow, double) {
@@ -146,6 +148,12 @@ var CHTMLmenclose = (function (_super) {
         if (double) {
             this.adaptor.setStyle(line, 'left', this.em(t * (x - 1)));
         }
+    };
+    CHTMLmenclose.prototype.moveArrow = function (arrow, offset, d) {
+        if (!d)
+            return;
+        var transform = this.adaptor.getStyle(arrow, 'transform');
+        this.adaptor.setStyle(arrow, 'transform', "translate" + offset + "(" + this.em(-d) + ")" + (transform ? ' ' + transform : ''));
     };
     CHTMLmenclose.prototype.adjustBorder = function (node) {
         if (this.thickness !== Notation.THICKNESS) {

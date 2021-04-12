@@ -108,7 +108,7 @@ var MmlMo = (function (_super) {
         var math = this.factory.getNodeClass('math');
         while (parent && parent.isEmbellished && parent.coreMO() === this && !(parent instanceof math)) {
             embellished = parent;
-            parent = parent.Parent;
+            parent = parent.parent;
         }
         return embellished;
     };
@@ -232,6 +232,7 @@ var MmlMo = (function (_super) {
         this.checkOperatorTable(mo);
         this.checkPseudoScripts(mo);
         this.checkPrimes(mo);
+        this.checkMathAccent(mo);
     };
     MmlMo.prototype.checkOperatorTable = function (mo) {
         var e_1, _a;
@@ -344,6 +345,14 @@ var MmlMo = (function (_super) {
         var primes = string_js_1.unicodeString(string_js_1.unicodeChars(mo).map(function (c) { return REMAP[c]; }));
         this.setProperty('primes', primes);
     };
+    MmlMo.prototype.checkMathAccent = function (mo) {
+        if (this.getProperty('mathaccent') !== undefined || !this.Parent.isKind('munderover'))
+            return;
+        var MATHACCENT = this.constructor.mathaccents;
+        if (mo.match(MATHACCENT)) {
+            this.setProperty('mathaccent', true);
+        }
+    };
     MmlMo.defaults = __assign(__assign({}, MmlNode_js_1.AbstractMmlTokenNode.defaults), { form: 'infix', fence: false, separator: false, lspace: 'thickmathspace', rspace: 'thickmathspace', stretchy: false, symmetric: false, maxsize: 'infinity', minsize: '0em', largeop: false, movablelimits: false, accent: false, linebreak: 'auto', lineleading: '1ex', linebreakstyle: 'before', indentalign: 'auto', indentshift: '0', indenttarget: '', indentalignfirst: 'indentalign', indentshiftfirst: 'indentshift', indentalignlast: 'indentalign', indentshiftlast: 'indentshift' });
     MmlMo.RANGES = OperatorDictionary_js_1.RANGES;
     MmlMo.MMLSPACING = OperatorDictionary_js_1.MMLSPACING;
@@ -380,6 +389,23 @@ var MmlMo = (function (_super) {
         0x201E: 0x2033,
         0x201F: 0x2036,
     };
+    MmlMo.mathaccents = new RegExp([
+        '^[',
+        '\u00B4\u0301\u02CA',
+        '\u0060\u0300\u02CB',
+        '\u00A8\u0308',
+        '\u007E\u0303\u02DC',
+        '\u00AF\u0304\u02C9',
+        '\u02D8\u0306',
+        '\u02C7\u030C',
+        '\u005E\u0302\u02C6',
+        '\u2192\u20D7',
+        '\u02D9\u0307',
+        '\u02DA\u030A',
+        '\u20DB',
+        '\u20DC',
+        ']$'
+    ].join(''));
     return MmlMo;
 }(MmlNode_js_1.AbstractMmlTokenNode));
 exports.MmlMo = MmlMo;

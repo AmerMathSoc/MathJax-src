@@ -12,22 +12,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Magnifier = exports.SpeechExplorer = exports.AbstractKeyExplorer = void 0;
 var Explorer_js_1 = require("./Explorer.js");
@@ -125,7 +109,10 @@ var SpeechExplorer = (function (_super) {
         this.region.Update(this.walker.speech());
         var options = this.speechGenerator.getOptions();
         if (options.modality === 'speech') {
-            this.document.options.a11y.speechRules = options.domain + '-' + options.style;
+            this.document.options.sre.domain = options.domain;
+            this.document.options.sre.style = options.style;
+            this.document.options.a11y.speechRules =
+                options.domain + '-' + options.style;
         }
     };
     SpeechExplorer.prototype.Speech = function (walker) {
@@ -165,13 +152,14 @@ var SpeechExplorer = (function (_super) {
     };
     SpeechExplorer.prototype.getOptions = function () {
         var options = this.speechGenerator.getOptions();
-        var _a = __read(this.document.options.a11y.speechRules.split('-'), 2), domain = _a[0], style = _a[1];
+        var sreOptions = this.document.options.sre;
         if (options.modality === 'speech' &&
-            (options.locale !== this.document.options.a11y.locale ||
-                options.domain !== domain || options.style !== style)) {
-            options.domain = domain;
-            options.style = style;
-            options.locale = this.document.options.a11y.locale;
+            (options.locale !== sreOptions.locale ||
+                options.domain !== sreOptions.domain ||
+                options.style !== sreOptions.style)) {
+            options.domain = sreOptions.domain;
+            options.style = sreOptions.style;
+            options.locale = sreOptions.locale;
             this.walker.update(options);
         }
         return options;

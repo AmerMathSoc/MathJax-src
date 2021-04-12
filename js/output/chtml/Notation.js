@@ -33,9 +33,12 @@ exports.RenderElement = function (name, offset) {
     if (offset === void 0) { offset = ''; }
     return (function (node, _child) {
         var shape = node.adjustBorder(node.html('mjx-' + name));
-        if (offset && node.thickness !== Notation.THICKNESS) {
-            var transform = 'translate' + offset + '(' + node.em(node.thickness / 2) + ')';
-            node.adaptor.setStyle(shape, 'transform', transform);
+        if (offset) {
+            var d = node.getOffset(offset);
+            if (node.thickness !== Notation.THICKNESS || d) {
+                var transform = "translate" + offset + "(" + node.em(node.thickness / 2 - d) + ")";
+                node.adaptor.setStyle(shape, 'transform', transform);
+            }
         }
         node.adaptor.append(node.chtml, shape);
     });

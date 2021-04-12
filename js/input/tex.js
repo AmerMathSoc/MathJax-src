@@ -97,6 +97,10 @@ var TeX = (function (_super) {
         enumerable: false,
         configurable: true
     });
+    TeX.prototype.reset = function (tag) {
+        if (tag === void 0) { tag = 0; }
+        this.parseOptions.tags.reset(tag);
+    };
     TeX.prototype.compile = function (math, document) {
         this.parseOptions.clear();
         this.executeFilters(this.preFilters, math, document, this.parseOptions);

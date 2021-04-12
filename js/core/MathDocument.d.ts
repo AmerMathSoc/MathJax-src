@@ -60,6 +60,14 @@ export declare class RenderList<N, T, D> extends PrioritizedList<RenderData<N, T
     findID(id: string): RenderData<N, T, D> | null;
 }
 export declare type ContainerList<N> = string | N | (string | N | N[])[];
+export declare type ResetList = {
+    all?: boolean;
+    processed?: boolean;
+    inputJax?: any[];
+    outputJax?: any[];
+};
+export declare const resetOptions: ResetList;
+export declare const resetAllOptions: ResetList;
 export interface MathDocument<N, T, D> {
     document: D;
     kind: string;
@@ -84,7 +92,7 @@ export interface MathDocument<N, T, D> {
     removeFromDocument(restore?: boolean): MathDocument<N, T, D>;
     state(state: number, restore?: boolean): MathDocument<N, T, D>;
     rerender(start?: number, end?: number): MathDocument<N, T, D>;
-    reset(): MathDocument<N, T, D>;
+    reset(options?: ResetList): MathDocument<N, T, D>;
     clear(): MathDocument<N, T, D>;
     concat(list: MathList<N, T, D>): MathDocument<N, T, D>;
     clearMathItemsWithin(containers: ContainerList<N>): void;
@@ -120,7 +128,7 @@ export declare abstract class AbstractMathDocument<N, T, D> implements MathDocum
     updateDocument(): this;
     removeFromDocument(_restore?: boolean): this;
     state(state: number, restore?: boolean): this;
-    reset(): this;
+    reset(options?: ResetList): this;
     clear(): this;
     concat(list: MathList<N, T, D>): this;
     clearMathItemsWithin(containers: ContainerList<N>): void;

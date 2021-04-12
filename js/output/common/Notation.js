@@ -121,7 +121,7 @@ exports.CommonDiagonalArrow = function (render) {
         var _a = __read(exports.diagonalArrowDef[name], 4), c = _a[0], pi = _a[1], double = _a[2], remove = _a[3];
         return [name + 'arrow', {
                 renderer: function (node, _child) {
-                    var _a = node.arrowData(), a = _a.a, W = _a.W;
+                    var _a = __read(node.arrowAW(), 2), a = _a[0], W = _a[1];
                     var arrow = node.arrow(W, c * (a - pi), double);
                     render(node, arrow);
                 },
@@ -143,8 +143,9 @@ exports.CommonArrow = function (render) {
         return [name + 'arrow', {
                 renderer: function (node, _child) {
                     var _a = node.getBBox(), w = _a.w, h = _a.h, d = _a.d;
-                    var W = (isVertical ? h + d : w);
-                    var arrow = node.arrow(W, angle, double);
+                    var _b = __read((isVertical ? [h + d, 'X'] : [w, 'Y']), 2), W = _b[0], offset = _b[1];
+                    var dd = node.getOffset(offset);
+                    var arrow = node.arrow(W, angle, double, offset, dd);
                     render(node, arrow);
                 },
                 bbox: exports.arrowBBox[name],

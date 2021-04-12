@@ -32,7 +32,6 @@ var NodeUtil_js_1 = require("./NodeUtil.js");
 var TexParser_js_1 = require("./TexParser.js");
 var TexError_js_1 = require("./TexError.js");
 var Entities_js_1 = require("../../util/Entities.js");
-require("../../util/entities/n.js");
 var ParseUtil;
 (function (ParseUtil) {
     var emPerInch = 7.2;

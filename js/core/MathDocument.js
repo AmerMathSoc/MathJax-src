@@ -44,7 +44,7 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AbstractMathDocument = exports.RenderList = void 0;
+exports.AbstractMathDocument = exports.resetAllOptions = exports.resetOptions = exports.RenderList = void 0;
 var Options_js_1 = require("../util/Options.js");
 var InputJax_js_1 = require("./InputJax.js");
 var OutputJax_js_1 = require("./OutputJax.js");
@@ -196,6 +196,18 @@ var RenderList = (function (_super) {
     return RenderList;
 }(PrioritizedList_js_1.PrioritizedList));
 exports.RenderList = RenderList;
+exports.resetOptions = {
+    all: false,
+    processed: false,
+    inputJax: null,
+    outputJax: null
+};
+exports.resetAllOptions = {
+    all: true,
+    processed: true,
+    inputJax: [],
+    outputJax: []
+};
 var DefaultInputJax = (function (_super) {
     __extends(DefaultInputJax, _super);
     function DefaultInputJax() {
@@ -496,8 +508,14 @@ var AbstractMathDocument = (function () {
         }
         return this;
     };
-    AbstractMathDocument.prototype.reset = function () {
-        this.processed.reset();
+    AbstractMathDocument.prototype.reset = function (options) {
+        var _a;
+        if (options === void 0) { options = { processed: true }; }
+        options = Options_js_1.userOptions(Object.assign({}, exports.resetOptions), options);
+        options.all && Object.assign(options, exports.resetAllOptions);
+        options.processed && this.processed.reset();
+        options.inputJax && this.inputJax.forEach(function (jax) { return jax.reset.apply(jax, __spread(options.inputJax)); });
+        options.outputJax && (_a = this.outputJax).reset.apply(_a, __spread(options.outputJax));
         return this;
     };
     AbstractMathDocument.prototype.clear = function () {

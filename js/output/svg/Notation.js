@@ -10,7 +10,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Arrow = exports.DiagonalArrow = exports.DiagonalStrike = exports.Border2 = exports.Border = exports.RenderLine = exports.lineData = exports.computeLineData = void 0;
+exports.Arrow = exports.DiagonalArrow = exports.DiagonalStrike = exports.Border2 = exports.Border = exports.RenderLine = exports.lineOffset = exports.lineData = exports.computeLineData = void 0;
 var Notation = require("../common/Notation.js");
 __exportStar(require("../common/Notation.js"), exports);
 exports.computeLineData = {
@@ -18,19 +18,38 @@ exports.computeLineData = {
     right: function (h, d, w, t) { return [w - t, -d, w - t, h]; },
     bottom: function (_h, d, w, t) { return [0, t - d, w, t - d]; },
     left: function (h, d, _w, t) { return [t, -d, t, h]; },
-    vertical: function (h, d, w, t) { return [w / 2 - t, h, w / 2 - t, -d]; },
-    horizontal: function (h, d, w, t) { return [0, (h - d) / 2 - t, w, (h - d) / 2 - t]; },
+    vertical: function (h, d, w, _t) { return [w / 2, h, w / 2, -d]; },
+    horizontal: function (h, d, w, _t) { return [0, (h - d) / 2, w, (h - d) / 2]; },
     up: function (h, d, w, t) { return [t, t - d, w - t, h - t]; },
     down: function (h, d, w, t) { return [t, h - t, w - t, t - d]; }
 };
-exports.lineData = function (node, kind) {
+exports.lineData = function (node, kind, offset) {
+    if (offset === void 0) { offset = ''; }
     var _a = node.getBBox(), h = _a.h, d = _a.d, w = _a.w;
     var t = node.thickness / 2;
-    return exports.computeLineData[kind](h, d, w, t);
+    return exports.lineOffset(exports.computeLineData[kind](h, d, w, t), node, offset);
 };
-exports.RenderLine = function (line) {
+exports.lineOffset = function (data, node, offset) {
+    if (offset) {
+        var d = node.getOffset(offset);
+        if (d) {
+            if (offset === 'X') {
+                data[0] -= d;
+                data[2] -= d;
+            }
+            else {
+                data[1] -= d;
+                data[3] -= d;
+            }
+        }
+    }
+    return data;
+};
+exports.RenderLine = function (line, offset) {
+    if (offset === void 0) { offset = ''; }
     return (function (node, _child) {
-        node.adaptor.append(node.element, node.line(exports.lineData(node, line)));
+        var L = node.line(exports.lineData(node, line, offset));
+        node.adaptor.append(node.element, L);
     });
 };
 exports.Border = function (side) {

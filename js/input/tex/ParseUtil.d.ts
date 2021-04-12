@@ -3,7 +3,6 @@ import { EnvList } from './StackItem.js';
 import { ArrayItem } from './base/BaseItems.js';
 import ParseOptions from './ParseOptions.js';
 import TexParser from './TexParser.js';
-import '../../util/entities/n.js';
 declare namespace ParseUtil {
     function matchDimen(dim: string, rest?: boolean): [string, string, number];
     function dimen2em(dim: string): number;

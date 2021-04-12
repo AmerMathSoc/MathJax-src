@@ -13,6 +13,7 @@ export declare class MmlMo extends AbstractMmlTokenNode {
     protected static remapPrimes: {
         [n: number]: number;
     };
+    protected static mathaccents: RegExp;
     _texClass: number;
     get texClass(): number;
     set texClass(value: number);
@@ -34,4 +35,5 @@ export declare class MmlMo extends AbstractMmlTokenNode {
     protected getRange(mo: string): RangeDef;
     protected checkPseudoScripts(mo: string): void;
     protected checkPrimes(mo: string): void;
+    protected checkMathAccent(mo: string): void;
 }

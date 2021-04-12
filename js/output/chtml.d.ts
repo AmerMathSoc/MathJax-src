@@ -21,6 +21,7 @@ export declare class CHTML<N, T, D> extends CommonOutputJax<N, T, D, CHTMLWrappe
     protected addClassStyles(CLASS: typeof CommonWrapper): void;
     protected processMath(math: MmlNode, parent: N): void;
     clearCache(): void;
+    reset(): void;
     unknownText(text: string, variant: string): N;
     measureTextNode(text: N): {
         w: number;

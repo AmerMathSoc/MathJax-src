@@ -186,7 +186,9 @@ function ExplorerMathDocumentMixin(BaseDocument) {
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
                 }
-                var _this = _super.apply(this, __spread(args)) || this;
+                var _this = this;
+                processSreOptions(args[2]);
+                _this = _super.apply(this, __spread(args)) || this;
                 var ProcessBits = _this.constructor.ProcessBits;
                 if (!ProcessBits.has('explorer')) {
                     ProcessBits.allocate('explorer');
@@ -229,7 +231,7 @@ function ExplorerMathDocumentMixin(BaseDocument) {
             };
             return class_2;
         }(BaseDocument)),
-        _a.OPTIONS = __assign(__assign({}, BaseDocument.OPTIONS), { enrichSpeech: 'shallow', enableExplorer: true, renderActions: Options_js_1.expandable(__assign(__assign({}, BaseDocument.OPTIONS.renderActions), { explorable: [MathItem_js_1.STATE.EXPLORER] })), a11y: {
+        _a.OPTIONS = __assign(__assign({}, BaseDocument.OPTIONS), { enableExplorer: true, renderActions: Options_js_1.expandable(__assign(__assign({}, BaseDocument.OPTIONS.renderActions), { explorable: [MathItem_js_1.STATE.EXPLORER] })), sre: Options_js_1.expandable(__assign(__assign({}, BaseDocument.OPTIONS.sre), { speech: 'shallow' })), a11y: {
                 align: 'top',
                 backgroundColor: 'Blue',
                 backgroundOpacity: 20,
@@ -243,12 +245,10 @@ function ExplorerMathDocumentMixin(BaseDocument) {
                 infoRole: false,
                 infoType: false,
                 keyMagnifier: false,
-                locale: 'en',
                 magnification: 'None',
                 magnify: '400%',
                 mouseMagnifier: false,
                 speech: true,
-                speechRules: 'mathspeak-default',
                 subtitles: true,
                 treeColoring: false,
                 viewBraille: false
@@ -256,6 +256,24 @@ function ExplorerMathDocumentMixin(BaseDocument) {
         _a;
 }
 exports.ExplorerMathDocumentMixin = ExplorerMathDocumentMixin;
+function processSreOptions(options) {
+    if (!options || !options.a11y) {
+        return;
+    }
+    if (!options.sre) {
+        options.sre = {};
+    }
+    if (options.a11y.locale) {
+        options.sre.locale = options.a11y.locale;
+        delete options.a11y.locale;
+    }
+    if (options.a11y.speechRules) {
+        var _a = __read(options.a11y.speechRules.split('-'), 2), domain = _a[0], style = _a[1];
+        options.sre.domain = domain;
+        options.sre.style = style;
+        delete options.a11y.speechRules;
+    }
+}
 function ExplorerHandler(handler, MmlJax) {
     if (MmlJax === void 0) { MmlJax = null; }
     if (!handler.documentClass.prototype.enrich && MmlJax) {
@@ -283,10 +301,9 @@ var allExplorers = {
             rest[_i - 2] = arguments[_i];
         }
         var explorer = (_a = ke.SpeechExplorer).create.apply(_a, __spread([doc, doc.explorerRegions.speechRegion, node], rest));
-        var _b = __read(doc.options.a11y.speechRules.split('-'), 2), domain = _b[0], style = _b[1];
         explorer.speechGenerator.setOptions({
-            locale: doc.options.a11y.locale, domain: domain,
-            style: style, modality: 'speech', cache: false
+            locale: doc.options.sre.locale, domain: doc.options.sre.domain,
+            style: doc.options.sre.style, modality: 'speech', cache: false
         });
         explorer.showRegion = 'subtitles';
         return explorer;
@@ -381,9 +398,17 @@ function initExplorers(document, node, mml) {
 }
 function setA11yOptions(document, options) {
     var e_6, _a;
+    var sreOptions = SRE.engineSetup();
     for (var key in options) {
         if (document.options.a11y[key] !== undefined) {
             setA11yOption(document, key, options[key]);
+            if (key === 'locale') {
+                document.options.sre[key] = options[key];
+            }
+            continue;
+        }
+        if (sreOptions[key] !== undefined) {
+            document.options.sre[key] = options[key];
         }
     }
     try {
@@ -441,8 +466,15 @@ function setA11yOption(document, option, value) {
                     break;
             }
             break;
+        case 'speechRules':
+            var _a = __read(value.split('-'), 2), domain = _a[0], style = _a[1];
+            document.options.sre.domain = domain;
+            document.options.sre.style = style;
+            break;
         case 'locale':
+            document.options.sre.locale = value;
             SRE.setupEngine({ locale: value });
+            break;
         default:
             document.options.a11y[option] = value;
     }

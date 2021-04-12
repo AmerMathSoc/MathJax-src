@@ -135,7 +135,8 @@ var HTMLAdaptor = (function (_super) {
         return node.childNodes[i];
     };
     HTMLAdaptor.prototype.kind = function (node) {
-        return node.nodeName.toLowerCase();
+        var n = node.nodeType;
+        return (n === 1 || n === 3 || n === 8 ? node.nodeName.toLowerCase() : '');
     };
     HTMLAdaptor.prototype.value = function (node) {
         return node.nodeValue || '';

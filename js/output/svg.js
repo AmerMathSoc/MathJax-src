@@ -69,6 +69,9 @@ var SVG = (function (_super) {
     SVG.prototype.clearFontCache = function () {
         this.fontCache.clearCache();
     };
+    SVG.prototype.reset = function () {
+        this.clearFontCache();
+    };
     SVG.prototype.setScale = function (node) {
         if (this.options.scale !== 1) {
             this.adaptor.setStyle(node, 'fontSize', lengths_js_1.percent(this.options.scale));
@@ -112,8 +115,9 @@ var SVG = (function (_super) {
     };
     SVG.prototype.createRoot = function (wrapper) {
         var _a = wrapper.getBBox(), w = _a.w, h = _a.h, d = _a.d, pwidth = _a.pwidth;
-        var W = Math.max(w, .001);
-        var H = Math.max(h + d, .001);
+        var px = wrapper.metrics.em / 1000;
+        var W = Math.max(w, px);
+        var H = Math.max(h + d, px);
         var g = this.svg('g', {
             stroke: 'currentColor', fill: 'currentColor',
             'stroke-width': 0, transform: 'scale(1,-1)'
@@ -225,7 +229,9 @@ var SVG = (function (_super) {
             direction: 'ltr'
         },
         'mjx-container[jax="SVG"] > svg': {
-            overflow: 'visible'
+            overflow: 'visible',
+            'min-height': '1px',
+            'min-width': '1px'
         },
         'mjx-container[jax="SVG"] > svg a': {
             fill: 'blue', stroke: 'blue'

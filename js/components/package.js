@@ -80,20 +80,9 @@ var Package = (function () {
     });
     Package.resolvePath = function (name, addExtension) {
         if (addExtension === void 0) { addExtension = true; }
-        var file = loader_js_1.CONFIG.source[name] || name;
-        if (!file.match(/^(?:[a-z]+:\/)?\/|[a-z]:\\|\[/i)) {
-            file = '[mathjax]/' + file.replace(/^\.\//, '');
-        }
-        if (addExtension && !file.match(/\.[^\/]+$/)) {
-            file += '.js';
-        }
-        var match;
-        while ((match = file.match(/^\[([^\]]*)\]/))) {
-            if (!loader_js_1.CONFIG.paths.hasOwnProperty(match[1]))
-                break;
-            file = loader_js_1.CONFIG.paths[match[1]] + file.substr(match[0].length);
-        }
-        return file;
+        var data = { name: name, addExtension: addExtension };
+        loader_js_1.Loader.pathFilters.execute(data);
+        return data.name;
     };
     Package.loadAll = function () {
         var e_1, _a;

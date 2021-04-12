@@ -36,9 +36,6 @@ var ParseUtil_js_1 = require("../ParseUtil.js");
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
 var Tags_js_1 = require("../Tags.js");
 var Entities_js_1 = require("../../../util/Entities.js");
-require("../../../util/entities/n.js");
-require("../../../util/entities/p.js");
-require("../../../util/entities/r.js");
 var BaseMethods = {};
 var P_HEIGHT = 1.2 / .85;
 var MmlTokenAllow = {
@@ -162,7 +159,7 @@ BaseMethods.Prime = function (parser, c) {
     do {
         sup += Entities_js_1.entities.prime;
         parser.i++, c = parser.GetNext();
-    } while (c === '\'' || c === Entities_js_1.entities.rquote);
+    } while (c === '\'' || c === Entities_js_1.entities.rsquo);
     sup = ['', '\u2032', '\u2033', '\u2034', '\u2057'][sup.length] || sup;
     var node = parser.create('token', 'mo', { variantForm: true }, sup);
     parser.Push(parser.itemFactory.create('prime', base, node));

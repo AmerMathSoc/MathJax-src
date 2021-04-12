@@ -14,6 +14,7 @@ export interface MinDocument<N, T> {
     querySelectorAll(selector: string): ArrayLike<N>;
 }
 export interface MinHTMLElement<N, T> {
+    nodeType: number;
     nodeName: string;
     nodeValue: string;
     textContent: string;
@@ -53,6 +54,7 @@ export interface MinHTMLElement<N, T> {
     };
 }
 export interface MinText<N, T> {
+    nodeType: number;
     nodeName: string;
     nodeValue: string;
     parentNode: N | Node;

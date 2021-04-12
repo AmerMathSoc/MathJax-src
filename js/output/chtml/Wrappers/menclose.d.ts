@@ -8,10 +8,11 @@ export declare class CHTMLmenclose<N, T, D> extends CHTMLmenclose_base {
     static styles: StyleList;
     static notations: Notation.DefList<CHTMLmenclose<any, any, any>, any>;
     toCHTML(parent: N): void;
-    arrow(w: number, a: number, double?: boolean): N;
+    arrow(w: number, a: number, double: boolean, offset?: string, dist?: number): N;
     protected adjustArrow(arrow: N, double: boolean): void;
     protected adjustHead(head: N, border: string[], a: string): void;
     protected adjustLine(line: N, t: number, x: number, double: boolean): void;
+    protected moveArrow(arrow: N, offset: string, d: number): void;
     adjustBorder(node: N): N;
     adjustThickness(shape: N): N;
     fixed(m: number, n?: number): string;

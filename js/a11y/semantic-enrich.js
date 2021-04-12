@@ -89,9 +89,9 @@ function EnrichedMathItemMixin(BaseMathItem, MmlJax, toMathML) {
                 if (typeof sre === 'undefined' || !sre.Engine.isReady()) {
                     mathjax_js_1.mathjax.retryAfter(sre_js_1.sreReady());
                 }
-                if (document.options.enrichSpeech !== currentSpeech) {
-                    SRE.setupEngine({ speech: document.options.enrichSpeech });
-                    currentSpeech = document.options.enrichSpeech;
+                if (document.options.sre.speech !== currentSpeech) {
+                    SRE.setupEngine(document.options.sre);
+                    currentSpeech = document.options.sre.speech;
                 }
                 var math = new document.options.MathItem('', MmlJax);
                 math.math = this.serializeMml(SRE.toEnriched(toMathML(this.root)));
@@ -169,7 +169,9 @@ function EnrichedMathDocumentMixin(BaseDocument, MmlJax) {
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
                 }
-                var _this = _super.apply(this, __spread(args)) || this;
+                var _this = this;
+                processSreOptions(args[2]);
+                _this = _super.apply(this, __spread(args)) || this;
                 MmlJax.setMmlFactory(_this.mmlFactory);
                 var ProcessBits = _this.constructor.ProcessBits;
                 if (!ProcessBits.has('enriched')) {
@@ -234,7 +236,12 @@ function EnrichedMathDocumentMixin(BaseDocument, MmlJax) {
             };
             return class_2;
         }(BaseDocument)),
-        _a.OPTIONS = __assign(__assign({}, BaseDocument.OPTIONS), { enableEnrichment: true, enrichSpeech: 'none', renderActions: Options_js_1.expandable(__assign(__assign({}, BaseDocument.OPTIONS.renderActions), { enrich: [MathItem_js_1.STATE.ENRICHED], attachSpeech: [MathItem_js_1.STATE.ATTACHSPEECH] })) }),
+        _a.OPTIONS = __assign(__assign({}, BaseDocument.OPTIONS), { enableEnrichment: true, renderActions: Options_js_1.expandable(__assign(__assign({}, BaseDocument.OPTIONS.renderActions), { enrich: [MathItem_js_1.STATE.ENRICHED], attachSpeech: [MathItem_js_1.STATE.ATTACHSPEECH] })), sre: Options_js_1.expandable({
+                speech: 'none',
+                domain: 'mathspeak',
+                style: 'default',
+                locale: 'en'
+            }) }),
         _a;
 }
 exports.EnrichedMathDocumentMixin = EnrichedMathDocumentMixin;
@@ -245,4 +252,16 @@ function EnrichHandler(handler, MmlJax) {
     return handler;
 }
 exports.EnrichHandler = EnrichHandler;
+function processSreOptions(options) {
+    if (!options) {
+        return;
+    }
+    if (!options.sre) {
+        options.sre = {};
+    }
+    if (options.enrichSpeech) {
+        options.sre.speech = options.enrichSpeech;
+        delete options.enrichSpeech;
+    }
+}
 //# sourceMappingURL=semantic-enrich.js.map

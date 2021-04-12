@@ -41,7 +41,7 @@ var MmlMstyle = (function (_super) {
     });
     Object.defineProperty(MmlMstyle.prototype, "notParent", {
         get: function () {
-            return true;
+            return this.childNodes[0] && this.childNodes[0].childNodes.length === 1;
         },
         enumerable: false,
         configurable: true

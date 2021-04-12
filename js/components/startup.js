@@ -21,6 +21,26 @@ var __values = (this && this.__values) || function(o) {
     };
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CONFIG = exports.MathJax = exports.Startup = void 0;
 var global_js_1 = require("./global.js");
@@ -217,12 +237,13 @@ var Startup;
     }
     Startup.makeMmlMethods = makeMmlMethods;
     function makeResetMethod(name, input) {
-        if (name === 'tex') {
-            exports.MathJax.texReset = function (start) {
-                if (start === void 0) { start = 0; }
-                return input.parseOptions.tags.reset(start);
-            };
-        }
+        exports.MathJax[name + 'Reset'] = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            return input.reset.apply(input, __spread(args));
+        };
     }
     Startup.makeResetMethod = makeResetMethod;
     function getInputJax() {

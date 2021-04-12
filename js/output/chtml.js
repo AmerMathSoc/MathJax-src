@@ -97,6 +97,9 @@ var CHTML = (function (_super) {
             finally { if (e_1) throw e_1.error; }
         }
     };
+    CHTML.prototype.reset = function () {
+        this.clearCache();
+    };
     CHTML.prototype.unknownText = function (text, variant) {
         var styles = {};
         var scale = 100 / this.math.metrics.scale;

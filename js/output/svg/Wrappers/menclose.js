@@ -80,8 +80,9 @@ var SVGmenclose = (function (_super) {
             finally { if (e_1) throw e_1.error; }
         }
     };
-    SVGmenclose.prototype.arrow = function (W, a, double) {
-        if (double === void 0) { double = false; }
+    SVGmenclose.prototype.arrow = function (W, a, double, offset, dist) {
+        if (offset === void 0) { offset = ''; }
+        if (dist === void 0) { dist = 0; }
         var _a = this.getBBox(), w = _a.w, h = _a.h, d = _a.d;
         var dw = (W - w) / 2;
         var m = (h - d) / 2;
@@ -91,9 +92,16 @@ var SVGmenclose = (function (_super) {
         var arrow = (double ?
             this.fill('M', w + dw, m, 'l', -(x + dx), y, 'l', dx, t2 - y, 'L', x - dw, m + t2, 'l', dx, y - t2, 'l', -(x + dx), -y, 'l', x + dx, -y, 'l', -dx, y - t2, 'L', w + dw - x, m - t2, 'l', -dx, t2 - y, 'Z') :
             this.fill('M', w + dw, m, 'l', -(x + dx), y, 'l', dx, t2 - y, 'L', -dw, m + t2, 'l', 0, -t, 'L', w + dw - x, m - t2, 'l', -dx, t2 - y, 'Z'));
+        var transform = [];
+        if (dist) {
+            transform.push(offset === 'X' ? "translate(" + this.fixed(-dist) + " 0)" : "translate(0 " + this.fixed(dist) + ")");
+        }
         if (a) {
             var A = this.jax.fixed(-a * 180 / Math.PI);
-            this.adaptor.setAttribute(arrow, 'transform', 'rotate(' + [A, this.fixed(w / 2), this.fixed(m)].join(' ') + ')');
+            transform.push("rotate(" + A + " " + this.fixed(w / 2) + " " + this.fixed(m) + ")");
+        }
+        if (transform.length) {
+            this.adaptor.setAttribute(arrow, 'transform', transform.join(' '));
         }
         return arrow;
     };
@@ -160,11 +168,11 @@ var SVGmenclose = (function (_super) {
         Notation.DiagonalStrike('up'),
         Notation.DiagonalStrike('down'),
         ['horizontalstrike', {
-                renderer: Notation.RenderLine('horizontal'),
+                renderer: Notation.RenderLine('horizontal', 'Y'),
                 bbox: function (node) { return [0, node.padding, 0, node.padding]; }
             }],
         ['verticalstrike', {
-                renderer: Notation.RenderLine('vertical'),
+                renderer: Notation.RenderLine('vertical', 'X'),
                 bbox: function (node) { return [node.padding, 0, node.padding, 0]; }
             }],
         ['box', {
