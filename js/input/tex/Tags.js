@@ -134,7 +134,7 @@ var AbstractTags = (function () {
         return '(' + tag + ')';
     };
     AbstractTags.prototype.formatId = function (id) {
-        return 'mjx-eqn-' + id.replace(/\s/g, '_');
+        return 'mjx-eqn:' + id.replace(/\s/g, '_');
     };
     AbstractTags.prototype.formatNumber = function (n) {
         return n.toString();

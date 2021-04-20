@@ -245,7 +245,8 @@ var BaseItem = (function (_super) {
     BaseItem.errors = {
         end: ['MissingBeginExtraEnd', 'Missing \\begin{%1} or extra \\end{%1}'],
         close: ['ExtraCloseMissingOpen', 'Extra close brace or missing open brace'],
-        right: ['MissingLeftExtraRight', 'Missing \\left or extra \\right']
+        right: ['MissingLeftExtraRight', 'Missing \\left or extra \\right'],
+        middle: ['ExtraMiddle', 'Extra \\middle']
     };
     return BaseItem;
 }(MmlStack));

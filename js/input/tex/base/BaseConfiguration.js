@@ -75,6 +75,7 @@ exports.BaseConfiguration = Configuration_js_1.Configuration.create('base', {
         _a[bitem.SubsupItem.prototype.kind] = bitem.SubsupItem,
         _a[bitem.OverItem.prototype.kind] = bitem.OverItem,
         _a[bitem.LeftItem.prototype.kind] = bitem.LeftItem,
+        _a[bitem.Middle.prototype.kind] = bitem.Middle,
         _a[bitem.RightItem.prototype.kind] = bitem.RightItem,
         _a[bitem.BeginItem.prototype.kind] = bitem.BeginItem,
         _a[bitem.EndItem.prototype.kind] = bitem.EndItem,

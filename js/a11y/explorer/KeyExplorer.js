@@ -20,6 +20,8 @@ var AbstractKeyExplorer = (function (_super) {
     __extends(AbstractKeyExplorer, _super);
     function AbstractKeyExplorer() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.attached = false;
+        _this.eventsAttached = false;
         _this.events = _super.prototype.Events.call(_this).concat([['keydown', _this.KeyDown.bind(_this)],
             ['focusin', _this.FocusIn.bind(_this)],
             ['focusout', _this.FocusOut.bind(_this)]]);
@@ -40,9 +42,16 @@ var AbstractKeyExplorer = (function (_super) {
     };
     AbstractKeyExplorer.prototype.Attach = function () {
         _super.prototype.Attach.call(this);
+        this.attached = true;
         this.oldIndex = this.node.tabIndex;
         this.node.tabIndex = 1;
         this.node.setAttribute('role', 'application');
+    };
+    AbstractKeyExplorer.prototype.AddEvents = function () {
+        if (!this.eventsAttached) {
+            _super.prototype.AddEvents.call(this);
+            this.eventsAttached = true;
+        }
     };
     AbstractKeyExplorer.prototype.Detach = function () {
         if (this.active) {
@@ -50,7 +59,7 @@ var AbstractKeyExplorer = (function (_super) {
             this.oldIndex = null;
             this.node.removeAttribute('role');
         }
-        _super.prototype.Detach.call(this);
+        this.attached = false;
     };
     AbstractKeyExplorer.prototype.Stop = function () {
         if (this.active) {
@@ -78,6 +87,8 @@ var SpeechExplorer = (function (_super) {
     }
     SpeechExplorer.prototype.Start = function () {
         var _this = this;
+        if (!this.attached)
+            return;
         var options = this.getOptions();
         if (!this.init) {
             this.init = true;
@@ -185,6 +196,8 @@ var Magnifier = (function (_super) {
     };
     Magnifier.prototype.Start = function () {
         _super.prototype.Start.call(this);
+        if (!this.attached)
+            return;
         this.region.Show(this.node, this.highlighter);
         this.walker.activate();
         this.Update();

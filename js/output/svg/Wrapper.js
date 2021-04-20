@@ -83,16 +83,17 @@ var SVGWrapper = (function (_super) {
         return svg;
     };
     SVGWrapper.prototype.createSVGnode = function (parent) {
+        this.element = this.svg('g', { 'data-mml-node': this.node.kind });
         var href = this.node.attributes.get('href');
         if (href) {
             parent = this.adaptor.append(parent, this.svg('a', { href: href }));
             var _a = this.getBBox(), h = _a.h, d = _a.d, w = _a.w;
-            this.adaptor.append(parent, this.svg('rect', {
+            this.adaptor.append(this.element, this.svg('rect', {
                 'data-hitbox': true, fill: 'none', stroke: 'none', 'pointer-events': 'all',
                 width: this.fixed(w), height: this.fixed(h + d), y: this.fixed(-d)
             }));
         }
-        this.element = this.adaptor.append(parent, this.svg('g', { 'data-mml-node': this.node.kind }));
+        this.adaptor.append(parent, this.element);
         return this.element;
     };
     SVGWrapper.prototype.handleStyles = function () {
@@ -180,19 +181,37 @@ var SVGWrapper = (function (_super) {
         if (element === void 0) { element = null; }
         if (!(x || y))
             return;
-        var adaptor = this.adaptor;
-        var translate = 'translate(' + this.fixed(x) + ', ' + this.fixed(y) + ')';
         if (!element) {
             element = this.element;
-            if (this.node.attributes && this.node.attributes.get('href')) {
-                var rect = adaptor.previous(element);
-                if (rect && adaptor.kind(rect) === 'rect' && adaptor.getAttribute(rect, 'data-hitbox')) {
-                    adaptor.setAttribute(rect, 'transform', translate);
-                }
-            }
+            y = this.handleId(y);
         }
-        var transform = adaptor.getAttribute(element, 'transform') || '';
-        adaptor.setAttribute(element, 'transform', translate + (transform ? ' ' + transform : ''));
+        var translate = "translate(" + this.fixed(x) + "," + this.fixed(y) + ")";
+        var transform = this.adaptor.getAttribute(element, 'transform') || '';
+        this.adaptor.setAttribute(element, 'transform', translate + (transform ? ' ' + transform : ''));
+    };
+    SVGWrapper.prototype.handleId = function (y) {
+        if (!this.node.attributes || !this.node.attributes.get('id')) {
+            return y;
+        }
+        var adaptor = this.adaptor;
+        var h = this.getBBox().h;
+        var children = adaptor.childNodes(this.element);
+        children.forEach(function (child) { return adaptor.remove(child); });
+        var g = this.svg('g', { 'data-idbox': true, transform: "translate(0," + this.fixed(-h) + ")" }, children);
+        adaptor.append(this.element, this.svg('text', { 'data-align': true }, [this.text('')]));
+        adaptor.append(this.element, g);
+        return y + h;
+    };
+    SVGWrapper.prototype.firstChild = function () {
+        var adaptor = this.adaptor;
+        var child = adaptor.firstChild(this.element);
+        if (child && adaptor.kind(child) === 'text' && adaptor.getAttribute(child, 'data-align')) {
+            child = adaptor.firstChild(adaptor.next(child));
+        }
+        if (child && adaptor.kind(child) === 'rect' && adaptor.getAttribute(child, 'data-hitbox')) {
+            child = adaptor.next(child);
+        }
+        return child;
     };
     SVGWrapper.prototype.placeChar = function (n, x, y, parent, variant) {
         var e_4, _a;

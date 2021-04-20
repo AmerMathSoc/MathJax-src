@@ -20,8 +20,10 @@ export declare class CHTMLmtable<N, T, D> extends CHTMLmtable_base {
     protected handleColumnWidths(): void;
     protected handleRowSpacing(): void;
     protected handleRowLines(): void;
+    protected handleRowHeights(): void;
     protected handleEqualRows(): void;
-    protected setRowHeight(row: CHTMLWrapper<N, T, D>, HD: number, D: number, space: number): void;
+    protected setRowHeight(row: CHTMLWrapper<N, T, D>, HD: number): void;
+    protected setRowBaseline(row: CHTMLWrapper<N, T, D>, HD: number, D: number): void;
     protected setCellBaseline(cell: CHTMLWrapper<N, T, D>, ralign: string, HD: number, D: number): boolean;
     protected handleFrame(): void;
     protected handleWidth(): void;

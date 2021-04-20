@@ -73,7 +73,7 @@ function ExplorerMathItemMixin(BaseMathItem, toMathML) {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.explorers = {};
             _this.attached = [];
-            _this.restart = false;
+            _this.restart = [];
             _this.refocus = false;
             _this.savedId = null;
             return _this;
@@ -95,15 +95,21 @@ function ExplorerMathItemMixin(BaseMathItem, toMathML) {
             this.state(MathItem_js_1.STATE.EXPLORER);
         };
         class_1.prototype.attachExplorers = function (document) {
-            var e_1, _a;
+            var e_1, _a, e_2, _b;
             this.attached = [];
+            var keyExplorers = [];
             try {
-                for (var _b = __values(Object.keys(this.explorers)), _c = _b.next(); !_c.done; _c = _b.next()) {
-                    var key = _c.value;
+                for (var _c = __values(Object.keys(this.explorers)), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var key = _d.value;
                     var explorer = this.explorers[key];
+                    if (explorer instanceof ke.AbstractKeyExplorer) {
+                        explorer.AddEvents();
+                        explorer.stoppable = false;
+                        keyExplorers.unshift(explorer);
+                    }
                     if (document.options.a11y[key]) {
                         explorer.Attach();
-                        this.attached.push(explorer);
+                        this.attached.push(key);
                     }
                     else {
                         explorer.Detach();
@@ -113,53 +119,40 @@ function ExplorerMathItemMixin(BaseMathItem, toMathML) {
             catch (e_1_1) { e_1 = { error: e_1_1 }; }
             finally {
                 try {
-                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
                 }
                 finally { if (e_1) throw e_1.error; }
             }
-            this.addExplorers(this.attached);
-        };
-        class_1.prototype.rerender = function (document, start) {
-            var e_2, _a;
-            if (start === void 0) { start = MathItem_js_1.STATE.RERENDER; }
-            this.savedId = this.typesetRoot.getAttribute('sre-explorer-id');
-            this.refocus = (window.document.activeElement === this.typesetRoot);
             try {
-                for (var _b = __values(this.attached), _c = _b.next(); !_c.done; _c = _b.next()) {
-                    var explorer = _c.value;
-                    if (explorer.active) {
-                        this.restart = true;
-                        explorer.Stop();
+                for (var keyExplorers_1 = __values(keyExplorers), keyExplorers_1_1 = keyExplorers_1.next(); !keyExplorers_1_1.done; keyExplorers_1_1 = keyExplorers_1.next()) {
+                    var explorer = keyExplorers_1_1.value;
+                    if (explorer.attached) {
+                        explorer.stoppable = true;
+                        break;
                     }
                 }
             }
             catch (e_2_1) { e_2 = { error: e_2_1 }; }
             finally {
                 try {
-                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                    if (keyExplorers_1_1 && !keyExplorers_1_1.done && (_b = keyExplorers_1.return)) _b.call(keyExplorers_1);
                 }
                 finally { if (e_2) throw e_2.error; }
             }
-            _super.prototype.rerender.call(this, document, start);
         };
-        class_1.prototype.updateDocument = function (document) {
-            _super.prototype.updateDocument.call(this, document);
-            this.refocus && this.typesetRoot.focus();
-            this.restart && this.attached.forEach(function (x) { return x.Start(); });
-            this.refocus = this.restart = false;
-        };
-        class_1.prototype.addExplorers = function (explorers) {
+        class_1.prototype.rerender = function (document, start) {
             var e_3, _a;
-            if (explorers.length <= 1)
-                return;
-            var lastKeyExplorer = null;
+            if (start === void 0) { start = MathItem_js_1.STATE.RERENDER; }
+            this.savedId = this.typesetRoot.getAttribute('sre-explorer-id');
+            this.refocus = (window.document.activeElement === this.typesetRoot);
             try {
                 for (var _b = __values(this.attached), _c = _b.next(); !_c.done; _c = _b.next()) {
-                    var explorer = _c.value;
-                    if (!(explorer instanceof ke.AbstractKeyExplorer))
-                        continue;
-                    explorer.stoppable = false;
-                    lastKeyExplorer = explorer;
+                    var key = _c.value;
+                    var explorer = this.explorers[key];
+                    if (explorer.active) {
+                        this.restart.push(key);
+                        explorer.Stop();
+                    }
                 }
             }
             catch (e_3_1) { e_3 = { error: e_3_1 }; }
@@ -169,9 +162,15 @@ function ExplorerMathItemMixin(BaseMathItem, toMathML) {
                 }
                 finally { if (e_3) throw e_3.error; }
             }
-            if (lastKeyExplorer) {
-                lastKeyExplorer.stoppable = true;
-            }
+            _super.prototype.rerender.call(this, document, start);
+        };
+        class_1.prototype.updateDocument = function (document) {
+            var _this = this;
+            _super.prototype.updateDocument.call(this, document);
+            this.refocus && this.typesetRoot.focus();
+            this.restart.forEach(function (x) { return _this.explorers[x].Start(); });
+            this.restart = [];
+            this.refocus = false;
         };
         return class_1;
     }(BaseMathItem));

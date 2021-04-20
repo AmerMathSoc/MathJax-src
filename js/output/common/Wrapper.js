@@ -415,7 +415,7 @@ var CommonWrapper = (function (_super) {
     CommonWrapper.prototype.getAlignY = function (H, D, h, d, align) {
         return (align === 'top' ? H - h :
             align === 'bottom' ? d - D :
-                align === 'middle' ? ((H - h) - (D - d)) / 2 :
+                align === 'center' ? ((H - h) - (D - d)) / 2 :
                     0);
     };
     CommonWrapper.prototype.getWrapWidth = function (i) {

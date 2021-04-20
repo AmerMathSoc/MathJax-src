@@ -84,7 +84,7 @@ var CHTMLmtable = (function (_super) {
         this.handleColumnWidths();
         this.handleRowSpacing();
         this.handleRowLines();
-        this.handleEqualRows();
+        this.handleRowHeights();
         this.handleFrame();
         this.handleWidth();
         this.handleLabels();
@@ -303,22 +303,28 @@ var CHTMLmtable = (function (_super) {
             finally { if (e_11) throw e_11.error; }
         }
     };
+    CHTMLmtable.prototype.handleRowHeights = function () {
+        if (this.node.attributes.get('equalrows')) {
+            this.handleEqualRows();
+        }
+    };
     CHTMLmtable.prototype.handleEqualRows = function () {
-        if (!this.node.attributes.get('equalrows'))
-            return;
         var space = this.getRowHalfSpacing();
         var _a = this.getTableData(), H = _a.H, D = _a.D, NH = _a.NH, ND = _a.ND;
         var HD = this.getEqualRowHeight();
         for (var i = 0; i < this.numRows; i++) {
             var row = this.childNodes[i];
+            this.setRowHeight(row, HD + space[i] + space[i + 1] + this.rLines[i]);
             if (HD !== NH[i] + ND[i]) {
-                this.setRowHeight(row, HD, (HD - H[i] + D[i]) / 2, space[i] + space[i + 1]);
+                this.setRowBaseline(row, HD, (HD - H[i] + D[i]) / 2);
             }
         }
     };
-    CHTMLmtable.prototype.setRowHeight = function (row, HD, D, space) {
+    CHTMLmtable.prototype.setRowHeight = function (row, HD) {
+        this.adaptor.setStyle(row.chtml, 'height', this.em(HD));
+    };
+    CHTMLmtable.prototype.setRowBaseline = function (row, HD, D) {
         var e_13, _a;
-        this.adaptor.setStyle(row.chtml, 'height', this.em(HD + space));
         var ralign = row.node.attributes.get('rowalign');
         try {
             for (var _b = __values(row.childNodes), _c = _b.next(); !_c.done; _c = _b.next()) {
@@ -434,14 +440,13 @@ var CHTMLmtable = (function (_super) {
         return [align, shift];
     };
     CHTMLmtable.prototype.updateRowHeights = function () {
-        if (this.node.attributes.get('equalrows'))
-            return;
         var _a = this.getTableData(), H = _a.H, D = _a.D, NH = _a.NH, ND = _a.ND;
         var space = this.getRowHalfSpacing();
         for (var i = 0; i < this.numRows; i++) {
             var row = this.childNodes[i];
+            this.setRowHeight(row, H[i] + D[i] + space[i] + space[i + 1] + this.rLines[i]);
             if (H[i] !== NH[i] || D[i] !== ND[i]) {
-                this.setRowHeight(row, H[i] + D[i], D[i], space[i] + space[i + 1]);
+                this.setRowBaseline(row, H[i] + D[i], D[i]);
             }
             else if (row.node.isKind('mlabeledtr')) {
                 this.setCellBaseline(row.childNodes[0], '', H[i] + D[i], D[i]);

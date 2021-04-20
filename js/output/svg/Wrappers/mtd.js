@@ -35,7 +35,7 @@ var SVGmtd = (function (_super) {
     };
     SVGmtd.prototype.placeColor = function (x, y, W, H) {
         var adaptor = this.adaptor;
-        var child = adaptor.firstChild(this.element);
+        var child = this.firstChild();
         if (child && adaptor.kind(child) === 'rect' && adaptor.getAttribute(child, 'data-bgcolor')) {
             adaptor.setAttribute(child, 'x', this.fixed(x));
             adaptor.setAttribute(child, 'y', this.fixed(y));

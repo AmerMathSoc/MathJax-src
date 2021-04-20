@@ -6,7 +6,9 @@ export interface KeyExplorer extends Explorer {
     FocusOut(event: FocusEvent): void;
 }
 export declare abstract class AbstractKeyExplorer<T> extends AbstractExplorer<T> implements KeyExplorer {
+    attached: boolean;
     protected walker: sre.Walker;
+    private eventsAttached;
     protected events: [string, (x: Event) => void][];
     private oldIndex;
     abstract KeyDown(event: KeyboardEvent): void;
@@ -14,6 +16,7 @@ export declare abstract class AbstractKeyExplorer<T> extends AbstractExplorer<T>
     FocusOut(_event: FocusEvent): void;
     Update(force?: boolean): void;
     Attach(): void;
+    AddEvents(): void;
     Detach(): void;
     Stop(): void;
 }

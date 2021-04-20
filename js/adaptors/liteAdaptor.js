@@ -322,6 +322,9 @@ var LiteAdaptor = (function (_super) {
     LiteAdaptor.prototype.outerHTML = function (node) {
         return this.parser.serialize(this, node);
     };
+    LiteAdaptor.prototype.serializeXML = function (node) {
+        return this.parser.serialize(this, node, true);
+    };
     LiteAdaptor.prototype.setAttribute = function (node, name, value, ns) {
         if (ns === void 0) { ns = null; }
         if (typeof value !== 'string') {

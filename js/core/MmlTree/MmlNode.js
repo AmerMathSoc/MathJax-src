@@ -854,7 +854,7 @@ var XMLNode = (function (_super) {
         return this;
     };
     XMLNode.prototype.getSerializedXML = function () {
-        return this.adaptor.outerHTML(this.xml);
+        return this.adaptor.serializeXML(this.xml);
     };
     XMLNode.prototype.toString = function () {
         return 'XML data';

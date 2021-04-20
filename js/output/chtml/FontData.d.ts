@@ -44,9 +44,9 @@ export declare class CHTMLFontData extends FontData<CHTMLCharOptions, CHTMLVaria
     protected addFontURLs(styles: StyleList, fonts: StyleList, url: string): void;
     protected addDelimiterStyles(styles: StyleList, n: number, data: CHTMLDelimiterData): void;
     protected addDelimiterVStyles(styles: StyleList, c: string, data: CHTMLDelimiterData): void;
-    protected addDelimiterVPart(styles: StyleList, c: string, W: number, part: string, n: number): number;
+    protected addDelimiterVPart(styles: StyleList, c: string, part: string, n: number, HDW: CHTMLCharData): number;
     protected addDelimiterHStyles(styles: StyleList, c: string, data: CHTMLDelimiterData): void;
-    protected addDelimiterHPart(styles: StyleList, c: string, part: string, n: number, force?: boolean): void;
+    protected addDelimiterHPart(styles: StyleList, c: string, part: string, n: number, HDW: CHTMLCharData): void;
     protected addCharStyles(styles: StyleList, vletter: string, n: number, data: CHTMLCharData): void;
     protected getDelimiterData(n: number): CHTMLCharData;
     em(n: number): string;

@@ -7,7 +7,7 @@ declare namespace ParseUtil {
     function matchDimen(dim: string, rest?: boolean): [string, string, number];
     function dimen2em(dim: string): number;
     function Em(m: number): string;
-    function fenced(configuration: ParseOptions, open: string, mml: MmlNode, close: string, big?: string): MmlNode;
+    function fenced(configuration: ParseOptions, open: string, mml: MmlNode, close: string, big?: string, color?: string): MmlNode;
     function fixedFence(configuration: ParseOptions, open: string, mml: MmlNode, close: string): MmlNode;
     function mathPalette(configuration: ParseOptions, fence: string, side: string): MmlNode;
     function fixInitialMO(configuration: ParseOptions, nodes: MmlNode[]): void;

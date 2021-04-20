@@ -108,22 +108,6 @@ export declare namespace TexConstant {
         TOOLTIP: string;
         INPUT: string;
     };
-    const Length: {
-        VERYVERYTHINMATHSPACE: string;
-        VERYTHINMATHSPACE: string;
-        THINMATHSPACE: string;
-        MEDIUMMATHSPACE: string;
-        THICKMATHSPACE: string;
-        VERYTHICKMATHSPACE: string;
-        VERYVERYTHICKMATHSPACE: string;
-        NEGATIVEVERYVERYTHINMATHSPACE: string;
-        NEGATIVEVERYTHINMATHSPACE: string;
-        NEGATIVETHINMATHSPACE: string;
-        NEGATIVEMEDIUMMATHSPACE: string;
-        NEGATIVETHICKMATHSPACE: string;
-        NEGATIVEVERYTHICKMATHSPACE: string;
-        NEGATIVEVERYVERYTHICKMATHSPACE: string;
-    };
     const Overflow: {
         LINBREAK: string;
         SCROLL: string;

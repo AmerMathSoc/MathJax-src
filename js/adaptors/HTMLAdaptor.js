@@ -150,6 +150,10 @@ var HTMLAdaptor = (function (_super) {
     HTMLAdaptor.prototype.outerHTML = function (node) {
         return node.outerHTML;
     };
+    HTMLAdaptor.prototype.serializeXML = function (node) {
+        var serializer = new this.window.XMLSerializer();
+        return serializer.serializeToString(node);
+    };
     HTMLAdaptor.prototype.setAttribute = function (node, name, value, ns) {
         if (ns === void 0) { ns = null; }
         if (!ns) {

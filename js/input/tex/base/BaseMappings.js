@@ -5,6 +5,7 @@ var TexConstants_js_1 = require("../TexConstants.js");
 var BaseMethods_js_1 = require("./BaseMethods.js");
 var ParseMethods_js_1 = require("../ParseMethods.js");
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
+var lengths_js_1 = require("../../../util/lengths.js");
 new sm.RegExpMap('letter', ParseMethods_js_1.default.variable, /[a-z]/i);
 new sm.RegExpMap('digit', ParseMethods_js_1.default.digit, /[0-9.,]/);
 new sm.RegExpMap('command', ParseMethods_js_1.default.controlSequence, /^\\/);
@@ -440,23 +441,23 @@ new sm.CommandMap('macros', {
     leftroot: ['MoveRoot', 'leftRoot'],
     left: 'LeftRight',
     right: 'LeftRight',
-    middle: 'Middle',
+    middle: 'LeftRight',
     llap: 'Lap',
     rlap: 'Lap',
     raise: 'RaiseLower',
     lower: 'RaiseLower',
     moveleft: 'MoveLeftRight',
     moveright: 'MoveLeftRight',
-    ',': ['Spacer', TexConstants_js_1.TexConstant.Length.THINMATHSPACE],
-    ':': ['Spacer', TexConstants_js_1.TexConstant.Length.MEDIUMMATHSPACE],
-    '>': ['Spacer', TexConstants_js_1.TexConstant.Length.MEDIUMMATHSPACE],
-    ';': ['Spacer', TexConstants_js_1.TexConstant.Length.THICKMATHSPACE],
-    '!': ['Spacer', TexConstants_js_1.TexConstant.Length.NEGATIVETHINMATHSPACE],
-    enspace: ['Spacer', '.5em'],
-    quad: ['Spacer', '1em'],
-    qquad: ['Spacer', '2em'],
-    thinspace: ['Spacer', TexConstants_js_1.TexConstant.Length.THINMATHSPACE],
-    negthinspace: ['Spacer', TexConstants_js_1.TexConstant.Length.NEGATIVETHINMATHSPACE],
+    ',': ['Spacer', lengths_js_1.MATHSPACE.thinmathspace],
+    ':': ['Spacer', lengths_js_1.MATHSPACE.mediummathspace],
+    '>': ['Spacer', lengths_js_1.MATHSPACE.mediummathspace],
+    ';': ['Spacer', lengths_js_1.MATHSPACE.thickmathspace],
+    '!': ['Spacer', lengths_js_1.MATHSPACE.negativethinmathspace],
+    enspace: ['Spacer', .5],
+    quad: ['Spacer', 1],
+    qquad: ['Spacer', 2],
+    thinspace: ['Spacer', lengths_js_1.MATHSPACE.thinmathspace],
+    negthinspace: ['Spacer', lengths_js_1.MATHSPACE.negativethinmathspace],
     hskip: 'Hskip',
     hspace: 'Hskip',
     kern: 'Hskip',
@@ -520,7 +521,7 @@ new sm.CommandMap('macros', {
     cases: ['Matrix', '{', '', 'left left', null, '.1em', null,
         true],
     eqalign: ['Matrix', null, null, 'right left',
-        TexConstants_js_1.TexConstant.Length.THICKMATHSPACE, '.5em', 'D'],
+        lengths_js_1.em(lengths_js_1.MATHSPACE.thickmathspace), '.5em', 'D'],
     displaylines: ['Matrix', null, null, 'center', null, '.5em', 'D'],
     cr: 'Cr',
     '\\': 'CrLaTeX',
@@ -528,10 +529,10 @@ new sm.CommandMap('macros', {
     hline: ['HLine', 'solid'],
     hdashline: ['HLine', 'dashed'],
     eqalignno: ['Matrix', null, null, 'right left',
-        TexConstants_js_1.TexConstant.Length.THICKMATHSPACE, '.5em', 'D', null,
+        lengths_js_1.em(lengths_js_1.MATHSPACE.thickmathspace), '.5em', 'D', null,
         'right'],
     leqalignno: ['Matrix', null, null, 'right left',
-        TexConstants_js_1.TexConstant.Length.THICKMATHSPACE, '.5em', 'D', null,
+        lengths_js_1.em(lengths_js_1.MATHSPACE.thickmathspace), '.5em', 'D', null,
         'left'],
     hfill: 'HFill',
     hfil: 'HFill',
@@ -568,7 +569,7 @@ new sm.EnvironmentMap('environment', ParseMethods_js_1.default.environment, {
     equation: ['Equation', null, true],
     'equation*': ['Equation', null, false],
     eqnarray: ['EqnArray', null, true, true, 'rcl',
-        '0 ' + TexConstants_js_1.TexConstant.Length.THICKMATHSPACE, '.5em']
+        '0 ' + lengths_js_1.em(lengths_js_1.MATHSPACE.thickmathspace), '.5em']
 }, BaseMethods_js_1.default);
 new sm.CharacterMap('not_remap', null, {
     '\u2190': '\u219A',

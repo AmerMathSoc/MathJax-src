@@ -81,8 +81,9 @@ var ParseUtil;
         return m.toFixed(3).replace(/\.?0+$/, '') + 'em';
     }
     ParseUtil.Em = Em;
-    function fenced(configuration, open, mml, close, big) {
+    function fenced(configuration, open, mml, close, big, color) {
         if (big === void 0) { big = ''; }
+        if (color === void 0) { color = ''; }
         var nf = configuration.nodeFactory;
         var mrow = nf.create('node', 'mrow', [], { open: open, close: close, texClass: MmlNode_js_1.TEXCLASS.INNER });
         var mo;
@@ -101,6 +102,7 @@ var ParseUtil;
             var closeNode = nf.create('text', close);
             mo = nf.create('node', 'mo', [], { fence: true, stretchy: true, symmetric: true, texClass: MmlNode_js_1.TEXCLASS.CLOSE }, closeNode);
         }
+        color && mo.attributes.set('mathcolor', color);
         NodeUtil_js_1.default.appendChildren(mrow, [mo]);
         return mrow;
     }

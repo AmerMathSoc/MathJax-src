@@ -76,7 +76,7 @@ var SVGmtr = (function (_super) {
     SVGmtr.prototype.placeColor = function () {
         var scale = 1 / this.getBBox().rscale;
         var adaptor = this.adaptor;
-        var child = adaptor.firstChild(this.element);
+        var child = this.firstChild();
         if (child && adaptor.kind(child) === 'rect' && adaptor.getAttribute(child, 'data-bgcolor')) {
             var _a = __read([(this.tLine / 2) * scale, (this.bLine / 2) * scale], 2), TL = _a[0], BL = _a[1];
             var _b = __read([this.tSpace * scale, this.bSpace * scale], 2), TS = _b[0], BS = _b[1];

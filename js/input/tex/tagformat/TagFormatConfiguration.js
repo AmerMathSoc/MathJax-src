@@ -54,7 +54,7 @@ exports.TagFormatConfiguration = Configuration_js_1.Configuration.create('tagfor
         tagformat: {
             number: function (n) { return n.toString(); },
             tag: function (tag) { return '(' + tag + ')'; },
-            id: function (id) { return 'mjx-eqn-' + id.replace(/\s/g, '_'); },
+            id: function (id) { return 'mjx-eqn:' + id.replace(/\s/g, '_'); },
             url: function (id, base) { return base + '#' + encodeURIComponent(id); },
         }
     }

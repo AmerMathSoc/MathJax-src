@@ -65,10 +65,16 @@ export interface MinText<N, T> {
 export interface MinDOMParser<D> {
     parseFromString(text: string, format?: string): D;
 }
+export interface MinXMLSerializer<N> {
+    serializeToString(node: N): string;
+}
 export interface MinWindow<N, D> {
     document: D;
     DOMParser: {
         new (): MinDOMParser<D>;
+    };
+    XMLSerializer: {
+        new (): MinXMLSerializer<N>;
     };
     NodeList: any;
     HTMLCollection: any;
@@ -112,6 +118,7 @@ export declare class HTMLAdaptor<N extends MinHTMLElement<N, T>, T extends MinTe
     textContent(node: N): string;
     innerHTML(node: N): string;
     outerHTML(node: N): string;
+    serializeXML(node: N): string;
     setAttribute(node: N, name: string, value: string, ns?: string): void;
     getAttribute(node: N, name: string): string;
     removeAttribute(node: N, name: string): void;

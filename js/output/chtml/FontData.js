@@ -255,14 +255,14 @@ var CHTMLFontData = (function (_super) {
         }
     };
     CHTMLFontData.prototype.addDelimiterVStyles = function (styles, c, data) {
-        var W = data.HDW[2];
+        var HDW = data.HDW;
         var _a = __read(data.stretch, 4), beg = _a[0], ext = _a[1], end = _a[2], mid = _a[3];
-        var Hb = this.addDelimiterVPart(styles, c, W, 'beg', beg);
-        this.addDelimiterVPart(styles, c, W, 'ext', ext);
-        var He = this.addDelimiterVPart(styles, c, W, 'end', end);
+        var Hb = this.addDelimiterVPart(styles, c, 'beg', beg, HDW);
+        this.addDelimiterVPart(styles, c, 'ext', ext, HDW);
+        var He = this.addDelimiterVPart(styles, c, 'end', end, HDW);
         var css = {};
         if (mid) {
-            var Hm = this.addDelimiterVPart(styles, c, W, 'mid', mid);
+            var Hm = this.addDelimiterVPart(styles, c, 'mid', mid, HDW);
             css.height = '50%';
             styles['mjx-stretchy-v' + c + ' > mjx-mid'] = {
                 'margin-top': this.em(-Hm / 2),
@@ -280,47 +280,42 @@ var CHTMLFontData = (function (_super) {
             styles['mjx-stretchy-v' + c + ' > mjx-ext'] = css;
         }
     };
-    CHTMLFontData.prototype.addDelimiterVPart = function (styles, c, W, part, n) {
+    CHTMLFontData.prototype.addDelimiterVPart = function (styles, c, part, n, HDW) {
         if (!n)
             return 0;
         var data = this.getDelimiterData(n);
-        var dw = (W - data[2]) / 2;
+        var dw = (HDW[2] - data[2]) / 2;
         var css = { content: this.charContent(n) };
         if (part !== 'ext') {
             css.padding = this.padding(data, dw);
         }
-        else if (dw) {
-            css['padding-left'] = this.em0(dw);
-        }
         else {
-            css.padding = '.1em 0';
+            css.width = this.em0(HDW[2]);
+            if (dw) {
+                css['padding-left'] = this.em0(dw);
+            }
         }
         styles['mjx-stretchy-v' + c + ' mjx-' + part + ' mjx-c::before'] = css;
         return data[0] + data[1];
     };
     CHTMLFontData.prototype.addDelimiterHStyles = function (styles, c, data) {
         var _a = __read(data.stretch, 4), beg = _a[0], ext = _a[1], end = _a[2], mid = _a[3];
-        this.addDelimiterHPart(styles, c, 'beg', beg);
-        this.addDelimiterHPart(styles, c, 'ext', ext, !(beg || end));
-        this.addDelimiterHPart(styles, c, 'end', end);
+        var HDW = data.HDW;
+        this.addDelimiterHPart(styles, c, 'beg', beg, HDW);
+        this.addDelimiterHPart(styles, c, 'ext', ext, HDW);
+        this.addDelimiterHPart(styles, c, 'end', end, HDW);
         if (mid) {
-            this.addDelimiterHPart(styles, c, 'mid', mid);
+            this.addDelimiterHPart(styles, c, 'mid', mid, HDW);
             styles['mjx-stretchy-h' + c + ' > mjx-ext'] = { width: '50%' };
         }
     };
-    CHTMLFontData.prototype.addDelimiterHPart = function (styles, c, part, n, force) {
-        if (force === void 0) { force = false; }
+    CHTMLFontData.prototype.addDelimiterHPart = function (styles, c, part, n, HDW) {
         if (!n)
             return;
         var data = this.getDelimiterData(n);
         var options = data[3];
         var css = { content: (options && options.c ? '"' + options.c + '"' : this.charContent(n)) };
-        if (part !== 'ext' || force) {
-            css.padding = this.padding(data, 0, -data[2]);
-        }
-        else {
-            css['padding-top'] = '1px';
-        }
+        css.padding = this.padding(HDW, 0, -HDW[2]);
         styles['mjx-stretchy-h' + c + ' mjx-' + part + ' mjx-c::before'] = css;
     };
     CHTMLFontData.prototype.addCharStyles = function (styles, vletter, n, data) {

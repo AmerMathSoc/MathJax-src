@@ -208,24 +208,27 @@ function CommonMtableMixin(Base) {
             var LW = [0];
             var rows = this.tableRows;
             for (var j = 0; j < rows.length; j++) {
+                var M = 0;
                 var row = rows[j];
+                var align = row.node.attributes.get('rowalign');
                 for (var i = 0; i < row.numCells; i++) {
                     var cell = row.getChild(i);
-                    this.updateHDW(cell, i, j, H, D, W);
+                    M = this.updateHDW(cell, i, j, align, H, D, W, M);
                     this.recordPWidthCell(cell, i);
                 }
                 NH[j] = H[j];
                 ND[j] = D[j];
                 if (row.labeled) {
-                    this.updateHDW(row.childNodes[0], 0, j, H, D, LW);
+                    M = this.updateHDW(row.childNodes[0], 0, j, align, H, D, LW, M);
                 }
+                this.extendHD(j, H, D, M);
+                this.extendHD(j, NH, ND, M);
             }
             var L = LW[0];
             this.data = { H: H, D: D, W: W, NH: NH, ND: ND, L: L };
             return this.data;
         };
-        class_1.prototype.updateHDW = function (cell, i, j, H, D, W) {
-            if (W === void 0) { W = null; }
+        class_1.prototype.updateHDW = function (cell, i, j, align, H, D, W, M) {
             var _a = cell.getBBox(), h = _a.h, d = _a.d, w = _a.w;
             var scale = cell.parent.bbox.rscale;
             if (cell.parent.bbox.rscale !== 1) {
@@ -239,12 +242,28 @@ function CommonMtableMixin(Base) {
                 if (d < .25)
                     d = .25;
             }
+            var m = 0;
+            align = cell.node.attributes.get('rowalign') || align;
+            if (align !== 'baseline' && align !== 'axis') {
+                m = h + d;
+                h = d = 0;
+            }
             if (h > H[j])
                 H[j] = h;
             if (d > D[j])
                 D[j] = d;
+            if (m > M)
+                M = m;
             if (W && w > W[i])
                 W[i] = w;
+            return M;
+        };
+        class_1.prototype.extendHD = function (i, H, D, M) {
+            var d = (M - (H[i] + D[i])) / 2;
+            if (d < .00001)
+                return;
+            H[i] += d;
+            D[i] += d;
         };
         class_1.prototype.recordPWidthCell = function (cell, i) {
             if (cell.childNodes[0] && cell.childNodes[0].getBBox().pwidth) {

@@ -33,7 +33,7 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EquationItem = exports.EqnArrayItem = exports.ArrayItem = exports.DotsItem = exports.NotItem = exports.FnItem = exports.MmlItem = exports.CellItem = exports.PositionItem = exports.StyleItem = exports.EndItem = exports.BeginItem = exports.RightItem = exports.LeftItem = exports.OverItem = exports.SubsupItem = exports.PrimeItem = exports.CloseItem = exports.OpenItem = exports.StopItem = exports.StartItem = void 0;
+exports.EquationItem = exports.EqnArrayItem = exports.ArrayItem = exports.DotsItem = exports.NotItem = exports.FnItem = exports.MmlItem = exports.CellItem = exports.PositionItem = exports.StyleItem = exports.EndItem = exports.BeginItem = exports.RightItem = exports.Middle = exports.LeftItem = exports.OverItem = exports.SubsupItem = exports.PrimeItem = exports.CloseItem = exports.OpenItem = exports.StopItem = exports.StartItem = void 0;
 var MapHandler_js_1 = require("../MapHandler.js");
 var Entities_js_1 = require("../../../util/Entities.js");
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
@@ -277,9 +277,9 @@ var OverItem = (function (_super) {
 exports.OverItem = OverItem;
 var LeftItem = (function (_super) {
     __extends(LeftItem, _super);
-    function LeftItem(factory) {
+    function LeftItem(factory, delim) {
         var _this = _super.call(this, factory) || this;
-        _this.setProperty('delim', '(');
+        _this.setProperty('delim', delim);
         return _this;
     }
     Object.defineProperty(LeftItem.prototype, "kind", {
@@ -298,7 +298,16 @@ var LeftItem = (function (_super) {
     });
     LeftItem.prototype.checkItem = function (item) {
         if (item.isKind('right')) {
-            return [[this.factory.create('mml', ParseUtil_js_1.default.fenced(this.factory.configuration, this.getProperty('delim'), this.toMml(), item.getProperty('delim')))], true];
+            return [[this.factory.create('mml', ParseUtil_js_1.default.fenced(this.factory.configuration, this.getProperty('delim'), this.toMml(), item.getProperty('delim'), '', item.getProperty('color')))], true];
+        }
+        if (item.isKind('middle')) {
+            var def = { stretchy: true };
+            if (item.getProperty('color')) {
+                def.mathcolor = item.getProperty('color');
+            }
+            this.Push(this.create('node', 'TeXAtom', [], { texClass: MmlNode_js_1.TEXCLASS.CLOSE }), this.create('token', 'mo', def, item.getProperty('delim')), this.create('node', 'TeXAtom', [], { texClass: MmlNode_js_1.TEXCLASS.OPEN }));
+            this.env = {};
+            return [[this], true];
         }
         return _super.prototype.checkItem.call(this, item);
     };
@@ -309,11 +318,37 @@ var LeftItem = (function (_super) {
     return LeftItem;
 }(StackItem_js_1.BaseItem));
 exports.LeftItem = LeftItem;
+var Middle = (function (_super) {
+    __extends(Middle, _super);
+    function Middle(factory, delim, color) {
+        var _this = _super.call(this, factory) || this;
+        _this.setProperty('delim', delim);
+        color && _this.setProperty('color', color);
+        return _this;
+    }
+    Object.defineProperty(Middle.prototype, "kind", {
+        get: function () {
+            return 'middle';
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Middle.prototype, "isClose", {
+        get: function () {
+            return true;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return Middle;
+}(StackItem_js_1.BaseItem));
+exports.Middle = Middle;
 var RightItem = (function (_super) {
     __extends(RightItem, _super);
-    function RightItem(factory) {
+    function RightItem(factory, delim, color) {
         var _this = _super.call(this, factory) || this;
-        _this.setProperty('delim', ')');
+        _this.setProperty('delim', delim);
+        color && _this.setProperty('color', color);
         return _this;
     }
     Object.defineProperty(RightItem.prototype, "kind", {

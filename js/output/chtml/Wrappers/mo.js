@@ -118,7 +118,6 @@ var CHTMLmo = (function (_super) {
         },
         'mjx-stretchy-h > * > mjx-c::before': {
             display: 'inline-block',
-            padding: '.001em 0',
             width: 'initial'
         },
         'mjx-stretchy-h > mjx-ext': {
@@ -162,10 +161,11 @@ var CHTMLmo = (function (_super) {
             overflow: 'hidden'
         },
         'mjx-stretchy-v > mjx-ext > mjx-c::before': {
-            width: 'initial'
+            width: 'initial',
+            'box-sizing': 'border-box'
         },
         'mjx-stretchy-v > mjx-ext > mjx-c': {
-            transform: 'scaleY(500) translateY(.1em)',
+            transform: 'scaleY(500) translateY(.075em)',
             overflow: 'visible'
         },
         'mjx-mark': {

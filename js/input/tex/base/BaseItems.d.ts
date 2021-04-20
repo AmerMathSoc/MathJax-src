@@ -40,13 +40,18 @@ export declare class OverItem extends BaseItem {
 }
 export declare class LeftItem extends BaseItem {
     protected static errors: any;
-    constructor(factory: StackItemFactory);
+    constructor(factory: StackItemFactory, delim: string);
     get kind(): string;
     get isOpen(): boolean;
     checkItem(item: StackItem): CheckType;
 }
+export declare class Middle extends BaseItem {
+    constructor(factory: StackItemFactory, delim: string, color: string);
+    get kind(): string;
+    get isClose(): boolean;
+}
 export declare class RightItem extends BaseItem {
-    constructor(factory: StackItemFactory);
+    constructor(factory: StackItemFactory, delim: string, color: string);
     get kind(): string;
     get isClose(): boolean;
 }

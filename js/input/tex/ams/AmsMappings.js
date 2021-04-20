@@ -6,6 +6,7 @@ var TexConstants_js_1 = require("../TexConstants.js");
 var ParseMethods_js_1 = require("../ParseMethods.js");
 var ParseUtil_js_1 = require("../ParseUtil.js");
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
+var lengths_js_1 = require("../../../util/lengths.js");
 var COLS = function (W) {
     var WW = [];
     for (var i = 0, m = W.length; i < m; i++) {
@@ -19,8 +20,8 @@ new sm.CharacterMap('AMSmath-mathchar0mo', ParseMethods_js_1.default.mathchar0mo
 new sm.CommandMap('AMSmath-macros', {
     mathring: ['Accent', '02DA'],
     nobreakspace: 'Tilde',
-    negmedspace: ['Spacer', TexConstants_js_1.TexConstant.Length.NEGATIVEMEDIUMMATHSPACE],
-    negthickspace: ['Spacer', TexConstants_js_1.TexConstant.Length.NEGATIVETHICKMATHSPACE],
+    negmedspace: ['Spacer', lengths_js_1.MATHSPACE.negativemediummathspace],
+    negthickspace: ['Spacer', lengths_js_1.MATHSPACE.negativethickmathspace],
     idotsint: ['MultiIntegral', '\\int\\cdots\\int'],
     dddot: ['Accent', '20DB'],
     ddddot: ['Accent', '20DC'],
@@ -55,7 +56,7 @@ new sm.CommandMap('AMSmath-macros', {
 }, AmsMethods_js_1.AmsMethods);
 new sm.EnvironmentMap('AMSmath-environment', ParseMethods_js_1.default.environment, {
     'eqnarray*': ['EqnArray', null, false, true, 'rcl',
-        '0 ' + TexConstants_js_1.TexConstant.Length.THICKMATHSPACE, '.5em'],
+        '0 ' + lengths_js_1.em(lengths_js_1.MATHSPACE.thickmathspace), '.5em'],
     align: ['EqnArray', null, true, true, 'rlrlrlrlrlrl',
         COLS([0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0])],
     'align*': ['EqnArray', null, false, true, 'rlrlrlrlrlrl',

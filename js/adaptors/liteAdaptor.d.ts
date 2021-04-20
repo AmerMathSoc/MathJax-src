@@ -46,6 +46,7 @@ export declare class LiteAdaptor extends AbstractDOMAdaptor<LiteElement, LiteTex
     textContent(node: LiteElement): string;
     innerHTML(node: LiteElement): string;
     outerHTML(node: LiteElement): string;
+    serializeXML(node: LiteElement): string;
     setAttribute(node: LiteElement, name: string, value: string | number, ns?: string): void;
     getAttribute(node: LiteElement, name: string): any;
     removeAttribute(node: LiteElement, name: string): void;

@@ -39,6 +39,7 @@ export interface DOMAdaptor<N, T, D> {
     textContent(node: N): string;
     innerHTML(node: N): string;
     outerHTML(node: N): string;
+    serializeXML(node: N): string;
     setAttribute(node: N, name: string, value: string | number, ns?: string): void;
     setAttributes(node: N, def: OptionList): void;
     getAttribute(node: N, name: string): string;
@@ -90,6 +91,7 @@ export declare abstract class AbstractDOMAdaptor<N, T, D> implements DOMAdaptor<
     abstract textContent(node: N): string;
     abstract innerHTML(node: N): string;
     abstract outerHTML(node: N): string;
+    abstract serializeXML(node: N): string;
     abstract setAttribute(node: N, name: string, value: string, ns?: string): void;
     abstract getAttribute(node: N, name: string): string;
     abstract removeAttribute(node: N, name: string): void;

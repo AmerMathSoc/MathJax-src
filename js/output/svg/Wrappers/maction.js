@@ -93,7 +93,7 @@ var SVGmaction = (function (_super) {
                     var tip = node.childNodes[1];
                     if (!tip)
                         return;
-                    var rect = node.adaptor.firstChild(node.element);
+                    var rect = node.firstChild();
                     if (tip.node.isKind('mtext')) {
                         var text = tip.node.getText();
                         node.adaptor.insert(node.svg('title', {}, [node.text(text)]), rect);

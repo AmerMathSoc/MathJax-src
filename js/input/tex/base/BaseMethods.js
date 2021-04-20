@@ -35,6 +35,7 @@ var TexConstants_js_1 = require("../TexConstants.js");
 var ParseUtil_js_1 = require("../ParseUtil.js");
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
 var Tags_js_1 = require("../Tags.js");
+var lengths_js_1 = require("../../../util/lengths.js");
 var Entities_js_1 = require("../../../util/Entities.js");
 var BaseMethods = {};
 var P_HEIGHT = 1.2 / .85;
@@ -190,29 +191,16 @@ BaseMethods.SetStyle = function (parser, _name, texStyle, style, level) {
 };
 BaseMethods.SetSize = function (parser, _name, size) {
     parser.stack.env['size'] = size;
-    parser.Push(parser.itemFactory.create('style').setProperty('styles', { mathsize: size + 'em' }));
+    parser.Push(parser.itemFactory.create('style').setProperty('styles', { mathsize: lengths_js_1.em(size) }));
 };
 BaseMethods.Spacer = function (parser, _name, space) {
-    var node = parser.create('node', 'mspace', [], { width: space });
+    var node = parser.create('node', 'mspace', [], { width: lengths_js_1.em(space) });
     var style = parser.create('node', 'mstyle', [node], { scriptlevel: 0 });
     parser.Push(style);
 };
 BaseMethods.LeftRight = function (parser, name) {
     var first = name.substr(1);
-    parser.Push(parser.itemFactory.create(first)
-        .setProperty('delim', parser.GetDelimiter(name)));
-};
-BaseMethods.Middle = function (parser, name) {
-    var delim = parser.GetDelimiter(name);
-    var node = parser.create('node', 'TeXAtom', [], { texClass: MmlNode_js_1.TEXCLASS.CLOSE });
-    parser.Push(node);
-    if (!parser.stack.Top().isKind('left')) {
-        throw new TexError_js_1.default('MisplacedMiddle', '%1 must be within \\left and \\right', parser.currentCS);
-    }
-    node = parser.create('token', 'mo', { stretchy: true }, delim);
-    parser.Push(node);
-    node = parser.create('node', 'TeXAtom', [], { texClass: MmlNode_js_1.TEXCLASS.OPEN });
-    parser.Push(node);
+    parser.Push(parser.itemFactory.create(first, parser.GetDelimiter(name), parser.stack.env.color));
 };
 BaseMethods.NamedFn = function (parser, name, id) {
     if (!id) {
