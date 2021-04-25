@@ -116,7 +116,12 @@ export abstract class AbstractKeyExplorer<T> extends AbstractExplorer<T> impleme
   public Update(force: boolean = false) {
     if (!this.active && !force) return;
     this.highlighter.unhighlight();
-    this.highlighter.highlight(this.walker.getFocus(true).getNodes());
+    let nodes = this.walker.getFocus(true).getNodes();
+    if (!nodes.length) {
+      this.walker.refocus();
+      nodes = this.walker.getFocus().getNodes();
+    }
+    this.highlighter.highlight(nodes);
   }
 
   /**
@@ -287,6 +292,7 @@ export class SpeechExplorer extends AbstractKeyExplorer<string> {
     }
     if (this.active) {
       this.Move(code);
+      if (this.triggerLink(code)) return;
       this.stopEvent(event);
       return;
     }
@@ -296,6 +302,24 @@ export class SpeechExplorer extends AbstractKeyExplorer<string> {
     }
   }
 
+  /**
+   * Programmatically triggers a link if the focused node contains one.
+   * @param {number} code The keycode of the last key pressed.
+   */
+  protected triggerLink(code: number) {
+    if (code !== 13) {
+      return false;
+    }
+    let node = this.walker.getFocus().getNodes()?.[0];
+    let focus = node?.
+      getAttribute('data-semantic-postfix')?.
+      match(/(^| )link($| )/);
+    if (focus) {
+      node.parentNode.dispatchEvent(new MouseEvent('click'));
+      return true;
+    }
+    return false;
+  }
 
   /**
    * @override
