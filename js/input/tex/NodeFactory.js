@@ -15,9 +15,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NodeFactory = void 0;
@@ -77,7 +78,7 @@ var NodeFactory = (function () {
             rest[_i - 1] = arguments[_i];
         }
         var func = this.factory[kind] || this.factory['node'];
-        var node = func.apply(void 0, __spread([this, rest[0]], rest.slice(1)));
+        var node = func.apply(void 0, __spreadArray([this, rest[0]], __read(rest.slice(1))));
         if (kind === 'node') {
             this.configuration.addNode(rest[0], node);
         }

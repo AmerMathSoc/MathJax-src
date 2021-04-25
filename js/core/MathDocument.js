@@ -7,6 +7,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -39,9 +41,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AbstractMathDocument = exports.resetAllOptions = exports.resetOptions = exports.RenderList = void 0;
@@ -514,8 +517,8 @@ var AbstractMathDocument = (function () {
         options = Options_js_1.userOptions(Object.assign({}, exports.resetOptions), options);
         options.all && Object.assign(options, exports.resetAllOptions);
         options.processed && this.processed.reset();
-        options.inputJax && this.inputJax.forEach(function (jax) { return jax.reset.apply(jax, __spread(options.inputJax)); });
-        options.outputJax && (_a = this.outputJax).reset.apply(_a, __spread(options.outputJax));
+        options.inputJax && this.inputJax.forEach(function (jax) { return jax.reset.apply(jax, __spreadArray([], __read(options.inputJax))); });
+        options.outputJax && (_a = this.outputJax).reset.apply(_a, __spreadArray([], __read(options.outputJax)));
         return this;
     };
     AbstractMathDocument.prototype.clear = function () {
@@ -529,7 +532,7 @@ var AbstractMathDocument = (function () {
     };
     AbstractMathDocument.prototype.clearMathItemsWithin = function (containers) {
         var _a;
-        (_a = this.math).remove.apply(_a, __spread(this.getMathItemsWithin(containers)));
+        (_a = this.math).remove.apply(_a, __spreadArray([], __read(this.getMathItemsWithin(containers))));
     };
     AbstractMathDocument.prototype.getMathItemsWithin = function (elements) {
         var e_11, _a, e_12, _b;

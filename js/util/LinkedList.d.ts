@@ -20,6 +20,7 @@ export declare class LinkedList<DataClass> {
     [Symbol.iterator](): Iterator<DataClass>;
     reversed(): IterableIterator<DataClass> | {
         toArray(): DataClass[];
+        [Symbol.iterator](): IterableIterator<DataClass>;
     };
     insert(data: DataClass, isBefore?: SortFn<DataClass>): this;
     sort(isBefore?: SortFn<DataClass>): LinkedList<DataClass>;

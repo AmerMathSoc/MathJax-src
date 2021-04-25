@@ -26,9 +26,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 var __values = (this && this.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
@@ -59,8 +60,8 @@ var FontData = (function () {
         var CLASS = this.constructor;
         this.options = Options_js_1.userOptions(Options_js_1.defaultOptions({}, CLASS.OPTIONS), options);
         this.params = __assign({}, CLASS.defaultParams);
-        this.sizeVariants = __spread(CLASS.defaultSizeVariants);
-        this.stretchVariants = __spread(CLASS.defaultStretchVariants);
+        this.sizeVariants = __spreadArray([], __read(CLASS.defaultSizeVariants));
+        this.stretchVariants = __spreadArray([], __read(CLASS.defaultStretchVariants));
         this.cssFontMap = __assign({}, CLASS.defaultCssFonts);
         try {
             for (var _c = __values(Object.keys(this.cssFontMap)), _d = _c.next(); !_d.done; _d = _c.next()) {

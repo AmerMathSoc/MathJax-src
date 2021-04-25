@@ -26,9 +26,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.separateOptions = exports.selectOptionsFromKeys = exports.selectOptions = exports.userOptions = exports.defaultOptions = exports.insert = exports.copy = exports.keys = exports.makeArray = exports.expandable = exports.Expandable = exports.REMOVE = exports.APPEND = void 0;
@@ -111,7 +112,7 @@ function insert(dst, src, warn) {
                     dval = dst[key] = dval.filter(function (x) { return sval[exports.REMOVE].indexOf(x) < 0; });
                 }
                 if (sval[exports.APPEND]) {
-                    dst[key] = __spread(dval, sval[exports.APPEND]);
+                    dst[key] = __spreadArray(__spreadArray([], __read(dval)), __read(sval[exports.APPEND]));
                 }
             }
             else {
@@ -189,7 +190,7 @@ function selectOptions(options) {
 }
 exports.selectOptions = selectOptions;
 function selectOptionsFromKeys(options, object) {
-    return selectOptions.apply(void 0, __spread([options], Object.keys(object)));
+    return selectOptions.apply(void 0, __spreadArray([options], __read(Object.keys(object))));
 }
 exports.selectOptionsFromKeys = selectOptionsFromKeys;
 function separateOptions(options) {

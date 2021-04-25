@@ -22,7 +22,7 @@ export declare type ScriptListName = keyof ScriptLists;
 export declare const NextScript: {
     [key: string]: ScriptListName;
 };
-export declare const ScriptNames: ("sub" | "sup" | "base" | "psub" | "psup" | "numPrescripts" | "numScripts")[];
+export declare const ScriptNames: (keyof ScriptData)[];
 export interface CommonMmultiscripts<W extends AnyWrapper> extends CommonMsubsup<W> {
     scriptData: ScriptData;
     firstPrescript: number;

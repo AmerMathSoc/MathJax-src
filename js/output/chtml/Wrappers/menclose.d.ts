@@ -1,8 +1,8 @@
-import { CHTMLWrapper } from '../Wrapper.js';
+import { CHTMLWrapper, CHTMLConstructor } from '../Wrapper.js';
 import { CHTMLmsqrt } from './msqrt.js';
 import * as Notation from '../Notation.js';
 import { StyleList } from '../../../util/StyleList.js';
-declare const CHTMLmenclose_base: import("../Wrapper.js").Constructor<import("../../common/Wrappers/menclose.js").CommonMenclose<CHTMLWrapper<any, any, any>, CHTMLmsqrt<any, any, any>, any>> & import("../Wrapper.js").Constructor<CHTMLWrapper<any, any, any>>;
+declare const CHTMLmenclose_base: import("../../common/Wrappers/menclose.js").MencloseConstructor<CHTMLWrapper<any, any, any>, CHTMLmsqrt<any, any, any>, any> & CHTMLConstructor<any, any, any>;
 export declare class CHTMLmenclose<N, T, D> extends CHTMLmenclose_base {
     static kind: string;
     static styles: StyleList;

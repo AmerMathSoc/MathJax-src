@@ -7,6 +7,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -28,9 +30,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SVGmlabeledtr = exports.SVGmtr = void 0;
@@ -50,7 +53,7 @@ var SVGmtr = (function (_super) {
     };
     SVGmtr.prototype.placeCells = function (svg) {
         var cSpace = this.parent.getColumnHalfSpacing();
-        var cLines = __spread([this.parent.fLine], this.parent.cLines, [this.parent.fLine]);
+        var cLines = __spreadArray(__spreadArray([this.parent.fLine], __read(this.parent.cLines)), [this.parent.fLine]);
         var cWidth = this.parent.getComputedWidths();
         var scale = 1 / this.getBBox().rscale;
         var x = cLines[0];

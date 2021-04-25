@@ -11,9 +11,9 @@ export declare const computeLineData: {
 };
 export declare const lineData: (node: Menclose, kind: LineName, offset?: string) => LineData;
 export declare const lineOffset: (data: LineData, node: Menclose, offset: string) => LineData;
-export declare const RenderLine: <N, T, D>(line: LineName, offset?: string) => Notation.Renderer<SVGmenclose<N, T, D>, N>;
-export declare const Border: <N, T, D>(side: Notation.Side) => Notation.DefPair<SVGmenclose<N, T, D>, N>;
-export declare const Border2: <N, T, D>(name: string, side1: Notation.Side, side2: Notation.Side) => Notation.DefPair<SVGmenclose<N, T, D>, N>;
-export declare const DiagonalStrike: <N, T, D>(name: LineName) => Notation.DefPair<SVGmenclose<N, T, D>, N>;
-export declare const DiagonalArrow: <N, T, D>(name: string) => Notation.DefPair<SVGmenclose<N, T, D>, N>;
-export declare const Arrow: <N, T, D>(name: string) => Notation.DefPair<SVGmenclose<N, T, D>, N>;
+export declare const RenderLine: <N, T, D>(line: LineName, offset?: string) => RENDERER<N, T, D>;
+export declare const Border: <N, T, D>(side: Notation.Side) => DEFPAIR<N, T, D>;
+export declare const Border2: <N, T, D>(name: string, side1: Notation.Side, side2: Notation.Side) => DEFPAIR<N, T, D>;
+export declare const DiagonalStrike: <N, T, D>(name: LineName) => DEFPAIR<N, T, D>;
+export declare const DiagonalArrow: <N, T, D>(name: string) => DEFPAIR<N, T, D>;
+export declare const Arrow: <N, T, D>(name: string) => DEFPAIR<N, T, D>;

@@ -32,7 +32,7 @@ export declare abstract class AbstractNode implements Node {
     constructor(factory: NodeFactory<Node, NodeClass>, properties?: PropertyList, children?: Node[]);
     get kind(): string;
     setProperty(name: string, value: Property): void;
-    getProperty(name: string): string | number | boolean;
+    getProperty(name: string): Property;
     getPropertyNames(): string[];
     getAllProperties(): PropertyList;
     removeProperty(...names: string[]): void;

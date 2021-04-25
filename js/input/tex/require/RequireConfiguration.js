@@ -26,9 +26,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RequireConfiguration = exports.options = exports.RequireMethods = exports.RequireLoad = void 0;
@@ -104,7 +105,7 @@ exports.RequireLoad = RequireLoad;
 function config(_config, jax) {
     jax.parseOptions.packageData.set('require', {
         jax: jax,
-        required: __spread(jax.options.packages),
+        required: __spreadArray([], __read(jax.options.packages)),
         configured: new Map()
     });
     var options = jax.parseOptions.options.require;

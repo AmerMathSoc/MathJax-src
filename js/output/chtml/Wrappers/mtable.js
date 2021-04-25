@@ -7,6 +7,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -480,7 +482,9 @@ var CHTMLmtable = (function (_super) {
             'vertical-align': '.25em',
             'text-align': 'center',
             'position': 'relative',
-            'box-sizing': 'border-box'
+            'box-sizing': 'border-box',
+            'border-spacing': 0,
+            'border-collapse': 'collapse'
         },
         'mjx-mstyle[size="s"] mjx-mtable': {
             'vertical-align': '.354em'

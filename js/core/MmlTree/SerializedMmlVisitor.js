@@ -7,6 +7,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -45,7 +47,8 @@ var MmlVisitor_js_1 = require("./MmlVisitor.js");
 var MmlNode_js_1 = require("./MmlNode.js");
 var mi_js_1 = require("./MmlNodes/mi.js");
 exports.DATAMJX = 'data-mjx-';
-exports.toEntity = function (c) { return '&#x' + c.codePointAt(0).toString(16).toUpperCase() + ';'; };
+var toEntity = function (c) { return '&#x' + c.codePointAt(0).toString(16).toUpperCase() + ';'; };
+exports.toEntity = toEntity;
 var SerializedMmlVisitor = (function (_super) {
     __extends(SerializedMmlVisitor, _super);
     function SerializedMmlVisitor() {

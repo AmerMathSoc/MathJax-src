@@ -7,6 +7,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -50,9 +52,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EnrichHandler = exports.EnrichedMathDocumentMixin = exports.EnrichedMathItemMixin = void 0;
@@ -94,11 +97,17 @@ function EnrichedMathItemMixin(BaseMathItem, MmlJax, toMathML) {
                     currentSpeech = document.options.sre.speech;
                 }
                 var math = new document.options.MathItem('', MmlJax);
-                math.math = this.serializeMml(SRE.toEnriched(toMathML(this.root)));
-                math.display = this.display;
-                math.compile(document);
-                this.root = math.root;
-                this.inputData.originalMml = math.math;
+                try {
+                    var mml = this.inputData.originalMml = toMathML(this.root);
+                    math.math = this.serializeMml(SRE.toEnriched(mml));
+                    math.display = this.display;
+                    math.compile(document);
+                    this.root = math.root;
+                    this.inputData.enrichedMml = math.math;
+                }
+                catch (err) {
+                    document.options.enrichError(document, this, err);
+                }
             }
             this.state(MathItem_js_1.STATE.ENRICHED);
         };
@@ -171,7 +180,7 @@ function EnrichedMathDocumentMixin(BaseDocument, MmlJax) {
                 }
                 var _this = this;
                 processSreOptions(args[2]);
-                _this = _super.apply(this, __spread(args)) || this;
+                _this = _super.apply(this, __spreadArray([], __read(args))) || this;
                 MmlJax.setMmlFactory(_this.mmlFactory);
                 var ProcessBits = _this.constructor.ProcessBits;
                 if (!ProcessBits.has('enriched')) {
@@ -226,6 +235,9 @@ function EnrichedMathDocumentMixin(BaseDocument, MmlJax) {
                 }
                 return this;
             };
+            class_2.prototype.enrichError = function (_doc, _math, err) {
+                console.warn('Enrichment error:', err);
+            };
             class_2.prototype.state = function (state, restore) {
                 if (restore === void 0) { restore = false; }
                 _super.prototype.state.call(this, state, restore);
@@ -236,7 +248,7 @@ function EnrichedMathDocumentMixin(BaseDocument, MmlJax) {
             };
             return class_2;
         }(BaseDocument)),
-        _a.OPTIONS = __assign(__assign({}, BaseDocument.OPTIONS), { enableEnrichment: true, renderActions: Options_js_1.expandable(__assign(__assign({}, BaseDocument.OPTIONS.renderActions), { enrich: [MathItem_js_1.STATE.ENRICHED], attachSpeech: [MathItem_js_1.STATE.ATTACHSPEECH] })), sre: Options_js_1.expandable({
+        _a.OPTIONS = __assign(__assign({}, BaseDocument.OPTIONS), { enableEnrichment: true, enrichError: function (doc, math, err) { return doc.enrichError(doc, math, err); }, renderActions: Options_js_1.expandable(__assign(__assign({}, BaseDocument.OPTIONS.renderActions), { enrich: [MathItem_js_1.STATE.ENRICHED], attachSpeech: [MathItem_js_1.STATE.ATTACHSPEECH] })), sre: Options_js_1.expandable({
                 speech: 'none',
                 domain: 'mathspeak',
                 style: 'default',

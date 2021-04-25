@@ -7,6 +7,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -50,9 +52,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setA11yOption = exports.setA11yOptions = exports.ExplorerHandler = exports.ExplorerMathDocumentMixin = exports.ExplorerMathItemMixin = void 0;
@@ -187,7 +190,7 @@ function ExplorerMathDocumentMixin(BaseDocument) {
                 }
                 var _this = this;
                 processSreOptions(args[2]);
-                _this = _super.apply(this, __spread(args)) || this;
+                _this = _super.apply(this, __spreadArray([], __read(args))) || this;
                 var ProcessBits = _this.constructor.ProcessBits;
                 if (!ProcessBits.has('explorer')) {
                     ProcessBits.allocate('explorer');
@@ -299,7 +302,7 @@ var allExplorers = {
         for (var _i = 2; _i < arguments.length; _i++) {
             rest[_i - 2] = arguments[_i];
         }
-        var explorer = (_a = ke.SpeechExplorer).create.apply(_a, __spread([doc, doc.explorerRegions.speechRegion, node], rest));
+        var explorer = (_a = ke.SpeechExplorer).create.apply(_a, __spreadArray([doc, doc.explorerRegions.speechRegion, node], __read(rest)));
         explorer.speechGenerator.setOptions({
             locale: doc.options.sre.locale, domain: doc.options.sre.domain,
             style: doc.options.sre.style, modality: 'speech', cache: false
@@ -313,7 +316,7 @@ var allExplorers = {
         for (var _i = 2; _i < arguments.length; _i++) {
             rest[_i - 2] = arguments[_i];
         }
-        var explorer = (_a = ke.SpeechExplorer).create.apply(_a, __spread([doc, doc.explorerRegions.brailleRegion, node], rest));
+        var explorer = (_a = ke.SpeechExplorer).create.apply(_a, __spreadArray([doc, doc.explorerRegions.brailleRegion, node], __read(rest)));
         explorer.speechGenerator.setOptions({ locale: 'nemeth', domain: 'default',
             style: 'default', modality: 'braille' });
         explorer.showRegion = 'viewBraille';
@@ -325,7 +328,7 @@ var allExplorers = {
         for (var _i = 2; _i < arguments.length; _i++) {
             rest[_i - 2] = arguments[_i];
         }
-        return (_a = ke.Magnifier).create.apply(_a, __spread([doc, doc.explorerRegions.magnifier, node], rest));
+        return (_a = ke.Magnifier).create.apply(_a, __spreadArray([doc, doc.explorerRegions.magnifier, node], __read(rest)));
     },
     mouseMagnifier: function (doc, node) {
         var _rest = [];
@@ -374,7 +377,7 @@ var allExplorers = {
         for (var _i = 2; _i < arguments.length; _i++) {
             rest[_i - 2] = arguments[_i];
         }
-        return TreeExplorer_js_1.TreeColorer.create.apply(TreeExplorer_js_1.TreeColorer, __spread([doc, null, node], rest));
+        return TreeExplorer_js_1.TreeColorer.create.apply(TreeExplorer_js_1.TreeColorer, __spreadArray([doc, null, node], __read(rest)));
     }
 };
 function initExplorers(document, node, mml) {
@@ -557,7 +560,11 @@ var csSelectionBox = function (menu, locale) {
 var csMenu = function (menu, sub) {
     var locale = menu.pool.lookup('locale').getValue();
     var box = csSelectionBox(menu, locale);
-    var items = sre.ClearspeakPreferences.smartPreferences(menu.mathItem, locale);
+    var items = [];
+    try {
+        items = sre.ClearspeakPreferences.smartPreferences(menu.mathItem, locale);
+    }
+    catch (e) { }
     if (box) {
         items.splice(2, 0, box);
     }

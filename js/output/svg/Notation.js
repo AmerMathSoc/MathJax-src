@@ -23,13 +23,14 @@ exports.computeLineData = {
     up: function (h, d, w, t) { return [t, t - d, w - t, h - t]; },
     down: function (h, d, w, t) { return [t, h - t, w - t, t - d]; }
 };
-exports.lineData = function (node, kind, offset) {
+var lineData = function (node, kind, offset) {
     if (offset === void 0) { offset = ''; }
     var _a = node.getBBox(), h = _a.h, d = _a.d, w = _a.w;
     var t = node.thickness / 2;
     return exports.lineOffset(exports.computeLineData[kind](h, d, w, t), node, offset);
 };
-exports.lineOffset = function (data, node, offset) {
+exports.lineData = lineData;
+var lineOffset = function (data, node, offset) {
     if (offset) {
         var d = node.getOffset(offset);
         if (d) {
@@ -45,37 +46,44 @@ exports.lineOffset = function (data, node, offset) {
     }
     return data;
 };
-exports.RenderLine = function (line, offset) {
+exports.lineOffset = lineOffset;
+var RenderLine = function (line, offset) {
     if (offset === void 0) { offset = ''; }
     return (function (node, _child) {
         var L = node.line(exports.lineData(node, line, offset));
         node.adaptor.append(node.element, L);
     });
 };
-exports.Border = function (side) {
+exports.RenderLine = RenderLine;
+var Border = function (side) {
     return Notation.CommonBorder(function (node, _child) {
         node.adaptor.append(node.element, node.line(exports.lineData(node, side)));
     })(side);
 };
-exports.Border2 = function (name, side1, side2) {
+exports.Border = Border;
+var Border2 = function (name, side1, side2) {
     return Notation.CommonBorder2(function (node, _child) {
         node.adaptor.append(node.element, node.line(exports.lineData(node, side1)));
         node.adaptor.append(node.element, node.line(exports.lineData(node, side2)));
     })(name, side1, side2);
 };
-exports.DiagonalStrike = function (name) {
+exports.Border2 = Border2;
+var DiagonalStrike = function (name) {
     return Notation.CommonDiagonalStrike(function (_cname) { return function (node, _child) {
         node.adaptor.append(node.element, node.line(exports.lineData(node, name)));
     }; })(name);
 };
-exports.DiagonalArrow = function (name) {
+exports.DiagonalStrike = DiagonalStrike;
+var DiagonalArrow = function (name) {
     return Notation.CommonDiagonalArrow(function (node, arrow) {
         node.adaptor.append(node.element, arrow);
     })(name);
 };
-exports.Arrow = function (name) {
+exports.DiagonalArrow = DiagonalArrow;
+var Arrow = function (name) {
     return Notation.CommonArrow(function (node, arrow) {
         node.adaptor.append(node.element, arrow);
     })(name);
 };
+exports.Arrow = Arrow;
 //# sourceMappingURL=Notation.js.map

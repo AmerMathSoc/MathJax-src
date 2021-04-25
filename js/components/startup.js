@@ -37,9 +37,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CONFIG = exports.MathJax = exports.Startup = void 0;
@@ -242,7 +243,7 @@ var Startup;
             for (var _i = 0; _i < arguments.length; _i++) {
                 args[_i] = arguments[_i];
             }
-            return input.reset.apply(input, __spread(args));
+            return input.reset.apply(input, __spreadArray([], __read(args)));
         };
     }
     Startup.makeResetMethod = makeResetMethod;

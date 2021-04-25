@@ -7,6 +7,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -198,14 +200,14 @@ var SVGWrapper = (function (_super) {
         var children = adaptor.childNodes(this.element);
         children.forEach(function (child) { return adaptor.remove(child); });
         var g = this.svg('g', { 'data-idbox': true, transform: "translate(0," + this.fixed(-h) + ")" }, children);
-        adaptor.append(this.element, this.svg('text', { 'data-align': true }, [this.text('')]));
+        adaptor.append(this.element, this.svg('text', { 'data-id-align': true }, [this.text('')]));
         adaptor.append(this.element, g);
         return y + h;
     };
     SVGWrapper.prototype.firstChild = function () {
         var adaptor = this.adaptor;
         var child = adaptor.firstChild(this.element);
-        if (child && adaptor.kind(child) === 'text' && adaptor.getAttribute(child, 'data-align')) {
+        if (child && adaptor.kind(child) === 'text' && adaptor.getAttribute(child, 'data-id-align')) {
             child = adaptor.firstChild(adaptor.next(child));
         }
         if (child && adaptor.kind(child) === 'rect' && adaptor.getAttribute(child, 'data-hitbox')) {

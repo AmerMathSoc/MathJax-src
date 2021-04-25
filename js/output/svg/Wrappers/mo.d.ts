@@ -1,7 +1,7 @@
-import { SVGWrapper } from '../Wrapper.js';
+import { SVGConstructor } from '../Wrapper.js';
 import { BBox } from '../../../util/BBox.js';
 import { SVGCharData } from '../FontData.js';
-declare const SVGmo_base: import("../Wrapper.js").Constructor<import("../../common/Wrappers/mo.js").CommonMo> & import("../Wrapper.js").Constructor<SVGWrapper<any, any, any>>;
+declare const SVGmo_base: import("../../common/Wrappers/mo.js").MoConstructor & SVGConstructor<any, any, any>;
 export declare class SVGmo<N, T, D> extends SVGmo_base {
     static kind: string;
     toSVG(parent: N): void;

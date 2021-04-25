@@ -226,7 +226,7 @@ var LiteParser = (function () {
         var attributes = adaptor.allAttributes(node).map(function (x) { return x.name + '="' + (CDATA[x.name] ? x.value : _this.protectAttribute(x.value)) + '"'; }).join(' ');
         var content = this.serializeInner(adaptor, node, xml);
         var html = '<' + tag + (attributes ? ' ' + attributes : '')
-            + (content && !SELF_CLOSING[tag] ? ">" + content + "</" + tag + ">" : xml ? '/>' : '>');
+            + ((!xml || content) && !SELF_CLOSING[tag] ? ">" + content + "</" + tag + ">" : xml ? '/>' : '>');
         return html;
     };
     LiteParser.prototype.serializeInner = function (adaptor, node, xml) {

@@ -1,10 +1,10 @@
-import { CHTMLWrapper } from '../Wrapper.js';
+import { CHTMLWrapper, CHTMLConstructor } from '../Wrapper.js';
 import { CHTMLWrapperFactory } from '../WrapperFactory.js';
 import { CHTMLmtr } from './mtr.js';
 import { CHTMLmtd } from './mtd.js';
 import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
 import { StyleList } from '../../../util/StyleList.js';
-declare const CHTMLmtable_base: import("../Wrapper.js").Constructor<import("../../common/Wrappers/mtable.js").CommonMtable<CHTMLmtd<any, any, any>, CHTMLmtr<any, any, any>>> & import("../Wrapper.js").Constructor<CHTMLWrapper<any, any, any>>;
+declare const CHTMLmtable_base: import("../../common/Wrappers/mtable.js").MtableConstructor<CHTMLmtd<any, any, any>, CHTMLmtr<any, any, any>> & CHTMLConstructor<any, any, any>;
 export declare class CHTMLmtable<N, T, D> extends CHTMLmtable_base {
     static kind: string;
     static styles: StyleList;

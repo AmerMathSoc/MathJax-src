@@ -7,6 +7,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -50,9 +52,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.STIX2Font = void 0;
@@ -131,7 +134,7 @@ var STIX2Font = (function (_super) {
     };
     STIX2Font.defaultParams = __assign(__assign({}, FontData_js_1.SVGFontData.defaultParams), { separation_factor: 1.5 });
     STIX2Font.defaultDelimiters = delimiters_js_1.delimiters;
-    STIX2Font.defaultVariants = __spread(FontData_js_1.SVGFontData.defaultVariants, [
+    STIX2Font.defaultVariants = __spreadArray(__spreadArray([], __read(FontData_js_1.SVGFontData.defaultVariants)), [
         ['-tex-calligraphic', 'normal'],
         ['-tex-bold-calligraphic', 'normal'],
         ['-tex-oldstyle', 'normal'],

@@ -7,6 +7,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -38,7 +40,12 @@ var AbstractKeyExplorer = (function (_super) {
         if (!this.active && !force)
             return;
         this.highlighter.unhighlight();
-        this.highlighter.highlight(this.walker.getFocus(true).getNodes());
+        var nodes = this.walker.getFocus(true).getNodes();
+        if (!nodes.length) {
+            this.walker.refocus();
+            nodes = this.walker.getFocus().getNodes();
+        }
+        this.highlighter.highlight(nodes);
     };
     AbstractKeyExplorer.prototype.Attach = function () {
         _super.prototype.Attach.call(this);
@@ -144,6 +151,8 @@ var SpeechExplorer = (function (_super) {
         }
         if (this.active) {
             this.Move(code);
+            if (this.triggerLink(code))
+                return;
             this.stopEvent(event);
             return;
         }
@@ -151,6 +160,19 @@ var SpeechExplorer = (function (_super) {
             this.Start();
             this.stopEvent(event);
         }
+    };
+    SpeechExplorer.prototype.triggerLink = function (code) {
+        var _a, _b;
+        if (code !== 13) {
+            return false;
+        }
+        var node = (_a = this.walker.getFocus().getNodes()) === null || _a === void 0 ? void 0 : _a[0];
+        var focus = (_b = node === null || node === void 0 ? void 0 : node.getAttribute('data-semantic-postfix')) === null || _b === void 0 ? void 0 : _b.match(/(^| )link($| )/);
+        if (focus) {
+            node.parentNode.dispatchEvent(new MouseEvent('click'));
+            return true;
+        }
+        return false;
     };
     SpeechExplorer.prototype.Move = function (key) {
         this.walker.move(key);

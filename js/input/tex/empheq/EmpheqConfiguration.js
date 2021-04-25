@@ -7,6 +7,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -28,9 +30,10 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
 };
 var __values = (this && this.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
@@ -79,7 +82,7 @@ exports.EmpheqUtil = {
     environment: function (parser, env, func, args) {
         var name = args[0];
         var item = parser.itemFactory.create(name + '-begin').setProperties({ name: env, end: name });
-        parser.Push(func.apply(void 0, __spread([parser, item], args.slice(1))));
+        parser.Push(func.apply(void 0, __spreadArray([parser, item], __read(args.slice(1)))));
     },
     copyMml: function (node) {
         var e_1, _a, e_2, _b;

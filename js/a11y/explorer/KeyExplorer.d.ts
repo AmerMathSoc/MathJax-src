@@ -34,6 +34,7 @@ export declare class SpeechExplorer extends AbstractKeyExplorer<string> {
     Update(force?: boolean): void;
     Speech(walker: sre.Walker): void;
     KeyDown(event: KeyboardEvent): void;
+    protected triggerLink(code: number): boolean;
     Move(key: number): void;
     private initWalker;
     private getOptions;

@@ -53,7 +53,7 @@ export declare type RenderActions<N, T, D> = {
 export declare class RenderList<N, T, D> extends PrioritizedList<RenderData<N, T, D>> {
     static create<N, T, D>(actions: RenderActions<N, T, D>): RenderList<N, T, D>;
     static action<N, T, D>(id: string, action: RenderAction<N, T, D>): [RenderData<N, T, D>, number];
-    protected static methodActions(method1: string, method2?: string): (((document: any) => boolean) | ((math: any, document: any) => boolean))[];
+    protected static methodActions(method1: string, method2?: string): ((math: any, document: any) => boolean)[];
     renderDoc(document: MathDocument<N, T, D>, start?: number): void;
     renderMath(math: MathItem<N, T, D>, document: MathDocument<N, T, D>, start?: number): void;
     renderConvert(math: MathItem<N, T, D>, document: MathDocument<N, T, D>, end?: number): void;
