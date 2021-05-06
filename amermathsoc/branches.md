@@ -19,3 +19,5 @@ issue2643
 issue2595
 mathaccent-fix
 combining-accents
+node-css-fixes
+issue2678
