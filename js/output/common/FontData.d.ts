@@ -3,6 +3,7 @@ import { StyleList } from '../../util/StyleList.js';
 export interface CharOptions {
     ic?: number;
     sk?: number;
+    dx?: number;
     unknown?: boolean;
     smp?: number;
 }

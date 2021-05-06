@@ -195,8 +195,9 @@ var CommonWrapper = (function (_super) {
     };
     CommonWrapper.prototype.copySkewIC = function (bbox) {
         var first = this.childNodes[0];
-        if (first && first.bbox.sk) {
-            bbox.sk = first.bbox.sk;
+        if (first) {
+            first.bbox.sk && (bbox.sk = first.bbox.sk);
+            first.bbox.dx && (bbox.dx = first.bbox.dx);
         }
         var last = this.childNodes[this.childNodes.length - 1];
         if (last && last.bbox.ic) {
