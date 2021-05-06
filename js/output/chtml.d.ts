@@ -16,6 +16,7 @@ export declare class CHTML<N, T, D> extends CommonOutputJax<N, T, D, CHTMLWrappe
     factory: CHTMLWrapperFactory<N, T, D>;
     chtmlStyles: N;
     constructor(options?: OptionList);
+    initialize(): void;
     escaped(math: MathItem<N, T, D>, html: MathDocument<N, T, D>): N;
     styleSheet(html: MathDocument<N, T, D>): N;
     protected addClassStyles(CLASS: typeof CommonWrapper): void;

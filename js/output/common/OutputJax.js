@@ -279,8 +279,9 @@ var CommonOutputJax = (function (_super) {
         var adaptor = this.adaptor;
         var family = (getFamily ? adaptor.fontFamily(node) : '');
         var em = adaptor.fontSize(node);
-        var ex = (adaptor.nodeSize(adaptor.childNode(node, 1))[1] / 60) || (em * this.options.exFactor);
-        var containerWidth = (adaptor.getStyle(node, 'display') === 'table' ?
+        var _a = __read(adaptor.nodeSize(adaptor.childNode(node, 1)), 2), w = _a[0], h = _a[1];
+        var ex = (w ? h / 60 : em * this.options.exFactor);
+        var containerWidth = (!w ? 1000000 : adaptor.getStyle(node, 'display') === 'table' ?
             adaptor.nodeSize(adaptor.lastChild(node))[0] - 1 :
             adaptor.nodeBBox(adaptor.lastChild(node)).left -
                 adaptor.nodeBBox(adaptor.firstChild(node)).left - 2);
