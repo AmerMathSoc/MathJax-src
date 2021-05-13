@@ -46,6 +46,8 @@ import './tagformat/TagFormatConfiguration.js';
 import './textmacros/TextMacrosConfiguration.js';
 import './unicode/UnicodeConfiguration.js';
 import './verb/VerbConfiguration.js';
+import './numcases/NumcasesConfiguration.js';
+import './empheq/EmpheqConfiguration.js';
 
 declare const MathJax: any;
 if (typeof MathJax !== 'undefined' && MathJax.loader) {
@@ -71,6 +73,8 @@ if (typeof MathJax !== 'undefined' && MathJax.loader) {
     '[tex]/physics',
     '[tex]/unicode',
     '[tex]/verb',
+    '[tex]/numcases',
+    '[tex]/empheq',
     '[tex]/configmacros',
     '[tex]/tagformat',
     '[tex]/textmacros'
@@ -98,6 +102,8 @@ export const AllPackages: string[] = [
   'noundefined',
   'unicode',
   'verb',
+  'numcases',
+  'empheq',
   'configmacros',
   'tagformat',
   'textmacros'
