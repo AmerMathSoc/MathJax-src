@@ -51,7 +51,7 @@ new sm.CommandMap('AMSmath-macros', {
     cfrac: 'CFrac',
     shoveleft: ['HandleShove', TexConstants_js_1.TexConstant.Align.LEFT],
     shoveright: ['HandleShove', TexConstants_js_1.TexConstant.Align.RIGHT],
-    xrightarrow: ['xArrow', 0x2192, 7, 12],
+    xrightarrow: ['xArrow', 0x2192, 5, 10],
     xleftarrow: ['xArrow', 0x2190, 10, 5]
 }, AmsMethods_js_1.AmsMethods);
 new sm.EnvironmentMap('AMSmath-environment', ParseMethods_js_1.default.environment, {

@@ -785,6 +785,21 @@ var ArrayItem = (function (_super) {
             this.arraydef['rowspacing'] = rows.join(' ');
         }
     };
+    ArrayItem.prototype.addRowSpacing = function (spacing) {
+        if (this.arraydef['rowspacing']) {
+            var rows = this.arraydef['rowspacing'].split(/ /);
+            if (!this.getProperty('rowspacing')) {
+                var dimem = ParseUtil_js_1.default.dimen2em(rows[0]);
+                this.setProperty('rowspacing', dimem);
+            }
+            var rowspacing = this.getProperty('rowspacing');
+            while (rows.length < this.table.length) {
+                rows.push(ParseUtil_js_1.default.Em(rowspacing));
+            }
+            rows[this.table.length - 1] = ParseUtil_js_1.default.Em(Math.max(0, rowspacing + ParseUtil_js_1.default.dimen2em(spacing)));
+            this.arraydef['rowspacing'] = rows.join(' ');
+        }
+    };
     return ArrayItem;
 }(StackItem_js_1.BaseItem));
 exports.ArrayItem = ArrayItem;

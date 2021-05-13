@@ -25,6 +25,7 @@ var SymbolMap_js_1 = require("../SymbolMap.js");
 var bitem = require("./BaseItems.js");
 var Tags_js_1 = require("../Tags.js");
 require("./BaseMappings.js");
+var OperatorDictionary_js_1 = require("../../../core/MmlTree/OperatorDictionary.js");
 new SymbolMap_js_1.CharacterMap('remap', null, {
     '-': '\u2212',
     '*': '\u2217',
@@ -34,11 +35,14 @@ function Other(parser, char) {
     var font = parser.stack.env['font'];
     var def = font ?
         { mathvariant: parser.stack.env['font'] } : {};
-    var remap = MapHandler_js_1.MapHandler.getMap('remap').
-        lookup(char);
-    var mo = parser.create('token', 'mo', def, (remap ? remap.char : char));
-    NodeUtil_js_1.default.setProperty(mo, 'fixStretchy', true);
-    parser.configuration.addNode('fixStretchy', mo);
+    var remap = MapHandler_js_1.MapHandler.getMap('remap').lookup(char);
+    var range = OperatorDictionary_js_1.getRange(char);
+    var type = (range ? range[3] : 'mo');
+    var mo = parser.create('token', type, def, (remap ? remap.char : char));
+    if (type === 'mo') {
+        NodeUtil_js_1.default.setProperty(mo, 'fixStretchy', true);
+        parser.configuration.addNode('fixStretchy', mo);
+    }
     parser.Push(mo);
 }
 exports.Other = Other;

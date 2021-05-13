@@ -246,6 +246,26 @@ var ParseUtil;
         return parser.create('node', 'mtext', [], def, textNode);
     }
     ParseUtil.internalText = internalText;
+    function underOver(parser, base, script, pos, stack) {
+        var symbol = NodeUtil_js_1.default.getForm(base);
+        if ((symbol && symbol[3] && symbol[3]['movablelimits']) || NodeUtil_js_1.default.getProperty(base, 'movablelimits')) {
+            NodeUtil_js_1.default.setProperties(base, { 'movablelimits': false });
+        }
+        if (NodeUtil_js_1.default.isType(base, 'munderover') && NodeUtil_js_1.default.isEmbellished(base)) {
+            NodeUtil_js_1.default.setProperties(NodeUtil_js_1.default.getCoreMO(base), { lspace: 0, rspace: 0 });
+            var mo = parser.create('node', 'mo', [], { rspace: 0 });
+            base = parser.create('node', 'mrow', [mo, base]);
+        }
+        var mml = parser.create('node', 'munderover', [base]);
+        NodeUtil_js_1.default.setChild(mml, pos === 'over' ? mml.over : mml.under, script);
+        var node = mml;
+        if (stack) {
+            node = parser.create('node', 'TeXAtom', [mml], { texClass: MmlNode_js_1.TEXCLASS.OP, movesupsub: true });
+        }
+        NodeUtil_js_1.default.setProperty(node, 'subsupOK', true);
+        return node;
+    }
+    ParseUtil.underOver = underOver;
     function trimSpaces(text) {
         if (typeof (text) !== 'string') {
             return text;
@@ -266,7 +286,7 @@ var ParseUtil;
             array.arraydef.align = 'baseline -1';
         }
         else if (align === 'c') {
-            array.arraydef.align = 'center';
+            array.arraydef.align = 'axis';
         }
         else if (align) {
             array.arraydef.align = align;
@@ -314,6 +334,21 @@ var ParseUtil;
         return s1 + s2;
     }
     ParseUtil.addArgs = addArgs;
+    function checkMaxMacros(parser, isMacro) {
+        if (isMacro === void 0) { isMacro = true; }
+        if (++parser.macroCount <= parser.configuration.options['maxMacros']) {
+            return;
+        }
+        if (isMacro) {
+            throw new TexError_js_1.default('MaxMacroSub1', 'MathJax maximum macro substitution count exceeded; ' +
+                'is here a recursive macro call?');
+        }
+        else {
+            throw new TexError_js_1.default('MaxMacroSub2', 'MathJax maximum substitution count exceeded; ' +
+                'is there a recursive latex environment?');
+        }
+    }
+    ParseUtil.checkMaxMacros = checkMaxMacros;
     function checkEqnEnv(parser) {
         if (parser.stack.global.eqnenv) {
             throw new TexError_js_1.default('ErroneousNestingEq', 'Erroneous nesting of equation structures');
@@ -341,7 +376,7 @@ var ParseUtil;
                     var key = _c.value;
                     if (!allowed.hasOwnProperty(key)) {
                         if (error) {
-                            throw new TexError_js_1.default('InvalidOption', 'Invalid optional argument: %1', key);
+                            throw new TexError_js_1.default('InvalidOption', 'Invalid option: %1', key);
                         }
                         delete def[key];
                     }

@@ -58,10 +58,16 @@ var MmlMstyle = (function (_super) {
             else {
                 level = parseInt(scriptlevel);
             }
+            prime = false;
         }
         var displaystyle = this.attributes.getExplicit('displaystyle');
         if (displaystyle != null) {
             display = (displaystyle === true);
+            prime = false;
+        }
+        var cramped = this.attributes.getExplicit('data-cramped');
+        if (cramped != null) {
+            prime = cramped;
         }
         attributes = this.addInheritedAttributes(attributes, this.attributes.getAllAttributes());
         this.childNodes[0].setInheritedAttributes(attributes, display, level, prime);

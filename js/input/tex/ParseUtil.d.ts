@@ -13,10 +13,12 @@ declare namespace ParseUtil {
     function fixInitialMO(configuration: ParseOptions, nodes: MmlNode[]): void;
     function internalMath(parser: TexParser, text: string, level?: number | string, font?: string): MmlNode[];
     function internalText(parser: TexParser, text: string, def: EnvList): MmlNode;
+    function underOver(parser: TexParser, base: MmlNode, script: MmlNode, pos: string, stack: boolean): MmlNode;
     function trimSpaces(text: string): string;
     function setArrayAlign(array: ArrayItem, align: string): ArrayItem;
     function substituteArgs(parser: TexParser, args: string[], str: string): string;
     function addArgs(parser: TexParser, s1: string, s2: string): string;
+    function checkMaxMacros(parser: TexParser, isMacro?: boolean): void;
     function checkEqnEnv(parser: TexParser): void;
     function MmlFilterAttribute(_parser: TexParser, _name: string, value: string): string;
     function getFontDef(parser: TexParser): EnvList;

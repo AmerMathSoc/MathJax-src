@@ -191,10 +191,7 @@ PhysicsMethods.StarMacro = function (parser, name, argcount) {
     macro = ParseUtil_js_1.default.substituteArgs(parser, args, macro);
     parser.string = ParseUtil_js_1.default.addArgs(parser, macro, parser.string.slice(parser.i));
     parser.i = 0;
-    if (++parser.macroCount > parser.configuration.options['maxMacros']) {
-        throw new TexError_js_1.default('MaxMacroSub1', 'MathJax maximum macro substitution count exceeded; ' +
-            'is there a recursive macro call?');
-    }
+    ParseUtil_js_1.default.checkMaxMacros(parser);
 };
 var vectorApplication = function (parser, kind, name, operator, fences) {
     var op = new TexParser_js_1.default(operator, parser.stack.env, parser.configuration).mml();

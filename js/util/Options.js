@@ -32,7 +32,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
     return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.separateOptions = exports.selectOptionsFromKeys = exports.selectOptions = exports.userOptions = exports.defaultOptions = exports.insert = exports.copy = exports.keys = exports.makeArray = exports.expandable = exports.Expandable = exports.REMOVE = exports.APPEND = void 0;
+exports.lookup = exports.separateOptions = exports.selectOptionsFromKeys = exports.selectOptions = exports.userOptions = exports.defaultOptions = exports.insert = exports.copy = exports.keys = exports.makeArray = exports.expandable = exports.Expandable = exports.REMOVE = exports.APPEND = void 0;
 var OBJECT = {}.constructor;
 function isObject(obj) {
     return typeof obj === 'object' && obj !== null &&
@@ -232,4 +232,9 @@ function separateOptions(options) {
     return results;
 }
 exports.separateOptions = separateOptions;
+function lookup(name, lookup, def) {
+    if (def === void 0) { def = null; }
+    return (lookup.hasOwnProperty(name) ? lookup[name] : def);
+}
+exports.lookup = lookup;
 //# sourceMappingURL=Options.js.map

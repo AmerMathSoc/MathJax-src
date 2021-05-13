@@ -109,7 +109,7 @@ var CHTMLmtable = (function (_super) {
             for (var _b = __values(adaptor.childNodes(this.itable)), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var row = _c.value;
                 while (adaptor.childNodes(row).length < this.numCols) {
-                    adaptor.append(row, this.html('mjx-mtd'));
+                    adaptor.append(row, this.html('mjx-mtd', { 'extra': true }));
                 }
             }
         }

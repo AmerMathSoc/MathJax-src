@@ -16,6 +16,7 @@ require("./configmacros/ConfigMacrosConfiguration.js");
 require("./enclose/EncloseConfiguration.js");
 require("./extpfeil/ExtpfeilConfiguration.js");
 require("./html/HtmlConfiguration.js");
+require("./mathtools/MathtoolsConfiguration.js");
 require("./mhchem/MhchemConfiguration.js");
 require("./newcommand/NewcommandConfiguration.js");
 require("./noerrors/NoErrorsConfiguration.js");
@@ -25,8 +26,10 @@ require("./tagformat/TagFormatConfiguration.js");
 require("./textmacros/TextMacrosConfiguration.js");
 require("./unicode/UnicodeConfiguration.js");
 require("./verb/VerbConfiguration.js");
+require("./numcases/NumcasesConfiguration.js");
+require("./empheq/EmpheqConfiguration.js");
 if (typeof MathJax !== 'undefined' && MathJax.loader) {
-    MathJax.loader.preLoad('[tex]/action', '[tex]/ams', '[tex]/amscd', '[tex]/bbox', '[tex]/boldsymbol', '[tex]/braket', '[tex]/bussproofs', '[tex]/cancel', '[tex]/color', '[tex]/colorv2', '[tex]/enclose', '[tex]/extpfeil', '[tex]/html', '[tex]/mhchem', '[tex]/newcommand', '[tex]/noerrors', '[tex]/noundefined', '[tex]/physics', '[tex]/unicode', '[tex]/verb', '[tex]/configmacros', '[tex]/tagformat', '[tex]/textmacros');
+    MathJax.loader.preLoad('[tex]/action', '[tex]/ams', '[tex]/amscd', '[tex]/bbox', '[tex]/boldsymbol', '[tex]/braket', '[tex]/bussproofs', '[tex]/cancel', '[tex]/color', '[tex]/colorv2', '[tex]/enclose', '[tex]/extpfeil', '[tex]/html', '[tex]/mathtools', '[tex]/mhchem', '[tex]/newcommand', '[tex]/noerrors', '[tex]/noundefined', '[tex]/physics', '[tex]/unicode', '[tex]/verb', '[tex]/numcases', '[tex]/empheq', '[tex]/configmacros', '[tex]/tagformat', '[tex]/textmacros');
 }
 exports.AllPackages = [
     'base',
@@ -42,12 +45,15 @@ exports.AllPackages = [
     'enclose',
     'extpfeil',
     'html',
+    'mathtools',
     'mhchem',
     'newcommand',
     'noerrors',
     'noundefined',
     'unicode',
     'verb',
+    'numcases',
+    'empheq',
     'configmacros',
     'tagformat',
     'textmacros'

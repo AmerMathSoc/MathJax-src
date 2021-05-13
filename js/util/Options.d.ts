@@ -15,3 +15,4 @@ export declare function userOptions(options: OptionList, ...defs: OptionList[]):
 export declare function selectOptions(options: OptionList, ...keys: string[]): OptionList;
 export declare function selectOptionsFromKeys(options: OptionList, object: OptionList): OptionList;
 export declare function separateOptions(options: OptionList, ...objects: OptionList[]): OptionList[];
+export declare function lookup(name: string, lookup: OptionList, def?: any): any;

@@ -110,6 +110,7 @@ export declare class ArrayItem extends BaseItem {
     EndRow(): void;
     EndTable(): void;
     checkLines(): void;
+    addRowSpacing(spacing: string): void;
 }
 export declare class EqnArrayItem extends ArrayItem {
     constructor(factory: any, ...args: any[]);

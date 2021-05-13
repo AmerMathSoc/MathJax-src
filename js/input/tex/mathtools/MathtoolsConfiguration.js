@@ -1,160 +1,139 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
     };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MathtoolsConfiguration = exports.MultlinedItem = void 0;
-var AmsItems_js_1 = require("../ams/AmsItems.js");
-var ParseUtil_js_1 = require("../ParseUtil.js");
-var ParseMethods_js_1 = require("../ParseMethods.js");
+exports.MathtoolsConfiguration = exports.fixPrescripts = exports.PAIREDDELIMS = void 0;
 var Configuration_js_1 = require("../Configuration.js");
-var AmsMethods_js_1 = require("../ams/AmsMethods.js");
-var BaseMethods_js_1 = require("../base/BaseMethods.js");
-var TexError_js_1 = require("../TexError.js");
 var SymbolMap_js_1 = require("../SymbolMap.js");
 var NodeUtil_js_1 = require("../NodeUtil.js");
-var TexConstants_js_1 = require("../TexConstants.js");
-var MathtoolsMethods = {};
-var MultlinedItem = (function (_super) {
-    __extends(MultlinedItem, _super);
-    function MultlinedItem() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(MultlinedItem.prototype, "kind", {
-        get: function () {
-            return 'multlined';
-        },
-        enumerable: false,
-        configurable: true
-    });
-    MultlinedItem.prototype.EndTable = function () {
-        if (this.Size() || this.row.length) {
-            this.EndEntry();
-            this.EndRow();
+var Options_js_1 = require("../../../util/Options.js");
+require("./MathtoolsMappings.js");
+var MathtoolsUtil_js_1 = require("./MathtoolsUtil.js");
+var MathtoolsTags_js_1 = require("./MathtoolsTags.js");
+var MathtoolsItems_js_1 = require("./MathtoolsItems.js");
+exports.PAIREDDELIMS = 'mathtools-paired-delims';
+function initMathtools(config) {
+    new SymbolMap_js_1.CommandMap(exports.PAIREDDELIMS, {}, {});
+    config.append(Configuration_js_1.Configuration.local({ handler: { macro: [exports.PAIREDDELIMS] }, priority: -5 }));
+}
+function configMathtools(config, jax) {
+    var e_1, _a;
+    var parser = jax.parseOptions;
+    var pairedDelims = parser.options.mathtools.pairedDelimiters;
+    try {
+        for (var _b = __values(Object.keys(pairedDelims)), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var cs = _c.value;
+            MathtoolsUtil_js_1.MathtoolsUtil.addPairedDelims(parser, cs, pairedDelims[cs]);
         }
-        if (this.table.length) {
-            var first = NodeUtil_js_1.default.getChildren(this.table[0])[0];
-            var m = this.table.length - 1;
-            if (NodeUtil_js_1.default.getAttribute(first, 'columnalign') !== TexConstants_js_1.TexConstant.Align.RIGHT) {
-                first.appendChild(this.create('node', 'mspace', [], { width: this.factory.configuration.options['MultlineGap'] || '2em' }));
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    MathtoolsTags_js_1.MathtoolsTagFormat(config, jax);
+}
+function fixPrescripts(_a) {
+    var e_2, _b, e_3, _c, e_4, _d;
+    var data = _a.data;
+    try {
+        for (var _e = __values(data.getList('mmultiscripts')), _f = _e.next(); !_f.done; _f = _e.next()) {
+            var node = _f.value;
+            if (!node.getProperty('fixPrescript'))
+                continue;
+            var childNodes = NodeUtil_js_1.default.getChildren(node);
+            var n = 0;
+            try {
+                for (var _g = (e_3 = void 0, __values([1, 2])), _h = _g.next(); !_h.done; _h = _g.next()) {
+                    var i = _h.value;
+                    if (!childNodes[i]) {
+                        NodeUtil_js_1.default.setChild(node, i, data.nodeFactory.create('node', 'none'));
+                        n++;
+                    }
+                }
             }
-            var last = NodeUtil_js_1.default.getChildren(this.table[m])[0];
-            if (NodeUtil_js_1.default.getAttribute(last, 'columnalign') !== TexConstants_js_1.TexConstant.Align.LEFT) {
-                var top_1 = last.childNodes[0];
-                top_1.childNodes.unshift(null);
-                var space = this.create('node', 'mspace', [], { width: this.factory.configuration.options['MultlineGap'] || '2em' });
-                NodeUtil_js_1.default.setChild(top_1, 0, space);
+            catch (e_3_1) { e_3 = { error: e_3_1 }; }
+            finally {
+                try {
+                    if (_h && !_h.done && (_c = _g.return)) _c.call(_g);
+                }
+                finally { if (e_3) throw e_3.error; }
+            }
+            try {
+                for (var _j = (e_4 = void 0, __values([4, 5])), _k = _j.next(); !_k.done; _k = _j.next()) {
+                    var i = _k.value;
+                    if (NodeUtil_js_1.default.isType(childNodes[i], 'mrow') && NodeUtil_js_1.default.getChildren(childNodes[i]).length === 0) {
+                        NodeUtil_js_1.default.setChild(node, i, data.nodeFactory.create('node', 'none'));
+                    }
+                }
+            }
+            catch (e_4_1) { e_4 = { error: e_4_1 }; }
+            finally {
+                try {
+                    if (_k && !_k.done && (_d = _j.return)) _d.call(_j);
+                }
+                finally { if (e_4) throw e_4.error; }
+            }
+            if (n === 2) {
+                childNodes.splice(1, 2);
             }
         }
-        _super.prototype.EndTable.call(this);
-    };
-    return MultlinedItem;
-}(AmsItems_js_1.MultlineItem));
-exports.MultlinedItem = MultlinedItem;
-MathtoolsMethods.MtMatrix = function (parser, begin, open, close) {
-    var align = parser.GetBrackets('\\begin{' + begin.getName() + '}') || 'c';
-    return BaseMethods_js_1.default.Array(parser, begin, open, close, align);
-},
-    MathtoolsMethods.MtSmallMatrix = function (parser, begin, open, close, align) {
-        if (!align) {
-            align = parser.GetBrackets('\\begin{' + begin.getName() + '}') || 'c';
-        }
-        return BaseMethods_js_1.default.Array(parser, begin, open, close, align, ParseUtil_js_1.default.Em(1 / 3), '.2em', 'S', 1);
-    },
-    MathtoolsMethods.MtMultlined = function (parser, begin) {
-        var pos = parser.GetBrackets('\\begin{' + begin.getName() + '}') || '';
-        var width = pos ? parser.GetBrackets('\\begin{' + begin.getName() + '}') : null;
-        if (!pos.match(/^[cbt]$/)) {
-            var tmp = width;
-            width = pos;
-            pos = tmp;
-        }
-        parser.Push(begin);
-        var item = parser.itemFactory.create('multlined', parser, begin);
-        item.arraydef = {
-            displaystyle: true,
-            rowspacing: '.5em',
-            width: width || parser.options['multlineWidth'],
-            columnwidth: '100%',
-        };
-        return ParseUtil_js_1.default.setArrayAlign(item, pos || 'c');
-    };
-MathtoolsMethods.HandleShove = function (parser, name, shove) {
-    var top = parser.stack.Top();
-    if (top.kind !== 'multline' && top.kind !== 'multlined') {
-        throw new TexError_js_1.default('CommandInMultlined', '%1 can only appear within the multline or multlined environments', name);
     }
-    if (top.Size()) {
-        throw new TexError_js_1.default('CommandAtTheBeginingOfLine', '%1 must come at the beginning of the line', name);
-    }
-    top.setProperty('shove', shove);
-    var shift = parser.GetBrackets(name);
-    var mml = parser.ParseArg(name);
-    if (shift) {
-        var mrow = parser.create('node', 'mrow', []);
-        var mspace = parser.create('node', 'mspace', [], { width: shift });
-        if (shove === 'left') {
-            mrow.appendChild(mspace);
-            mrow.appendChild(mml);
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
         }
-        else {
-            mrow.appendChild(mml);
-            mrow.appendChild(mspace);
-        }
-        mml = mrow;
+        finally { if (e_2) throw e_2.error; }
     }
-    parser.Push(mml);
-};
-MathtoolsMethods.Array = BaseMethods_js_1.default.Array;
-MathtoolsMethods.Macro = BaseMethods_js_1.default.Macro;
-MathtoolsMethods.xArrow = AmsMethods_js_1.AmsMethods.xArrow;
-new SymbolMap_js_1.CommandMap('mathtools-macros', {
-    shoveleft: ['HandleShove', TexConstants_js_1.TexConstant.Align.LEFT],
-    shoveright: ['HandleShove', TexConstants_js_1.TexConstant.Align.RIGHT],
-    coloneqq: ['Macro', '\\mathrel{≔}'],
-    xleftrightarrow: ['xArrow', 0x2194, 7, 6]
-}, MathtoolsMethods);
-new SymbolMap_js_1.EnvironmentMap('mathtools-environment', ParseMethods_js_1.default.environment, {
-    dcases: ['Array', null, '\\{', '.', 'll', null, '.2em', 'D'],
-    rcases: ['Array', null, '.', '\\}', 'll', null, '.2em', 'D'],
-    drcases: ['Array', null, '\\{', '\\}', 'll', null, '.2em', 'D'],
-    'matrix*': ['MtMatrix', null, null, null],
-    'pmatrix*': ['MtMatrix', null, '(', ')'],
-    'bmatrix*': ['MtMatrix', null, '[', ']'],
-    'Bmatrix*': ['MtMatrix', null, '\\{', '\\}'],
-    'vmatrix*': ['MtMatrix', null, '\\vert', '\\vert'],
-    'Vmatrix*': ['MtMatrix', null, '\\Vert', '\\Vert'],
-    'smallmatrix*': ['MtSmallMatrix', null, null, null],
-    psmallmatrix: ['MtSmallMatrix', null, '(', ')', 'c'],
-    'psmallmatrix*': ['MtSmallMatrix', null, '(', ')'],
-    bsmallmatrix: ['MtSmallMatrix', null, '[', ']', 'c'],
-    'bsmallmatrix*': ['MtSmallMatrix', null, '[', ']'],
-    Bsmallmatrix: ['MtSmallMatrix', null, '\\{', '\\}', 'c'],
-    'Bsmallmatrix*': ['MtSmallMatrix', null, '\\{', '\\}'],
-    vsmallmatrix: ['MtSmallMatrix', null, '\\vert', '\\vert', 'c'],
-    'vsmallmatrix*': ['MtSmallMatrix', null, '\\vert', '\\vert'],
-    Vsmallmatrix: ['MtSmallMatrix', null, '\\Vert', '\\Vert', 'c'],
-    'Vsmallmatrix*': ['MtSmallMatrix', null, '\\Vert', '\\Vert'],
-    multlined: 'MtMultlined',
-}, MathtoolsMethods);
+}
+exports.fixPrescripts = fixPrescripts;
 exports.MathtoolsConfiguration = Configuration_js_1.Configuration.create('mathtools', {
     handler: {
-        macro: ['mathtools-macros'],
-        environment: ['mathtools-environment']
+        macro: ['mathtools-macros', 'mathtools-delimiters'],
+        environment: ['mathtools-environments'],
+        delimiter: ['mathtools-delimiters'],
+        character: ['mathtools-characters']
     },
-    items: (_a = {}, _a[MultlinedItem.prototype.kind] = MultlinedItem, _a)
+    items: (_a = {},
+        _a[MathtoolsItems_js_1.MultlinedItem.prototype.kind] = MathtoolsItems_js_1.MultlinedItem,
+        _a),
+    init: initMathtools,
+    config: configMathtools,
+    postprocessors: [[fixPrescripts, -6]],
+    options: {
+        mathtools: {
+            'multlinegap': '1em',
+            'multlined-pos': 'c',
+            'firstline-afterskip': '',
+            'lastline-preskip': '',
+            'smallmatrix-align': 'c',
+            'shortvdotsadjustabove': '.2em',
+            'shortvdotsadjustbelow': '.2em',
+            'centercolon': false,
+            'centercolon-offset': '.04em',
+            'thincolon-dx': '-.04em',
+            'thincolon-dw': '-.08em',
+            'use-unicode': false,
+            'prescript-sub-format': '',
+            'prescript-sup-format': '',
+            'prescript-arg-format': '',
+            'allow-mathtoolsset': true,
+            pairedDelimiters: Options_js_1.expandable({}),
+            tagforms: Options_js_1.expandable({}),
+        }
+    }
 });
 //# sourceMappingURL=MathtoolsConfiguration.js.map
