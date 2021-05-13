@@ -21,3 +21,5 @@ mathaccent-fix
 combining-accents
 node-css-fixes
 issue2678
+minor-fixes
+mathtools-update
