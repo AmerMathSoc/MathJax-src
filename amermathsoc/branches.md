@@ -1,8 +1,6 @@
 develop
 stix2-svg
-mathtools_package
 empheq-numcases
-xalign_package
 underline-overline
 issue2632
 issue2550
@@ -23,3 +21,4 @@ node-css-fixes
 issue2678
 minor-fixes
 mathtools-update
+amsmath-update
