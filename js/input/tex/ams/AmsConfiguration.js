@@ -44,8 +44,15 @@ exports.AmsConfiguration = Configuration_js_1.Configuration.create('ams', {
             'AMSmath-mathchar0mo', 'AMSmath-macros', 'AMSmath-delimiter'],
         environment: ['AMSmath-environment']
     },
-    items: (_a = {}, _a[AmsItems_js_1.MultlineItem.prototype.kind] = AmsItems_js_1.MultlineItem, _a),
+    items: (_a = {},
+        _a[AmsItems_js_1.MultlineItem.prototype.kind] = AmsItems_js_1.MultlineItem,
+        _a[AmsItems_js_1.FlalignItem.prototype.kind] = AmsItems_js_1.FlalignItem,
+        _a),
     tags: { 'ams': AmsTags },
-    init: init
+    init: init,
+    options: {
+        multlineWidth: '100%',
+        multlineIndent: '1em',
+    }
 });
 //# sourceMappingURL=AmsConfiguration.js.map

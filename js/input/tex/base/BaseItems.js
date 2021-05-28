@@ -811,6 +811,7 @@ var EqnArrayItem = (function (_super) {
             args[_i - 1] = arguments[_i];
         }
         var _this = _super.call(this, factory) || this;
+        _this.maxrow = 0;
         _this.factory.configuration.tags.start(args[0], args[2], args[1]);
         return _this;
     }
@@ -830,6 +831,9 @@ var EqnArrayItem = (function (_super) {
         this.Clear();
     };
     EqnArrayItem.prototype.EndRow = function () {
+        if (this.row.length > this.maxrow) {
+            this.maxrow = this.row.length;
+        }
         var mtr = 'mtr';
         var tag = this.factory.configuration.tags.getTag();
         if (tag) {
@@ -844,6 +848,21 @@ var EqnArrayItem = (function (_super) {
     EqnArrayItem.prototype.EndTable = function () {
         _super.prototype.EndTable.call(this);
         this.factory.configuration.tags.end();
+        this.extendArray('columnalign', this.maxrow);
+        this.extendArray('columnwidth', this.maxrow);
+        this.extendArray('columnspacing', this.maxrow - 1);
+    };
+    EqnArrayItem.prototype.extendArray = function (name, max) {
+        if (!this.arraydef[name])
+            return;
+        var repeat = this.arraydef[name].split(/ /);
+        var columns = __spreadArray([], __read(repeat));
+        if (columns.length > 1) {
+            while (columns.length < max) {
+                columns.push.apply(columns, __spreadArray([], __read(repeat)));
+            }
+            this.arraydef[name] = columns.slice(0, max).join(' ');
+        }
     };
     return EqnArrayItem;
 }(ArrayItem));

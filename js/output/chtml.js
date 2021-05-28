@@ -105,7 +105,8 @@ var CHTML = (function (_super) {
     CHTML.prototype.reset = function () {
         this.clearCache();
     };
-    CHTML.prototype.unknownText = function (text, variant) {
+    CHTML.prototype.unknownText = function (text, variant, width) {
+        if (width === void 0) { width = null; }
         var styles = {};
         var scale = 100 / this.math.metrics.scale;
         if (scale !== 100) {
@@ -118,11 +119,16 @@ var CHTML = (function (_super) {
                 this.cssFontStyles(this.font.getCssFont(variant), styles);
             }
         }
+        if (width !== null) {
+            var metrics = this.math.metrics;
+            styles.width = Math.round(width * metrics.em * metrics.scale) + 'px';
+        }
         return this.html('mjx-utext', { variant: variant, style: styles }, [this.text(text)]);
     };
-    CHTML.prototype.measureTextNode = function (text) {
+    CHTML.prototype.measureTextNode = function (textNode) {
         var adaptor = this.adaptor;
-        text = adaptor.clone(text);
+        var text = adaptor.clone(textNode);
+        adaptor.setStyle(text, 'font-family', adaptor.getStyle(text, 'font-family').replace(/MJXZERO, /g, ''));
         var style = { position: 'absolute', 'white-space': 'nowrap' };
         var node = this.html('mjx-measure-text', { style: style }, [text]);
         adaptor.append(adaptor.parent(this.math.start.node), this.container);

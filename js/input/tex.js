@@ -110,9 +110,11 @@ var TeX = (function (_super) {
         this.latex = math.math;
         var node;
         this.parseOptions.tags.startEquation(math);
+        var globalEnv;
         try {
             var parser = new TexParser_js_1.default(this.latex, { display: display, isInner: false }, this.parseOptions);
             node = parser.mml();
+            globalEnv = parser.stack.global;
         }
         catch (err) {
             if (!(err instanceof TexError_js_1.default)) {
@@ -122,6 +124,9 @@ var TeX = (function (_super) {
             node = this.options.formatError(this, err);
         }
         node = this.parseOptions.nodeFactory.create('node', 'math', [node]);
+        if (globalEnv === null || globalEnv === void 0 ? void 0 : globalEnv.indentalign) {
+            NodeUtil_js_1.default.setAttribute(node, 'indentalign', globalEnv.indentalign);
+        }
         if (display) {
             NodeUtil_js_1.default.setAttribute(node, 'display', 'block');
         }

@@ -42,8 +42,7 @@ var CHTMLTextNode = (function (_super) {
         var variant = this.parent.variant;
         var text = this.node.getText();
         if (variant === '-explicitFont') {
-            var font = this.jax.getFontData(this.parent.styles);
-            adaptor.append(parent, this.jax.unknownText(text, variant, font));
+            adaptor.append(parent, this.jax.unknownText(text, variant, this.getBBox().w));
         }
         else {
             var chars = this.remappedText(text, variant);

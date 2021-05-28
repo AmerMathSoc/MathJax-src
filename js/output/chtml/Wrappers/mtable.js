@@ -382,11 +382,12 @@ var CHTMLmtable = (function (_super) {
         adaptor.setStyle(table, 'minWidth', this.em(w));
         if (L || R) {
             adaptor.setStyle(this.chtml, 'margin', '');
+            var style = (this.node.attributes.get('data-width-includes-label') ? 'padding' : 'margin');
             if (L === R) {
-                adaptor.setStyle(table, 'margin', '0 ' + this.em(R));
+                adaptor.setStyle(table, style, '0 ' + this.em(R));
             }
             else {
-                adaptor.setStyle(table, 'margin', '0 ' + this.em(R) + ' 0 ' + this.em(L));
+                adaptor.setStyle(table, style, '0 ' + this.em(R) + ' 0 ' + this.em(L));
             }
         }
         adaptor.setAttribute(this.itable, 'width', 'full');
@@ -431,7 +432,7 @@ var CHTMLmtable = (function (_super) {
     CHTMLmtable.prototype.addLabelPadding = function (side) {
         var _a = __read(this.getPadAlignShift(side), 3), align = _a[1], shift = _a[2];
         var styles = {};
-        if (side === 'right') {
+        if (side === 'right' && !this.node.attributes.get('data-width-includes-label')) {
             var W = this.node.attributes.get('width');
             var _b = this.getBBox(), w = _b.w, L = _b.L, R = _b.R;
             styles.style = {
@@ -496,7 +497,8 @@ var CHTMLmtable = (function (_super) {
         },
         'mjx-table': {
             'display': 'inline-block',
-            'vertical-align': '-.5ex'
+            'vertical-align': '-.5ex',
+            'box-sizing': 'border-box'
         },
         'mjx-table > mjx-itable': {
             'vertical-align': 'middle',

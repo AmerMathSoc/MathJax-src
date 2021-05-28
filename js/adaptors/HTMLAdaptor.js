@@ -58,7 +58,7 @@ var HTMLAdaptor = (function (_super) {
         return doc.documentElement;
     };
     HTMLAdaptor.prototype.doctype = function (doc) {
-        return "<!DOCTYPE " + doc.doctype.name + ">";
+        return (doc.doctype ? "<!DOCTYPE " + doc.doctype.name + ">" : '');
     };
     HTMLAdaptor.prototype.tags = function (node, name, ns) {
         if (ns === void 0) { ns = null; }

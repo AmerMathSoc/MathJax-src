@@ -113,11 +113,13 @@ export declare class ArrayItem extends BaseItem {
     addRowSpacing(spacing: string): void;
 }
 export declare class EqnArrayItem extends ArrayItem {
+    maxrow: number;
     constructor(factory: any, ...args: any[]);
     get kind(): string;
     EndEntry(): void;
     EndRow(): void;
     EndTable(): void;
+    protected extendArray(name: string, max: number): void;
 }
 export declare class EquationItem extends BaseItem {
     constructor(factory: any, ...args: any[]);

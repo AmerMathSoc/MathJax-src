@@ -311,7 +311,8 @@ function CommonMtableMixin(Base) {
                 this.container.bbox.pwidth = '';
             }
             var _a = this.bbox, w = _a.w, L = _a.L, R = _a.R;
-            var W = Math.max(w, this.length2em(width, Math.max(cwidth, L + w + R)));
+            var labelInWidth = this.node.attributes.get('data-width-includes-label');
+            var W = Math.max(w, this.length2em(width, Math.max(cwidth, L + w + R))) - (labelInWidth ? L + R : 0);
             var cols = (this.node.attributes.get('equalcolumns') ?
                 Array(this.numCols).fill(this.percent(1 / Math.max(1, this.numCols))) :
                 this.getColumnAttributes('columnwidth', 0));
@@ -479,7 +480,7 @@ function CommonMtableMixin(Base) {
             var dw = cwidth;
             indices.forEach(function (i) {
                 var x = swidths[i];
-                dw -= (x === 'fit' || x === 'auto' ? W[i] : _this.length2em(x, width));
+                dw -= (x === 'fit' || x === 'auto' ? W[i] : _this.length2em(x, cwidth));
             });
             var fw = (n && dw > 0 ? dw / n : 0);
             return indices.map(function (i) {
