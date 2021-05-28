@@ -35,6 +35,7 @@ import './colorv2/ColorV2Configuration.js';
 import './configmacros/ConfigMacrosConfiguration.js';
 import './enclose/EncloseConfiguration.js';
 import './extpfeil/ExtpfeilConfiguration.js';
+import './gensymb/GensymbConfiguration.js';
 import './html/HtmlConfiguration.js';
 import './mathtools/MathtoolsConfiguration.js';
 import './mhchem/MhchemConfiguration.js';
@@ -44,6 +45,7 @@ import './noundefined/NoUndefinedConfiguration.js';
 import './physics/PhysicsConfiguration.js';
 import './tagformat/TagFormatConfiguration.js';
 import './textmacros/TextMacrosConfiguration.js';
+import './upgreek/UpgreekConfiguration.js';
 import './unicode/UnicodeConfiguration.js';
 import './verb/VerbConfiguration.js';
 import './numcases/NumcasesConfiguration.js';
@@ -64,6 +66,7 @@ if (typeof MathJax !== 'undefined' && MathJax.loader) {
     '[tex]/colorv2',
     '[tex]/enclose',
     '[tex]/extpfeil',
+    '[tex]/gensymb',
     '[tex]/html',
     '[tex]/mathtools',
     '[tex]/mhchem',
@@ -71,6 +74,7 @@ if (typeof MathJax !== 'undefined' && MathJax.loader) {
     '[tex]/noerrors',
     '[tex]/noundefined',
     '[tex]/physics',
+    '[tex]/upgreek',
     '[tex]/unicode',
     '[tex]/verb',
     '[tex]/numcases',
@@ -94,12 +98,14 @@ export const AllPackages: string[] = [
   'color',
   'enclose',
   'extpfeil',
+  'gensymb',
   'html',
   'mathtools',
   'mhchem',
   'newcommand',
   'noerrors',
   'noundefined',
+  'upgreek',
   'unicode',
   'verb',
   'numcases',
