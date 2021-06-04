@@ -369,9 +369,14 @@ function CommonMtableMixin(Base) {
         };
         class_1.prototype.getBBoxLR = function () {
             if (this.hasLabels) {
-                var side = this.node.attributes.get('side');
+                var attributes = this.node.attributes;
+                var side = attributes.get('side');
                 var _a = __read(this.getPadAlignShift(side), 2), pad = _a[0], align = _a[1];
-                return (align === 'center' ? [pad, pad] :
+                var labels = this.hasLabels && !!attributes.get('data-width-includes-label');
+                if (labels && this.frame && this.fSpace[0]) {
+                    pad -= this.fSpace[0];
+                }
+                return (align === 'center' && !labels ? [pad, pad] :
                     side === 'left' ? [pad, 0] : [0, pad]);
             }
             return [0, 0];

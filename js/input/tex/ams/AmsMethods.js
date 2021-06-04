@@ -46,14 +46,13 @@ exports.AmsMethods.Multline = function (parser, begin, numbered) {
         displaystyle: true,
         rowspacing: '.5em',
         columnspacing: '100%',
-        width: parser.options['multlineWidth'],
+        width: parser.options.ams['multlineWidth'],
         side: parser.options['tagSide'],
         minlabelspacing: parser.options['tagIndent'],
-        framespacing: parser.options['multlineIndent'] + ' 0',
+        framespacing: parser.options.ams['multlineIndent'] + ' 0',
         frame: '',
         'data-width-includes-label': true
     };
-    parser.stack.global.indentalign = (item.arraydef.side === 'right' ? 'left' : 'right');
     return item;
 };
 exports.AmsMethods.XalignAt = function (parser, begin, numbered, padded) {
@@ -90,7 +89,6 @@ exports.AmsMethods.FlalignArray = function (parser, begin, numbered, padded, cen
         'data-width-includes-label': true,
     };
     item.setProperty('zeroWidthLabel', zeroWidthLabel);
-    parser.stack.global.indentalign = (item.arraydef.side === 'right' ? 'left' : 'right');
     return item;
 };
 exports.NEW_OPS = 'ams-declare-ops';
