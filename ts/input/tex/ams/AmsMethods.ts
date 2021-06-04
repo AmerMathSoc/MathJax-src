@@ -120,14 +120,13 @@ AmsMethods.Multline = function (parser: TexParser, begin: StackItem, numbered: b
     displaystyle: true,
     rowspacing: '.5em',
     columnspacing: '100%',
-    width: parser.options['multlineWidth'],
+    width: parser.options.ams['multlineWidth'],
     side: parser.options['tagSide'],
     minlabelspacing: parser.options['tagIndent'],
-    framespacing: parser.options['multlineIndent'] + ' 0',
+    framespacing: parser.options.ams['multlineIndent'] + ' 0',
     frame: '',   // Use frame spacing with no actual frame
     'data-width-includes-label': true // take label space out of 100% width
   };
-  parser.stack.global.indentalign = (item.arraydef.side === 'right' ? 'left' : 'right');
   return item;
 };
 
@@ -191,7 +190,6 @@ AmsMethods.FlalignArray = function(parser: TexParser, begin: StackItem, numbered
     'data-width-includes-label': true,
   };
   item.setProperty('zeroWidthLabel', zeroWidthLabel);
-  parser.stack.global.indentalign = (item.arraydef.side === 'right' ? 'left' : 'right');
   return item;
 };
 
