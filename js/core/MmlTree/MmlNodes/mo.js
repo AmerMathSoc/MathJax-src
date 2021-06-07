@@ -173,15 +173,6 @@ var MmlMo = (function (_super) {
                 this.texClass = MmlNode_js_1.TEXCLASS.CLOSE;
             }
         }
-        if (this.getText() === '\u2061') {
-            if (prev && prev.getProperty('texClass') === undefined &&
-                prev.attributes.get('mathvariant') !== 'italic') {
-                prev.texClass = MmlNode_js_1.TEXCLASS.OP;
-                prev.setProperty('fnOP', true);
-            }
-            this.texClass = this.prevClass = MmlNode_js_1.TEXCLASS.NONE;
-            return prev;
-        }
         return this.adjustTeXclass(prev);
     };
     MmlMo.prototype.adjustTeXclass = function (prev) {
