@@ -11,7 +11,7 @@ import {MmlMtable} from '../../../core/MmlTree/MmlNodes/mtable.js';
 import {EmpheqUtil} from '../empheq/EmpheqUtil.js';
 
 /**
- * The StakItem for the numcases environment.
+ * The StackItem for the numcases environment.
  */
 export class CasesBeginItem extends BeginItem {
 
@@ -79,7 +79,7 @@ export class CasesTags extends AmsTags {
 
 }
 
-export const NumcasesMethods = {
+export const CasesMethods = {
 
   /**
    * Implements the numcases environment.
@@ -93,7 +93,7 @@ export const NumcasesMethods = {
       parser.Push(parser.itemFactory.create('end').setProperty('name', begin.getName())); // finish eqnarray
       const cases = parser.stack.Top();
       const table = cases.Last as MmlMtable;
-      const original = table.copy() as MmlMtable;
+      const original = ParseUtil.copyNode(table, parser) as MmlMtable;
       const left = cases.getProperty('left');
       EmpheqUtil.left(table, original, left + '\\empheqlbrace\\,', parser, 'numcases-left');
       parser.Push(parser.itemFactory.create('end').setProperty('name', begin.getName()));
@@ -188,19 +188,19 @@ export const NumcasesMethods = {
 new EnvironmentMap('cases-env', EmpheqUtil.environment, {
   numcases: ['NumCases', 'cases'],
   subnumcases: ['NumCases', 'cases']
-}, NumcasesMethods);
+}, CasesMethods);
 
 /**
  * The macros for this package
  */
 new MacroMap('cases-macros', {
   '&': 'Entry'
-}, NumcasesMethods);
+}, CasesMethods);
 
 //
 //  Define the package for our new environment
 //
-export const NumcasesConfiguration = Configuration.create('cases', {
+export const CasesConfiguration = Configuration.create('cases', {
   handler: {
     environment: ['cases-env'],
     character: ['cases-macros']
