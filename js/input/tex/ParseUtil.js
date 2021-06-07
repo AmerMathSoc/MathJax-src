@@ -362,6 +362,30 @@ var ParseUtil;
         parser.stack.global.eqnenv = true;
     }
     ParseUtil.checkEqnEnv = checkEqnEnv;
+    function copyNode(node, parser) {
+        var tree = node.copy();
+        var options = parser.configuration;
+        tree.walkTree(function (n) {
+            var e_1, _a;
+            options.addNode(n.kind, n);
+            var lists = (n.getProperty('in-lists') || '').split(/,/);
+            try {
+                for (var lists_1 = __values(lists), lists_1_1 = lists_1.next(); !lists_1_1.done; lists_1_1 = lists_1.next()) {
+                    var list = lists_1_1.value;
+                    options.addNode(list, n);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (lists_1_1 && !lists_1_1.done && (_a = lists_1.return)) _a.call(lists_1);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+        });
+        return tree;
+    }
+    ParseUtil.copyNode = copyNode;
     function MmlFilterAttribute(_parser, _name, value) {
         return value;
     }
@@ -372,7 +396,7 @@ var ParseUtil;
     }
     ParseUtil.getFontDef = getFontDef;
     function keyvalOptions(attrib, allowed, error) {
-        var e_1, _a;
+        var e_2, _a;
         if (allowed === void 0) { allowed = null; }
         if (error === void 0) { error = false; }
         var def = readKeyval(attrib);
@@ -388,12 +412,12 @@ var ParseUtil;
                     }
                 }
             }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
             finally {
                 try {
                     if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                 }
-                finally { if (e_1) throw e_1.error; }
+                finally { if (e_2) throw e_2.error; }
             }
         }
         return def;

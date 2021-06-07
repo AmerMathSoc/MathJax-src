@@ -34,6 +34,7 @@ var __values = (this && this.__values) || function(o) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var StackItemFactory_js_1 = require("./StackItemFactory.js");
 var NodeFactory_js_1 = require("./NodeFactory.js");
+var NodeUtil_js_1 = require("./NodeUtil.js");
 var Options_js_1 = require("../../util/Options.js");
 var ParseOptions = (function () {
     function ParseOptions(configuration, options) {
@@ -79,6 +80,10 @@ var ParseOptions = (function () {
             list = this.nodeLists[property] = [];
         }
         list.push(node);
+        if (node.kind !== property) {
+            var lists = (NodeUtil_js_1.default.getProperty(node, 'in-lists') || '').split(',').concat(property).join(',');
+            NodeUtil_js_1.default.setProperty(node, 'in-lists', lists);
+        }
     };
     ParseOptions.prototype.getList = function (property) {
         var e_1, _a;

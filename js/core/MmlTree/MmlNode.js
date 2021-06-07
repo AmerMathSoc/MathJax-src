@@ -136,6 +136,9 @@ var AbstractMmlNode = (function (_super) {
                     if (child) {
                         node.appendChild(child.copy());
                     }
+                    else {
+                        node.childNodes.push(null);
+                    }
                 }
             }
             catch (e_2_1) { e_2 = { error: e_2_1 }; }

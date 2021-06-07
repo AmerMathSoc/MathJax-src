@@ -147,8 +147,9 @@ var AbstractNode = (function () {
         try {
             for (var _b = __values(this.childNodes || []), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var child = _c.value;
-                if (child)
+                if (child) {
                     node.appendChild(child.copy());
+                }
             }
         }
         catch (e_4_1) { e_4 = { error: e_4_1 }; }

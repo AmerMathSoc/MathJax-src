@@ -93,14 +93,14 @@ exports.EmpheqUtil = {
         return mpadded;
     },
     topRowTable: function (original, parser) {
-        var table = original.copy();
+        var table = ParseUtil_js_1.default.copyNode(original, parser);
         table.setChildren(table.childNodes.slice(0, 1));
         table.attributes.set('align', 'baseline 1');
         return original.factory.create('mphantom', {}, [parser.create('node', 'mpadded', [table], { width: 0 })]);
     },
     rowspanCell: function (mtd, tex, table, parser, env) {
         mtd.appendChild(parser.create('node', 'mpadded', [
-            this.cellBlock(tex, table.copy(), parser, env),
+            this.cellBlock(tex, ParseUtil_js_1.default.copyNode(table, parser), parser, env),
             this.topRowTable(table, parser)
         ], { height: 0, depth: 0, voffset: 'height' }));
     },
@@ -150,7 +150,7 @@ exports.EmpheqUtil = {
         var right = empheq.getProperty('right');
         if (left || right) {
             var table = empheq.Last;
-            var original = table.copy();
+            var original = ParseUtil_js_1.default.copyNode(table, parser);
             if (left)
                 this.left(table, original, left, parser);
             if (right)

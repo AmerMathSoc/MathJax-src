@@ -21,6 +21,7 @@ declare namespace ParseUtil {
     function addArgs(parser: TexParser, s1: string, s2: string): string;
     function checkMaxMacros(parser: TexParser, isMacro?: boolean): void;
     function checkEqnEnv(parser: TexParser): void;
+    function copyNode(node: MmlNode, parser: TexParser): MmlNode;
     function MmlFilterAttribute(_parser: TexParser, _name: string, value: string): string;
     function getFontDef(parser: TexParser): EnvList;
     function keyvalOptions(attrib: string, allowed?: {

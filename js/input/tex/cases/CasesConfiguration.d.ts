@@ -13,8 +13,8 @@ export declare class CasesTags extends AmsTags {
     autoTag(): void;
     formatNumber(n: number, m?: number): string;
 }
-export declare const NumcasesMethods: {
+export declare const CasesMethods: {
     NumCases(parser: TexParser, begin: CasesBeginItem): EqnArrayItem;
     Entry(parser: TexParser, name: string): import("../Types.js").ParseResult;
 };
-export declare const NumcasesConfiguration: Configuration;
+export declare const CasesConfiguration: Configuration;

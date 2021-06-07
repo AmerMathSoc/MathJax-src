@@ -16,7 +16,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NumcasesConfiguration = exports.NumcasesMethods = exports.CasesTags = exports.CasesBeginItem = void 0;
+exports.CasesConfiguration = exports.CasesMethods = exports.CasesTags = exports.CasesBeginItem = void 0;
 var Configuration_js_1 = require("../Configuration.js");
 var SymbolMap_js_1 = require("../SymbolMap.js");
 var ParseUtil_js_1 = require("../ParseUtil.js");
@@ -82,14 +82,14 @@ var CasesTags = (function (_super) {
     return CasesTags;
 }(AmsConfiguration_js_1.AmsTags));
 exports.CasesTags = CasesTags;
-exports.NumcasesMethods = {
+exports.CasesMethods = {
     NumCases: function (parser, begin) {
         if (parser.stack.env.closing === begin.getName()) {
             delete parser.stack.env.closing;
             parser.Push(parser.itemFactory.create('end').setProperty('name', begin.getName()));
             var cases = parser.stack.Top();
             var table = cases.Last;
-            var original = table.copy();
+            var original = ParseUtil_js_1.default.copyNode(table, parser);
             var left = cases.getProperty('left');
             EmpheqUtil_js_1.EmpheqUtil.left(table, original, left + '\\empheqlbrace\\,', parser, 'numcases-left');
             parser.Push(parser.itemFactory.create('end').setProperty('name', begin.getName()));
@@ -152,11 +152,11 @@ exports.NumcasesMethods = {
 new SymbolMap_js_1.EnvironmentMap('cases-env', EmpheqUtil_js_1.EmpheqUtil.environment, {
     numcases: ['NumCases', 'cases'],
     subnumcases: ['NumCases', 'cases']
-}, exports.NumcasesMethods);
+}, exports.CasesMethods);
 new SymbolMap_js_1.MacroMap('cases-macros', {
     '&': 'Entry'
-}, exports.NumcasesMethods);
-exports.NumcasesConfiguration = Configuration_js_1.Configuration.create('cases', {
+}, exports.CasesMethods);
+exports.CasesConfiguration = Configuration_js_1.Configuration.create('cases', {
     handler: {
         environment: ['cases-env'],
         character: ['cases-macros']
