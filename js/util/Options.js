@@ -32,7 +32,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
     return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.lookup = exports.separateOptions = exports.selectOptionsFromKeys = exports.selectOptions = exports.userOptions = exports.defaultOptions = exports.insert = exports.copy = exports.keys = exports.makeArray = exports.expandable = exports.Expandable = exports.REMOVE = exports.APPEND = exports.isObject = void 0;
+exports.lookup = exports.separateOptions = exports.selectOptionsFromKeys = exports.selectOptions = exports.userOptions = exports.defaultOptions = exports.insert = exports.copy = exports.keys = exports.makeArray = exports.expandable = exports.Expandable = exports.OPTIONS = exports.REMOVE = exports.APPEND = exports.isObject = void 0;
 var OBJECT = {}.constructor;
 function isObject(obj) {
     return typeof obj === 'object' && obj !== null &&
@@ -41,6 +41,15 @@ function isObject(obj) {
 exports.isObject = isObject;
 exports.APPEND = '[+]';
 exports.REMOVE = '[-]';
+exports.OPTIONS = {
+    invalidOption: 'warn',
+    optionError: function (message, _key) {
+        if (exports.OPTIONS.invalidOption === 'fatal') {
+            throw new Error(message);
+        }
+        console.warn('MathJax: ' + message);
+    }
+};
 var Expandable = (function () {
     function Expandable() {
     }
@@ -99,7 +108,8 @@ function insert(dst, src, warn) {
             if (typeof key === 'symbol') {
                 key = key.toString();
             }
-            throw new Error('Invalid option "' + key + '" (no default value).');
+            exports.OPTIONS.optionError("Invalid option \"" + key + "\" (no default value).", key);
+            return "continue";
         }
         var sval = src[key], dval = dst[key];
         if (isObject(sval) && dval !== null &&

@@ -526,6 +526,9 @@ BaseMethods.Hskip = function (parser, name) {
     var node = parser.create('node', 'mspace', [], { width: parser.GetDimen(name) });
     parser.Push(node);
 };
+BaseMethods.Nonscript = function (parser, _name) {
+    parser.Push(parser.itemFactory.create('nonscript'));
+};
 BaseMethods.Rule = function (parser, name, style) {
     var w = parser.GetDimen(name), h = parser.GetDimen(name), d = parser.GetDimen(name);
     var def = { width: w, height: h, depth: d };

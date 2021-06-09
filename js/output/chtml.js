@@ -78,7 +78,7 @@ var CHTML = (function (_super) {
         return sheet;
     };
     CHTML.prototype.updateFontStyles = function (styles) {
-        styles.addStyles(this.font.updateStyles());
+        styles.addStyles(this.font.updateStyles({}));
     };
     CHTML.prototype.addWrapperStyles = function (styles) {
         var e_1, _a;

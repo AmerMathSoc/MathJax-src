@@ -89,6 +89,10 @@ export declare class NotItem extends BaseItem {
     get kind(): string;
     checkItem(item: StackItem): CheckType;
 }
+export declare class NonscriptItem extends BaseItem {
+    get kind(): string;
+    checkItem(item: StackItem): CheckType;
+}
 export declare class DotsItem extends BaseItem {
     get kind(): string;
     checkItem(item: StackItem): CheckType;

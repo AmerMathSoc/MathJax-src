@@ -470,6 +470,7 @@ new sm.CommandMap('macros', {
     rule: 'rule',
     Rule: ['Rule'],
     Space: ['Rule', 'blank'],
+    nonscript: 'Nonscript',
     big: ['MakeBig', MmlNode_js_1.TEXCLASS.ORD, 0.85],
     Big: ['MakeBig', MmlNode_js_1.TEXCLASS.ORD, 1.15],
     bigg: ['MakeBig', MmlNode_js_1.TEXCLASS.ORD, 1.45],

@@ -122,18 +122,14 @@ var CHTMLFontData = (function (_super) {
             var CLASS = this.constructor;
             var styles = __assign({}, CLASS.defaultStyles);
             this.addFontURLs(styles, CLASS.defaultFonts, this.options.fontURL);
-            this.addDelimiterCharStyles(styles);
-            this.addVariantCharStyles(styles);
-            this.delimUsage.update();
-            this.charUsage.update();
+            this.updateStyles(styles);
             return styles;
         },
         enumerable: false,
         configurable: true
     });
-    CHTMLFontData.prototype.updateStyles = function () {
+    CHTMLFontData.prototype.updateStyles = function (styles) {
         var e_2, _a, e_3, _b;
-        var styles = {};
         try {
             for (var _c = __values(this.delimUsage.update()), _d = _c.next(); !_d.done; _d = _c.next()) {
                 var N = _d.value;
@@ -163,16 +159,14 @@ var CHTMLFontData = (function (_super) {
         }
         return styles;
     };
-    CHTMLFontData.prototype.addDelimiterCharStyles = function (styles) {
+    CHTMLFontData.prototype.addFontURLs = function (styles, fonts, url) {
         var e_4, _a;
-        var allCSS = !this.options.adaptiveCSS;
         try {
-            for (var _b = __values(Object.keys(this.delimiters)), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var n = _c.value;
-                var N = parseInt(n);
-                if (allCSS || this.delimUsage.has(N)) {
-                    this.addDelimiterStyles(styles, N, this.delimiters[N]);
-                }
+            for (var _b = __values(Object.keys(fonts)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var name_2 = _c.value;
+                var font = __assign({}, fonts[name_2]);
+                font.src = font.src.replace(/%%URL%%/, url);
+                styles[name_2] = font;
             }
         }
         catch (e_4_1) { e_4 = { error: e_4_1 }; }
@@ -181,64 +175,6 @@ var CHTMLFontData = (function (_super) {
                 if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
             finally { if (e_4) throw e_4.error; }
-        }
-    };
-    CHTMLFontData.prototype.addVariantCharStyles = function (styles) {
-        var e_5, _a, e_6, _b;
-        var allCSS = !this.options.adaptiveCSS;
-        try {
-            for (var _c = __values(Object.keys(this.variant)), _d = _c.next(); !_d.done; _d = _c.next()) {
-                var name_2 = _d.value;
-                var variant = this.variant[name_2];
-                var vletter = variant.letter;
-                try {
-                    for (var _e = (e_6 = void 0, __values(Object.keys(variant.chars))), _f = _e.next(); !_f.done; _f = _e.next()) {
-                        var n = _f.value;
-                        var N = parseInt(n);
-                        var char = variant.chars[N];
-                        if ((char[3] || {}).smp)
-                            continue;
-                        if (allCSS && char.length < 4) {
-                            char[3] = {};
-                        }
-                        if (allCSS || this.charUsage.has([name_2, N])) {
-                            this.addCharStyles(styles, vletter, N, char);
-                        }
-                    }
-                }
-                catch (e_6_1) { e_6 = { error: e_6_1 }; }
-                finally {
-                    try {
-                        if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
-                    }
-                    finally { if (e_6) throw e_6.error; }
-                }
-            }
-        }
-        catch (e_5_1) { e_5 = { error: e_5_1 }; }
-        finally {
-            try {
-                if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
-            }
-            finally { if (e_5) throw e_5.error; }
-        }
-    };
-    CHTMLFontData.prototype.addFontURLs = function (styles, fonts, url) {
-        var e_7, _a;
-        try {
-            for (var _b = __values(Object.keys(fonts)), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var name_3 = _c.value;
-                var font = __assign({}, fonts[name_3]);
-                font.src = font.src.replace(/%%URL%%/, url);
-                styles[name_3] = font;
-            }
-        }
-        catch (e_7_1) { e_7 = { error: e_7_1 }; }
-        finally {
-            try {
-                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
-            }
-            finally { if (e_7) throw e_7.error; }
         }
     };
     CHTMLFontData.prototype.addDelimiterStyles = function (styles, n, data) {
@@ -371,7 +307,7 @@ var CHTMLFontData = (function (_super) {
 }(FontData_js_1.FontData));
 exports.CHTMLFontData = CHTMLFontData;
 function AddCSS(font, options) {
-    var e_8, _a;
+    var e_5, _a;
     try {
         for (var _b = __values(Object.keys(options)), _c = _b.next(); !_c.done; _c = _b.next()) {
             var c = _c.value;
@@ -379,12 +315,12 @@ function AddCSS(font, options) {
             Object.assign(FontData_js_1.FontData.charOptions(font, n), options[n]);
         }
     }
-    catch (e_8_1) { e_8 = { error: e_8_1 }; }
+    catch (e_5_1) { e_5 = { error: e_5_1 }; }
     finally {
         try {
             if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
         }
-        finally { if (e_8) throw e_8.error; }
+        finally { if (e_5) throw e_5.error; }
     }
     return font;
 }

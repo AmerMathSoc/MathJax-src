@@ -36,7 +36,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
     return to;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EquationItem = exports.EqnArrayItem = exports.ArrayItem = exports.DotsItem = exports.NotItem = exports.FnItem = exports.MmlItem = exports.CellItem = exports.PositionItem = exports.StyleItem = exports.EndItem = exports.BeginItem = exports.RightItem = exports.Middle = exports.LeftItem = exports.OverItem = exports.SubsupItem = exports.PrimeItem = exports.CloseItem = exports.OpenItem = exports.StopItem = exports.StartItem = void 0;
+exports.EquationItem = exports.EqnArrayItem = exports.ArrayItem = exports.DotsItem = exports.NonscriptItem = exports.NotItem = exports.FnItem = exports.MmlItem = exports.CellItem = exports.PositionItem = exports.StyleItem = exports.EndItem = exports.BeginItem = exports.RightItem = exports.Middle = exports.LeftItem = exports.OverItem = exports.SubsupItem = exports.PrimeItem = exports.CloseItem = exports.OpenItem = exports.StopItem = exports.StartItem = void 0;
 var MapHandler_js_1 = require("../MapHandler.js");
 var Entities_js_1 = require("../../../util/Entities.js");
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
@@ -621,6 +621,37 @@ var NotItem = (function (_super) {
     return NotItem;
 }(StackItem_js_1.BaseItem));
 exports.NotItem = NotItem;
+var NonscriptItem = (function (_super) {
+    __extends(NonscriptItem, _super);
+    function NonscriptItem() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(NonscriptItem.prototype, "kind", {
+        get: function () {
+            return 'nonscript';
+        },
+        enumerable: false,
+        configurable: true
+    });
+    NonscriptItem.prototype.checkItem = function (item) {
+        if (item.isKind('mml') && item.Size() === 1) {
+            var mml = item.First;
+            if (mml.isKind('mstyle') && mml.notParent) {
+                mml = NodeUtil_js_1.default.getChildren(NodeUtil_js_1.default.getChildren(mml)[0])[0];
+            }
+            if (mml.isKind('mspace')) {
+                if (mml !== item.First) {
+                    var mrow = this.create('node', 'mrow', [item.Pop()]);
+                    item.Push(mrow);
+                }
+                this.factory.configuration.addNode('nonscript', item.First);
+            }
+        }
+        return [[item], true];
+    };
+    return NonscriptItem;
+}(StackItem_js_1.BaseItem));
+exports.NonscriptItem = NonscriptItem;
 var DotsItem = (function (_super) {
     __extends(DotsItem, _super);
     function DotsItem() {

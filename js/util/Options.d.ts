@@ -4,6 +4,10 @@ export declare type OptionList = {
 };
 export declare const APPEND = "[+]";
 export declare const REMOVE = "[-]";
+export declare const OPTIONS: {
+    invalidOption: "warn" | "fatal";
+    optionError: (message: string, _key: string) => void;
+};
 export declare class Expandable {
 }
 export declare function expandable(def: OptionList): any;

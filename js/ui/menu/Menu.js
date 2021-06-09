@@ -573,6 +573,7 @@ var Menu = (function () {
             var document = _this.document;
             _this.document = startup.document = startup.getDocument();
             _this.document.menu = _this;
+            _this.document.outputJax.reset();
             _this.transferMathList(document);
             _this.document.processed = document.processed;
             if (!Menu._loadingPromise) {
