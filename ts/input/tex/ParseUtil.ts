@@ -30,8 +30,8 @@ import NodeUtil from './NodeUtil.js';
 import TexParser from './TexParser.js';
 import TexError from './TexError.js';
 import {entities} from '../../util/Entities.js';
-import {em} from '../../util/lengths.js';
 import {MmlMunderover} from '../../core/MmlTree/MmlNodes/munderover.js';
+import {em} from '../../util/lengths.js';
 
 
 namespace ParseUtil {
