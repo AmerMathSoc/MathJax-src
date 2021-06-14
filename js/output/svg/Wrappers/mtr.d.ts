@@ -1,5 +1,4 @@
 import { SVGConstructor, Constructor } from '../Wrapper.js';
-import { SVGmtable } from './mtable.js';
 import { SVGmtd } from './mtd.js';
 export declare type SizeData = {
     x: number;
@@ -13,7 +12,6 @@ export declare type SizeData = {
 declare const SVGmtr_base: import("../../common/Wrappers/mtr.js").MtrConstructor<SVGmtd<any, any, any>> & SVGConstructor<any, any, any>;
 export declare class SVGmtr<N, T, D> extends SVGmtr_base {
     static kind: string;
-    parent: SVGmtable<N, T, D>;
     H: number;
     D: number;
     tSpace: number;

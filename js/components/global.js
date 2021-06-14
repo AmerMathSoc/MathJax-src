@@ -78,7 +78,7 @@ if (typeof global.MathJax === 'undefined') {
 }
 if (!global.MathJax.version) {
     global.MathJax = {
-        version: '3.1.4',
+        version: '3.2.0',
         _: {},
         config: global.MathJax
     };

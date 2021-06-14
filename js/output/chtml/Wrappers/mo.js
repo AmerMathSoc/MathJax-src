@@ -76,6 +76,7 @@ var CHTMLmo = (function (_super) {
     CHTMLmo.prototype.stretchHTML = function (chtml) {
         var c = this.getText().codePointAt(0);
         this.font.delimUsage.add(c);
+        this.childNodes[0].markUsed();
         var delim = this.stretch;
         var stretch = delim.stretch;
         var content = [];
@@ -123,7 +124,8 @@ var CHTMLmo = (function (_super) {
             width: 'initial'
         },
         'mjx-stretchy-h > mjx-ext': {
-            overflow: 'hidden',
+            '/* IE */ overflow': 'hidden',
+            '/* others */ overflow': 'clip visible',
             width: '100%'
         },
         'mjx-stretchy-h > mjx-ext > mjx-c::before': {
@@ -160,7 +162,8 @@ var CHTMLmo = (function (_super) {
             height: '100%',
             'box-sizing': 'border-box',
             border: '0px solid transparent',
-            overflow: 'hidden'
+            '/* IE */ overflow': 'hidden',
+            '/* others */ overflow': 'visible clip',
         },
         'mjx-stretchy-v > mjx-ext > mjx-c::before': {
             width: 'initial',

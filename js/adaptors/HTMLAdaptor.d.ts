@@ -30,7 +30,7 @@ export interface MinHTMLElement<N, T> {
     classList: DOMTokenList;
     style: OptionList;
     sheet?: {
-        insertRule: (rule: string) => void;
+        insertRule: (rule: string, index?: number) => void;
     };
     childNodes: (N | T)[] | NodeList;
     firstChild: N | T | Node;

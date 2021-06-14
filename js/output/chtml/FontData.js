@@ -180,6 +180,7 @@ var CHTMLFontData = (function (_super) {
     CHTMLFontData.prototype.addDelimiterStyles = function (styles, n, data) {
         var c = this.charSelector(n);
         if (data.c && data.c !== n) {
+            c = this.charSelector(data.c);
             styles['.mjx-stretched mjx-c' + c + '::before'] = {
                 content: this.charContent(data.c)
             };

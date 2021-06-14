@@ -124,8 +124,10 @@ var SpeechExplorer = (function (_super) {
     SpeechExplorer.prototype.Update = function (force) {
         if (force === void 0) { force = false; }
         _super.prototype.Update.call(this, force);
-        this.region.Update(this.walker.speech());
         var options = this.speechGenerator.getOptions();
+        SRE.setupEngine({ modality: options.modality,
+            locale: options.locale });
+        this.region.Update(this.walker.speech());
         if (options.modality === 'speech') {
             this.document.options.sre.domain = options.domain;
             this.document.options.sre.style = options.style;

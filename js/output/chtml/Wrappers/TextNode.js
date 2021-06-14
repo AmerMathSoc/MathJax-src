@@ -55,7 +55,7 @@ var CHTMLTextNode = (function (_super) {
                         this.jax.unknownText(String.fromCodePoint(n), variant) :
                         this.html('mjx-c', { class: this.char(n) + font }));
                     adaptor.append(parent, node);
-                    this.font.charUsage.add([variant, n]);
+                    !data.unknown && this.font.charUsage.add([variant, n]);
                 }
             }
             catch (e_1_1) { e_1 = { error: e_1_1 }; }

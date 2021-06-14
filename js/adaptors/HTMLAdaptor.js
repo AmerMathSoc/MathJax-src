@@ -214,7 +214,12 @@ var HTMLAdaptor = (function (_super) {
         try {
             for (var _b = __values(rules.reverse()), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var rule = _c.value;
-                node.sheet.insertRule(rule);
+                try {
+                    node.sheet.insertRule(rule, 0);
+                }
+                catch (e) {
+                    console.warn("MathJax: can't insert css rule '" + rule + "': " + e.message);
+                }
             }
         }
         catch (e_2_1) { e_2 = { error: e_2_1 }; }

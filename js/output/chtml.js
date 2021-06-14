@@ -161,7 +161,7 @@ var CHTML = (function (_super) {
         return { w: w, h: .75, d: .2 };
     };
     CHTML.NAME = 'CHTML';
-    CHTML.OPTIONS = __assign(__assign({}, OutputJax_js_1.CommonOutputJax.OPTIONS), { adaptiveCSS: true });
+    CHTML.OPTIONS = __assign(__assign({}, OutputJax_js_1.CommonOutputJax.OPTIONS), { adaptiveCSS: true, matchFontHeight: true });
     CHTML.commonStyles = {
         'mjx-container[jax="CHTML"]': { 'line-height': 0 },
         'mjx-container [space="1"]': { 'margin-left': '.111em' },
@@ -200,7 +200,12 @@ var CHTML = (function (_super) {
             color: 'red',
             'background-color': 'yellow'
         },
-        'mjx-mphantom': { visibility: 'hidden' }
+        'mjx-mphantom': {
+            visibility: 'hidden'
+        },
+        '_::-webkit-full-page-media, _:future, :root mjx-container': {
+            'will-change': 'opacity'
+        }
     };
     CHTML.STYLESHEETID = 'MJX-CHTML-styles';
     return CHTML;

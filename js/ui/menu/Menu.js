@@ -1,4 +1,20 @@
 "use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
 var __values = (this && this.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
@@ -175,8 +191,12 @@ var Menu = (function () {
                 this.a11yVar('subtitles'),
                 this.a11yVar('braille'),
                 this.a11yVar('viewBraille'),
-                this.a11yVar('locale'),
-                this.a11yVar('speechRules'),
+                this.a11yVar('locale', function (value) { return SRE.setupEngine({ locale: value }); }),
+                this.a11yVar('speechRules', function (value) {
+                    var _a = __read(value.split('-'), 2), domain = _a[0], style = _a[1];
+                    _this.document.options.sre.domain = domain;
+                    _this.document.options.sre.style = style;
+                }),
                 this.a11yVar('magnification'),
                 this.a11yVar('magnify'),
                 this.a11yVar('treeColoring'),
@@ -577,6 +597,7 @@ var Menu = (function () {
             _this.transferMathList(document);
             _this.document.processed = document.processed;
             if (!Menu._loadingPromise) {
+                _this.document.outputJax.reset();
                 _this.rerender(component === 'complexity' || noEnrich ? MathItem_js_1.STATE.COMPILED : MathItem_js_1.STATE.TYPESET);
             }
         });
@@ -684,7 +705,7 @@ var Menu = (function () {
             }
         };
     };
-    Menu.prototype.a11yVar = function (name) {
+    Menu.prototype.a11yVar = function (name, action) {
         var _this = this;
         return {
             name: name,
@@ -694,6 +715,7 @@ var Menu = (function () {
                 var options = {};
                 options[name] = value;
                 _this.setA11y(options);
+                action && action(value);
                 _this.saveUserSettings();
             }
         };

@@ -32,7 +32,6 @@ var NodeUtil_js_1 = require("./NodeUtil.js");
 var TexParser_js_1 = require("./TexParser.js");
 var TexError_js_1 = require("./TexError.js");
 var Entities_js_1 = require("../../util/Entities.js");
-var lengths_js_1 = require("../../util/lengths.js");
 var ParseUtil;
 (function (ParseUtil) {
     var emPerInch = 7.2;
@@ -76,7 +75,10 @@ var ParseUtil;
     }
     ParseUtil.dimen2em = dimen2em;
     function Em(m) {
-        return lengths_js_1.em(m);
+        if (Math.abs(m) < .0006) {
+            return '0em';
+        }
+        return m.toFixed(3).replace(/\.?0+$/, '') + 'em';
     }
     ParseUtil.Em = Em;
     function cols() {
