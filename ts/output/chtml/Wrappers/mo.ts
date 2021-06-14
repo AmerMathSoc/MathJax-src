@@ -65,7 +65,8 @@ CommonMoMixin<CHTMLConstructor<any, any, any>>(CHTMLWrapper) {
       width: 'initial'
     },
     'mjx-stretchy-h > mjx-ext': {
-      overflow: 'hidden',
+      '/* IE */ overflow': 'hidden',
+      '/* others */ overflow': 'clip visible',
       width: '100%'
     },
     'mjx-stretchy-h > mjx-ext > mjx-c::before': {
@@ -103,7 +104,8 @@ CommonMoMixin<CHTMLConstructor<any, any, any>>(CHTMLWrapper) {
       height: '100%',
       'box-sizing': 'border-box',
       border: '0px solid transparent',
-      overflow: 'hidden'
+      '/* IE */ overflow': 'hidden',
+      '/* others */ overflow': 'visible clip',
     },
     'mjx-stretchy-v > mjx-ext > mjx-c::before': {
       width: 'initial',
@@ -158,6 +160,7 @@ CommonMoMixin<CHTMLConstructor<any, any, any>>(CHTMLWrapper) {
   protected stretchHTML(chtml: N) {
     const c = this.getText().codePointAt(0);
     this.font.delimUsage.add(c);
+    this.childNodes[0].markUsed();
     const delim = this.stretch;
     const stretch = delim.stretch;
     const content: N[] = [];
