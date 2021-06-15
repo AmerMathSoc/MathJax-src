@@ -88,8 +88,11 @@ function Mml3Handler(handler) {
                     for (var _b = __values(options.InputJax), _c = _b.next(); !_c.done; _c = _b.next()) {
                         var jax = _c.value;
                         if (jax.name === 'MathML') {
-                            var mml3 = new Mml3(_this);
-                            jax.preFilters.add(mml3.preFilter.bind(mml3));
+                            if (!jax.options._mml3) {
+                                var mml3 = new Mml3(_this);
+                                jax.preFilters.add(mml3.preFilter.bind(mml3));
+                                jax.options._mml3 = true;
+                            }
                             break;
                         }
                     }
