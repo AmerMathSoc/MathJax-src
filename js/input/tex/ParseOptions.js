@@ -81,7 +81,8 @@ var ParseOptions = (function () {
         }
         list.push(node);
         if (node.kind !== property) {
-            var lists = (NodeUtil_js_1.default.getProperty(node, 'in-lists') || '').split(',').concat(property).join(',');
+            var inlists = (NodeUtil_js_1.default.getProperty(node, 'in-lists') || '');
+            var lists = (inlists ? inlists.split(/,/) : []).concat(property).join(',');
             NodeUtil_js_1.default.setProperty(node, 'in-lists', lists);
         }
     };

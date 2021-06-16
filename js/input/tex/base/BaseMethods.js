@@ -356,18 +356,14 @@ BaseMethods.UnderOver = function (parser, name, c, stack) {
 BaseMethods.Overset = function (parser, name) {
     var top = parser.ParseArg(name);
     var base = parser.ParseArg(name);
-    if (NodeUtil_js_1.default.getAttribute(base, 'movablelimits') || NodeUtil_js_1.default.getProperty(base, 'movablelimits')) {
-        NodeUtil_js_1.default.setProperties(base, { 'movablelimits': false });
-    }
+    ParseUtil_js_1.default.checkMovableLimits(base);
     var node = parser.create('node', 'mover', [base, top]);
     parser.Push(node);
 };
 BaseMethods.Underset = function (parser, name) {
     var bot = parser.ParseArg(name);
     var base = parser.ParseArg(name);
-    if (NodeUtil_js_1.default.isType(base, 'mo') || NodeUtil_js_1.default.getProperty(base, 'movablelimits')) {
-        NodeUtil_js_1.default.setProperties(base, { 'movablelimits': false });
-    }
+    ParseUtil_js_1.default.checkMovableLimits(base);
     var node = parser.create('node', 'munder', [base, bot]);
     parser.Push(node);
 };
@@ -375,9 +371,7 @@ BaseMethods.Overunderset = function (parser, name) {
     var top = parser.ParseArg(name);
     var bot = parser.ParseArg(name);
     var base = parser.ParseArg(name);
-    if (NodeUtil_js_1.default.isType(base, 'mo') || NodeUtil_js_1.default.getProperty(base, 'movablelimits')) {
-        NodeUtil_js_1.default.setProperties(base, { 'movablelimits': false });
-    }
+    ParseUtil_js_1.default.checkMovableLimits(base);
     var node = parser.create('node', 'munderover', [base, bot, top]);
     parser.Push(node);
 };

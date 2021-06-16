@@ -50,7 +50,8 @@ exports.MO = {
 };
 exports.RANGES = [
     [0x0020, 0x007F, MmlNode_js_1.TEXCLASS.REL, 'mo'],
-    [0x00A0, 0x024F, MmlNode_js_1.TEXCLASS.ORD, 'mi'],
+    [0x00A0, 0x00BF, MmlNode_js_1.TEXCLASS.ORD, 'mo'],
+    [0x00C0, 0x024F, MmlNode_js_1.TEXCLASS.ORD, 'mi'],
     [0x02B0, 0x036F, MmlNode_js_1.TEXCLASS.ORD, 'mo'],
     [0x0370, 0x1A20, MmlNode_js_1.TEXCLASS.ORD, 'mi'],
     [0x1AB0, 0x1AFF, MmlNode_js_1.TEXCLASS.ORD, 'mo'],

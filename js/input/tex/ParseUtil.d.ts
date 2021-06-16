@@ -15,6 +15,7 @@ declare namespace ParseUtil {
     function internalMath(parser: TexParser, text: string, level?: number | string, font?: string): MmlNode[];
     function internalText(parser: TexParser, text: string, def: EnvList): MmlNode;
     function underOver(parser: TexParser, base: MmlNode, script: MmlNode, pos: string, stack: boolean): MmlNode;
+    function checkMovableLimits(base: MmlNode): void;
     function trimSpaces(text: string): string;
     function setArrayAlign(array: ArrayItem, align: string): ArrayItem;
     function substituteArgs(parser: TexParser, args: string[], str: string): string;

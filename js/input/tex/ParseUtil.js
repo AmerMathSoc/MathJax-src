@@ -255,10 +255,7 @@ var ParseUtil;
     }
     ParseUtil.internalText = internalText;
     function underOver(parser, base, script, pos, stack) {
-        var symbol = NodeUtil_js_1.default.getForm(base);
-        if ((symbol && symbol[3] && symbol[3]['movablelimits']) || NodeUtil_js_1.default.getProperty(base, 'movablelimits')) {
-            NodeUtil_js_1.default.setProperties(base, { 'movablelimits': false });
-        }
+        ParseUtil.checkMovableLimits(base);
         if (NodeUtil_js_1.default.isType(base, 'munderover') && NodeUtil_js_1.default.isEmbellished(base)) {
             NodeUtil_js_1.default.setProperties(NodeUtil_js_1.default.getCoreMO(base), { lspace: 0, rspace: 0 });
             var mo = parser.create('node', 'mo', [], { rspace: 0 });
@@ -274,6 +271,13 @@ var ParseUtil;
         return node;
     }
     ParseUtil.underOver = underOver;
+    function checkMovableLimits(base) {
+        var symbol = (NodeUtil_js_1.default.isType(base, 'mo') ? NodeUtil_js_1.default.getForm(base) : null);
+        if (NodeUtil_js_1.default.getProperty(base, 'movablelimits') || (symbol && symbol[3] && symbol[3].movablelimits)) {
+            NodeUtil_js_1.default.setProperties(base, { movablelimits: false });
+        }
+    }
+    ParseUtil.checkMovableLimits = checkMovableLimits;
     function trimSpaces(text) {
         if (typeof (text) !== 'string') {
             return text;
