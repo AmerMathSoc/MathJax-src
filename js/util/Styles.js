@@ -333,7 +333,7 @@ var Styles = (function () {
                     var name_2 = _c.value;
                     var parent_1 = this.parentName(name_2);
                     if (!this.styles[parent_1]) {
-                        styles.push(name_2 + ': ' + this.styles[name_2]);
+                        styles.push(name_2 + ': ' + this.styles[name_2] + ';');
                     }
                 }
             }
@@ -344,7 +344,7 @@ var Styles = (function () {
                 }
                 finally { if (e_11) throw e_11.error; }
             }
-            return styles.join('; ');
+            return styles.join(' ');
         },
         enumerable: false,
         configurable: true
