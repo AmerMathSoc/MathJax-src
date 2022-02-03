@@ -357,6 +357,9 @@ BaseMethods.Overset = function (parser, name) {
     var top = parser.ParseArg(name);
     var base = parser.ParseArg(name);
     ParseUtil_js_1.default.checkMovableLimits(base);
+    if (top.isKind('mo')) {
+        NodeUtil_js_1.default.setAttribute(top, 'accent', false);
+    }
     var node = parser.create('node', 'mover', [base, top]);
     parser.Push(node);
 };
@@ -364,7 +367,10 @@ BaseMethods.Underset = function (parser, name) {
     var bot = parser.ParseArg(name);
     var base = parser.ParseArg(name);
     ParseUtil_js_1.default.checkMovableLimits(base);
-    var node = parser.create('node', 'munder', [base, bot]);
+    if (bot.isKind('mo')) {
+        NodeUtil_js_1.default.setAttribute(bot, 'accent', false);
+    }
+    var node = parser.create('node', 'munder', [base, bot], { underaccent: false });
     parser.Push(node);
 };
 BaseMethods.Overunderset = function (parser, name) {
@@ -372,7 +378,13 @@ BaseMethods.Overunderset = function (parser, name) {
     var bot = parser.ParseArg(name);
     var base = parser.ParseArg(name);
     ParseUtil_js_1.default.checkMovableLimits(base);
-    var node = parser.create('node', 'munderover', [base, bot, top]);
+    if (top.isKind('mo')) {
+        NodeUtil_js_1.default.setAttribute(top, 'accent', false);
+    }
+    if (bot.isKind('mo')) {
+        NodeUtil_js_1.default.setAttribute(bot, 'accent', false);
+    }
+    var node = parser.create('node', 'munderover', [base, bot, top], { accent: false, underaccent: false });
     parser.Push(node);
 };
 BaseMethods.TeXAtom = function (parser, name, mclass) {
@@ -405,6 +417,7 @@ BaseMethods.MmlToken = function (parser, name) {
     var attr = parser.GetBrackets(name, '').replace(/^\s+/, '');
     var text = parser.GetArgument(name);
     var def = {};
+    var keep = [];
     var node;
     try {
         node = parser.create('node', kind);
@@ -432,8 +445,12 @@ BaseMethods.MmlToken = function (parser, name) {
                 value = false;
             }
             def[match[1]] = value;
+            keep.push(match[1]);
         }
         attr = attr.substr(match[0].length);
+    }
+    if (keep.length) {
+        def['mjx-keep-attrs'] = keep.join(' ');
     }
     var textNode = parser.create('text', text);
     node.appendChild(textNode);

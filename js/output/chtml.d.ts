@@ -18,7 +18,6 @@ export declare class CHTML<N, T, D> extends CommonOutputJax<N, T, D, CHTMLWrappe
     wrapperUsage: Usage<string>;
     chtmlStyles: N;
     constructor(options?: OptionList);
-    initialize(): void;
     escaped(math: MathItem<N, T, D>, html: MathDocument<N, T, D>): N;
     styleSheet(html: MathDocument<N, T, D>): N;
     protected updateFontStyles(styles: CssStyles): void;

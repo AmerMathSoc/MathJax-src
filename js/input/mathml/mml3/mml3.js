@@ -14,6 +14,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -58,39 +69,39 @@ var Mml3 = (function () {
             var processor_1 = new XSLTProcessor();
             var parsed = document.adaptor.parse(Mml3.XSLT, 'text/xml');
             processor_1.importStylesheet(parsed);
-            this.transform = function (mml) {
-                var adaptor = document.adaptor;
-                var parsed = adaptor.parse(mml);
-                var xml = processor_1.transformToDocument(parsed);
-                return adaptor.serializeXML(adaptor.body(xml));
+            this.transform = function (node) {
+                var div = document.adaptor.node('div', {}, [document.adaptor.clone(node)]);
+                var mml = processor_1.transformToDocument(div);
+                return document.adaptor.firstChild(mml);
             };
         }
     }
-    Mml3.prototype.preFilter = function (args) {
-        args.data = this.transform(args.data);
+    Mml3.prototype.mmlFilter = function (args) {
+        if (args.document.options.enableMml3) {
+            args.data = this.transform(args.data, args.document);
+        }
     };
     return Mml3;
 }());
 exports.Mml3 = Mml3;
 function Mml3Handler(handler) {
-    handler.documentClass = (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
-            var e_1, _a;
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
-            }
-            var _this = _super.apply(this, __spreadArray([], __read(args))) || this;
-            var options = args[2];
-            if (options.InputJax) {
+    var _a;
+    handler.documentClass = (_a = (function (_super) {
+            __extends(class_1, _super);
+            function class_1() {
+                var e_1, _a;
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                var _this = _super.apply(this, __spreadArray([], __read(args))) || this;
                 try {
-                    for (var _b = __values(options.InputJax), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    for (var _b = __values(_this.inputJax || []), _c = _b.next(); !_c.done; _c = _b.next()) {
                         var jax = _c.value;
                         if (jax.name === 'MathML') {
                             if (!jax.options._mml3) {
                                 var mml3 = new Mml3(_this);
-                                jax.preFilters.add(mml3.preFilter.bind(mml3));
+                                jax.mmlFilters.add(mml3.mmlFilter.bind(mml3));
                                 jax.options._mml3 = true;
                             }
                             break;
@@ -104,11 +115,12 @@ function Mml3Handler(handler) {
                     }
                     finally { if (e_1) throw e_1.error; }
                 }
+                return _this;
             }
-            return _this;
-        }
-        return class_1;
-    }(handler.documentClass));
+            return class_1;
+        }(handler.documentClass)),
+        _a.OPTIONS = __assign(__assign({}, handler.documentClass.OPTIONS), { enableMml3: true }),
+        _a);
     return handler;
 }
 exports.Mml3Handler = Mml3Handler;

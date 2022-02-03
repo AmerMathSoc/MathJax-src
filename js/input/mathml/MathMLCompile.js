@@ -55,7 +55,7 @@ var MathMLCompile = (function () {
         try {
             for (var _b = __values(this.filterClassList(adaptor.allClasses(node))), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var name_1 = _c.value;
-                if (name_1.match(/^MJX-TeXAtom-/)) {
+                if (name_1.match(/^MJX-TeXAtom-/) && kind === 'mrow') {
                     texClass = name_1.substr(12);
                     type = 'TeXAtom';
                 }

@@ -81,6 +81,7 @@ var CHTMLmover = (function (_super) {
         this.baseChild.toCHTML(base);
         var overbox = this.scriptChild.getBBox();
         var basebox = this.baseChild.getBBox();
+        this.adjustBaseHeight(base, basebox);
         var k = this.getOverKU(basebox, overbox)[0];
         var delta = (this.isLineAbove ? 0 : this.getDelta());
         this.adaptor.setStyle(over, 'paddingBottom', this.em(k));
@@ -122,6 +123,7 @@ var CHTMLmunderover = (function (_super) {
         var overbox = this.overChild.getBBox();
         var basebox = this.baseChild.getBBox();
         var underbox = this.underChild.getBBox();
+        this.adjustBaseHeight(base, basebox);
         var ok = this.getOverKU(basebox, overbox)[0];
         var uk = this.getUnderKV(basebox, underbox)[0];
         var delta = this.getDelta();

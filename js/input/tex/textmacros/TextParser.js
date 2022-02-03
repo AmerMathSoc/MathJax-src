@@ -113,6 +113,9 @@ var TextParser = (function (_super) {
     TextParser.prototype.PushMath = function (mml) {
         var e_1, _a;
         var env = this.stack.env;
+        if (!mml.isKind('TeXAtom')) {
+            mml = this.create('node', 'TeXAtom', [mml]);
+        }
         try {
             for (var _b = __values(['mathsize', 'mathcolor']), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var name_1 = _c.value;

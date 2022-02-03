@@ -65,9 +65,8 @@ var SVG = (function (_super) {
     }
     SVG.prototype.initialize = function () {
         if (this.options.fontCache === 'global') {
-            this.clearFontCache();
+            this.fontCache.clearCache();
         }
-        this.svgStyles = null;
     };
     SVG.prototype.clearFontCache = function () {
         this.fontCache.clearCache();

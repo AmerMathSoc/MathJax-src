@@ -52,10 +52,12 @@ var FilterUtil;
             if (!attribs) {
                 return;
             }
+            var keep = new Set((attribs.get('mjx-keep-attrs') || '').split(/ /));
+            delete (attribs.getAllAttributes())['mjx-keep-attrs'];
             try {
                 for (var _b = __values(attribs.getExplicitNames()), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var key = _c.value;
-                    if (attribs.attributes[key] === mml.attributes.getInherited(key)) {
+                    if (!keep.has(key) && attribs.attributes[key] === mml.attributes.getInherited(key)) {
                         delete attribs.attributes[key];
                     }
                 }

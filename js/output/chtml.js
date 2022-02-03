@@ -55,9 +55,6 @@ var CHTML = (function (_super) {
         _this.wrapperUsage = new Usage_js_1.Usage();
         return _this;
     }
-    CHTML.prototype.initialize = function () {
-        this.chtmlStyles = null;
-    };
     CHTML.prototype.escaped = function (math, html) {
         this.setDocument(html);
         return this.html('span', {}, [this.text(math.math)]);

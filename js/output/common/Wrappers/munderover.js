@@ -105,6 +105,9 @@ function CommonMoverMixin(Base) {
             bbox.empty();
             var basebox = this.baseChild.getBBox();
             var overbox = this.scriptChild.getBBox();
+            if (this.node.attributes.get('accent')) {
+                basebox.h = Math.max(basebox.h, this.font.params.x_height * basebox.scale);
+            }
             var u = this.getOverKU(basebox, overbox)[1];
             var delta = (this.isLineAbove ? 0 : this.getDelta());
             var _a = __read(this.getDeltaW([basebox, overbox], [0, delta]), 2), bw = _a[0], ow = _a[1];
@@ -166,6 +169,9 @@ function CommonMunderoverMixin(Base) {
             var overbox = this.overChild.getBBox();
             var basebox = this.baseChild.getBBox();
             var underbox = this.underChild.getBBox();
+            if (this.node.attributes.get('accent')) {
+                basebox.h = Math.max(basebox.h, this.font.params.x_height * basebox.scale);
+            }
             var u = this.getOverKU(basebox, overbox)[1];
             var v = this.getUnderKV(basebox, underbox)[1];
             var delta = this.getDelta();
