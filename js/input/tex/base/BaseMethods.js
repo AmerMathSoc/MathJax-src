@@ -370,7 +370,7 @@ BaseMethods.Underset = function (parser, name) {
     if (bot.isKind('mo')) {
         NodeUtil_js_1.default.setAttribute(bot, 'accent', false);
     }
-    var node = parser.create('node', 'munder', [base, bot], { underaccent: false });
+    var node = parser.create('node', 'munder', [base, bot], { accentunder: false });
     parser.Push(node);
 };
 BaseMethods.Overunderset = function (parser, name) {
@@ -384,7 +384,7 @@ BaseMethods.Overunderset = function (parser, name) {
     if (bot.isKind('mo')) {
         NodeUtil_js_1.default.setAttribute(bot, 'accent', false);
     }
-    var node = parser.create('node', 'munderover', [base, bot, top], { accent: false, underaccent: false });
+    var node = parser.create('node', 'munderover', [base, bot, top], { accent: false, accentunder: false });
     parser.Push(node);
 };
 BaseMethods.TeXAtom = function (parser, name, mclass) {
