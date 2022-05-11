@@ -41,10 +41,14 @@ var __values = (this && this.__values) || function(o) {
     };
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from) {
-    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-    return to;
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EnvironmentMap = exports.CommandMap = exports.MacroMap = exports.DelimiterMap = exports.CharacterMap = exports.AbstractParseMap = exports.RegExpMap = exports.AbstractSymbolMap = void 0;
@@ -196,7 +200,7 @@ var MacroMap = (function (_super) {
         if (!macro || !parser) {
             return null;
         }
-        return parser.apply(void 0, __spreadArray([env, macro.symbol], __read(macro.args))) || true;
+        return parser.apply(void 0, __spreadArray([env, macro.symbol], __read(macro.args), false)) || true;
     };
     return MacroMap;
 }(AbstractParseMap));
@@ -218,7 +222,7 @@ var CommandMap = (function (_super) {
         }
         var saveCommand = env.currentCS;
         env.currentCS = '\\' + symbol;
-        var result = parser.apply(void 0, __spreadArray([env, '\\' + macro.symbol], __read(macro.args)));
+        var result = parser.apply(void 0, __spreadArray([env, '\\' + macro.symbol], __read(macro.args), false));
         env.currentCS = saveCommand;
         return result || true;
     };

@@ -52,10 +52,14 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from) {
-    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-    return to;
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.STIX2Font = void 0;
@@ -134,7 +138,7 @@ var STIX2Font = (function (_super) {
     };
     STIX2Font.defaultParams = __assign(__assign({}, FontData_js_1.SVGFontData.defaultParams), { separation_factor: 1.5 });
     STIX2Font.defaultDelimiters = delimiters_js_1.delimiters;
-    STIX2Font.defaultVariants = __spreadArray(__spreadArray([], __read(FontData_js_1.SVGFontData.defaultVariants)), [
+    STIX2Font.defaultVariants = __spreadArray(__spreadArray([], __read(FontData_js_1.SVGFontData.defaultVariants), false), [
         ['-tex-calligraphic', 'normal'],
         ['-tex-bold-calligraphic', 'normal'],
         ['-tex-oldstyle', 'normal'],
@@ -155,7 +159,7 @@ var STIX2Font = (function (_super) {
         ['-tex-variant', 'normal'],
         ['-extend', 'normal'],
         ['-double-struck-italic', 'normal']
-    ]);
+    ], false);
     STIX2Font.defaultCssFonts = __assign(__assign({}, FontData_js_1.SVGFontData.defaultCssFonts), { '-tex-calligraphic': ['serif', false, false], '-tex-bold-calligraphic': ['serif', false, false], '-tex-oldstyle': ['serif', false, false], '-tex-bold-oldstyle': ['serif', false, false], '-tex-mathit': ['serif', false, false], '-smallop': ['serif', false, false], '-largeop': ['serif', false, false], '-size3': ['serif', false, false], '-size4': ['serif', false, false], '-size5': ['serif', false, false], '-size6': ['serif', false, false], '-size7': ['serif', false, false], '-size8': ['serif', false, false], '-size9': ['serif', false, false], '-size10': ['serif', false, false], '-size11': ['serif', false, false], '-size12': ['serif', false, false], '-tex-variant': ['serif', false, false], '-extend': ['serif', false, false], '-double-struck-italic': ['serif', false, false] });
     STIX2Font.defaultChars = {
         'normal': normal_js_1.normal,
@@ -232,6 +236,6 @@ var STIX2Font = (function (_super) {
     STIX2Font.defaultSizeVariants = ['normal', '-smallop', '-largeop', '-size3', '-size4', '-size5', '-size6', '-size7', '-size8', '-size9', '-size10', '-size11', '-size12'];
     STIX2Font.defaultStretchVariants = ['-extend', 'normal', '-size4', '-smallop', '-tex-variant'];
     return STIX2Font;
-}(stix2_js_1.CommonSTIX2FontMixin(FontData_js_1.SVGFontData)));
+}((0, stix2_js_1.CommonSTIX2FontMixin)(FontData_js_1.SVGFontData)));
 exports.STIX2Font = STIX2Font;
 //# sourceMappingURL=stix2.js.map

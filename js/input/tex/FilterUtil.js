@@ -10,9 +10,12 @@ var __values = (this && this.__values) || function(o) {
     };
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var MmlNode_js_1 = require("../../core/MmlTree/MmlNode.js");
-var NodeUtil_js_1 = require("./NodeUtil.js");
+var NodeUtil_js_1 = __importDefault(require("./NodeUtil.js"));
 var FilterUtil;
 (function (FilterUtil) {
     FilterUtil.cleanStretchy = function (arg) {

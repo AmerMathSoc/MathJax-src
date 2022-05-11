@@ -3,7 +3,7 @@ export declare type OperatorDef = [number, number, number, PropertyList];
 export declare type OperatorList = {
     [name: string]: OperatorDef;
 };
-export declare type RangeDef = [number, number, number, string];
+export declare type RangeDef = [number, number, number, string, string?];
 export declare function OPDEF(lspace: number, rspace: number, texClass?: number, properties?: PropertyList): OperatorDef;
 export declare const MO: {
     ORD: OperatorDef;

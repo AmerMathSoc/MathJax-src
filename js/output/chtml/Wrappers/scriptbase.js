@@ -106,6 +106,6 @@ var CHTMLscriptbase = (function (_super) {
     };
     CHTMLscriptbase.kind = 'scriptbase';
     return CHTMLscriptbase;
-}(scriptbase_js_1.CommonScriptbaseMixin(Wrapper_js_1.CHTMLWrapper)));
+}((0, scriptbase_js_1.CommonScriptbaseMixin)(Wrapper_js_1.CHTMLWrapper)));
 exports.CHTMLscriptbase = CHTMLscriptbase;
 //# sourceMappingURL=scriptbase.js.map

@@ -31,7 +31,7 @@ var SVGmsqrt = (function (_super) {
         var base = this.childNodes[this.base];
         var root = (this.root ? this.childNodes[this.root] : null);
         var sbox = surd.getBBox();
-        var bbox = base.getBBox();
+        var bbox = base.getOuterBBox();
         var q = this.getPQ(sbox)[1];
         var t = this.font.params.rule_thickness * this.bbox.scale;
         var H = bbox.h + q + t;
@@ -51,6 +51,6 @@ var SVGmsqrt = (function (_super) {
     };
     SVGmsqrt.kind = msqrt_js_2.MmlMsqrt.prototype.kind;
     return SVGmsqrt;
-}(msqrt_js_1.CommonMsqrtMixin(Wrapper_js_1.SVGWrapper)));
+}((0, msqrt_js_1.CommonMsqrtMixin)(Wrapper_js_1.SVGWrapper)));
 exports.SVGmsqrt = SVGmsqrt;
 //# sourceMappingURL=msqrt.js.map

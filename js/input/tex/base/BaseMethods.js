@@ -10,6 +10,25 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -26,13 +45,16 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var sitem = require("./BaseItems.js");
-var NodeUtil_js_1 = require("../NodeUtil.js");
-var TexError_js_1 = require("../TexError.js");
-var TexParser_js_1 = require("../TexParser.js");
+var sitem = __importStar(require("./BaseItems.js"));
+var NodeUtil_js_1 = __importDefault(require("../NodeUtil.js"));
+var TexError_js_1 = __importDefault(require("../TexError.js"));
+var TexParser_js_1 = __importDefault(require("../TexParser.js"));
 var TexConstants_js_1 = require("../TexConstants.js");
-var ParseUtil_js_1 = require("../ParseUtil.js");
+var ParseUtil_js_1 = __importDefault(require("../ParseUtil.js"));
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
 var Tags_js_1 = require("../Tags.js");
 var lengths_js_1 = require("../../../util/lengths.js");
@@ -176,7 +198,7 @@ BaseMethods.Hash = function (_parser, _c) {
 };
 BaseMethods.MathFont = function (parser, name, variant) {
     var text = parser.GetArgument(name);
-    var mml = new TexParser_js_1.default(text, __assign(__assign({}, parser.stack.env), { font: variant, multiLetterIdentifiers: true }), parser.configuration).mml();
+    var mml = new TexParser_js_1.default(text, __assign(__assign({}, parser.stack.env), { font: variant, multiLetterIdentifiers: /^[a-zA-Z]+/, noAutoOP: true }), parser.configuration).mml();
     parser.Push(parser.create('node', 'TeXAtom', [mml]));
 };
 BaseMethods.SetFont = function (parser, _name, font) {
@@ -189,10 +211,10 @@ BaseMethods.SetStyle = function (parser, _name, texStyle, style, level) {
 };
 BaseMethods.SetSize = function (parser, _name, size) {
     parser.stack.env['size'] = size;
-    parser.Push(parser.itemFactory.create('style').setProperty('styles', { mathsize: lengths_js_1.em(size) }));
+    parser.Push(parser.itemFactory.create('style').setProperty('styles', { mathsize: (0, lengths_js_1.em)(size) }));
 };
 BaseMethods.Spacer = function (parser, _name, space) {
-    var node = parser.create('node', 'mspace', [], { width: lengths_js_1.em(space) });
+    var node = parser.create('node', 'mspace', [], { width: (0, lengths_js_1.em)(space) });
     var style = parser.create('node', 'mstyle', [node], { scriptlevel: 0 });
     parser.Push(style);
 };
@@ -603,7 +625,7 @@ BaseMethods.FrameBox = function (parser, name) {
     if (width) {
         mml = [parser.create('node', 'mpadded', mml, {
                 width: width,
-                'data-align': Options_js_1.lookup(pos, { l: 'left', r: 'right' }, 'center')
+                'data-align': (0, Options_js_1.lookup)(pos, { l: 'left', r: 'right' }, 'center')
             })];
     }
     var node = parser.create('node', 'TeXAtom', [parser.create('node', 'menclose', mml, { notation: 'box' })], { texClass: MmlNode_js_1.TEXCLASS.ORD });
@@ -667,7 +689,7 @@ BaseMethods.Entry = function (parser, name) {
         return;
     var str = parser.string;
     var braces = 0, close = -1, i = parser.i, m = str.length;
-    var end = (env ? new RegExp("^\\\\end\\s*\\{" + env.replace(/\*/, '\\*') + "\\}") : null);
+    var end = (env ? new RegExp("^\\\\end\\s*\\{".concat(env.replace(/\*/, '\\*'), "\\}")) : null);
     while (i < m) {
         var c = str.charAt(i);
         if (c === '{') {
