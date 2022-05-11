@@ -7,4 +7,5 @@ while read p; do
   git merge mathjax/"$p"
 done <branches.md
 
+npm i
 npm run compile
