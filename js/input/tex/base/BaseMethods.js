@@ -358,7 +358,7 @@ BaseMethods.Accent = function (parser, name, accent, stretchy) {
     var mml = moNode;
     NodeUtil_js_1.default.setAttribute(mml, 'stretchy', stretchy ? true : false);
     var mo = (NodeUtil_js_1.default.isEmbellished(c) ? NodeUtil_js_1.default.getCoreMO(c) : c);
-    if (NodeUtil_js_1.default.isType(mo, 'mo')) {
+    if (NodeUtil_js_1.default.isType(mo, 'mo') || NodeUtil_js_1.default.getProperty(mo, 'movablelimits')) {
         NodeUtil_js_1.default.setProperties(mo, { 'movablelimits': false });
     }
     var muoNode = parser.create('node', 'munderover');
