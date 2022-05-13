@@ -10,7 +10,7 @@ export declare namespace Sre {
     type highlighter = Highlighter;
     type speechGenerator = SpeechGenerator;
     type walker = Walker;
-    const locales: string[];
+    const locales: Map<string, string>;
     const sreReady: typeof Api.engineReady;
     const setupEngine: typeof Api.setupEngine;
     const engineSetup: typeof Api.engineSetup;

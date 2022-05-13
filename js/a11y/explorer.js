@@ -314,6 +314,11 @@ var allExplorers = {
             locale: doc.options.sre.locale, domain: doc.options.sre.domain,
             style: doc.options.sre.style, modality: 'speech'
         });
+        var locale = explorer.speechGenerator.getOptions().locale;
+        if (locale !== sre_js_1.default.engineSetup().locale) {
+            doc.options.sre.locale = sre_js_1.default.engineSetup().locale;
+            explorer.speechGenerator.setOptions({ locale: doc.options.sre.locale });
+        }
         explorer.showRegion = 'subtitles';
         return explorer;
     },
@@ -575,29 +580,16 @@ var csMenu = function (menu, sub) {
     }, sub);
 };
 MJContextMenu_js_1.MJContextMenu.DynamicSubmenus.set('Clearspeak', csMenu);
-var iso = {
-    'ca': 'Catalan',
-    'da': 'Danish',
-    'de': 'German',
-    'en': 'English',
-    'es': 'Spanish',
-    'fr': 'French',
-    'hi': 'Hindi',
-    'it': 'Italian',
-    'nb': 'Bokmål',
-    'nn': 'Nynorsk',
-    'sv': 'Swedish'
-};
 var language = function (menu, sub) {
     var e_9, _a;
     var radios = [];
     try {
-        for (var _b = __values(sre_js_1.default.locales), _c = _b.next(); !_c.done; _c = _b.next()) {
+        for (var _b = __values(sre_js_1.default.locales.keys()), _c = _b.next(); !_c.done; _c = _b.next()) {
             var lang = _c.value;
             if (lang === 'nemeth')
                 continue;
             radios.push({ type: 'radio', id: lang,
-                content: iso[lang] || lang, variable: 'locale' });
+                content: sre_js_1.default.locales.get(lang) || lang, variable: 'locale' });
         }
     }
     catch (e_9_1) { e_9 = { error: e_9_1 }; }

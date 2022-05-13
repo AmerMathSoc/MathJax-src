@@ -196,31 +196,22 @@ exports.MathtoolsMethods = {
         parser.Push(parser.create('node', 'mrow', [parser.ParseArg(name)]));
     },
     UnderOverBracket: function (parser, name) {
-        var _a;
         var thickness = (0, lengths_js_1.length2em)(parser.GetBrackets(name, '.1em'), .1);
         var height = parser.GetBrackets(name, '.2em');
         var arg = parser.GetArgument(name);
-        var _b = __read((name.charAt(1) === 'o' ?
-            ['over', 'accent', 'bottom', 'height'] :
-            ['under', 'accentunder', 'top', 'depth']), 4), pos = _b[0], accent = _b[1], border = _b[2], side = _b[3];
+        var _a = __read((name.charAt(1) === 'o' ?
+            ['over', 'accent', 'bottom'] :
+            ['under', 'accentunder', 'top']), 3), pos = _a[0], accent = _a[1], border = _a[2];
         var t = (0, lengths_js_1.em)(thickness);
-        var t2 = (0, lengths_js_1.em)(2 * thickness);
         var base = new TexParser_js_1.default(arg, parser.stack.env, parser.configuration).mml();
         var copy = new TexParser_js_1.default(arg, parser.stack.env, parser.configuration).mml();
         var script = parser.create('node', 'mpadded', [
-            parser.create('node', 'mpadded', [
-                parser.create('node', 'mphantom', [copy])
-            ], {
-                style: "border: ".concat(t, " solid; border-").concat(border, ": none"),
-                width: "-".concat(t2),
-                height: height,
-                depth: 0
-            })
-        ], (_a = {
-                width: "+".concat(t2)
-            },
-            _a[side] = "+".concat(t),
-            _a));
+            parser.create('node', 'mphantom', [copy])
+        ], {
+            style: "border: ".concat(t, " solid; border-").concat(border, ": none"),
+            height: height,
+            depth: 0
+        });
         var node = ParseUtil_js_1.default.underOver(parser, base, script, pos, true);
         var munderover = NodeUtil_js_1.default.getChildAt(NodeUtil_js_1.default.getChildAt(node, 0), 0);
         NodeUtil_js_1.default.setAttribute(munderover, accent, true);

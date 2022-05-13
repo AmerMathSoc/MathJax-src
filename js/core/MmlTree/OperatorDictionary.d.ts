@@ -11,6 +11,7 @@ export declare const MO: {
     ORD21: OperatorDef;
     ORD02: OperatorDef;
     ORD55: OperatorDef;
+    NONE: OperatorDef;
     OP: OperatorDef;
     OPFIXED: OperatorDef;
     INTEGRAL: OperatorDef;
