@@ -7,3 +7,4 @@ issue2764
 fix-accentunder
 fix-symbol-maps
 fix-invisibles
+fix-movable-limits
