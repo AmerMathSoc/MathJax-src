@@ -6,3 +6,4 @@ issue2766
 issue2764
 fix-accentunder
 fix-symbol-maps
+fix-invisibles
