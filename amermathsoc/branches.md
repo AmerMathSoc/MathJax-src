@@ -8,3 +8,4 @@ fix-accentunder
 fix-symbol-maps
 fix-invisibles
 fix-movable-limits
+fix-sideset
