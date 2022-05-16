@@ -180,12 +180,14 @@ exports.AmsMethods.SideSet = function (parser, name) {
         postScripts.replaceChild(base, NodeUtil_js_1.default.getChildAt(postScripts, 0));
         mml = postScripts;
     }
+    var mrow = parser.create('node', 'TeXAtom', [], { texClass: MmlNode_js_1.TEXCLASS.OP, movesupsub: true, movablelimits: true });
     if (preRest) {
-        preScripts && parser.Push(preScripts);
-        parser.Push(preRest);
+        preScripts && mrow.appendChild(preScripts);
+        mrow.appendChild(preRest);
     }
-    parser.Push(mml);
-    postRest && parser.Push(postRest);
+    mrow.appendChild(mml);
+    postRest && mrow.appendChild(postRest);
+    parser.Push(mrow);
 };
 function splitSideSet(mml) {
     if (!mml || (mml.isInferred && mml.childNodes.length === 0))
