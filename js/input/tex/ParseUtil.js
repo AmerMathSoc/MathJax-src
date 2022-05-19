@@ -381,7 +381,7 @@ var ParseUtil;
             try {
                 for (var lists_1 = __values(lists), lists_1_1 = lists_1.next(); !lists_1_1.done; lists_1_1 = lists_1.next()) {
                     var list = lists_1_1.value;
-                    options.addNode(list, n);
+                    list && options.addNode(list, n);
                 }
             }
             catch (e_1_1) { e_1 = { error: e_1_1 }; }

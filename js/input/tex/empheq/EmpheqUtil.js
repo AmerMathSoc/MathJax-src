@@ -122,7 +122,7 @@ exports.EmpheqUtil = {
                 var row = _c.value;
                 mtd = parser.create('node', 'mtd');
                 row.childNodes.unshift(mtd);
-                row.replaceChild(mtd, mtd);
+                mtd.parent = row;
                 if (row.isKind('mlabeledtr')) {
                     row.childNodes[0] = row.childNodes[1];
                     row.childNodes[1] = mtd;

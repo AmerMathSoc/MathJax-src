@@ -15,6 +15,7 @@ export declare namespace Sre {
     const setupEngine: typeof Api.setupEngine;
     const engineSetup: typeof Api.engineSetup;
     const toEnriched: typeof Api.toEnriched;
+    const toSpeech: typeof Api.toSpeech;
     const clearspeakPreferences: typeof ClearspeakPreferences;
     const getHighlighter: typeof HighlighterFactory.highlighter;
     const getSpeechGenerator: typeof SpeechGeneratorFactory.generator;

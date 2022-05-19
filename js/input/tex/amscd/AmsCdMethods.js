@@ -67,7 +67,7 @@ AmsCdMethods.arrow = function (parser, name) {
                 a = '\\kern ' + top.getProperty('minw');
             }
             if (a || b) {
-                var pad = { width: '.67em', lspace: '.33em' };
+                var pad = { width: '+.67em', lspace: '.33em' };
                 mml = parser.create('node', 'munderover', [mml]);
                 if (a) {
                     var nodeA = new TexParser_js_1.default(a, parser.stack.env, parser.configuration).mml();

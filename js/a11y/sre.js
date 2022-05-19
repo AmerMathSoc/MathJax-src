@@ -75,6 +75,7 @@ var Sre;
     Sre.setupEngine = Api.setupEngine;
     Sre.engineSetup = Api.engineSetup;
     Sre.toEnriched = Api.toEnriched;
+    Sre.toSpeech = Api.toSpeech;
     Sre.clearspeakPreferences = clearspeak_preferences_js_1.ClearspeakPreferences;
     Sre.getHighlighter = HighlighterFactory.highlighter;
     Sre.getSpeechGenerator = SpeechGeneratorFactory.generator;
