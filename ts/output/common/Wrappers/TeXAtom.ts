@@ -21,31 +21,118 @@
  * @author dpvc@mathjax.org (Davide Cervone)
  */
 
-import {AnyWrapper, WrapperConstructor, Constructor} from '../Wrapper.js';
+import {CommonWrapper, CommonWrapperClass, CommonWrapperConstructor} from '../Wrapper.js';
+import {CommonWrapperFactory} from '../WrapperFactory.js';
+import {CharOptions, VariantData, DelimiterData, FontData, FontDataClass} from '../FontData.js';
+import {CommonOutputJax} from '../../common.js';
 import {BBox} from '../../../util/BBox.js';
 import {TEXCLASS} from '../../../core/MmlTree/MmlNode.js';
 
 /*****************************************************************/
 /**
  * The CommonTeXAtom interface
+ *
+ * @template N   The DOM node type
+ * @template T   The DOM text node type
+ * @template D   The DOM document type
+ * @template JX  The OutputJax type
+ * @template WW  The Wrapper type
+ * @template WF  The WrapperFactory type
+ * @template WC  The WrapperClass type
+ * @template CC  The CharOptions type
+ * @template VV  The VariantData type
+ * @template DD  The DelimiterData type
+ * @template FD  The FontData type
+ * @template FC  The FontDataClass type
  */
-export interface CommonTeXAtom extends AnyWrapper {
+export interface CommonTeXAtom<
+  N, T, D,
+  JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  CC extends CharOptions,
+  VV extends VariantData<CC>,
+  DD extends DelimiterData,
+  FD extends FontData<CC, VV, DD>,
+  FC extends FontDataClass<CC, VV, DD>
+> extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
+
+  /**
+   * The vertical adjustment for VCENTER and VBOX atoms
+   */
+  dh: number;
 }
 
 /**
- * Shorthand for the CommonTeXAtom constructor
+ * The CommonTeXAtomClass interface
+ *
+ * @template N   The DOM node type
+ * @template T   The DOM text node type
+ * @template D   The DOM document type
+ * @template JX  The OutputJax type
+ * @template WW  The Wrapper type
+ * @template WF  The WrapperFactory type
+ * @template WC  The WrapperClass type
+ * @template CC  The CharOptions type
+ * @template VV  The VariantData type
+ * @template DD  The DelimiterData type
+ * @template FD  The FontData type
+ * @template FC  The FontDataClass type
  */
-export type TeXAtomConstructor = Constructor<CommonTeXAtom>;
+export interface CommonTeXAtomClass<
+  N, T, D,
+  JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  CC extends CharOptions,
+  VV extends VariantData<CC>,
+  DD extends DelimiterData,
+  FD extends FontData<CC, VV, DD>,
+  FC extends FontDataClass<CC, VV, DD>
+> extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {}
 
 /*****************************************************************/
 /**
  * The CommonTeXAtom wrapper mixin for the TeXAtom object
  *
- * @template T  The Wrapper class constructor type
+ * @template N   The DOM node type
+ * @template T   The DOM text node type
+ * @template D   The DOM document type
+ * @template JX  The OutputJax type
+ * @template WW  The Wrapper type
+ * @template WF  The WrapperFactory type
+ * @template WC  The WrapperClass type
+ * @template CC  The CharOptions type
+ * @template VV  The VariantData type
+ * @template DD  The DelimiterData type
+ * @template FD  The FontData type
+ * @template FC  The FontDataClass type
+ *
+ * @template B   The Mixin interface to create
  */
-export function CommonTeXAtomMixin<T extends WrapperConstructor>(Base: T): TeXAtomConstructor & T {
+export function CommonTeXAtomMixin<
+  N, T, D,
+  JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  CC extends CharOptions,
+  VV extends VariantData<CC>,
+  DD extends DelimiterData,
+  FD extends FontData<CC, VV, DD>,
+  FC extends FontDataClass<CC, VV, DD>,
+  B extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>
+>(Base: CommonWrapperConstructor<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>): B {
 
-  return class extends Base {
+  return class CommonTeXAtomMixin extends Base
+  implements CommonTeXAtom<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
+
+    /**
+     * @override
+     */
+    public dh: number = 0;
 
     /**
      * @override
@@ -61,12 +148,25 @@ export function CommonTeXAtomMixin<T extends WrapperConstructor>(Base: T): TeXAt
       if (this.node.texClass === TEXCLASS.VCENTER) {
         const {h, d} = bbox;
         const a = this.font.params.axis_height;
-        const dh = ((h + d) / 2 + a) - h;  // new height minus old height
-        bbox.h += dh;
-        bbox.d -= dh;
+        this.dh = ((h + d) / 2 + a) - h;  // new height minus old height
+        bbox.h += this.dh;
+        bbox.d -= this.dh;
+      } else if (this.node.texClass === TEXCLASS.VBOX) {
+        if (this.vboxAdjust(this.childNodes[0], bbox) || this.childNodes[0].childNodes.length > 1) return;
+        const child = this.childNodes[0].childNodes[0];
+        (child.node.isKind('mpadded') && this.vboxAdjust(child.childNodes[0], bbox)) || this.vboxAdjust(child, bbox);
       }
     }
 
-  };
+    public vboxAdjust(child: WW, bbox: BBox): boolean {
+      const n = child.lineBBox.length;
+      if (!n) return false;
+      this.dh = bbox.d - child.lineBBox[n - 1].d;
+      bbox.h += this.dh;
+      bbox.d -= this.dh;
+      return true;
+    }
+
+  } as any as B;
 
 }

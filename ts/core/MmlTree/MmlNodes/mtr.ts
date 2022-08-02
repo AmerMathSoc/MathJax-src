@@ -59,6 +59,14 @@ export class MmlMtr extends AbstractMmlNode {
   }
 
   /**
+   * Don't reset indent attributes
+   * @override
+   */
+  public get linebreakAlign() {
+    return '';
+  }
+
+  /**
    * Inherit the mtr attributes
    *
    * @override
@@ -96,7 +104,7 @@ export class MmlMtr extends AbstractMmlNode {
     }
     for (const child of this.childNodes) {
       if (!child.isKind('mtd')) {
-        let mtd = this.replaceChild(this.factory.create('mtd'), child) as MmlNode;
+        let mtd = this.replaceChild(this.factory.create('mtd'), child);
         mtd.appendChild(child);
         if (!options['fixMtables']) {
           child.mError('Children of ' + this.kind + ' must be mtd', options);

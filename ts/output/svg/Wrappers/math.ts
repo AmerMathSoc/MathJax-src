@@ -16,130 +16,208 @@
  */
 
 /**
- * @fileoverview  Implements the SVGmath wrapper for the MmlMath object
+ * @fileoverview  Implements the SvgMath wrapper for the MmlMath object
  *
  * @author dpvc@mathjax.org (Davide Cervone)
  */
 
-import {SVGWrapper, SVGConstructor} from '../Wrapper.js';
-import {CommonMathMixin} from '../../common/Wrappers/math.js';
+import {SVG} from '../../svg.js';
+import {SvgWrapper, SvgWrapperClass} from '../Wrapper.js';
+import {SvgWrapperFactory} from '../WrapperFactory.js';
+import {SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass} from '../FontData.js';
+import {CommonMath, CommonMathClass, CommonMathMixin} from '../../common/Wrappers/math.js';
+import {MmlNode} from '../../../core/MmlTree/MmlNode.js';
 import {MmlMath} from '../../../core/MmlTree/MmlNodes/math.js';
 import {StyleList} from '../../../util/StyleList.js';
 import {BBox} from '../../../util/BBox.js';
 
 /*****************************************************************/
 /**
- * The SVGmath wrapper for the MmlMath object
+ * The Svgmath interface for the SVG math wrapper
  *
  * @template N  The HTMLElement node class
  * @template T  The Text node class
  * @template D  The Document class
  */
-// @ts-ignore
-export class SVGmath<N, T, D> extends
-CommonMathMixin<SVGConstructor<any, any, any>>(SVGWrapper) {
+export interface SvgMathNTD<N, T, D> extends SvgWrapper<N, T, D>, CommonMath<
+  N, T, D,
+  SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>,
+  SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass
+> {}
 
-  /**
-   * The math wrapper
-   */
-  public static kind = MmlMath.prototype.kind;
+/**
+ * The SvgmathClass interface for the SVG math wrapper
+ *
+ * @template N  The HTMLElement node class
+ * @template T  The Text node class
+ * @template D  The Document class
+ */
+export interface SvgMathClass<N, T, D> extends SvgWrapperClass<N, T, D>, CommonMathClass<
+  N, T, D,
+  SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>,
+  SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass
+> {
+  new(factory: SvgWrapperFactory<N, T, D>, node: MmlNode, parent?: SvgWrapper<N, T, D>): SvgMathNTD<N, T, D>;
+}
 
-  /**
-   * @overreide
-   */
-  public static styles: StyleList = {
-    'mjx-container[jax="SVG"][display="true"]': {
-      display: 'block',
-      'text-align': 'center',
-      margin: '1em 0'
-    },
-    'mjx-container[jax="SVG"][display="true"][width="full"]': {
-      display: 'flex'
-    },
-    'mjx-container[jax="SVG"][justify="left"]': {
-      'text-align': 'left'
-    },
-    'mjx-container[jax="SVG"][justify="right"]': {
-      'text-align': 'right'
+
+/*****************************************************************/
+
+/**
+ * The SvgMath wrapper for the MmlMath class
+ */
+export const SvgMath = (function <N, T, D>(): SvgMathClass<N, T, D> {
+
+  const Base = CommonMathMixin<
+      N, T, D,
+      SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>,
+      SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass,
+      SvgMathClass<N, T, D>
+    >(SvgWrapper);
+
+  // Avoid message about base constructors not having the same type
+  //   (they should both be SvgWrapper<N, T, D>, but are thought of as different by typescript)
+  // @ts-ignore
+  return class SvgMath extends Base extends SvgMathNTD<N, T, D> {
+
+    /**
+     * @override
+     */
+    public static kind = MmlMath.prototype.kind;
+
+    /**
+     * @overreide
+     */
+    public static styles: StyleList = {
+      'mjx-container[jax="SVG"][display="true"]': {
+        display: 'block',
+        'text-align': 'center',
+        'justify-content': 'center',
+        margin: '1em 0'
+      },
+      'mjx-container[jax="SVG"][display="true"][width="full"]': {
+        display: 'flex'
+      },
+      'mjx-container[jax="SVG"][justify="left"]': {
+        'text-align': 'left',
+        'justify-content': 'left'
+      },
+      'mjx-container[jax="SVG"][justify="right"]': {
+        'text-align': 'right',
+        'justify-content': 'right'
+      },
+      //
+      //  For inline breakpoints, use a scaled space and make it breakable
+      //    (The space is .25em, so make everything 4 times the usual.
+      //     This will need to be adjusted when we do other fonts: we will
+      //     need one where the space is 1em)
+      //
+      'mjx-break::after': {
+        content: '" "',
+        'white-space': 'normal'
+      },
+      'mjx-break[size="1"]': {
+        'font-size': '44.4%'
+      },
+      'mjx-break[size="2"]': {
+        'font-size': '66.8%'
+      },
+      'mjx-break[size="3"]': {
+        'font-size': '88.8%'
+      },
+      'mjx-break[size="4"]': {
+        'font-size': '111.2%'
+      },
+      'mjx-break[size="5"]': {
+        'font-size': '133.2%'
+      },
+      'mjx-break[newline]::after': {
+        display: 'block'
+      },
+    };
+
+    /************************************************************/
+
+    /**
+     * Set the justification, and get the minwidth and shift needed
+     * for the displayed equation.
+     */
+    protected handleDisplay() {
+      const [align, shift] = this.getAlignShift();
+      if (align !== 'center') {
+        this.adaptor.setAttribute(this.jax.container, 'justify', align);
+      }
+      if (this.bbox.pwidth === BBox.fullWidth) {
+        this.adaptor.setAttribute(this.jax.container, 'width', 'full');
+        if (this.jax.table) {
+          let {L, w, R} = this.jax.table.getOuterBBox();
+          if (align === 'right') {
+            R = Math.max(R || -shift, -shift);
+          } else if (align === 'left') {
+            L = Math.max(L || shift, shift);
+          } else if (align === 'center') {
+            w += 2 * Math.abs(shift);
+          }
+          this.jax.minwidth = Math.max(0, L + w + R);
+        }
+      } else {
+        this.jax.shift = shift;
+      }
     }
+
+    /**
+     * Handle adding speech to the top-level node, if any.
+     */
+    protected handleSpeech() {
+      const adaptor = this.adaptor;
+      const attributes = this.node.attributes;
+      const speech = (attributes.get('aria-label') || attributes.get('data-semantic-speech')) as string;
+      if (speech) {
+        const id = this.getTitleID();
+        const label = this.svg('title', {id}, [this.text(speech)]);
+        adaptor.insert(label, adaptor.firstChild(this.dom[0]));
+        adaptor.setAttribute(this.dom[0], 'aria-labeledby', id);
+        adaptor.removeAttribute(this.dom[0], 'aria-label');
+        for (const child of this.childNodes[0].childNodes) {
+          child.dom.forEach(node => adaptor.setAttribute(node, 'aria-hidden', 'true'));
+        }
+      }
+    }
+
+    /**
+     * @return {string}  A unique ID to use for aria-labeledby title elements
+     */
+    protected getTitleID(): string {
+      return 'mjx-svg-title-' + String(this.jax.options.titleID++);
+    }
+
+    /************************************************************/
+
+    /**
+     * @override
+     */
+    public toSVG(parents: N[]) {
+      super.toSVG(parents);
+      const adaptor = this.adaptor;
+      const display = (this.node.attributes.get('display') === 'block');
+      if (display) {
+        adaptor.setAttribute(this.jax.container, 'display', 'true');
+        this.handleDisplay();
+      }
+      if (this.jax.document.options.internalSpeechTitles) {
+        this.handleSpeech();
+      }
+    }
+
+    /**
+     * @override
+     */
+    public setChildPWidths(recompute: boolean, w: number = null, _clear: boolean = true) {
+      return super.setChildPWidths(recompute,
+                                   this.parent ? w : this.metrics.containerWidth / this.jax.pxPerEm,
+                                   false);
+    }
+
   };
 
-  /**
-   * @override
-   */
-  public toSVG(parent: N) {
-    super.toSVG(parent);
-    const adaptor = this.adaptor;
-    const display = (this.node.attributes.get('display') === 'block');
-    if (display) {
-      adaptor.setAttribute(this.jax.container, 'display', 'true');
-      this.handleDisplay();
-    }
-    if (this.jax.document.options.internalSpeechTitles) {
-      this.handleSpeech();
-    }
-  }
-
-  /**
-   * Set the justification, and get the minwidth and shift needed
-   * for the displayed equation.
-   */
-  protected handleDisplay() {
-    const [align, shift] = this.getAlignShift();
-    if (align !== 'center') {
-      this.adaptor.setAttribute(this.jax.container, 'justify', align);
-    }
-    if (this.bbox.pwidth === BBox.fullWidth) {
-      this.adaptor.setAttribute(this.jax.container, 'width', 'full');
-      if (this.jax.table) {
-        let {L, w, R} = this.jax.table.getOuterBBox();
-        if (align === 'right') {
-          R = Math.max(R || -shift, -shift);
-        } else if (align === 'left') {
-          L = Math.max(L || shift, shift);
-        } else if (align === 'center') {
-          w += 2 * Math.abs(shift);
-        }
-        this.jax.minwidth = Math.max(0, L + w + R);
-      }
-    } else {
-      this.jax.shift = shift;
-    }
-  }
-
-  /**
-   * Handle adding speech to the top-level node, if any.
-   */
-  protected handleSpeech() {
-    const adaptor = this.adaptor;
-    const attributes = this.node.attributes;
-    const speech = (attributes.get('aria-label') || attributes.get('data-semantic-speech')) as string;
-    if (speech) {
-      const id = this.getTitleID();
-      const label = this.svg('title', {id}, [this.text(speech)]);
-      adaptor.insert(label, adaptor.firstChild(this.element));
-      adaptor.setAttribute(this.element, 'aria-labeledby', id);
-      adaptor.removeAttribute(this.element, 'aria-label');
-      for (const child of this.childNodes[0].childNodes) {
-        adaptor.setAttribute(child.element, 'aria-hidden', 'true');
-      }
-    }
-  }
-
-  /**
-   * @return {string}  A unique ID to use for aria-labeledby title elements
-   */
-  protected getTitleID(): string {
-    return 'mjx-svg-title-' + String(this.jax.options.titleID++);
-  }
-
-  /**
-   * @override
-   */
-  public setChildPWidths(recompute: boolean, w: number = null, _clear: boolean = true) {
-    return super.setChildPWidths(recompute,
-                                 this.parent ? w : this.metrics.containerWidth / this.jax.pxPerEm,
-                                 false);
-  }
-
-}
+})<any, any, any>();

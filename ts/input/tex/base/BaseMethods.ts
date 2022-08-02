@@ -31,7 +31,9 @@ import TexError from '../TexError.js';
 import TexParser from '../TexParser.js';
 import {TexConstant} from '../TexConstants.js';
 import ParseUtil from '../ParseUtil.js';
+import {PropertyList} from '../../../core/Tree/Node.js';
 import {MmlNode, TEXCLASS} from '../../../core/MmlTree/MmlNode.js';
+import {MmlMo} from '../../../core/MmlTree/MmlNodes/mo.js';
 import {MmlMsubsup} from '../../../core/MmlTree/MmlNodes/msubsup.js';
 import {MmlMunderover} from '../../../core/MmlTree/MmlNodes/munderover.js';
 import {Label} from '../Tags.js';
@@ -221,7 +223,7 @@ BaseMethods.Prime = function(parser: TexParser, c: string) {
   let base = parser.stack.Prev();
   if (!base) {
     // @test PrimeSup, PrePrime, Prime on Sup
-    base = parser.create('node', 'mi');
+    base = parser.create('token', 'mi');
   }
   if (NodeUtil.isType(base, 'msubsup') && !NodeUtil.isType(base, 'msup') &&
       NodeUtil.getChildAt(base, (base as MmlMsubsup).sup)) {
@@ -341,6 +343,57 @@ BaseMethods.Spacer = function(parser: TexParser, _name: string, space: number) {
   const style = parser.create('node', 'mstyle', [node], {scriptlevel: 0});
   parser.Push(style);
 };
+
+/**
+ * Create a discretionary times operator.
+ *
+ * @param {TexParser} parser The calling parser.
+ * @param {string} _name The macro name.
+ */
+BaseMethods.DiscretionaryTimes = function (parser: TexParser, _name: string) {
+  parser.Push(parser.create('token', 'mo', {linebreakmultchar: '\u00D7'}, '\u2062'));
+}
+
+/**
+ * Create a discretionary breakpoint.
+ *
+ * @param {TexParser} parser The calling parser.
+ * @param {string} _name The macro name.
+ */
+BaseMethods.AllowBreak = function (parser: TexParser, _name: string) {
+  parser.Push(parser.create('token', 'mo', {'data-allowbreak': true}));
+}
+
+/**
+ * Create a forced breakpoint.
+ *
+ * @param {TexParser} parser The calling parser.
+ * @param {string} _name The macro name.
+ */
+BaseMethods.Break = function (parser: TexParser, _name: string) {
+  parser.Push(parser.create('token', 'mo', {linebreak: TexConstant.LineBreak.NEWLINE}));
+}
+
+/**
+ * Set surrounding mo linebreak attributes
+ *
+ * @param {TexParser} parser The calling parser.
+ * @param {string} _name The macro name.
+ * @param {string} linebreak The linebreak attribute to use.
+ */
+BaseMethods.Linebreak = function (parser: TexParser, _name: string, linebreak: string) {
+  let insert = true;
+  const prev = parser.stack.Prev(true);
+  if (prev && prev.isKind('mo')) {
+    const style = NodeUtil.getOp(prev as any as MmlMo)?.[3]?.linebreakstyle ||
+                  NodeUtil.getAttribute(prev, 'linebreakstyle');
+    if (style !== TexConstant.LineBreakStyle.BEFORE) {
+      prev.attributes.set('linebreak', linebreak);
+      insert = false;
+    }
+  }
+  parser.Push(parser.itemFactory.create('break', linebreak, insert));
+}
 
 
 /**
@@ -684,7 +737,6 @@ BaseMethods.TeXAtom = function(parser: TexParser, name: string, mclass: number) 
   let def: EnvList = {texClass: mclass};
   let mml: StackItem | MmlNode;
   let node: MmlNode;
-  let parsed: MmlNode;
   if (mclass === TEXCLASS.OP) {
     def['movesupsub'] = def['movablelimits'] = true;
     const arg = parser.GetArgument(name);
@@ -695,17 +747,39 @@ BaseMethods.TeXAtom = function(parser: TexParser, name: string, mclass: number) 
       node = parser.create('token', 'mi', def, match[1]);
     } else {
       // @test Mathop Cal
-      parsed = new TexParser(arg, parser.stack.env, parser.configuration).mml();
+      const parsed = new TexParser(arg, parser.stack.env, parser.configuration).mml();
       node = parser.create('node', 'TeXAtom', [parsed], def);
     }
     mml = parser.itemFactory.create('fn', node);
   } else {
     // @test Mathrel
-    parsed = parser.ParseArg(name);
-    mml = parser.create('node', 'TeXAtom', [parsed], def);
+    mml = parser.create('node', 'TeXAtom', [], def);
+    const arg = new TexParser(parser.GetArgument(name), parser.stack.env, parser.configuration);
+    //
+    //  If \hsize was specified in a \vbox, \vtop, or \vcenter,
+    //    enclose contents in mpadded for linebreaking
+    //
+    if (mclass >= TEXCLASS.VCENTER && arg.stack.env.hsize) {
+      mml.appendChild(parser.create('node', 'mpadded', [arg.mml()], {
+        width: arg.stack.env.hsize,
+        'data-overflow': 'linebreak'
+      }));
+    } else {
+      mml.appendChild(arg.mml());
+    }
   }
   parser.Push(mml);
 };
+
+/**
+ * Sets hsize for \vbox, \vtop, \vcenter boxes
+ * @param {TexParser} parser The calling parser.
+ * @param {string} name The macro name.
+ */
+BaseMethods.Hsize = function (parser:TexParser, name: string) {
+  parser.GetNext() === '=' && parser.i++;
+  parser.stack.env.hsize = parser.GetDimen(name);
+}
 
 
 /**
@@ -899,10 +973,11 @@ BaseMethods.MoveLeftRight = function(parser: TexParser, name: string) {
  * @param {TexParser} parser The calling parser.
  * @param {string} name The macro name.
  */
-BaseMethods.Hskip = function(parser: TexParser, name: string) {
+BaseMethods.Hskip = function(parser: TexParser, name: string, nobreak: boolean = false) {
   // @test Modulo
   const node = parser.create('node', 'mspace', [],
                              {width: parser.GetDimen(name)});
+  nobreak && NodeUtil.setAttribute(node, 'linebreak', 'nobreak');
   parser.Push(node);
 };
 
@@ -1045,6 +1120,24 @@ BaseMethods.FrameBox = function(parser: TexParser, name: string) {
                              [parser.create('node', 'menclose', mml, {notation: 'box'})],
                              {texClass: TEXCLASS.ORD});
   parser.Push(node);
+};
+
+
+/**
+ * Implements \makebox.
+ *
+ * @param {TexParser} parser   The calling parser.
+ * @param {string} name        The macro name.
+ */
+BaseMethods.MakeBox = function (parser: TexParser, name: string) {
+  const width = parser.GetBrackets(name);
+  const pos = parser.GetBrackets(name, 'c');
+  const mml = parser.create('node', 'mpadded', ParseUtil.internalMath(parser, parser.GetArgument(name)));
+  width && NodeUtil.setAttribute(mml, 'width', width);
+  const align = lookup(pos.toLowerCase(), {c: 'center', r: 'right'}, '');
+  align && NodeUtil.setAttribute(mml, 'data-align', align);
+  pos.toLowerCase() !== pos && NodeUtil.setAttribute(mml, 'data-overflow', 'linebreak');
+  parser.Push(mml);
 };
 
 
@@ -1278,13 +1371,10 @@ BaseMethods.CrLaTeX = function(parser: TexParser, name: string, nobrackets: bool
       top.addRowSpacing(n);
     }
   } else {
-    if (n) {
-      // @test Custom Linebreak
-      node = parser.create('node', 'mspace', [], {depth: n});
-      parser.Push(node);
-    }
     // @test Linebreak
     node = parser.create('node', 'mspace', [], {linebreak: TexConstant.LineBreak.NEWLINE});
+    // @test Custom Linebreak
+    if (n) NodeUtil.setAttribute(node, 'data-lineleading', n);
     parser.Push(node);
   }
 };
@@ -1348,7 +1438,7 @@ BaseMethods.HFill = function(parser: TexParser, _name: string) {
 BaseMethods.BeginEnd = function(parser: TexParser, name: string) {
   // @test Array1, Array2, Array Test
   let env = parser.GetArgument(name);
-  if (env.match(/\\/i)) {
+  if (env.match(/\\/)) {
     // @test InvalidEnv
     throw new TexError('InvalidEnv', 'Invalid environment name \'%1\'', env);
   }
@@ -1458,6 +1548,47 @@ BaseMethods.AlignedArray = function(parser: TexParser, begin: StackItem) {
   const align = parser.GetBrackets('\\begin{' + begin.getName() + '}');
   let item = BaseMethods.Array(parser, begin);
   return ParseUtil.setArrayAlign(item as sitem.ArrayItem, align);
+};
+
+
+BaseMethods.IndentAlign = function (parser: TexParser, begin: StackItem) {
+  const name = `\\begin{${begin.getName()}}`;
+  //
+  // Get the indentshift values, if any
+  //
+  const first = parser.GetBrackets(name, '');
+  let shift = parser.GetBrackets(name, '');
+  const last = parser.GetBrackets(name, '');
+  if ((first && !ParseUtil.matchDimen(first)[0]) ||
+      (shift && !ParseUtil.matchDimen(shift)[0]) ||
+      (last && !ParseUtil.matchDimen(last)[0])) {
+    throw new TexError('BracketMustBeDimension', 'Bracket argument to %1 must be a dimension', name);
+  }
+  //
+  // Get the indentalign values, if any
+  //
+  const lcr = parser.GetArgument(name);
+  if (lcr && !lcr.match(/^([lcr]{1,3})?$/)) {
+    throw new TexError('BadAlignment', 'Alignment must be one to three copies of l, c, or r');
+  }
+  const align = [...lcr].map(c => ({l: 'left', c: 'center', r: 'right'})[c]);
+  align.length === 1 && align.push(align[0]);
+  //
+  // Set the properties for the mstyle
+  //
+  const attr: PropertyList = {};
+  for (const [name, value] of [
+    ['indentshiftfirst', first], ['indentshift', shift || first], ['indentshiftlast', last],
+    ['indentalignfirst', align[0]], ['indentalign', align[1]], ['indentalignlast', align[2]]
+  ]) {
+    if (value) {
+      attr[name] = value;
+    }
+  }
+  //
+  // Push the indentalign item on the stack
+  //
+  parser.Push(parser.itemFactory.create('mstyle', attr, begin.getName()));
 };
 
 

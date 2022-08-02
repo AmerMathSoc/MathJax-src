@@ -32,7 +32,6 @@ import * as bitem from './BaseItems.js';
 import {AbstractTags} from '../Tags.js';
 import './BaseMappings.js';
 import {getRange} from '../../../core/MmlTree/OperatorDictionary.js';
-import {MmlNode} from '../../../core/MmlTree/MmlNode.js';
 import ParseOptions from '../ParseOptions.js';
 
 /**
@@ -116,9 +115,9 @@ function filterNonscript({data}: {data: ParseOptions}) {
       //    the mstyle and mspace from their lists as well.
       //
       if (mml.isKind('mrow')) {
-        const mstyle = mml.childNodes[0] as MmlNode;
+        const mstyle = mml.childNodes[0];
         data.removeFromList('mstyle', [mstyle]);
-        data.removeFromList('mspace', mstyle.childNodes[0].childNodes as MmlNode[]);
+        data.removeFromList('mspace', mstyle.childNodes[0].childNodes);
       }
     } else if (mml.isKind('mrow')) {
       //
@@ -169,6 +168,7 @@ export const BaseConfiguration: Configuration = Configuration.create(
       [bitem.LeftItem.prototype.kind]: bitem.LeftItem,
       [bitem.Middle.prototype.kind]: bitem.Middle,
       [bitem.RightItem.prototype.kind]: bitem.RightItem,
+      [bitem.BreakItem.prototype.kind]: bitem.BreakItem,
       [bitem.BeginItem.prototype.kind]: bitem.BeginItem,
       [bitem.EndItem.prototype.kind]: bitem.EndItem,
       [bitem.StyleItem.prototype.kind]: bitem.StyleItem,
@@ -181,7 +181,8 @@ export const BaseConfiguration: Configuration = Configuration.create(
       [bitem.DotsItem.prototype.kind]: bitem.DotsItem,
       [bitem.ArrayItem.prototype.kind]: bitem.ArrayItem,
       [bitem.EqnArrayItem.prototype.kind]: bitem.EqnArrayItem,
-      [bitem.EquationItem.prototype.kind]: bitem.EquationItem
+      [bitem.EquationItem.prototype.kind]: bitem.EquationItem,
+      [bitem.MstyleItem.prototype.kind]: bitem.MstyleItem
     },
     options: {
       maxMacros: 1000,

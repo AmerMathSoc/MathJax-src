@@ -27,11 +27,12 @@ import {MapHandler} from '../MapHandler.js';
 import {CharacterMap} from '../SymbolMap.js';
 import {entities} from '../../../util/Entities.js';
 import {MmlNode, TextNode, TEXCLASS} from '../../../core/MmlTree/MmlNode.js';
+import {MmlMo} from '../../../core/MmlTree/MmlNodes/mo.js';
 import {MmlMsubsup} from '../../../core/MmlTree/MmlNodes/msubsup.js';
 import TexError from '../TexError.js';
 import ParseUtil from '../ParseUtil.js';
 import NodeUtil from '../NodeUtil.js';
-import {Property} from '../../../core/Tree/Node.js';
+import {Property, PropertyList} from '../../../core/Tree/Node.js';
 import StackItemFactory from '../StackItemFactory.js';
 import {CheckType, BaseItem, StackItem, EnvList} from '../StackItem.js';
 
@@ -480,6 +481,54 @@ export class RightItem extends BaseItem {
 
 
 /**
+ * Add linebreak attribute to next mo, if any, or insert an mo with the
+ * given linebreak attribute.
+ */
+export class BreakItem extends BaseItem {
+
+  /**
+   * @override
+   */
+  public get kind() {
+    return 'break';
+  }
+
+  /**
+   * @override
+   * @param {string} linebreak   The linbreak attribute to use
+   * @param {boolean} insert     Whether to insert an mo if there isn't a following
+   */
+  constructor(factory: StackItemFactory, linebreak: string, insert: boolean) {
+    super(factory);
+    this.setProperty('linebreak', linebreak);
+    this.setProperty('insert', insert);
+  }
+
+  /**
+   * @override
+   */
+  public checkItem(item: StackItem): CheckType {
+    const linebreak = this.getProperty('linebreak') as string;
+    if (item.isKind('mml')) {
+      const mml = item.First;
+      if (mml.isKind('mo')) {
+        const style = NodeUtil.getOp(mml as MmlMo)?.[3]?.linebreakstyle ||
+                      NodeUtil.getAttribute(mml, 'linebreakstyle');
+        if (style !== 'after') {
+          NodeUtil.setAttribute(mml, 'linebreak', linebreak);
+          return [[item], true];
+        }
+        if (!this.getProperty('insert')) return [[item], true];
+      }
+    }
+    const mml = this.create('token', 'mo', {linebreak});
+    return [[this.factory.create('mml', mml), item], true];
+  }
+
+}
+
+
+/**
  * Item pushed for opening an environment with \\begin{env}.
  */
 export class BeginItem extends BaseItem {
@@ -693,7 +742,7 @@ export class FnItem extends BaseItem {
           return [[top, item], true];
         }
         if ((NodeUtil.isType(mml, 'mstyle') && mml.childNodes.length &&
-             NodeUtil.isType(mml.childNodes[0].childNodes[0] as MmlNode, 'mspace')) ||
+             NodeUtil.isType(mml.childNodes[0].childNodes[0], 'mspace')) ||
              NodeUtil.isType(mml, 'mspace')) {
           // @test Fn Pos Space, Fn Neg Space
           return [[top, item], true];
@@ -1173,6 +1222,10 @@ export class EqnArrayItem extends ArrayItem {
     this.extendArray('columnalign', this.maxrow);
     this.extendArray('columnwidth', this.maxrow);
     this.extendArray('columnspacing', this.maxrow - 1);
+    //
+    // Add indentshift for left-aligned columns
+    //
+    this.addIndentshift()
   }
 
   /**
@@ -1190,6 +1243,73 @@ export class EqnArrayItem extends ArrayItem {
       this.arraydef[name] = columns.slice(0, max).join(' ');
     }
   }
+
+  /**
+   * Add indentshift to left-aligned columns so that linebreaking will work
+   *   better in alignments.
+   */
+  protected addIndentshift() {
+    if (!this.arraydef.columnalign) return;
+    const align = (this.arraydef.columnalign as string).split(/ /);
+    let prev = '';
+    for (const i of align.keys()) {
+      if (align[i] === 'left') {
+        const indentshift = (prev === 'center' ? '.7em' : '2em');
+        for (const row of this.table) {
+          const cell = row.childNodes[row.isKind('mlabeledtr') ? i + 1 : i];
+          if (cell) {
+            const mstyle = this.create('node', 'mstyle', cell.childNodes[0].childNodes, {indentshift});
+            cell.childNodes[0].childNodes = [];
+            cell.appendChild(mstyle);
+          }
+        }
+      }
+      prev = align[i];
+    }
+  }
+
+}
+
+/**
+ * Item that places an mstyle having given attributes around its contents
+ */
+export class MstyleItem extends BeginItem {
+
+  /**
+   * @override
+   */
+  get kind() {
+    return 'mstyle';
+  }
+
+  /**
+   * The properties to set for the mstyle element
+   */
+  public attrList: PropertyList;
+
+  /**
+   * @param {PropertyList} attr  The properties to set on the mstyle
+   * @param {string} name        The name of the environment being processed
+   * @override
+   * @constructor
+   */
+  constructor(factory: any, attr: PropertyList, name: string) {
+    super(factory);
+    this.attrList = attr;
+    this.setProperty('name', name);
+  }
+
+  /**
+   * @override
+   */
+  public checkItem(item: StackItem): CheckType {
+    if (item.isKind('end') && item.getName() === this.getName()) {
+      const mml = this.create('node', 'mstyle', [this.toMml()], this.attrList);
+      return [[mml], true];
+    }
+    return super.checkItem(item);
+  }
+
 }
 
 

@@ -21,33 +21,35 @@
  * @author dpvc@mathjax.org (Davide Cervone)
  */
 
-import {CommonOutputJax, UnknownBBox} from './common/OutputJax.js';
+import {CommonOutputJax, UnknownBBox} from './common.js';
 import {OptionList} from '../util/Options.js';
 import {MathDocument} from '../core/MathDocument.js';
 import {MathItem} from '../core/MathItem.js';
-import {MmlNode} from '../core/MmlTree/MmlNode.js';
-import {SVGWrapper} from './svg/Wrapper.js';
-import {SVGWrapperFactory} from './svg/WrapperFactory.js';
-import {SVGFontData} from './svg/FontData.js';
+import {SvgWrapper, SvgWrapperClass} from './svg/Wrapper.js';
+import {SvgWrapperFactory} from './svg/WrapperFactory.js';
+import {SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass} from './svg/FontData.js';
 import {TeXFont} from './svg/fonts/tex.js';
 import {StyleList as CssStyleList} from '../util/StyleList.js';
 import {FontCache} from './svg/FontCache.js';
 import {unicodeChars} from '../util/string.js';
-import {percent} from '../util/lengths.js';
 
 export const SVGNS = 'http://www.w3.org/2000/svg';
 export const XLINKNS = 'http://www.w3.org/1999/xlink';
 
 /*****************************************************************/
 /**
- *  Implements the CHTML class (extends AbstractOutputJax)
+ *  Implements the SVG class (extends AbstractOutputJax)
  *
  * @template N  The HTMLElement node class
  * @template T  The Text node class
  * @template D  The Document class
  */
 export class SVG<N, T, D> extends
-CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFontData, typeof SVGFontData> {
+CommonOutputJax<
+  N, T, D,
+  SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>,
+  SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass
+> {
 
   /**
    * The name of the output jax
@@ -70,7 +72,8 @@ CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFon
    */
   public static commonStyles: CssStyleList = {
     'mjx-container[jax="SVG"]': {
-      direction: 'ltr'
+      direction: 'ltr',
+      'white-space': 'nowrap'
     },
     'mjx-container[jax="SVG"] > svg': {
       overflow: 'visible',
@@ -93,9 +96,11 @@ CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFon
   public static STYLESHEETID = 'MJX-SVG-styles';
 
   /**
-   * Stores the CHTMLWrapper factory
+   * @override
    */
-  public factory: SVGWrapperFactory<N, T, D>;
+  get forceInlineBreaks() {
+    return true;   // We need to break up the output into several separate SVGs
+  }
 
   /**
    * Stores the information about the cached character glyphs
@@ -112,11 +117,6 @@ CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFon
   public shift: number = 0;
 
   /**
-   * The container element for the math
-   */
-  public container: N = null;
-
-  /**
    * The SVG stylesheet, once it is constructed
    */
   public svgStyles: N = null;
@@ -126,7 +126,7 @@ CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFon
    * @constructor
    */
   constructor(options: OptionList = null) {
-    super(options, SVGWrapperFactory as any, TeXFont);
+    super(options, SvgWrapperFactory as any, TeXFont);
     this.fontCache = new FontCache(this);
   }
 
@@ -151,15 +151,6 @@ CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFon
    */
   public reset() {
     this.clearFontCache();
-  }
-
-  /**
-   * @override
-   */
-  protected setScale(node: N) {
-    if (this.options.scale !== 1) {
-      this.adaptor.setStyle(node, 'fontSize', percent(this.options.scale));
-    }
   }
 
   /**
@@ -210,22 +201,23 @@ CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFon
   }
 
   /**
-   * @param {MmlNode} math  The MML node whose SVG is to be produced
-   * @param {N} parent      The HTML node to contain the SVG
+   * @param {WW} wrapper   The MML node wrapper whose SVG is to be produced
+   * @param {N} parent     The HTML node to contain the SVG
    */
-  protected processMath(math: MmlNode, parent: N) {
+  public processMath(wrapper: SvgWrapper<N, T, D>, parent: N) {
     //
     // Cache the container (tooltips process into separate containers)
     //
     const container = this.container;
     this.container = parent;
     //
-    //  Get the wrapped math element and the SVG container
+    //  Get the SVG container
     //  Then typeset the math into the SVG
+    //  Mark the inline breakpoints, if applicable
     //
-    const wrapper = this.factory.wrap(math);
     const [svg, g] = this.createRoot(wrapper);
-    this.typesetSVG(wrapper, svg, g);
+    this.typesetSvg(wrapper, svg, g);
+    wrapper.node.getProperty('breakable') && this.handleInlineBreaks(wrapper, svg, g);
     //
     //  Put back the original container
     //
@@ -233,12 +225,33 @@ CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFon
   }
 
   /**
-   * @param {SVGWrapper} wrapper   The wrapped math to process
+   * @param {SvgWrapper} wrapper   The wrapped math to process
    * @return {[N, N]}              The svg and g nodes for the math
    */
-  protected createRoot(wrapper: SVGWrapper<N, T, D>): [N, N] {
+  protected createRoot(wrapper: SvgWrapper<N, T, D>): [N, N] {
     const {w, h, d, pwidth} = wrapper.getOuterBBox();
-    const px = wrapper.metrics.em / 1000;
+    const [svg, g] = this.createSVG(h, d, w);
+    if (pwidth) {
+      //
+      // Use width 100% with no viewbox, and instead scale and translate to achieve the same result
+      //
+      const adaptor = this.adaptor;
+      adaptor.setStyle(svg, 'min-width', adaptor.getStyle(svg, 'width'));
+      adaptor.setAttribute(svg, 'width', pwidth);
+      adaptor.removeAttribute(svg, 'viewBox');
+      const scale = this.fixed(wrapper.metrics.ex / (this.font.params.x_height * 1000), 6);
+      adaptor.setAttribute(g, 'transform', `scale(${scale},-${scale}) translate(0, ${this.fixed(-h * 1000, 1)})`);
+    }
+    return [svg, g];
+  }
+
+  /**
+   * @param {number} h   The height of the SVG to create
+   * @param {number} d   The depth of the SVG to create
+   * @param {number} w   The width of the SVG to create
+   */
+  protected createSVG(h: number, d: number, w: number): [N, N] {
+    const px = this.math.metrics.em / 1000;
     const W = Math.max(w, px); // make sure we are at least one px wide (needed for e.g. \llap)
     const H = Math.max(h + d, px); // make sure we are at least one px tall (needed for e.g., \smash)
     //
@@ -265,16 +278,6 @@ CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFon
         adaptor.setStyle(this.container, 'margin-right', this.ex(w));
       }
     }
-    if (pwidth) {
-      //
-      // Use width 100% with no viewbox, and instead scale and translate to achieve the same result
-      //
-      adaptor.setStyle(svg, 'min-width', this.ex(W));
-      adaptor.setAttribute(svg, 'width', pwidth);
-      adaptor.removeAttribute(svg, 'viewBox');
-      const scale = this.fixed(wrapper.metrics.ex / (this.font.params.x_height * 1000), 6);
-      adaptor.setAttribute(g, 'transform', `scale(${scale},-${scale}) translate(0, ${this.fixed(-h * 1000, 1)})`);
-    }
     if (this.options.fontCache !== 'none') {
       adaptor.setAttribute(svg, 'xmlns:xlink', XLINKNS);
     }
@@ -285,11 +288,11 @@ CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFon
    * Typeset the math and add minwidth (from mtables), or set the alignment and indentation
    * of the finalized expression.
    *
-   * @param {SVGWrapper} wrapper   The wrapped math to typeset
+   * @param {SvgWrapper} wrapper   The wrapped math to typeset
    * @param {N} svg                The main svg element for the typeet math
    * @param {N} g                  The group in which the math is typeset
    */
-  protected typesetSVG(wrapper: SVGWrapper<N, T, D>, svg: N, g: N) {
+  protected typesetSvg(wrapper: SvgWrapper<N, T, D>, svg: N, g: N) {
     const adaptor = this.adaptor;
     //
     //  Typeset the math and add minWidth (from mtables), or set the alignment and indentation
@@ -301,7 +304,7 @@ CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFon
       this.fontCache.useLocalID(this.options.localID);
       adaptor.insert(this.fontCache.getCache(), g);
     }
-    wrapper.toSVG(g);
+    wrapper.toSVG([g]);
     this.fontCache.clearLocalID();
     if (this.minwidth) {
       adaptor.setStyle(svg, 'minWidth', this.ex(this.minwidth));
@@ -324,6 +327,62 @@ CommonOutputJax<N, T, D, SVGWrapper<N, T, D>, SVGWrapperFactory<N, T, D>, SVGFon
     if (align === 'center' || align === 'right') {
       this.adaptor.setStyle(svg, 'margin-right', this.ex(-shift));
     }
+  }
+
+  /**
+   * @param {N} svg    The SVG node that is breaking
+   * @param {N} g      The group in which the math is typeset
+   */
+  protected handleInlineBreaks(wrapper: SvgWrapper<N, T, D>, svg: N, g: N) {
+    const adaptor = this.adaptor;
+    //
+    // Remove content from original SVG other than <defs>, if any
+    //
+    adaptor.setAttribute(svg, 'width', 0);
+    adaptor.setAttribute(svg, 'height', 0);
+    adaptor.setStyle(svg, 'vertical-align', '');
+    adaptor.remove(g);
+    //
+    // Find the math element and the lines that it contains
+    //
+    const math = adaptor.firstChild(g) as N;
+    const lines = adaptor.childNodes(adaptor.firstChild(math) as N) as N[];
+    const n = lines.length;
+    const lineBBox = wrapper.childNodes[0].lineBBox;
+    let newline = true;
+    //
+    // Make each line a separate SVG containing the line's children
+    //
+    for (let i = 0; i < n; i++) {
+      const {h, d, w} = lineBBox[i];
+      const [nsvg, ng] = this.createSVG(h, d, w);
+      const nmath = adaptor.append(ng, adaptor.clone(math, false)) as N;
+      for (const child of adaptor.childNodes(lines[i])) {
+        adaptor.append(nmath, child);
+      }
+      adaptor.insert(nsvg, svg);
+      //
+      // If the line is not the first one (or not a forced break), add a break node of the correct size
+      //
+      const line = lineBBox[i];
+      const [mml, mo] = wrapper.childNodes[0].getBreakNode(line);
+      const forced = !!(mml && mml.node.getProperty('forcebreak'));
+      if (i || forced) {
+        const space = (mml && !newline ? mml.getLineBBox(0).originalL : 0) * 400;
+        (space || !forced) && adaptor.insert(
+          adaptor.node('mjx-break', forced ? {style: {'font-size': space.toFixed(1) + '%'}} : {newline: true}),
+          nsvg
+        );
+      }
+      //
+      // Don't insert space right after an mo with linebreak="newline"
+      //
+      newline = !!(mo && mo.node.attributes.get('linebreak') === 'newline');
+    }
+    //
+    // Remove the original SVG node, if it doesn't have a <defs> node
+    //
+    adaptor.childNodes(svg).length === 0 && adaptor.remove(svg);
   }
 
   /**
