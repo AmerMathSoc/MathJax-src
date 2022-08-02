@@ -80,7 +80,10 @@ var MathML = (function (_super) {
             }
         }
         mml = this.executeFilters(this.mmlFilters, math, document, mml);
-        return this.executeFilters(this.postFilters, math, document, this.mathml.compile(mml));
+        var root = this.mathml.compile(mml);
+        root = this.executeFilters(this.postFilters, math, document, root);
+        math.display = root.attributes.get('display') === 'block';
+        return root;
     };
     MathML.prototype.checkForErrors = function (doc) {
         var err = this.adaptor.tags(this.adaptor.body(doc), 'parsererror')[0];

@@ -15,16 +15,16 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHTMLWrapperFactory = void 0;
+exports.ChtmlWrapperFactory = void 0;
 var WrapperFactory_js_1 = require("../common/WrapperFactory.js");
 var Wrappers_js_1 = require("./Wrappers.js");
-var CHTMLWrapperFactory = (function (_super) {
-    __extends(CHTMLWrapperFactory, _super);
-    function CHTMLWrapperFactory() {
+var ChtmlWrapperFactory = (function (_super) {
+    __extends(ChtmlWrapperFactory, _super);
+    function ChtmlWrapperFactory() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    CHTMLWrapperFactory.defaultNodes = Wrappers_js_1.CHTMLWrappers;
-    return CHTMLWrapperFactory;
+    ChtmlWrapperFactory.defaultNodes = Wrappers_js_1.ChtmlWrappers;
+    return ChtmlWrapperFactory;
 }(WrapperFactory_js_1.CommonWrapperFactory));
-exports.CHTMLWrapperFactory = CHTMLWrapperFactory;
+exports.ChtmlWrapperFactory = ChtmlWrapperFactory;
 //# sourceMappingURL=WrapperFactory.js.map

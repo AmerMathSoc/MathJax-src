@@ -183,13 +183,10 @@ exports.MathtoolsMethods = {
         var width = parser.GetBrackets(name);
         var pos = parser.GetBrackets(name, 'c');
         var mml = parser.create('node', 'mpadded', [parser.ParseArg(name)]);
-        if (width) {
-            NodeUtil_js_1.default.setAttribute(mml, 'width', width);
-        }
-        var align = (0, Options_js_1.lookup)(pos, { c: 'center', r: 'right' }, '');
-        if (align) {
-            NodeUtil_js_1.default.setAttribute(mml, 'data-align', align);
-        }
+        width && NodeUtil_js_1.default.setAttribute(mml, 'width', width);
+        var align = (0, Options_js_1.lookup)(pos.toLowerCase(), { c: 'center', r: 'right' }, '');
+        align && NodeUtil_js_1.default.setAttribute(mml, 'data-align', align);
+        pos.toLowerCase() !== pos && NodeUtil_js_1.default.setAttribute(mml, 'data-overflow', 'linebreak');
         parser.Push(mml);
     },
     MathMBox: function (parser, name) {

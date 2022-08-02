@@ -1,6 +1,12 @@
-import { CHTMLConstructor } from '../Wrapper.js';
-declare const CHTMLms_base: import("../../common/Wrappers/ms.js").MsConstructor & CHTMLConstructor<any, any, any>;
-export declare class CHTMLms<N, T, D> extends CHTMLms_base {
-    static kind: string;
+import { CHTML } from '../../chtml.js';
+import { ChtmlWrapper, ChtmlWrapperClass } from '../Wrapper.js';
+import { ChtmlWrapperFactory } from '../WrapperFactory.js';
+import { ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass } from '../FontData.js';
+import { CommonMs, CommonMsClass } from '../../common/Wrappers/ms.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+export interface ChtmlMsNTD<N, T, D> extends ChtmlWrapper<N, T, D>, CommonMs<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
 }
-export {};
+export interface ChtmlMsClass<N, T, D> extends ChtmlWrapperClass<N, T, D>, CommonMsClass<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
+    new (factory: ChtmlWrapperFactory<N, T, D>, node: MmlNode, parent?: ChtmlWrapper<N, T, D>): ChtmlMsNTD<N, T, D>;
+}
+export declare const ChtmlMs: ChtmlMsClass<any, any, any>;

@@ -60,6 +60,13 @@ var MmlMtr = (function (_super) {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(MmlMtr.prototype, "linebreakAlign", {
+        get: function () {
+            return '';
+        },
+        enumerable: false,
+        configurable: true
+    });
     MmlMtr.prototype.setChildInheritedAttributes = function (attributes, display, level, prime) {
         var e_1, _a, e_2, _b;
         try {

@@ -49,7 +49,7 @@ var MmlMenclose = (function (_super) {
         enumerable: false,
         configurable: true
     });
-    Object.defineProperty(MmlMenclose.prototype, "linebreakContininer", {
+    Object.defineProperty(MmlMenclose.prototype, "linebreakContainer", {
         get: function () {
             return true;
         },

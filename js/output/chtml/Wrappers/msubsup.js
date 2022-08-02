@@ -31,66 +31,78 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHTMLmsubsup = exports.CHTMLmsup = exports.CHTMLmsub = void 0;
-var scriptbase_js_1 = require("./scriptbase.js");
+exports.ChtmlMsubsup = exports.ChtmlMsup = exports.ChtmlMsub = void 0;
 var msubsup_js_1 = require("../../common/Wrappers/msubsup.js");
-var msubsup_js_2 = require("../../common/Wrappers/msubsup.js");
-var msubsup_js_3 = require("../../common/Wrappers/msubsup.js");
-var msubsup_js_4 = require("../../../core/MmlTree/MmlNodes/msubsup.js");
-var CHTMLmsub = (function (_super) {
-    __extends(CHTMLmsub, _super);
-    function CHTMLmsub() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CHTMLmsub.kind = msubsup_js_4.MmlMsub.prototype.kind;
-    return CHTMLmsub;
-}((0, msubsup_js_1.CommonMsubMixin)(scriptbase_js_1.CHTMLscriptbase)));
-exports.CHTMLmsub = CHTMLmsub;
-var CHTMLmsup = (function (_super) {
-    __extends(CHTMLmsup, _super);
-    function CHTMLmsup() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CHTMLmsup.kind = msubsup_js_4.MmlMsup.prototype.kind;
-    return CHTMLmsup;
-}((0, msubsup_js_2.CommonMsupMixin)(scriptbase_js_1.CHTMLscriptbase)));
-exports.CHTMLmsup = CHTMLmsup;
-var CHTMLmsubsup = (function (_super) {
-    __extends(CHTMLmsubsup, _super);
-    function CHTMLmsubsup() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CHTMLmsubsup.prototype.toCHTML = function (parent) {
-        var adaptor = this.adaptor;
-        var chtml = this.standardCHTMLnode(parent);
-        var _a = __read([this.baseChild, this.supChild, this.subChild], 3), base = _a[0], sup = _a[1], sub = _a[2];
-        var _b = __read(this.getUVQ(), 3), v = _b[1], q = _b[2];
-        var style = { 'vertical-align': this.em(v) };
-        base.toCHTML(chtml);
-        var stack = adaptor.append(chtml, this.html('mjx-script', { style: style }));
-        sup.toCHTML(stack);
-        adaptor.append(stack, this.html('mjx-spacer', { style: { 'margin-top': this.em(q) } }));
-        sub.toCHTML(stack);
-        var ic = this.getAdjustedIc();
-        if (ic) {
-            adaptor.setStyle(sup.chtml, 'marginLeft', this.em(ic / sup.bbox.rscale));
-        }
-        if (this.baseRemoveIc) {
-            adaptor.setStyle(stack, 'marginLeft', this.em(-this.baseIc));
-        }
-    };
-    CHTMLmsubsup.kind = msubsup_js_4.MmlMsubsup.prototype.kind;
-    CHTMLmsubsup.styles = {
-        'mjx-script': {
-            display: 'inline-block',
-            'padding-right': '.05em',
-            'padding-left': '.033em'
+var scriptbase_js_1 = require("./scriptbase.js");
+var msubsup_js_2 = require("../../../core/MmlTree/MmlNodes/msubsup.js");
+exports.ChtmlMsub = (function () {
+    var _a;
+    var Base = (0, msubsup_js_1.CommonMsubMixin)(scriptbase_js_1.ChtmlScriptbase);
+    return _a = (function (_super) {
+            __extends(ChtmlMsub, _super);
+            function ChtmlMsub() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            return ChtmlMsub;
+        }(Base)),
+        _a.kind = msubsup_js_2.MmlMsub.prototype.kind,
+        _a;
+})();
+exports.ChtmlMsup = (function () {
+    var _a;
+    var Base = (0, msubsup_js_1.CommonMsupMixin)(scriptbase_js_1.ChtmlScriptbase);
+    return _a = (function (_super) {
+            __extends(ChtmlMsup, _super);
+            function ChtmlMsup() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            return ChtmlMsup;
+        }(Base)),
+        _a.kind = msubsup_js_2.MmlMsup.prototype.kind,
+        _a;
+})();
+exports.ChtmlMsubsup = (function () {
+    var _a;
+    var Base = (0, msubsup_js_1.CommonMsubsupMixin)(scriptbase_js_1.ChtmlScriptbase);
+    return _a = (function (_super) {
+            __extends(ChtmlMsubsup, _super);
+            function ChtmlMsubsup() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            ChtmlMsubsup.prototype.toCHTML = function (parents) {
+                if (this.toEmbellishedCHTML(parents))
+                    return;
+                var adaptor = this.adaptor;
+                var chtml = this.standardChtmlNodes(parents);
+                var _a = __read([this.baseChild, this.supChild, this.subChild], 3), base = _a[0], sup = _a[1], sub = _a[2];
+                var _b = __read(this.getUVQ(), 3), v = _b[1], q = _b[2];
+                var style = { 'vertical-align': this.em(v) };
+                base.toCHTML(chtml);
+                var stack = adaptor.append(chtml[chtml.length - 1], this.html('mjx-script', { style: style }));
+                sup.toCHTML([stack]);
+                adaptor.append(stack, this.html('mjx-spacer', { style: { 'margin-top': this.em(q) } }));
+                sub.toCHTML([stack]);
+                var ic = this.getAdjustedIc();
+                if (ic) {
+                    adaptor.setStyle(sup.dom[0], 'marginLeft', this.em(ic / sup.bbox.rscale));
+                }
+                if (this.baseRemoveIc) {
+                    adaptor.setStyle(stack, 'marginLeft', this.em(-this.baseIc));
+                }
+            };
+            return ChtmlMsubsup;
+        }(Base)),
+        _a.kind = msubsup_js_2.MmlMsubsup.prototype.kind,
+        _a.styles = {
+            'mjx-script': {
+                display: 'inline-block',
+                'padding-right': '.05em',
+                'padding-left': '.033em'
+            },
+            'mjx-script > mjx-spacer': {
+                display: 'block'
+            }
         },
-        'mjx-script > mjx-spacer': {
-            display: 'block'
-        }
-    };
-    return CHTMLmsubsup;
-}((0, msubsup_js_3.CommonMsubsupMixin)(scriptbase_js_1.CHTMLscriptbase)));
-exports.CHTMLmsubsup = CHTMLmsubsup;
+        _a;
+})();
 //# sourceMappingURL=msubsup.js.map

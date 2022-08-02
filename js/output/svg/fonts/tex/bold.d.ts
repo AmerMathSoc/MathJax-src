@@ -1,2 +1,2 @@
-import { SVGCharMap } from '../../FontData.js';
-export declare const bold: SVGCharMap;
+import { SvgCharMap } from '../../FontData.js';
+export declare const bold: SvgCharMap;

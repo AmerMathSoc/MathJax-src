@@ -1,27 +1,15 @@
-import { CHTMLWrapper, CHTMLConstructor } from '../Wrapper.js';
-import { BBox } from '../../../util/BBox.js';
-import { StyleList } from '../../../util/StyleList.js';
-declare const CHTMLsemantics_base: import("../../common/Wrappers/semantics.js").SemanticsConstructor & CHTMLConstructor<any, any, any>;
-export declare class CHTMLsemantics<N, T, D> extends CHTMLsemantics_base {
-    static kind: string;
-    toCHTML(parent: N): void;
+import { CHTML } from '../../chtml.js';
+import { ChtmlWrapper, ChtmlWrapperClass } from '../Wrapper.js';
+import { ChtmlWrapperFactory } from '../WrapperFactory.js';
+import { ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass } from '../FontData.js';
+import { CommonSemantics, CommonSemanticsClass } from '../../common/Wrappers/semantics.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+export interface ChtmlSemanticsNTD<N, T, D> extends ChtmlWrapper<N, T, D>, CommonSemantics<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
 }
-export declare class CHTMLannotation<N, T, D> extends CHTMLWrapper<N, T, D> {
-    static kind: string;
-    toCHTML(parent: N): void;
-    computeBBox(): BBox;
+export interface ChtmlSemanticsClass<N, T, D> extends ChtmlWrapperClass<N, T, D>, CommonSemanticsClass<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
+    new (factory: ChtmlWrapperFactory<N, T, D>, node: MmlNode, parent?: ChtmlWrapper<N, T, D>): ChtmlSemanticsNTD<N, T, D>;
 }
-export declare class CHTMLannotationXML<N, T, D> extends CHTMLWrapper<N, T, D> {
-    static kind: string;
-    static styles: StyleList;
-}
-export declare class CHTMLxml<N, T, D> extends CHTMLWrapper<N, T, D> {
-    static kind: string;
-    static autoStyle: boolean;
-    toCHTML(parent: N): void;
-    computeBBox(bbox: BBox, _recompute?: boolean): void;
-    protected getStyles(): void;
-    protected getScale(): void;
-    protected getVariant(): void;
-}
-export {};
+export declare const ChtmlSemantics: ChtmlSemanticsClass<any, any, any>;
+export declare const ChtmlAnnotation: ChtmlWrapperClass<any, any, any>;
+export declare const ChtmlAnnotationXML: ChtmlWrapperClass<any, any, any>;
+export declare const ChtmlXmlNode: ChtmlWrapperClass<any, any, any>;

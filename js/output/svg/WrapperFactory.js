@@ -15,18 +15,16 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGWrapperFactory = void 0;
+exports.SvgWrapperFactory = void 0;
 var WrapperFactory_js_1 = require("../common/WrapperFactory.js");
 var Wrappers_js_1 = require("./Wrappers.js");
-var SVGWrapperFactory = (function (_super) {
-    __extends(SVGWrapperFactory, _super);
-    function SVGWrapperFactory() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.jax = null;
-        return _this;
+var SvgWrapperFactory = (function (_super) {
+    __extends(SvgWrapperFactory, _super);
+    function SvgWrapperFactory() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    SVGWrapperFactory.defaultNodes = Wrappers_js_1.SVGWrappers;
-    return SVGWrapperFactory;
+    SvgWrapperFactory.defaultNodes = Wrappers_js_1.SvgWrappers;
+    return SvgWrapperFactory;
 }(WrapperFactory_js_1.CommonWrapperFactory));
-exports.SVGWrapperFactory = SVGWrapperFactory;
+exports.SvgWrapperFactory = SvgWrapperFactory;
 //# sourceMappingURL=WrapperFactory.js.map

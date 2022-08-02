@@ -1,5 +1,10 @@
-import { SVGConstructor, Constructor } from '../Wrapper.js';
-import { SVGmtd } from './mtd.js';
+import { SVG } from '../../svg.js';
+import { SvgWrapper, SvgWrapperClass } from '../Wrapper.js';
+import { SvgWrapperFactory } from '../WrapperFactory.js';
+import { SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass } from '../FontData.js';
+import { CommonMtr, CommonMtrClass, CommonMlabeledtr, CommonMlabeledtrClass } from '../../common/Wrappers/mtr.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+import { SvgMtdNTD } from './mtd.js';
 export declare type SizeData = {
     x: number;
     y: number;
@@ -9,23 +14,22 @@ export declare type SizeData = {
     lLine: number;
     rLine: number;
 };
-declare const SVGmtr_base: import("../../common/Wrappers/mtr.js").MtrConstructor<SVGmtd<any, any, any>> & SVGConstructor<any, any, any>;
-export declare class SVGmtr<N, T, D> extends SVGmtr_base {
-    static kind: string;
+export interface SvgMtrNTD<N, T, D> extends SvgWrapper<N, T, D>, CommonMtr<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
     H: number;
     D: number;
     tSpace: number;
     bSpace: number;
     tLine: number;
     bLine: number;
-    toSVG(parent: N): void;
-    protected placeCells(svg: N): void;
-    placeCell(cell: SVGmtd<N, T, D>, sizes: SizeData): number;
-    protected placeColor(): void;
+    placeCell(cell: SvgMtdNTD<N, T, D>, sizes: SizeData): number;
 }
-declare const SVGmlabeledtr_base: import("../../common/Wrappers/mtr.js").MlabeledtrConstructor<SVGmtd<any, any, any>> & Constructor<SVGmtr<any, any, any>>;
-export declare class SVGmlabeledtr<N, T, D> extends SVGmlabeledtr_base {
-    static kind: string;
-    toSVG(parent: N): void;
+export interface SvgMtrClass<N, T, D> extends SvgWrapperClass<N, T, D>, CommonMtrClass<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
+    new (factory: SvgWrapperFactory<N, T, D>, node: MmlNode, parent?: SvgWrapper<N, T, D>): SvgMtrNTD<N, T, D>;
 }
-export {};
+export declare const SvgMtr: SvgMtrClass<any, any, any>;
+export interface SvgMlabeledtrNTD<N, T, D> extends SvgMtrNTD<N, T, D>, CommonMlabeledtr<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
+}
+export interface SvgMlabeledtrClass<N, T, D> extends SvgMtrClass<N, T, D>, CommonMlabeledtrClass<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
+    new (factory: SvgWrapperFactory<N, T, D>, node: MmlNode, parent?: SvgWrapper<N, T, D>): SvgMlabeledtrNTD<N, T, D>;
+}
+export declare const SvgMlabeledtr: SvgMlabeledtrClass<any, any, any>;

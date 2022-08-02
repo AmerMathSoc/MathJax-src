@@ -1,9 +1,12 @@
-import { CHTMLConstructor } from '../Wrapper.js';
-import { StyleList } from '../../../util/StyleList.js';
-declare const CHTMLmglyph_base: import("../../common/Wrappers/mglyph.js").MglyphConstructor & CHTMLConstructor<any, any, any>;
-export declare class CHTMLmglyph<N, T, D> extends CHTMLmglyph_base {
-    static kind: string;
-    static styles: StyleList;
-    toCHTML(parent: N): void;
+import { CHTML } from '../../chtml.js';
+import { ChtmlWrapper, ChtmlWrapperClass } from '../Wrapper.js';
+import { ChtmlWrapperFactory } from '../WrapperFactory.js';
+import { ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass } from '../FontData.js';
+import { CommonMglyph, CommonMglyphClass } from '../../common/Wrappers/mglyph.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+export interface ChtmlMglyphNTD<N, T, D> extends ChtmlWrapper<N, T, D>, CommonMglyph<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
 }
-export {};
+export interface ChtmlMglyphClass<N, T, D> extends ChtmlWrapperClass<N, T, D>, CommonMglyphClass<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
+    new (factory: ChtmlWrapperFactory<N, T, D>, node: MmlNode, parent?: ChtmlWrapper<N, T, D>): ChtmlMglyphNTD<N, T, D>;
+}
+export declare const ChtmlMglyph: ChtmlMglyphClass<any, any, any>;

@@ -1,2 +1,2 @@
-import { CHTMLCharMap } from '../../FontData.js';
-export declare const sansSerif: CHTMLCharMap;
+import { ChtmlCharMap } from '../../FontData.js';
+export declare const sansSerif: ChtmlCharMap;

@@ -66,9 +66,11 @@ exports.TEXCLASS = {
     PUNCT: 6,
     INNER: 7,
     VCENTER: 8,
+    VTOP: 9,
+    VBOX: 10,
     NONE: -1
 };
-exports.TEXCLASSNAMES = ['ORD', 'OP', 'BIN', 'REL', 'OPEN', 'CLOSE', 'PUNCT', 'INNER', 'VCENTER'];
+exports.TEXCLASSNAMES = ['ORD', 'OP', 'BIN', 'REL', 'OPEN', 'CLOSE', 'PUNCT', 'INNER', 'VCENTER', 'VTOP', 'VBOX'];
 var TEXSPACELENGTH = ['', 'thinmathspace', 'mediummathspace', 'thickmathspace'];
 var TEXSPACE = [
     [0, -1, 2, 3, 0, 0, 0, 1],
@@ -189,9 +191,9 @@ var AbstractMmlNode = (function (_super) {
         enumerable: false,
         configurable: true
     });
-    Object.defineProperty(AbstractMmlNode.prototype, "hasNewLine", {
+    Object.defineProperty(AbstractMmlNode.prototype, "linebreakAlign", {
         get: function () {
-            return false;
+            return 'data-align';
         },
         enumerable: false,
         configurable: true
@@ -335,10 +337,10 @@ var AbstractMmlNode = (function (_super) {
         if (prevClass === exports.TEXCLASS.NONE || texClass === exports.TEXCLASS.NONE) {
             return '';
         }
-        if (prevClass === exports.TEXCLASS.VCENTER) {
+        if (prevClass >= exports.TEXCLASS.VCENTER) {
             prevClass = exports.TEXCLASS.ORD;
         }
-        if (texClass === exports.TEXCLASS.VCENTER) {
+        if (texClass >= exports.TEXCLASS.VCENTER) {
             texClass = exports.TEXCLASS.ORD;
         }
         var space = TEXSPACE[prevClass][texClass];
@@ -397,6 +399,18 @@ var AbstractMmlNode = (function (_super) {
                 while (this.childNodes.length < arity) {
                     this.appendChild(this.factory.create('mrow'));
                 }
+            }
+        }
+        if (this.linebreakContainer && !this.isEmbellished) {
+            var align = this.linebreakAlign;
+            if (align) {
+                var indentalign = this.attributes.get(align) || 'left';
+                attributes = this.addInheritedAttributes(attributes, {
+                    indentalign: indentalign,
+                    indentshift: '0',
+                    indentalignfirst: indentalign, indentshiftfirst: '0',
+                    indentalignlast: 'indentalign', indentshiftlast: 'indentshift'
+                });
             }
         }
         this.setChildInheritedAttributes(attributes, display, level, prime);
@@ -544,7 +558,8 @@ var AbstractMmlNode = (function (_super) {
     };
     AbstractMmlNode.alwaysInherit = {
         scriptminsize: true,
-        scriptsizemultiplier: true
+        scriptsizemultiplier: true,
+        infixlinebreakstyle: true
     };
     AbstractMmlNode.verifyDefaults = {
         checkArity: true,
@@ -761,9 +776,9 @@ var AbstractMmlEmptyNode = (function (_super) {
         enumerable: false,
         configurable: true
     });
-    Object.defineProperty(AbstractMmlEmptyNode.prototype, "hasNewLine", {
+    Object.defineProperty(AbstractMmlEmptyNode.prototype, "linebreakAlign", {
         get: function () {
-            return false;
+            return '';
         },
         enumerable: false,
         configurable: true

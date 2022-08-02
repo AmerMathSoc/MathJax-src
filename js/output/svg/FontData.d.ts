@@ -3,23 +3,23 @@ export * from '../common/FontData.js';
 export declare type CharStringMap = {
     [name: number]: string;
 };
-export interface SVGCharOptions extends CharOptions {
+export interface SvgCharOptions extends CharOptions {
     c?: string;
     p?: string;
 }
-export declare type SVGCharMap = CharMap<SVGCharOptions>;
-export declare type SVGCharData = CharData<SVGCharOptions>;
-export interface SVGVariantData extends VariantData<SVGCharOptions> {
+export declare type SvgCharMap = CharMap<SvgCharOptions>;
+export declare type SvgCharData = CharData<SvgCharOptions>;
+export interface SvgVariantData extends VariantData<SvgCharOptions> {
     cacheID: string;
 }
-export interface SVGDelimiterData extends DelimiterData {
+export interface SvgDelimiterData extends DelimiterData {
 }
-export declare class SVGFontData extends FontData<SVGCharOptions, SVGVariantData, SVGDelimiterData> {
+export declare class SvgFontData extends FontData<SvgCharOptions, SvgVariantData, SvgDelimiterData> {
     static OPTIONS: {
         dynamicPrefix: string;
     };
     static JAX: string;
-    static charOptions(font: SVGCharMap, n: number): SVGCharOptions;
+    static charOptions(font: SvgCharMap, n: number): SvgCharOptions;
 }
-export declare type SVGFontDataClass = typeof SVGFontData;
-export declare function AddPaths(font: SVGCharMap, paths: CharStringMap, content: CharStringMap): SVGCharMap;
+export declare type SvgFontDataClass = typeof SvgFontData;
+export declare function AddPaths(font: SvgCharMap, paths: CharStringMap, content: CharStringMap): SvgCharMap;

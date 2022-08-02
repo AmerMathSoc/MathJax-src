@@ -5,6 +5,7 @@ export declare class MmlMtd extends AbstractMmlBaseNode {
     get kind(): string;
     get arity(): number;
     get linebreakContainer(): boolean;
+    get linebreakAlign(): string;
     protected verifyChildren(options: PropertyList): void;
     setTeXclass(prev: MmlNode): this;
 }

@@ -15,42 +15,47 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGmsqrt = void 0;
+exports.SvgMsqrt = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var msqrt_js_1 = require("../../common/Wrappers/msqrt.js");
 var msqrt_js_2 = require("../../../core/MmlTree/MmlNodes/msqrt.js");
-var SVGmsqrt = (function (_super) {
-    __extends(SVGmsqrt, _super);
-    function SVGmsqrt() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.dx = 0;
-        return _this;
-    }
-    SVGmsqrt.prototype.toSVG = function (parent) {
-        var surd = this.childNodes[this.surd];
-        var base = this.childNodes[this.base];
-        var root = (this.root ? this.childNodes[this.root] : null);
-        var sbox = surd.getBBox();
-        var bbox = base.getOuterBBox();
-        var q = this.getPQ(sbox)[1];
-        var t = this.font.params.rule_thickness * this.bbox.scale;
-        var H = bbox.h + q + t;
-        var SVG = this.standardSVGnode(parent);
-        var BASE = this.adaptor.append(SVG, this.svg('g'));
-        this.addRoot(SVG, root, sbox, H);
-        surd.toSVG(SVG);
-        surd.place(this.dx, H - sbox.h);
-        base.toSVG(BASE);
-        base.place(this.dx + sbox.w, 0);
-        this.adaptor.append(SVG, this.svg('rect', {
-            width: this.fixed(bbox.w), height: this.fixed(t),
-            x: this.fixed(this.dx + sbox.w), y: this.fixed(H - t)
-        }));
-    };
-    SVGmsqrt.prototype.addRoot = function (_ROOT, _root, _sbox, _H) {
-    };
-    SVGmsqrt.kind = msqrt_js_2.MmlMsqrt.prototype.kind;
-    return SVGmsqrt;
-}((0, msqrt_js_1.CommonMsqrtMixin)(Wrapper_js_1.SVGWrapper)));
-exports.SVGmsqrt = SVGmsqrt;
+exports.SvgMsqrt = (function () {
+    var _a;
+    var Base = (0, msqrt_js_1.CommonMsqrtMixin)(Wrapper_js_1.SvgWrapper);
+    return _a = (function (_super) {
+            __extends(SvgMsqrt, _super);
+            function SvgMsqrt() {
+                var _this = _super !== null && _super.apply(this, arguments) || this;
+                _this.dx = 0;
+                return _this;
+            }
+            SvgMsqrt.prototype.addRoot = function (_ROOT, _root, _sbox, _H) {
+                return 0;
+            };
+            SvgMsqrt.prototype.toSVG = function (parents) {
+                var surd = this.surd;
+                var base = this.childNodes[this.base];
+                var root = (this.root ? this.childNodes[this.root] : null);
+                var sbox = surd.getBBox();
+                var bbox = base.getOuterBBox();
+                var q = this.getPQ(sbox)[1];
+                var t = this.font.params.rule_thickness * this.bbox.scale;
+                var H = bbox.h + q + t;
+                var SVG = this.standardSvgNodes(parents);
+                var BASE = this.adaptor.append(SVG[0], this.svg('g'));
+                var dx = this.addRoot(SVG, root, sbox, H);
+                surd.toSVG(SVG);
+                surd.place(dx, H - sbox.h);
+                base.toSVG([BASE]);
+                base.place(dx + sbox.w, 0);
+                this.adaptor.append(SVG[SVG.length - 1], this.svg('rect', {
+                    width: this.fixed(bbox.w), height: this.fixed(t),
+                    x: this.fixed(dx + sbox.w), y: this.fixed(H - t)
+                }));
+            };
+            return SvgMsqrt;
+        }(Base)),
+        _a.kind = msqrt_js_2.MmlMsqrt.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=msqrt.js.map

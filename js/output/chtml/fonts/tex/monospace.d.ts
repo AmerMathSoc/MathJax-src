@@ -1,2 +1,2 @@
-import { CHTMLCharMap } from '../../FontData.js';
-export declare const monospace: CHTMLCharMap;
+import { ChtmlCharMap } from '../../FontData.js';
+export declare const monospace: ChtmlCharMap;

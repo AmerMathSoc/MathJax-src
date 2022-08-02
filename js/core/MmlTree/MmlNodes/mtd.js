@@ -55,6 +55,13 @@ var MmlMtd = (function (_super) {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(MmlMtd.prototype, "linebreakAlign", {
+        get: function () {
+            return 'columnalign';
+        },
+        enumerable: false,
+        configurable: true
+    });
     MmlMtd.prototype.verifyChildren = function (options) {
         if (this.parent && !this.parent.isKind('mtr')) {
             this.mError(this.kind + ' can only be a child of an mtr or mlabeledtr', options, true);

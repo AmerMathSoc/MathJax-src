@@ -133,6 +133,10 @@ var NodeUtil;
         return node.attributes.get(attr);
     }
     NodeUtil.getAttribute = getAttribute;
+    function removeAttribute(node, attr) {
+        delete (node.attributes.getAllAttributes())[attr];
+    }
+    NodeUtil.removeAttribute = removeAttribute;
     function removeProperties(node) {
         var properties = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -199,7 +203,7 @@ var NodeUtil;
         try {
             for (var forms_1 = __values(forms), forms_1_1 = forms_1.next(); !forms_1_1.done; forms_1_1 = forms_1.next()) {
                 var form = forms_1_1.value;
-                var symbol = mo_js_1.MmlMo.OPTABLE[form][mo.getText()];
+                var symbol = this.getOp(mo, form);
                 if (symbol) {
                     return symbol;
                 }
@@ -215,6 +219,11 @@ var NodeUtil;
         return null;
     }
     NodeUtil.getForm = getForm;
+    function getOp(mo, form) {
+        if (form === void 0) { form = 'infix'; }
+        return mo_js_1.MmlMo.OPTABLE[form][mo.getText()] || null;
+    }
+    NodeUtil.getOp = getOp;
 })(NodeUtil || (NodeUtil = {}));
 exports.default = NodeUtil;
 //# sourceMappingURL=NodeUtil.js.map

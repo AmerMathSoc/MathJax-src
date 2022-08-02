@@ -25,6 +25,17 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -41,30 +52,11 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
-var __values = (this && this.__values) || function(o) {
-    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-    if (m) return m.call(o);
-    if (o && typeof o.length === "number") return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-};
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMoMixin = exports.DirectionVH = void 0;
 var BBox_js_1 = require("../../../util/BBox.js");
+var LineBBox_js_1 = require("../LineBBox.js");
 var string_js_1 = require("../../../util/string.js");
 var FontData_js_1 = require("../FontData.js");
 exports.DirectionVH = (_a = {},
@@ -73,32 +65,38 @@ exports.DirectionVH = (_a = {},
     _a);
 function CommonMoMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
-            }
-            var _this = _super.apply(this, __spreadArray([], __read(args), false)) || this;
+        __extends(CommonMoMixin, _super);
+        function CommonMoMixin(factory, node, parent) {
+            if (parent === void 0) { parent = null; }
+            var _this = _super.call(this, factory, node, parent) || this;
             _this.size = null;
             _this.isAccent = _this.node.isAccent;
+            _this.getMultChar();
+            _this.setBreakStyle();
             return _this;
         }
-        class_1.prototype.computeBBox = function (bbox, _recompute) {
-            if (_recompute === void 0) { _recompute = false; }
-            this.protoBBox(bbox);
-            if (this.node.attributes.get('symmetric') &&
-                this.stretch.dir !== 2) {
-                var d = this.getCenterOffset(bbox);
-                bbox.h += d;
-                bbox.d -= d;
-            }
-            if (this.node.getProperty('mathaccent') &&
-                (this.stretch.dir === 0 || this.size >= 0)) {
-                bbox.w = 0;
-            }
-        };
-        class_1.prototype.protoBBox = function (bbox) {
+        Object.defineProperty(CommonMoMixin.prototype, "breakCount", {
+            get: function () {
+                return (this.breakStyle ? 1 : 0);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(CommonMoMixin.prototype, "embellishedBreakCount", {
+            get: function () {
+                return (this.embellishedBreakStyle ? 1 : 0);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(CommonMoMixin.prototype, "embellishedBreakStyle", {
+            get: function () {
+                return (this.breakStyle || this.getBreakStyle());
+            },
+            enumerable: false,
+            configurable: true
+        });
+        CommonMoMixin.prototype.protoBBox = function (bbox) {
             var stretchy = (this.stretch.dir !== 0);
             if (stretchy && this.size === null) {
                 this.getStretchedVariant([0]);
@@ -108,12 +106,12 @@ function CommonMoMixin(Base) {
             _super.prototype.computeBBox.call(this, bbox);
             this.copySkewIC(bbox);
         };
-        class_1.prototype.getAccentOffset = function () {
+        CommonMoMixin.prototype.getAccentOffset = function () {
             var bbox = BBox_js_1.BBox.empty();
             this.protoBBox(bbox);
             return -bbox.w / 2;
         };
-        class_1.prototype.getCenterOffset = function (bbox) {
+        CommonMoMixin.prototype.getCenterOffset = function (bbox) {
             if (bbox === void 0) { bbox = null; }
             if (!bbox) {
                 bbox = BBox_js_1.BBox.empty();
@@ -121,33 +119,7 @@ function CommonMoMixin(Base) {
             }
             return ((bbox.h + bbox.d) / 2 + this.font.params.axis_height) - bbox.h;
         };
-        class_1.prototype.getVariant = function () {
-            if (this.node.attributes.get('largeop')) {
-                this.variant = (this.node.attributes.get('displaystyle') ? '-largeop' : '-smallop');
-                return;
-            }
-            if (!this.node.attributes.getExplicit('mathvariant') &&
-                this.node.getProperty('pseudoscript') === false) {
-                this.variant = '-tex-variant';
-                return;
-            }
-            _super.prototype.getVariant.call(this);
-        };
-        class_1.prototype.canStretch = function (direction) {
-            if (this.stretch.dir !== 0) {
-                return this.stretch.dir === direction;
-            }
-            var attributes = this.node.attributes;
-            if (!attributes.get('stretchy'))
-                return false;
-            var c = this.getText();
-            if (Array.from(c).length !== 1)
-                return false;
-            var delim = this.font.getDelimiter(c.codePointAt(0));
-            this.stretch = (delim && delim.dir === direction ? delim : FontData_js_1.NOSTRETCH);
-            return this.stretch.dir !== 0;
-        };
-        class_1.prototype.getStretchedVariant = function (WH, exact) {
+        CommonMoMixin.prototype.getStretchedVariant = function (WH, exact) {
             var e_1, _a;
             if (exact === void 0) { exact = false; }
             if (this.stretch.dir !== 0) {
@@ -199,14 +171,14 @@ function CommonMoMixin(Base) {
                 }
             }
         };
-        class_1.prototype.getSize = function (name, value) {
+        CommonMoMixin.prototype.getSize = function (name, value) {
             var attributes = this.node.attributes;
             if (attributes.isSet(name)) {
                 value = this.length2em(attributes.get(name), 1, 1);
             }
             return value;
         };
-        class_1.prototype.getWH = function (WH) {
+        CommonMoMixin.prototype.getWH = function (WH) {
             if (WH.length === 0)
                 return 0;
             if (WH.length === 1)
@@ -215,7 +187,7 @@ function CommonMoMixin(Base) {
             var a = this.font.params.axis_height;
             return (this.node.attributes.get('symmetric') ? 2 * Math.max(H - a, D + a) : H + D);
         };
-        class_1.prototype.getStretchBBox = function (WHD, D, C) {
+        CommonMoMixin.prototype.getStretchBBox = function (WHD, D, C) {
             var _a;
             if (C.hasOwnProperty('min') && C.min > D) {
                 D = C.min;
@@ -231,7 +203,7 @@ function CommonMoMixin(Base) {
             this.bbox.d = d;
             this.bbox.w = w;
         };
-        class_1.prototype.getBaseline = function (WHD, HD, C) {
+        CommonMoMixin.prototype.getBaseline = function (WHD, HD, C) {
             var hasWHD = (WHD.length === 2 && WHD[0] + WHD[1] === HD);
             var symmetric = this.node.attributes.get('symmetric');
             var _a = __read((hasWHD ? WHD : [HD, 0]), 2), H = _a[0], D = _a[1];
@@ -252,7 +224,7 @@ function CommonMoMixin(Base) {
             }
             return [h - d, d];
         };
-        class_1.prototype.checkExtendedHeight = function (D, C) {
+        CommonMoMixin.prototype.checkExtendedHeight = function (D, C) {
             if (C.fullExt) {
                 var _a = __read(C.fullExt, 2), extSize = _a[0], endSize = _a[1];
                 var n = Math.ceil(Math.max(0, D - endSize) / extSize);
@@ -260,7 +232,104 @@ function CommonMoMixin(Base) {
             }
             return D;
         };
-        class_1.prototype.remapChars = function (chars) {
+        CommonMoMixin.prototype.setBreakStyle = function (linebreak) {
+            if (linebreak === void 0) { linebreak = ''; }
+            this.breakStyle = (this.node.parent.isEmbellished && !linebreak ? '' : this.getBreakStyle(linebreak));
+            if (!this.breakCount)
+                return;
+            if (this.multChar) {
+                var i = this.parent.node.childIndex(this.node);
+                var next = this.parent.node.childNodes[i + 1];
+                next && next.setTeXclass(this.multChar.node);
+            }
+        };
+        CommonMoMixin.prototype.getBreakStyle = function (linebreak) {
+            if (linebreak === void 0) { linebreak = ''; }
+            var attributes = this.node.attributes;
+            var style = (linebreak || (attributes.get('linebreak') === 'newline' || this.node.getProperty('forcebreak') ?
+                attributes.get('linebreakstyle') : ''));
+            if (style === 'infixlinebreakstyle') {
+                style = attributes.get(style);
+            }
+            return style;
+        };
+        CommonMoMixin.prototype.getMultChar = function () {
+            var multChar = this.node.attributes.get('linebreakmultchar');
+            if (multChar && this.getText() === '\u2062' && multChar !== '\u2062') {
+                this.multChar = this.createMo(multChar);
+            }
+        };
+        CommonMoMixin.prototype.computeBBox = function (bbox, _recompute) {
+            if (_recompute === void 0) { _recompute = false; }
+            this.protoBBox(bbox);
+            if (this.node.attributes.get('symmetric') &&
+                this.stretch.dir !== 2) {
+                var d = this.getCenterOffset(bbox);
+                bbox.h += d;
+                bbox.d -= d;
+            }
+            if (this.node.getProperty('mathaccent') &&
+                (this.stretch.dir === 0 || this.size >= 0)) {
+                bbox.w = 0;
+            }
+        };
+        CommonMoMixin.prototype.computeLineBBox = function (i) {
+            return this.moLineBBox(i, this.breakStyle);
+        };
+        CommonMoMixin.prototype.moLineBBox = function (i, style, obox) {
+            if (obox === void 0) { obox = null; }
+            var leadingString = this.node.attributes.get('lineleading');
+            var leading = this.length2em(leadingString, this.linebreakOptions.lineleading);
+            if (i === 0 && style === 'before') {
+                var bbox_1 = LineBBox_js_1.LineBBox.from(BBox_js_1.BBox.zero(), leading);
+                bbox_1.originalL = this.bbox.L;
+                this.bbox.L = 0;
+                return bbox_1;
+            }
+            var bbox = LineBBox_js_1.LineBBox.from(obox || this.getOuterBBox(), leading);
+            if (i === 1) {
+                if (style === 'after') {
+                    bbox.w = bbox.h = bbox.d = 0;
+                    bbox.isFirst = true;
+                    this.bbox.R = 0;
+                }
+                else if (style === 'duplicate') {
+                    bbox.L = 0;
+                }
+                else if (this.multChar) {
+                    bbox = LineBBox_js_1.LineBBox.from(this.multChar.getOuterBBox(), leading);
+                }
+                bbox.getIndentData(this.node);
+            }
+            return bbox;
+        };
+        CommonMoMixin.prototype.canStretch = function (direction) {
+            if (this.stretch.dir !== 0) {
+                return this.stretch.dir === direction;
+            }
+            var attributes = this.node.attributes;
+            if (!attributes.get('stretchy'))
+                return false;
+            var c = this.getText();
+            if (Array.from(c).length !== 1)
+                return false;
+            var delim = this.font.getDelimiter(c.codePointAt(0));
+            this.stretch = (delim && delim.dir === direction ? delim : FontData_js_1.NOSTRETCH);
+            return this.stretch.dir !== 0;
+        };
+        CommonMoMixin.prototype.getVariant = function () {
+            if (this.node.attributes.get('largeop')) {
+                this.variant = (this.node.attributes.get('displaystyle') ? '-largeop' : '-smallop');
+                return;
+            }
+            if (!this.node.attributes.getExplicit('mathvariant') &&
+                this.node.getProperty('pseudoscript') === false) {
+                this.variant = '-tex-variant';
+                return;
+            }
+            _super.prototype.getVariant.call(this);
+        };
+        CommonMoMixin.prototype.remapChars = function (chars) {
             var primes = this.node.getProperty('primes');
             if (primes) {
                 return (0, string_js_1.unicodeChars)(primes);
@@ -276,7 +345,7 @@ function CommonMoMixin(Base) {
             }
             return chars;
         };
-        return class_1;
+        return CommonMoMixin;
     }(Base));
 }
 exports.CommonMoMixin = CommonMoMixin;

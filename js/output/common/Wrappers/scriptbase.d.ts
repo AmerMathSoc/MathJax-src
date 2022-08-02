@@ -1,8 +1,11 @@
-import { AnyWrapper, WrapperConstructor, Constructor, AnyWrapperClass } from '../Wrapper.js';
+import { CommonWrapper, CommonWrapperClass, CommonWrapperConstructor, Constructor } from '../Wrapper.js';
+import { CommonWrapperFactory } from '../WrapperFactory.js';
+import { CharOptions, VariantData, DelimiterData, FontData, FontDataClass } from '../FontData.js';
+import { CommonOutputJax } from '../../common.js';
 import { BBox } from '../../../util/BBox.js';
-export interface CommonScriptbase<W extends AnyWrapper> extends AnyWrapper {
-    readonly baseCore: W;
-    readonly baseChild: W;
+export interface CommonScriptbase<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
+    readonly baseCore: WW;
+    readonly baseChild: WW;
     readonly baseScale: number;
     readonly baseIc: number;
     readonly baseRemoveIc: boolean;
@@ -12,16 +15,17 @@ export interface CommonScriptbase<W extends AnyWrapper> extends AnyWrapper {
     readonly isLineAbove: boolean;
     readonly isLineBelow: boolean;
     readonly isMathAccent: boolean;
-    readonly scriptChild: W;
-    getBaseCore(): W;
-    getSemanticBase(): W;
-    getBaseFence(fence: W, id: string): W;
+    readonly scriptChild: WW;
+    getBaseCore(): WW;
+    setBaseAccentsFor(core: WW): void;
+    getSemanticBase(): WW;
+    getBaseFence(fence: WW, id: string): WW;
     getBaseScale(): number;
     getBaseIc(): number;
     getAdjustedIc(): number;
     isCharBase(): boolean;
     checkLineAccents(): void;
-    isLineAccent(script: W): boolean;
+    isLineAccent(script: WW): boolean;
     getBaseWidth(): number;
     getOffset(): number[];
     baseCharZero(n: number): number;
@@ -33,9 +37,10 @@ export interface CommonScriptbase<W extends AnyWrapper> extends AnyWrapper {
     getDeltaW(boxes: BBox[], delta?: number[]): number[];
     getDelta(noskew?: boolean): number;
     stretchChildren(): void;
+    appendScripts(bbox: BBox): BBox;
 }
-export interface CommonScriptbaseClass extends AnyWrapperClass {
+export interface CommonScriptbaseClass<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
     useIC: boolean;
 }
-export declare type ScriptbaseConstructor<W extends AnyWrapper> = Constructor<CommonScriptbase<W>>;
-export declare function CommonScriptbaseMixin<W extends AnyWrapper, T extends WrapperConstructor>(Base: T): ScriptbaseConstructor<W> & T;
+export declare type CommonScriptbaseConstructor<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> = Constructor<CommonScriptbase<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>>;
+export declare function CommonScriptbaseMixin<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, B extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>>(Base: CommonWrapperConstructor<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>): B;

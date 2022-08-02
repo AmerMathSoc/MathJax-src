@@ -17,6 +17,8 @@ export interface MenuSettings {
     ctrl: boolean;
     shift: boolean;
     scale: string;
+    overflow: string;
+    breakInline: boolean;
     autocollapse: boolean;
     collapsible: boolean;
     inTabOrder: boolean;
@@ -79,6 +81,8 @@ export declare class Menu {
     }): void;
     protected getA11y(option: string): any;
     protected applySettings(): void;
+    protected setOverflow(overflow: string): void;
+    protected setInlineBreaks(breaks: boolean): void;
     protected setScale(scale: string): void;
     protected setRenderer(jax: string): void;
     protected setOutputJax(jax: string): void;

@@ -1,2 +1,2 @@
-import { SVGCharMap } from '../../FontData.js';
-export declare const texSize4: SVGCharMap;
+import { SvgCharMap } from '../../FontData.js';
+export declare const texSize4: SvgCharMap;

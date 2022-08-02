@@ -15,39 +15,42 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGmerror = void 0;
+exports.SvgMerror = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var merror_js_1 = require("../../../core/MmlTree/MmlNodes/merror.js");
-var SVGmerror = (function (_super) {
-    __extends(SVGmerror, _super);
-    function SVGmerror() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SVGmerror.prototype.toSVG = function (parent) {
-        var svg = this.standardSVGnode(parent);
-        var _a = this.getBBox(), h = _a.h, d = _a.d, w = _a.w;
-        this.adaptor.append(this.element, this.svg('rect', {
-            'data-background': true,
-            width: this.fixed(w), height: this.fixed(h + d), y: this.fixed(-d)
-        }));
-        var title = this.node.attributes.get('title');
-        if (title) {
-            this.adaptor.append(this.element, this.svg('title', {}, [this.adaptor.text(title)]));
-        }
-        this.addChildren(svg);
-    };
-    SVGmerror.kind = merror_js_1.MmlMerror.prototype.kind;
-    SVGmerror.styles = {
-        'g[data-mml-node="merror"] > g': {
-            fill: 'red',
-            stroke: 'red'
+exports.SvgMerror = (function () {
+    var _a;
+    return _a = (function (_super) {
+            __extends(SvgMerror, _super);
+            function SvgMerror() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            SvgMerror.prototype.toSVG = function (parents) {
+                var svg = this.standardSvgNodes(parents);
+                var _a = this.getBBox(), h = _a.h, d = _a.d, w = _a.w;
+                this.adaptor.append(this.dom[0], this.svg('rect', {
+                    'data-background': true,
+                    width: this.fixed(w), height: this.fixed(h + d), y: this.fixed(-d)
+                }));
+                var title = this.node.attributes.get('title');
+                if (title) {
+                    this.adaptor.append(this.dom[0], this.svg('title', {}, [this.adaptor.text(title)]));
+                }
+                this.addChildren(svg);
+            };
+            return SvgMerror;
+        }(Wrapper_js_1.SvgWrapper)),
+        _a.kind = merror_js_1.MmlMerror.prototype.kind,
+        _a.styles = {
+            'g[data-mml-node="merror"] > g': {
+                fill: 'red',
+                stroke: 'red'
+            },
+            'g[data-mml-node="merror"] > rect[data-background]': {
+                fill: 'yellow',
+                stroke: 'none'
+            }
         },
-        'g[data-mml-node="merror"] > rect[data-background]': {
-            fill: 'yellow',
-            stroke: 'none'
-        }
-    };
-    return SVGmerror;
-}(Wrapper_js_1.SVGWrapper));
-exports.SVGmerror = SVGmerror;
+        _a;
+})();
 //# sourceMappingURL=merror.js.map

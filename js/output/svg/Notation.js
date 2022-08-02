@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -63,38 +67,38 @@ var RenderLine = function (line, offset) {
     if (offset === void 0) { offset = ''; }
     return (function (node, _child) {
         var L = node.line((0, exports.lineData)(node, line, offset));
-        node.adaptor.append(node.element, L);
+        node.adaptor.append(node.dom[0], L);
     });
 };
 exports.RenderLine = RenderLine;
 var Border = function (side) {
     return Notation.CommonBorder(function (node, _child) {
-        node.adaptor.append(node.element, node.line((0, exports.lineData)(node, side)));
+        node.adaptor.append(node.dom[0], node.line((0, exports.lineData)(node, side)));
     })(side);
 };
 exports.Border = Border;
 var Border2 = function (name, side1, side2) {
     return Notation.CommonBorder2(function (node, _child) {
-        node.adaptor.append(node.element, node.line((0, exports.lineData)(node, side1)));
-        node.adaptor.append(node.element, node.line((0, exports.lineData)(node, side2)));
+        node.adaptor.append(node.dom[0], node.line((0, exports.lineData)(node, side1)));
+        node.adaptor.append(node.dom[0], node.line((0, exports.lineData)(node, side2)));
     })(name, side1, side2);
 };
 exports.Border2 = Border2;
 var DiagonalStrike = function (name) {
     return Notation.CommonDiagonalStrike(function (_cname) { return function (node, _child) {
-        node.adaptor.append(node.element, node.line((0, exports.lineData)(node, name)));
+        node.adaptor.append(node.dom[0], node.line((0, exports.lineData)(node, name)));
     }; })(name);
 };
 exports.DiagonalStrike = DiagonalStrike;
 var DiagonalArrow = function (name) {
     return Notation.CommonDiagonalArrow(function (node, arrow) {
-        node.adaptor.append(node.element, arrow);
+        node.adaptor.append(node.dom[0], arrow);
     })(name);
 };
 exports.DiagonalArrow = DiagonalArrow;
 var Arrow = function (name) {
     return Notation.CommonArrow(function (node, arrow) {
-        node.adaptor.append(node.element, arrow);
+        node.adaptor.append(node.dom[0], arrow);
     })(name);
 };
 exports.Arrow = Arrow;

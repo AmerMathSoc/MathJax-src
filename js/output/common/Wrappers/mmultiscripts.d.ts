@@ -1,5 +1,8 @@
-import { AnyWrapper, Constructor } from '../Wrapper.js';
-import { CommonMsubsup, MsubsupConstructor } from './msubsup.js';
+import { CommonWrapper, CommonWrapperClass, Constructor } from '../Wrapper.js';
+import { CommonWrapperFactory } from '../WrapperFactory.js';
+import { CharOptions, VariantData, DelimiterData, FontData, FontDataClass } from '../FontData.js';
+import { CommonOutputJax } from '../../common.js';
+import { CommonMsubsup, CommonMsubsupClass } from './msubsup.js';
 import { BBox } from '../../../util/BBox.js';
 export declare type ScriptData = {
     base: BBox;
@@ -23,7 +26,7 @@ export declare const NextScript: {
     [key: string]: ScriptListName;
 };
 export declare const ScriptNames: (keyof ScriptData)[];
-export interface CommonMmultiscripts<W extends AnyWrapper> extends CommonMsubsup<W> {
+export interface CommonMmultiscripts<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends CommonMsubsup<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
     scriptData: ScriptData;
     firstPrescript: number;
     combinePrePost(pre: BBox, post: BBox): BBox;
@@ -32,6 +35,9 @@ export interface CommonMmultiscripts<W extends AnyWrapper> extends CommonMsubsup
     padLists(list1: BBox[], list2: BBox[]): void;
     combineBBoxLists(bbox1: BBox, bbox2: BBox, list1: BBox[], list2: BBox[]): void;
     getScaledWHD(bbox: BBox): void;
+    getCombinedUV(): number[];
+    addPrescripts(bbox: BBox, u: number, v: number): BBox;
 }
-export declare type MmultiscriptsConstructor<W extends AnyWrapper> = Constructor<CommonMmultiscripts<W>>;
-export declare function CommonMmultiscriptsMixin<W extends AnyWrapper, T extends MsubsupConstructor<W>>(Base: T): MmultiscriptsConstructor<W> & T;
+export interface CommonMmultiscriptsClass<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends CommonMsubsupClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
+}
+export declare function CommonMmultiscriptsMixin<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, B extends CommonMsubsupClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>>(Base: Constructor<CommonMsubsup<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>>): B;

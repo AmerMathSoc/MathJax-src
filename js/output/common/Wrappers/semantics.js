@@ -18,11 +18,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonSemanticsMixin = void 0;
 function CommonSemanticsMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
+        __extends(CommonSemanticsMixin, _super);
+        function CommonSemanticsMixin() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        class_1.prototype.computeBBox = function (bbox, _recompute) {
+        CommonSemanticsMixin.prototype.computeBBox = function (bbox, _recompute) {
             if (_recompute === void 0) { _recompute = false; }
             if (this.childNodes.length) {
                 var _a = this.childNodes[0].getBBox(), w = _a.w, h = _a.h, d = _a.d;
@@ -31,7 +31,14 @@ function CommonSemanticsMixin(Base) {
                 bbox.d = d;
             }
         };
-        return class_1;
+        Object.defineProperty(CommonSemanticsMixin.prototype, "breakCount", {
+            get: function () {
+                return (this.node.isEmbellished ? this.coreMO().embellishedBreakCount : this.childNodes[0].breakCount);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        return CommonSemanticsMixin;
     }(Base));
 }
 exports.CommonSemanticsMixin = CommonSemanticsMixin;

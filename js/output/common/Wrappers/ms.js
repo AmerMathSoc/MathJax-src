@@ -14,42 +14,14 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMsMixin = void 0;
 function CommonMsMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
-            }
-            var _this = _super.apply(this, __spreadArray([], __read(args), false)) || this;
+        __extends(CommonMsMixin, _super);
+        function CommonMsMixin(factory, node, parent) {
+            if (parent === void 0) { parent = null; }
+            var _this = _super.call(this, factory, node, parent) || this;
             var attributes = _this.node.attributes;
             var quotes = attributes.getList('lquote', 'rquote');
             if (_this.variant !== 'monospace') {
@@ -62,12 +34,12 @@ function CommonMsMixin(Base) {
             _this.childNodes.push(_this.createText(quotes.rquote));
             return _this;
         }
-        class_1.prototype.createText = function (text) {
+        CommonMsMixin.prototype.createText = function (text) {
             var node = this.wrap(this.mmlText(text));
             node.parent = this;
             return node;
         };
-        return class_1;
+        return CommonMsMixin;
     }(Base));
 }
 exports.CommonMsMixin = CommonMsMixin;

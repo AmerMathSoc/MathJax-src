@@ -6,12 +6,14 @@ import { MmlNode } from '../../core/MmlTree/MmlNode.js';
 import TexParser from './TexParser.js';
 import { OptionList } from '../../util/Options.js';
 import { ParserConfiguration } from './Configuration.js';
+import { ColumnParser } from './ColumnParser.js';
 export default class ParseOptions {
     handlers: SubHandlers;
     options: OptionList;
     itemFactory: StackItemFactory;
     nodeFactory: NodeFactory;
     tags: Tags;
+    columnParser: ColumnParser;
     packageData: Map<string, any>;
     parsers: TexParser[];
     root: MmlNode;

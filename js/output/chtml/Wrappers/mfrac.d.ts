@@ -1,14 +1,12 @@
-import { CHTMLConstructor } from '../Wrapper.js';
-import { CHTMLmo } from './mo.js';
-import { StyleList } from '../../../util/StyleList.js';
-declare const CHTMLmfrac_base: import("../../common/Wrappers/mfrac.js").MfracConstructor & CHTMLConstructor<any, any, any>;
-export declare class CHTMLmfrac<N, T, D> extends CHTMLmfrac_base {
-    static kind: string;
-    static styles: StyleList;
-    bevel: CHTMLmo<N, T, D>;
-    toCHTML(parent: N): void;
-    protected makeFraction(display: boolean, t: number): void;
-    protected makeAtop(display: boolean): void;
-    protected makeBevelled(display: boolean): void;
+import { CHTML } from '../../chtml.js';
+import { ChtmlWrapper, ChtmlWrapperClass } from '../Wrapper.js';
+import { ChtmlWrapperFactory } from '../WrapperFactory.js';
+import { ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass } from '../FontData.js';
+import { CommonMfrac, CommonMfracClass } from '../../common/Wrappers/mfrac.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+export interface ChtmlMfracNTD<N, T, D> extends ChtmlWrapper<N, T, D>, CommonMfrac<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
 }
-export {};
+export interface ChtmlMfracClass<N, T, D> extends ChtmlWrapperClass<N, T, D>, CommonMfracClass<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
+    new (factory: ChtmlWrapperFactory<N, T, D>, node: MmlNode, parent?: ChtmlWrapper<N, T, D>): ChtmlMfracNTD<N, T, D>;
+}
+export declare const ChtmlMfrac: ChtmlMfracClass<any, any, any>;

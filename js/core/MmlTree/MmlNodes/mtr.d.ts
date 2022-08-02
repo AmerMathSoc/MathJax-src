@@ -4,6 +4,7 @@ export declare class MmlMtr extends AbstractMmlNode {
     static defaults: PropertyList;
     get kind(): string;
     get linebreakContainer(): boolean;
+    get linebreakAlign(): string;
     protected setChildInheritedAttributes(attributes: AttributeList, display: boolean, level: number, prime: boolean): void;
     protected verifyChildren(options: PropertyList): void;
     setTeXclass(prev: MmlNode): this;

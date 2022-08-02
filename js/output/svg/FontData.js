@@ -27,7 +27,11 @@ var __assign = (this && this.__assign) || function () {
 };
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -47,29 +51,29 @@ var __values = (this && this.__values) || function(o) {
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddPaths = exports.SVGFontData = void 0;
+exports.AddPaths = exports.SvgFontData = void 0;
 var FontData_js_1 = require("../common/FontData.js");
 __exportStar(require("../common/FontData.js"), exports);
-var SVGFontData = (function (_super) {
-    __extends(SVGFontData, _super);
-    function SVGFontData() {
+var SvgFontData = (function (_super) {
+    __extends(SvgFontData, _super);
+    function SvgFontData() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    SVGFontData.charOptions = function (font, n) {
+    SvgFontData.charOptions = function (font, n) {
         return _super.charOptions.call(this, font, n);
     };
-    SVGFontData.OPTIONS = __assign(__assign({}, FontData_js_1.FontData.OPTIONS), { dynamicPrefix: './output/svg/fonts' });
-    SVGFontData.JAX = 'SVG';
-    return SVGFontData;
+    SvgFontData.OPTIONS = __assign(__assign({}, FontData_js_1.FontData.OPTIONS), { dynamicPrefix: './output/svg/fonts' });
+    SvgFontData.JAX = 'SVG';
+    return SvgFontData;
 }(FontData_js_1.FontData));
-exports.SVGFontData = SVGFontData;
+exports.SvgFontData = SvgFontData;
 function AddPaths(font, paths, content) {
     var e_1, _a, e_2, _b;
     try {
         for (var _c = __values(Object.keys(paths)), _d = _c.next(); !_d.done; _d = _c.next()) {
             var c = _d.value;
             var n = parseInt(c);
-            SVGFontData.charOptions(font, n).p = paths[n];
+            SvgFontData.charOptions(font, n).p = paths[n];
         }
     }
     catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -83,7 +87,7 @@ function AddPaths(font, paths, content) {
         for (var _e = __values(Object.keys(content)), _f = _e.next(); !_f.done; _f = _e.next()) {
             var c = _f.value;
             var n = parseInt(c);
-            SVGFontData.charOptions(font, n).c = content[n];
+            SvgFontData.charOptions(font, n).c = content[n];
         }
     }
     catch (e_2_1) { e_2 = { error: e_2_1 }; }

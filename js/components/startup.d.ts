@@ -4,7 +4,7 @@ import { MmlNode } from '../core/MmlTree/MmlNode.js';
 import { Handler } from '../core/Handler.js';
 import { InputJax } from '../core/InputJax.js';
 import { OutputJax } from '../core/OutputJax.js';
-import { CommonOutputJax } from '../output/common/OutputJax.js';
+import { CommonOutputJax } from '../output/common.js';
 import { DOMAdaptor } from '../core/DOMAdaptor.js';
 import { TeX } from '../input/tex.js';
 export interface MathJaxConfig extends MJConfig {
@@ -28,7 +28,7 @@ export declare type HANDLER = Handler<any, any, any>;
 export declare type DOMADAPTOR = DOMAdaptor<any, any, any>;
 export declare type INPUTJAX = InputJax<any, any, any>;
 export declare type OUTPUTJAX = OutputJax<any, any, any>;
-export declare type COMMONJAX = CommonOutputJax<any, any, any, any, any, any, any>;
+export declare type COMMONJAX = CommonOutputJax<any, any, any, any, any, any, any, any, any, any, any>;
 export declare type TEX = TeX<any, any, any>;
 export declare type HandlerExtension = (handler: HANDLER) => HANDLER;
 export interface MathJaxObject extends MJObject {
@@ -52,7 +52,7 @@ export interface MathJaxObject extends MJObject {
         extendHandler(extend: HandlerExtension): void;
         toMML(node: MmlNode): string;
         defaultReady(): void;
-        defaultPageReady(): void;
+        defaultPageReady(): Promise<void>;
         getComponents(): void;
         makeMethods(): void;
         makeTypesetMethods(): void;

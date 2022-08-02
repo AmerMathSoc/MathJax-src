@@ -5,6 +5,7 @@ export declare class MmlMfrac extends AbstractMmlBaseNode {
     get kind(): string;
     get arity(): number;
     get linebreakContainer(): boolean;
+    get linebreakAlign(): string;
     setTeXclass(prev: MmlNode): this;
     protected setChildInheritedAttributes(attributes: AttributeList, display: boolean, level: number, prime: boolean): void;
 }

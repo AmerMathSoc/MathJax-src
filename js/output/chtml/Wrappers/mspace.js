@@ -15,35 +15,41 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHTMLmspace = void 0;
+exports.ChtmlMspace = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var mspace_js_1 = require("../../common/Wrappers/mspace.js");
 var mspace_js_2 = require("../../../core/MmlTree/MmlNodes/mspace.js");
-var CHTMLmspace = (function (_super) {
-    __extends(CHTMLmspace, _super);
-    function CHTMLmspace() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CHTMLmspace.prototype.toCHTML = function (parent) {
-        var chtml = this.standardCHTMLnode(parent);
-        var _a = this.getBBox(), w = _a.w, h = _a.h, d = _a.d;
-        if (w < 0) {
-            this.adaptor.setStyle(chtml, 'marginRight', this.em(w));
-            w = 0;
-        }
-        if (w) {
-            this.adaptor.setStyle(chtml, 'width', this.em(w));
-        }
-        h = Math.max(0, h + d);
-        if (h) {
-            this.adaptor.setStyle(chtml, 'height', this.em(Math.max(0, h)));
-        }
-        if (d) {
-            this.adaptor.setStyle(chtml, 'verticalAlign', this.em(-d));
-        }
-    };
-    CHTMLmspace.kind = mspace_js_2.MmlMspace.prototype.kind;
-    return CHTMLmspace;
-}((0, mspace_js_1.CommonMspaceMixin)(Wrapper_js_1.CHTMLWrapper)));
-exports.CHTMLmspace = CHTMLmspace;
+exports.ChtmlMspace = (function () {
+    var _a;
+    var Base = (0, mspace_js_1.CommonMspaceMixin)(Wrapper_js_1.ChtmlWrapper);
+    return _a = (function (_super) {
+            __extends(ChtmlMspace, _super);
+            function ChtmlMspace() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            ChtmlMspace.prototype.toCHTML = function (parents) {
+                var _this = this;
+                parents.length > 1 && parents.forEach(function (dom) { return _this.adaptor.append(dom, _this.html('mjx-linestrut')); });
+                var chtml = this.standardChtmlNodes(parents);
+                var _a = this.getBBox(), w = _a.w, h = _a.h, d = _a.d;
+                if (w < 0) {
+                    this.adaptor.setStyle(chtml[0], 'marginRight', this.em(w));
+                    w = 0;
+                }
+                if (w && !this.breakCount) {
+                    this.adaptor.setStyle(chtml[0], 'width', this.em(w));
+                }
+                h = Math.max(0, h + d);
+                if (h) {
+                    this.adaptor.setStyle(chtml[0], 'height', this.em(Math.max(0, h)));
+                }
+                if (d) {
+                    this.adaptor.setStyle(chtml[0], 'verticalAlign', this.em(-d));
+                }
+            };
+            return ChtmlMspace;
+        }(Base)),
+        _a.kind = mspace_js_2.MmlMspace.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=mspace.js.map

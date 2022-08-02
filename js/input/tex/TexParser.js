@@ -75,6 +75,7 @@ var TexParser = (function () {
         this.stack = new Stack_js_1.default(this.itemFactory, ENV, inner ? isInner : true);
         this.Parse();
         this.Push(this.itemFactory.create('stop'));
+        this.stack.env = ENV;
     }
     Object.defineProperty(TexParser.prototype, "options", {
         get: function () {

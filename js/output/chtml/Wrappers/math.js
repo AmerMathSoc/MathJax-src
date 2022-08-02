@@ -31,110 +31,143 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHTMLmath = void 0;
+exports.ChtmlMath = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var math_js_1 = require("../../common/Wrappers/math.js");
 var math_js_2 = require("../../../core/MmlTree/MmlNodes/math.js");
 var BBox_js_1 = require("../../../util/BBox.js");
-var CHTMLmath = (function (_super) {
-    __extends(CHTMLmath, _super);
-    function CHTMLmath() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CHTMLmath.prototype.toCHTML = function (parent) {
-        _super.prototype.toCHTML.call(this, parent);
-        var chtml = this.chtml;
-        var adaptor = this.adaptor;
-        var display = (this.node.attributes.get('display') === 'block');
-        if (display) {
-            adaptor.setAttribute(chtml, 'display', 'true');
-            adaptor.setAttribute(parent, 'display', 'true');
-            this.handleDisplay(parent);
-        }
-        else {
-            this.handleInline(parent);
-        }
-        adaptor.addClass(chtml, 'MJX-TEX');
-    };
-    CHTMLmath.prototype.handleDisplay = function (parent) {
-        var adaptor = this.adaptor;
-        var _a = __read(this.getAlignShift(), 2), align = _a[0], shift = _a[1];
-        if (align !== 'center') {
-            adaptor.setAttribute(parent, 'justify', align);
-        }
-        if (this.bbox.pwidth === BBox_js_1.BBox.fullWidth) {
-            adaptor.setAttribute(parent, 'width', 'full');
-            if (this.jax.table) {
-                var _b = this.jax.table.getOuterBBox(), L = _b.L, w = _b.w, R = _b.R;
-                if (align === 'right') {
-                    R = Math.max(R || -shift, -shift);
-                }
-                else if (align === 'left') {
-                    L = Math.max(L || shift, shift);
-                }
-                else if (align === 'center') {
-                    w += 2 * Math.abs(shift);
-                }
-                var W = this.em(Math.max(0, L + w + R));
-                adaptor.setStyle(parent, 'min-width', W);
-                adaptor.setStyle(this.jax.table.chtml, 'min-width', W);
+exports.ChtmlMath = (function () {
+    var _a;
+    var Base = (0, math_js_1.CommonMathMixin)(Wrapper_js_1.ChtmlWrapper);
+    return _a = (function (_super) {
+            __extends(ChtmlMath, _super);
+            function ChtmlMath() {
+                return _super !== null && _super.apply(this, arguments) || this;
             }
-        }
-        else {
-            this.setIndent(this.chtml, align, shift);
-        }
-    };
-    CHTMLmath.prototype.handleInline = function (parent) {
-        var adaptor = this.adaptor;
-        var margin = adaptor.getStyle(this.chtml, 'margin-right');
-        if (margin) {
-            adaptor.setStyle(this.chtml, 'margin-right', '');
-            adaptor.setStyle(parent, 'margin-right', margin);
-            adaptor.setStyle(parent, 'width', '0');
-        }
-    };
-    CHTMLmath.prototype.setChildPWidths = function (recompute, w, clear) {
-        if (w === void 0) { w = null; }
-        if (clear === void 0) { clear = true; }
-        return (this.parent ? _super.prototype.setChildPWidths.call(this, recompute, w, clear) : false);
-    };
-    CHTMLmath.kind = math_js_2.MmlMath.prototype.kind;
-    CHTMLmath.styles = {
-        'mjx-math': {
-            'line-height': 0,
-            'text-align': 'left',
-            'text-indent': 0,
-            'font-style': 'normal',
-            'font-weight': 'normal',
-            'font-size': '100%',
-            'font-size-adjust': 'none',
-            'letter-spacing': 'normal',
-            'border-collapse': 'collapse',
-            'word-wrap': 'normal',
-            'word-spacing': 'normal',
-            'white-space': 'nowrap',
-            'direction': 'ltr',
-            'padding': '1px 0'
+            ChtmlMath.prototype.handleDisplay = function (parent) {
+                var adaptor = this.adaptor;
+                var _a = __read(this.getAlignShift(), 2), align = _a[0], shift = _a[1];
+                if (align !== 'center') {
+                    adaptor.setAttribute(parent, 'justify', align);
+                }
+                if (this.bbox.pwidth === BBox_js_1.BBox.fullWidth) {
+                    adaptor.setAttribute(parent, 'width', 'full');
+                    if (this.jax.table) {
+                        var _b = this.jax.table.getOuterBBox(), L = _b.L, w = _b.w, R = _b.R;
+                        if (align === 'right') {
+                            R = Math.max(R || -shift, -shift);
+                        }
+                        else if (align === 'left') {
+                            L = Math.max(L || shift, shift);
+                        }
+                        else if (align === 'center') {
+                            w += 2 * Math.abs(shift);
+                        }
+                        var W = this.em(Math.max(0, L + w + R));
+                        adaptor.setStyle(parent, 'min-width', W);
+                        adaptor.setStyle(this.jax.table.dom[0], 'min-width', W);
+                    }
+                }
+                else {
+                    this.setIndent(this.dom[0], align, shift);
+                }
+            };
+            ChtmlMath.prototype.handleInline = function (parent) {
+                var adaptor = this.adaptor;
+                var margin = adaptor.getStyle(this.dom[0], 'margin-right');
+                if (margin) {
+                    adaptor.setStyle(this.dom[0], 'margin-right', '');
+                    adaptor.setStyle(parent, 'margin-right', margin);
+                    adaptor.setStyle(parent, 'width', '0');
+                }
+            };
+            ChtmlMath.prototype.toCHTML = function (parents) {
+                _super.prototype.toCHTML.call(this, parents);
+                var adaptor = this.adaptor;
+                var display = (this.node.attributes.get('display') === 'block');
+                if (display) {
+                    adaptor.setAttribute(this.dom[0], 'display', 'true');
+                    adaptor.setAttribute(parents[0], 'display', 'true');
+                    this.handleDisplay(parents[0]);
+                }
+                else {
+                    this.handleInline(parents[0]);
+                }
+                adaptor.addClass(this.dom[0], 'MJX-TEX');
+            };
+            ChtmlMath.prototype.setChildPWidths = function (recompute, w, clear) {
+                if (w === void 0) { w = null; }
+                if (clear === void 0) { clear = true; }
+                return (this.parent ? _super.prototype.setChildPWidths.call(this, recompute, w, clear) : false);
+            };
+            ChtmlMath.prototype.handleAttributes = function () {
+                _super.prototype.handleAttributes.call(this);
+                var adaptor = this.adaptor;
+                if (this.node.getProperty('breakable')) {
+                    this.dom.forEach(function (dom) { return adaptor.setAttribute(dom, 'breakable', 'true'); });
+                }
+            };
+            return ChtmlMath;
+        }(Base)),
+        _a.kind = math_js_2.MmlMath.prototype.kind,
+        _a.styles = {
+            'mjx-math': {
+                'line-height': 0,
+                'text-align': 'left',
+                'text-indent': 0,
+                'font-style': 'normal',
+                'font-weight': 'normal',
+                'font-size': '100%',
+                'font-size-adjust': 'none',
+                'letter-spacing': 'normal',
+                'word-wrap': 'normal',
+                'word-spacing': 'normal',
+                'direction': 'ltr',
+                'padding': '1px 0'
+            },
+            'mjx-container[jax="CHTML"][display="true"]': {
+                display: 'block',
+                'text-align': 'center',
+                'justify-content': 'center',
+                margin: '1em 0'
+            },
+            'mjx-container[jax="CHTML"][display="true"][width="full"]': {
+                display: 'flex',
+            },
+            'mjx-container[jax="CHTML"][display="true"] mjx-math': {
+                padding: 0
+            },
+            'mjx-container[jax="CHTML"][justify="left"]': {
+                'text-align': 'left',
+                'justify-content': 'left'
+            },
+            'mjx-container[jax="CHTML"][justify="right"]': {
+                'text-align': 'right',
+                'justify-content': 'right'
+            },
+            'mjx-break::after': {
+                content: '" "',
+                'white-space': 'normal'
+            },
+            'mjx-break[size="1"]': {
+                'font-size': '44.4%'
+            },
+            'mjx-break[size="2"]': {
+                'font-size': '66.8%'
+            },
+            'mjx-break[size="3"]': {
+                'font-size': '88.8%'
+            },
+            'mjx-break[size="4"]': {
+                'font-size': '111.2%'
+            },
+            'mjx-break[size="5"]': {
+                'font-size': '133.2%'
+            },
+            'mjx-math[breakable]': {
+                display: 'inline'
+            }
         },
-        'mjx-container[jax="CHTML"][display="true"]': {
-            display: 'block',
-            'text-align': 'center',
-            margin: '1em 0'
-        },
-        'mjx-container[jax="CHTML"][display="true"][width="full"]': {
-            display: 'flex'
-        },
-        'mjx-container[jax="CHTML"][display="true"] mjx-math': {
-            padding: 0
-        },
-        'mjx-container[jax="CHTML"][justify="left"]': {
-            'text-align': 'left'
-        },
-        'mjx-container[jax="CHTML"][justify="right"]': {
-            'text-align': 'right'
-        }
-    };
-    return CHTMLmath;
-}((0, math_js_1.CommonMathMixin)(Wrapper_js_1.CHTMLWrapper)));
-exports.CHTMLmath = CHTMLmath;
+        _a;
+})();
 //# sourceMappingURL=math.js.map

@@ -18,30 +18,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMtdMixin = void 0;
 function CommonMtdMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
+        __extends(CommonMtdMixin, _super);
+        function CommonMtdMixin() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        Object.defineProperty(class_1.prototype, "fixesPWidth", {
+        Object.defineProperty(CommonMtdMixin.prototype, "fixesPWidth", {
             get: function () {
                 return false;
             },
             enumerable: false,
             configurable: true
         });
-        class_1.prototype.invalidateBBox = function () {
+        CommonMtdMixin.prototype.invalidateBBox = function () {
             this.bboxComputed = false;
+            this.lineBBox = [];
         };
-        class_1.prototype.getWrapWidth = function (_j) {
+        CommonMtdMixin.prototype.getWrapWidth = function (_j) {
             var table = this.parent.parent;
             var row = this.parent;
             var i = this.node.childPosition() - (row.labeled ? 1 : 0);
             return (typeof (table.cWidths[i]) === 'number' ? table.cWidths[i] : table.getTableData().W[i]);
         };
-        class_1.prototype.getChildAlign = function (_i) {
+        CommonMtdMixin.prototype.getChildAlign = function (_i) {
             return this.node.attributes.get('columnalign');
         };
-        return class_1;
+        return CommonMtdMixin;
     }(Base));
 }
 exports.CommonMtdMixin = CommonMtdMixin;

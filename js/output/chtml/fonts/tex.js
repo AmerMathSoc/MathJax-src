@@ -139,7 +139,7 @@ var TeXFont = (function (_super) {
         '-tex-bold-oldstyle': tex_oldstyle_bold_js_1.texOldstyleBold,
         '-tex-variant': tex_variant_js_1.texVariant
     };
-    TeXFont.defaultStyles = __assign(__assign({}, FontData_js_1.CHTMLFontData.defaultStyles), { '.MJX-TEX': {
+    TeXFont.defaultStyles = __assign(__assign({}, FontData_js_1.ChtmlFontData.defaultStyles), { '.MJX-TEX': {
             'font-family': 'MJXZERO, MJXTEX'
         }, '.TEX-B': {
             'font-family': 'MJXZERO, MJXTEX-B'
@@ -184,7 +184,7 @@ var TeXFont = (function (_super) {
         }, 'mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c': {
             'font-family': 'MJXZERO, MJXTEX-S1, MJXTEX-S4, MJXTEX, MJXTEX-A ! important'
         } });
-    TeXFont.defaultFonts = __assign(__assign({}, FontData_js_1.CHTMLFontData.defaultFonts), { '@font-face /* 1 */': {
+    TeXFont.defaultFonts = __assign(__assign({}, FontData_js_1.ChtmlFontData.defaultFonts), { '@font-face /* 1 */': {
             'font-family': 'MJXTEX',
             src: 'url("%%URL%%/MathJax_Main-Regular.woff") format("woff")'
         }, '@font-face /* 2 */': {
@@ -249,6 +249,6 @@ var TeXFont = (function (_super) {
             src: 'url("%%URL%%/MathJax_Vector-Bold.woff") format("woff")'
         } });
     return TeXFont;
-}((0, tex_js_1.CommonTeXFontMixin)(FontData_js_1.CHTMLFontData)));
+}((0, tex_js_1.CommonTeXFontMixin)(FontData_js_1.ChtmlFontData)));
 exports.TeXFont = TeXFont;
 //# sourceMappingURL=tex.js.map

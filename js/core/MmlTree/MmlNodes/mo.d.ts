@@ -20,7 +20,6 @@ export declare class MmlMo extends AbstractMmlTokenNode {
     rspace: number;
     get kind(): string;
     get isEmbellished(): boolean;
-    get hasNewLine(): boolean;
     coreParent(): MmlNode;
     coreText(parent: MmlNode): string;
     hasSpacingAttributes(): boolean;

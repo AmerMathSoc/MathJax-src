@@ -49,6 +49,13 @@ var MmlMroot = (function (_super) {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(MmlMroot.prototype, "linebreakContainer", {
+        get: function () {
+            return true;
+        },
+        enumerable: false,
+        configurable: true
+    });
     MmlMroot.prototype.setTeXclass = function (prev) {
         this.getPrevClass(prev);
         this.childNodes[0].setTeXclass(null);

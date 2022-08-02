@@ -112,8 +112,9 @@ var HTMLAdaptor = (function (_super) {
     HTMLAdaptor.prototype.replace = function (nnode, onode) {
         return this.parent(onode).replaceChild(nnode, onode);
     };
-    HTMLAdaptor.prototype.clone = function (node) {
-        return node.cloneNode(true);
+    HTMLAdaptor.prototype.clone = function (node, deep) {
+        if (deep === void 0) { deep = true; }
+        return node.cloneNode(deep);
     };
     HTMLAdaptor.prototype.split = function (node, n) {
         return node.splitText(n);

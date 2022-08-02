@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -48,23 +52,23 @@ var RenderElement = function (name, offset) {
         if (offset) {
             var d = node.getOffset(offset);
             if (node.thickness !== Notation.THICKNESS || d) {
-                var transform = "translate".concat(offset, "(").concat(node.em(node.thickness / 2 - d), ")");
+                var transform = "translate".concat(offset, "(").concat(node.Em(node.thickness / 2 - d), ")");
                 node.adaptor.setStyle(shape, 'transform', transform);
             }
         }
-        node.adaptor.append(node.chtml, shape);
+        node.adaptor.append(node.dom[0], shape);
     });
 };
 exports.RenderElement = RenderElement;
 var Border = function (side) {
     return Notation.CommonBorder(function (node, child) {
-        node.adaptor.setStyle(child, 'border-' + side, node.em(node.thickness) + ' solid');
+        node.adaptor.setStyle(child, 'border-' + side, node.Em(node.thickness) + ' solid');
     })(side);
 };
 exports.Border = Border;
 var Border2 = function (name, side1, side2) {
     return Notation.CommonBorder2(function (node, child) {
-        var border = node.em(node.thickness) + ' solid';
+        var border = node.Em(node.thickness) + ' solid';
         node.adaptor.setStyle(child, 'border-' + side1, border);
         node.adaptor.setStyle(child, 'border-' + side2, border);
     })(name, side1, side2);
@@ -76,22 +80,22 @@ var DiagonalStrike = function (name, neg) {
         var _b = __read(node.getArgMod(w, h + d), 2), a = _b[0], W = _b[1];
         var t = neg * node.thickness / 2;
         var strike = node.adjustBorder(node.html(cname, { style: {
-                width: node.em(W),
+                width: node.Em(W),
                 transform: 'rotate(' + node.fixed(-neg * a) + 'rad) translateY(' + t + 'em)',
             } }));
-        node.adaptor.append(node.chtml, strike);
+        node.adaptor.append(node.dom[0], strike);
     }; })(name);
 };
 exports.DiagonalStrike = DiagonalStrike;
 var DiagonalArrow = function (name) {
     return Notation.CommonDiagonalArrow(function (node, arrow) {
-        node.adaptor.append(node.chtml, arrow);
+        node.adaptor.append(node.dom[0], arrow);
     })(name);
 };
 exports.DiagonalArrow = DiagonalArrow;
 var Arrow = function (name) {
     return Notation.CommonArrow(function (node, arrow) {
-        node.adaptor.append(node.chtml, arrow);
+        node.adaptor.append(node.dom[0], arrow);
     })(name);
 };
 exports.Arrow = Arrow;

@@ -6,6 +6,7 @@ export declare class TeXAtom extends AbstractMmlBaseNode {
     protected texclass: number;
     get kind(): string;
     get arity(): number;
+    get linebreakContainer(): boolean;
     get notParent(): boolean;
     constructor(factory: MmlFactory, attributes: PropertyList, children: MmlNode[]);
     setTeXclass(prev: MmlNode): MmlNode;

@@ -15,19 +15,22 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGmphantom = void 0;
+exports.SvgMphantom = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var mphantom_js_1 = require("../../../core/MmlTree/MmlNodes/mphantom.js");
-var SVGmphantom = (function (_super) {
-    __extends(SVGmphantom, _super);
-    function SVGmphantom() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SVGmphantom.prototype.toSVG = function (parent) {
-        this.standardSVGnode(parent);
-    };
-    SVGmphantom.kind = mphantom_js_1.MmlMphantom.prototype.kind;
-    return SVGmphantom;
-}(Wrapper_js_1.SVGWrapper));
-exports.SVGmphantom = SVGmphantom;
+exports.SvgMphantom = (function () {
+    var _a;
+    return _a = (function (_super) {
+            __extends(SvgMphantom, _super);
+            function SvgMphantom() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            SvgMphantom.prototype.toSVG = function (parents) {
+                this.standardSvgNodes(parents);
+            };
+            return SvgMphantom;
+        }(Wrapper_js_1.SvgWrapper)),
+        _a.kind = mphantom_js_1.MmlMphantom.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=mphantom.js.map

@@ -1,4 +1,7 @@
-import { AnyWrapper, WrapperConstructor, Constructor } from '../Wrapper.js';
+import { CommonWrapper, CommonWrapperClass, CommonWrapperConstructor } from '../Wrapper.js';
+import { CommonWrapperFactory } from '../WrapperFactory.js';
+import { CharOptions, VariantData, DelimiterData, FontData, FontDataClass } from '../FontData.js';
+import { CommonOutputJax } from '../../common.js';
 import { CommonMtr } from './mtr.js';
 export declare type TableData = {
     H: number[];
@@ -9,12 +12,13 @@ export declare type TableData = {
     L: number;
 };
 export declare type ColumnWidths = (string | number | null)[];
-export interface CommonMtable<C extends AnyWrapper, R extends CommonMtr<C>> extends AnyWrapper {
+export declare let BREAK_BELOW: number;
+export interface CommonMtable<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, R extends CommonMtr<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
     numCols: number;
     numRows: number;
     hasLabels: boolean;
     isTop: boolean;
-    container: AnyWrapper;
+    container: WW;
     containerI: number;
     frame: boolean;
     fLine: number;
@@ -25,30 +29,34 @@ export interface CommonMtable<C extends AnyWrapper, R extends CommonMtr<C>> exte
     rLines: number[];
     cWidths: (number | string)[];
     data: TableData;
-    pwidthCells: [C, number][];
+    pwidthCells: [WW, number][];
     pWidth: number;
     readonly tableRows: R[];
-    childNodes: R[];
     findContainer(): void;
     getPercentageWidth(): void;
     stretchRows(): void;
     stretchColumns(): void;
     stretchColumn(i: number, W: number): void;
+    breakColumn(i: number, W: number): void;
     getTableData(): TableData;
-    updateHDW(cell: C, i: number, j: number, align: string, H: number[], D: number[], W: number[], M: number): number;
+    updateHDW(cell: WW, i: number, j: number, align: string, H: number[], D: number[], W: number[], M: number): number;
     extendHD(i: number, H: number[], D: number[], M: number): void;
+    recordPWidthCell(cell: WW, i: number): void;
     setColumnPWidths(): void;
     getBBoxHD(height: number): number[];
     getBBoxLR(): number[];
     getPadAlignShift(side: string): [number, string, number];
     getWidth(): number;
+    adjustWideTable(): void;
+    naturalWidth(): number;
     getEqualRowHeight(): number;
     getComputedWidths(): number[];
     getColumnWidths(): ColumnWidths;
     getEqualColumns(width: string): ColumnWidths;
     getColumnWidthsAuto(swidths: string[]): ColumnWidths;
-    getColumnWidthsPercent(widths: string[]): ColumnWidths;
+    getColumnWidthsPercent(swidths: string[]): ColumnWidths;
     getColumnWidthsFixed(swidths: string[], width: number): ColumnWidths;
+    adjustColumnWidths(width: number): void;
     getVerticalPosition(i: number, align: string): number;
     getEmHalfSpacing(fspace: number, space: number[], scale?: number): string[];
     getRowHalfSpacing(): number[];
@@ -60,5 +68,6 @@ export interface CommonMtable<C extends AnyWrapper, R extends CommonMtr<C>> exte
     addEm(list: number[], n?: number): string[];
     convertLengths(list: string[]): number[];
 }
-export declare type MtableConstructor<C extends AnyWrapper, R extends CommonMtr<C>> = Constructor<CommonMtable<C, R>>;
-export declare function CommonMtableMixin<C extends AnyWrapper, R extends CommonMtr<C>, T extends WrapperConstructor>(Base: T): MtableConstructor<C, R> & T;
+export interface CommonMtableClass<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
+}
+export declare function CommonMtableMixin<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, R extends CommonMtr<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, B extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>>(Base: CommonWrapperConstructor<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>): B;

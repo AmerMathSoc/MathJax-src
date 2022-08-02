@@ -15,17 +15,21 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHTMLmi = void 0;
+exports.ChtmlMi = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var mi_js_1 = require("../../common/Wrappers/mi.js");
 var mi_js_2 = require("../../../core/MmlTree/MmlNodes/mi.js");
-var CHTMLmi = (function (_super) {
-    __extends(CHTMLmi, _super);
-    function CHTMLmi() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CHTMLmi.kind = mi_js_2.MmlMi.prototype.kind;
-    return CHTMLmi;
-}((0, mi_js_1.CommonMiMixin)(Wrapper_js_1.CHTMLWrapper)));
-exports.CHTMLmi = CHTMLmi;
+exports.ChtmlMi = (function () {
+    var _a;
+    var Base = (0, mi_js_1.CommonMiMixin)(Wrapper_js_1.ChtmlWrapper);
+    return _a = (function (_super) {
+            __extends(ChtmlMi, _super);
+            function ChtmlMi() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            return ChtmlMi;
+        }(Base)),
+        _a.kind = mi_js_2.MmlMi.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=mi.js.map

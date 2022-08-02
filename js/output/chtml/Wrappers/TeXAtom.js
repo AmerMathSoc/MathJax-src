@@ -15,29 +15,42 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHTMLTeXAtom = void 0;
+exports.ChtmlTeXAtom = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var TeXAtom_js_1 = require("../../common/Wrappers/TeXAtom.js");
 var TeXAtom_js_2 = require("../../../core/MmlTree/MmlNodes/TeXAtom.js");
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
-var CHTMLTeXAtom = (function (_super) {
-    __extends(CHTMLTeXAtom, _super);
-    function CHTMLTeXAtom() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CHTMLTeXAtom.prototype.toCHTML = function (parent) {
-        _super.prototype.toCHTML.call(this, parent);
-        this.adaptor.setAttribute(this.chtml, 'texclass', MmlNode_js_1.TEXCLASSNAMES[this.node.texClass]);
-        if (this.node.texClass === MmlNode_js_1.TEXCLASS.VCENTER) {
-            var bbox = this.childNodes[0].getBBox();
-            var h = bbox.h, d = bbox.d;
-            var a = this.font.params.axis_height;
-            var dh = ((h + d) / 2 + a) - h;
-            this.adaptor.setStyle(this.chtml, 'verticalAlign', this.em(dh));
-        }
-    };
-    CHTMLTeXAtom.kind = TeXAtom_js_2.TeXAtom.prototype.kind;
-    return CHTMLTeXAtom;
-}((0, TeXAtom_js_1.CommonTeXAtomMixin)(Wrapper_js_1.CHTMLWrapper)));
-exports.CHTMLTeXAtom = CHTMLTeXAtom;
+exports.ChtmlTeXAtom = (function () {
+    var _a;
+    var Base = (0, TeXAtom_js_1.CommonTeXAtomMixin)(Wrapper_js_1.ChtmlWrapper);
+    return _a = (function (_super) {
+            __extends(ChtmlTeXAtom, _super);
+            function ChtmlTeXAtom() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            ChtmlTeXAtom.prototype.toCHTML = function (parents) {
+                var _this = this;
+                _super.prototype.toCHTML.call(this, parents);
+                this.dom.forEach(function (dom) { return _this.adaptor.setAttribute(dom, 'texclass', MmlNode_js_1.TEXCLASSNAMES[_this.node.texClass]); });
+                if (this.node.texClass === MmlNode_js_1.TEXCLASS.VCENTER) {
+                    var bbox = this.childNodes[0].getBBox();
+                    var h = bbox.h, d = bbox.d;
+                    var a = this.font.params.axis_height;
+                    var dh = ((h + d) / 2 + a) - h;
+                    this.adaptor.setStyle(this.dom[0], 'verticalAlign', this.em(dh));
+                }
+            };
+            return ChtmlTeXAtom;
+        }(Base)),
+        _a.kind = TeXAtom_js_2.TeXAtom.prototype.kind,
+        _a.styles = {
+            'mjx-texatom[texclass="VBOX"] > mjx-linestack': {
+                display: 'inline-block'
+            },
+            'mjx-texatom[texclass="VBOX"] > mjx-mpadded > mjx-block > mjx-linestack': {
+                display: 'inline-block'
+            }
+        },
+        _a;
+})();
 //# sourceMappingURL=TeXAtom.js.map

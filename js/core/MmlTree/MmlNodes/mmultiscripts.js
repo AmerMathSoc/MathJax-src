@@ -57,9 +57,9 @@ var MmlMmultiscripts = (function (_super) {
                 if (!prescripts) {
                     prescripts = true;
                     if (i % 2 === 0) {
-                        var mrow = this.factory.create('mrow');
-                        this.childNodes.splice(i, 0, mrow);
-                        mrow.parent = this;
+                        var none = this.factory.create('none');
+                        this.childNodes.splice(i, 0, none);
+                        none.parent = this;
                         i++;
                     }
                 }
@@ -71,7 +71,7 @@ var MmlMmultiscripts = (function (_super) {
             }
         }
         if (this.childNodes.length % 2 === (prescripts ? 1 : 0)) {
-            this.appendChild(this.factory.create('mrow'));
+            this.appendChild(this.factory.create('none'));
             this.childNodes[this.childNodes.length - 1].setInheritedAttributes(attributes, false, level + 1, prime);
         }
     };

@@ -5,6 +5,7 @@ export declare class MmlMroot extends AbstractMmlNode {
     protected texclass: number;
     get kind(): string;
     get arity(): number;
+    get linebreakContainer(): boolean;
     setTeXclass(prev: MmlNode): this;
     protected setChildInheritedAttributes(attributes: AttributeList, display: boolean, level: number, prime: boolean): void;
 }

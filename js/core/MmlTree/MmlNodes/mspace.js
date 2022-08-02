@@ -62,13 +62,16 @@ var MmlMspace = (function (_super) {
     Object.defineProperty(MmlMspace.prototype, "hasNewline", {
         get: function () {
             var attributes = this.attributes;
-            return (attributes.getExplicit('width') == null && attributes.getExplicit('height') == null &&
-                attributes.getExplicit('depth') == null && attributes.get('linebreak') === 'newline');
+            var linebreak = attributes.get('linebreak');
+            return (attributes.getExplicit('width') == null &&
+                attributes.getExplicit('height') == null &&
+                attributes.getExplicit('depth') == null &&
+                (linebreak === 'newline' || linebreak === 'indentingnewline'));
         },
         enumerable: false,
         configurable: true
     });
-    MmlMspace.defaults = __assign(__assign({}, MmlNode_js_1.AbstractMmlTokenNode.defaults), { width: '0em', height: '0ex', depth: '0ex', linebreak: 'auto' });
+    MmlMspace.defaults = __assign(__assign({}, MmlNode_js_1.AbstractMmlTokenNode.defaults), { width: '0em', height: '0ex', depth: '0ex', linebreak: 'auto', indentshift: 'auto', indentalign: 'auto', indenttarget: '', indentalignfirst: 'indentalign', indentshiftfirst: 'indentshift', indentalignlast: 'indentalign', indentshiftlast: 'indentshift' });
     return MmlMspace;
 }(MmlNode_js_1.AbstractMmlTokenNode));
 exports.MmlMspace = MmlMspace;

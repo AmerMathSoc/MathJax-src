@@ -42,64 +42,70 @@ var __values = (this && this.__values) || function(o) {
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHTMLmpadded = void 0;
+exports.ChtmlMpadded = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var mpadded_js_1 = require("../../common/Wrappers/mpadded.js");
 var mpadded_js_2 = require("../../../core/MmlTree/MmlNodes/mpadded.js");
-var CHTMLmpadded = (function (_super) {
-    __extends(CHTMLmpadded, _super);
-    function CHTMLmpadded() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CHTMLmpadded.prototype.toCHTML = function (parent) {
-        var e_1, _a;
-        var chtml = this.standardCHTMLnode(parent);
-        var content = [];
-        var style = {};
-        var _b = __read(this.getDimens(), 9), W = _b[2], dh = _b[3], dd = _b[4], dw = _b[5], x = _b[6], y = _b[7], dx = _b[8];
-        if (dw) {
-            style.width = this.em(W + dw);
-        }
-        if (dh || dd) {
-            style.margin = this.em(dh) + ' 0 ' + this.em(dd);
-        }
-        if (x + dx || y) {
-            style.position = 'relative';
-            var rbox = this.html('mjx-rbox', {
-                style: { left: this.em(x + dx), top: this.em(-y), 'max-width': style.width }
-            });
-            if (x + dx && this.childNodes[0].getBBox().pwidth) {
-                this.adaptor.setAttribute(rbox, 'width', 'full');
-                this.adaptor.setStyle(rbox, 'left', this.em(x));
+exports.ChtmlMpadded = (function () {
+    var _a;
+    var Base = (0, mpadded_js_1.CommonMpaddedMixin)(Wrapper_js_1.ChtmlWrapper);
+    return _a = (function (_super) {
+            __extends(ChtmlMpadded, _super);
+            function ChtmlMpadded() {
+                return _super !== null && _super.apply(this, arguments) || this;
             }
-            content.push(rbox);
-        }
-        chtml = this.adaptor.append(chtml, this.html('mjx-block', { style: style }, content));
-        try {
-            for (var _c = __values(this.childNodes), _d = _c.next(); !_d.done; _d = _c.next()) {
-                var child = _d.value;
-                child.toCHTML(content[0] || chtml);
+            ChtmlMpadded.prototype.toCHTML = function (parents) {
+                var e_1, _a;
+                if (this.toEmbellishedCHTML(parents))
+                    return;
+                var chtml = this.standardChtmlNodes(parents);
+                var content = [];
+                var style = {};
+                var _b = __read(this.getDimens(), 9), W = _b[2], dh = _b[3], dd = _b[4], dw = _b[5], x = _b[6], y = _b[7], dx = _b[8];
+                if (dw || this.childNodes[0].getBBox().pwidth) {
+                    style.width = this.em(W + dw);
+                }
+                if (dh || dd) {
+                    style.margin = this.em(dh) + ' 0 ' + this.em(dd);
+                }
+                if (x + dx || y) {
+                    style.position = 'relative';
+                    var rbox = this.html('mjx-rbox', {
+                        style: { left: this.em(x + dx), top: this.em(-y), 'max-width': style.width }
+                    });
+                    if (x + dx && this.childNodes[0].getBBox().pwidth) {
+                        this.adaptor.setAttribute(rbox, 'width', 'full');
+                        this.adaptor.setStyle(rbox, 'left', this.em(x));
+                    }
+                    content.push(rbox);
+                }
+                chtml = [this.adaptor.append(chtml[0], this.html('mjx-block', { style: style }, content))];
+                try {
+                    for (var _c = __values(this.childNodes), _d = _c.next(); !_d.done; _d = _c.next()) {
+                        var child = _d.value;
+                        child.toCHTML([content[0] || chtml[0]]);
+                    }
+                }
+                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                finally {
+                    try {
+                        if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                    }
+                    finally { if (e_1) throw e_1.error; }
+                }
+            };
+            return ChtmlMpadded;
+        }(Base)),
+        _a.kind = mpadded_js_2.MmlMpadded.prototype.kind,
+        _a.styles = {
+            'mjx-mpadded': {
+                display: 'inline-block'
+            },
+            'mjx-rbox': {
+                display: 'inline-block',
+                position: 'relative'
             }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-    };
-    CHTMLmpadded.kind = mpadded_js_2.MmlMpadded.prototype.kind;
-    CHTMLmpadded.styles = {
-        'mjx-mpadded': {
-            display: 'inline-block'
         },
-        'mjx-rbox': {
-            display: 'inline-block',
-            position: 'relative'
-        }
-    };
-    return CHTMLmpadded;
-}((0, mpadded_js_1.CommonMpaddedMixin)(Wrapper_js_1.CHTMLWrapper)));
-exports.CHTMLmpadded = CHTMLmpadded;
+        _a;
+})();
 //# sourceMappingURL=mpadded.js.map

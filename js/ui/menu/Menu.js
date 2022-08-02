@@ -48,8 +48,8 @@ var isMac = (typeof window !== 'undefined' &&
     window.navigator && window.navigator.platform.substr(0, 3) === 'Mac');
 var Menu = (function () {
     function Menu(document, options) {
-        var _this = this;
         if (options === void 0) { options = {}; }
+        var _this = this;
         this.settings = null;
         this.defaultSettings = null;
         this.menu = null;
@@ -168,6 +168,9 @@ var Menu = (function () {
         }
         this.settings.scale = jax.options.scale;
         this.defaultSettings = Object.assign({}, this.settings);
+        this.settings.overflow =
+            jax.options.displayOverflow.substr(0, 1).toUpperCase() + jax.options.displayOverflow.substr(1).toLowerCase();
+        this.settings.breakInline = jax.options.linebreaks.inline;
     };
     Menu.prototype.initMenu = function () {
         var _this = this;
@@ -181,6 +184,8 @@ var Menu = (function () {
                 this.variable('zoom'),
                 this.variable('zscale'),
                 this.variable('renderer', function (jax) { return _this.setRenderer(jax); }),
+                this.variable('overflow', function (overflow) { return _this.setOverflow(overflow); }),
+                this.variable('breakInline', function (breaks) { return _this.setInlineBreaks(breaks); }),
                 this.variable('alt'),
                 this.variable('cmd'),
                 this.variable('ctrl'),
@@ -227,6 +232,13 @@ var Menu = (function () {
                 this.rule(),
                 this.submenu('Settings', 'Math Settings', [
                     this.submenu('Renderer', 'Math Renderer', this.radioGroup('renderer', [['CHTML'], ['SVG']])),
+                    this.submenu('Overflow', 'Wide Expressions', [
+                        this.radioGroup('overflow', [
+                            ['Overflow'], ['Scroll'], ['Linebreak'], ['Scale'], ['Truncate'], ['Elide']
+                        ]),
+                        this.rule(),
+                        this.checkbox('BreakInline', 'Allow In-line Breaks', 'breakInline'),
+                    ]),
                     this.rule(),
                     this.submenu('ZoomTrigger', 'Zoom Trigger', [
                         this.command('ZoomNow', 'Zoom Once Now', function () { return _this.zoom(null, '', _this.menu.mathItem); }),
@@ -325,6 +337,7 @@ var Menu = (function () {
             ]
         });
         var menu = this.menu;
+        menu.findID('Settings', 'Overflow', 'Elide').disable();
         this.about.attachMenu(menu);
         this.help.attachMenu(menu);
         this.originalText.attachMenu(menu);
@@ -455,6 +468,16 @@ var Menu = (function () {
         if (this.settings.renderer !== this.defaultSettings.renderer) {
             this.setRenderer(this.settings.renderer);
         }
+        this.document.outputJax.options.displayOverflow = this.settings.overflow.toLowerCase();
+        this.document.outputJax.options.linebreaks.inline = this.settings.breakInline;
+    };
+    Menu.prototype.setOverflow = function (overflow) {
+        this.document.outputJax.options.displayOverflow = overflow.toLowerCase();
+        this.document.rerender();
+    };
+    Menu.prototype.setInlineBreaks = function (breaks) {
+        this.document.outputJax.options.linebreaks.inline = breaks;
+        this.document.rerender();
     };
     Menu.prototype.setScale = function (scale) {
         this.document.outputJax.options.scale = parseFloat(scale);
@@ -793,6 +816,8 @@ var Menu = (function () {
             ctrl: false,
             shift: false,
             scale: 1,
+            overflow: 'Scroll',
+            breakInline: true,
             autocollapse: false,
             collapsible: false,
             inTabOrder: true,

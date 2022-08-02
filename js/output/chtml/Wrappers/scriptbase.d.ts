@@ -1,12 +1,17 @@
-import { CHTMLWrapper, CHTMLConstructor } from '../Wrapper.js';
+import { CHTML } from '../../chtml.js';
+import { ChtmlWrapper, ChtmlWrapperClass } from '../Wrapper.js';
+import { ChtmlWrapperFactory } from '../WrapperFactory.js';
+import { ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass } from '../FontData.js';
+import { CommonScriptbase, CommonScriptbaseClass } from '../../common/Wrappers/scriptbase.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
 import { BBox } from '../../../util/BBox.js';
-declare const CHTMLscriptbase_base: import("../../common/Wrappers/scriptbase.js").ScriptbaseConstructor<CHTMLWrapper<any, any, any>> & CHTMLConstructor<any, any, any>;
-export declare class CHTMLscriptbase<N, T, D> extends CHTMLscriptbase_base {
-    static kind: string;
-    toCHTML(parent: N): void;
-    protected setDeltaW(nodes: N[], dx: number[]): void;
-    protected adjustOverDepth(over: N, overbox: BBox): void;
-    protected adjustUnderDepth(under: N, underbox: BBox): void;
-    protected adjustBaseHeight(base: N, basebox: BBox): void;
+export interface ChtmlScriptbaseNTD<N, T, D> extends ChtmlWrapper<N, T, D>, CommonScriptbase<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
+    setDeltaW(nodes: N[], dx: number[]): void;
+    adjustOverDepth(over: N, overbox: BBox): void;
+    adjustUnderDepth(under: N, underbox: BBox): void;
+    adjustBaseHeight(base: N, basebox: BBox): void;
 }
-export {};
+export interface ChtmlScriptbaseClass<N, T, D> extends ChtmlWrapperClass<N, T, D>, CommonScriptbaseClass<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
+    new (factory: ChtmlWrapperFactory<N, T, D>, node: MmlNode, parent?: ChtmlWrapper<N, T, D>): ChtmlScriptbaseNTD<N, T, D>;
+}
+export declare const ChtmlScriptbase: ChtmlScriptbaseClass<any, any, any>;

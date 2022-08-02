@@ -1,2 +1,2 @@
-import { SVGCharMap } from '../../FontData.js';
-export declare const frakturBold: SVGCharMap;
+import { SvgCharMap } from '../../FontData.js';
+export declare const frakturBold: SvgCharMap;

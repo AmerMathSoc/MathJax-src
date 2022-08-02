@@ -31,24 +31,28 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGmroot = void 0;
-var msqrt_js_1 = require("./msqrt.js");
+exports.SvgMroot = void 0;
 var mroot_js_1 = require("../../common/Wrappers/mroot.js");
 var mroot_js_2 = require("../../../core/MmlTree/MmlNodes/mroot.js");
-var SVGmroot = (function (_super) {
-    __extends(SVGmroot, _super);
-    function SVGmroot() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SVGmroot.prototype.addRoot = function (ROOT, root, sbox, H) {
-        root.toSVG(ROOT);
-        var _a = __read(this.getRootDimens(sbox, H), 3), x = _a[0], h = _a[1], dx = _a[2];
-        var bbox = root.getOuterBBox();
-        root.place(dx * bbox.rscale, h);
-        this.dx = x;
-    };
-    SVGmroot.kind = mroot_js_2.MmlMroot.prototype.kind;
-    return SVGmroot;
-}((0, mroot_js_1.CommonMrootMixin)(msqrt_js_1.SVGmsqrt)));
-exports.SVGmroot = SVGmroot;
+var msqrt_js_1 = require("./msqrt.js");
+exports.SvgMroot = (function () {
+    var _a;
+    var Base = (0, mroot_js_1.CommonMrootMixin)(msqrt_js_1.SvgMsqrt);
+    return _a = (function (_super) {
+            __extends(SvgMroot, _super);
+            function SvgMroot() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            SvgMroot.prototype.addRoot = function (ROOT, root, sbox, H) {
+                root.toSVG(ROOT);
+                var _a = __read(this.getRootDimens(sbox, H), 3), x = _a[0], h = _a[1], dx = _a[2];
+                var bbox = root.getOuterBBox();
+                root.place(dx * bbox.rscale, h);
+                return x;
+            };
+            return SvgMroot;
+        }(Base)),
+        _a.kind = mroot_js_2.MmlMroot.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=mroot.js.map

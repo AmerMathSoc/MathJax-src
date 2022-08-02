@@ -16,22 +16,48 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMspaceMixin = void 0;
+var BBox_js_1 = require("../../../util/BBox.js");
+var LineBBox_js_1 = require("../LineBBox.js");
 function CommonMspaceMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
-            return _super !== null && _super.apply(this, arguments) || this;
+        __extends(CommonMspaceMixin, _super);
+        function CommonMspaceMixin(factory, node, parent) {
+            if (parent === void 0) { parent = null; }
+            var _this = _super.call(this, factory, node, parent) || this;
+            _this.setBreakStyle();
+            return _this;
         }
-        class_1.prototype.computeBBox = function (bbox, _recompute) {
+        Object.defineProperty(CommonMspaceMixin.prototype, "breakCount", {
+            get: function () {
+                return (this.breakStyle ? 1 : 0);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        CommonMspaceMixin.prototype.setBreakStyle = function (linebreak) {
+            if (linebreak === void 0) { linebreak = ''; }
+            this.breakStyle = (linebreak || (this.node.hasNewline ? 'before' : ''));
+        };
+        CommonMspaceMixin.prototype.computeBBox = function (bbox, _recompute) {
             if (_recompute === void 0) { _recompute = false; }
             var attributes = this.node.attributes;
             bbox.w = this.length2em(attributes.get('width'), 0);
             bbox.h = this.length2em(attributes.get('height'), 0);
             bbox.d = this.length2em(attributes.get('depth'), 0);
         };
-        class_1.prototype.handleVariant = function () {
+        CommonMspaceMixin.prototype.computeLineBBox = function (i) {
+            var leadingString = this.node.attributes.get('data-lineleading');
+            var leading = this.length2em(leadingString, this.linebreakOptions.lineleading);
+            var bbox = LineBBox_js_1.LineBBox.from(BBox_js_1.BBox.zero(), leading);
+            if (i === 1) {
+                bbox.getIndentData(this.node);
+                bbox.isFirst = true;
+            }
+            return bbox;
         };
-        return class_1;
+        CommonMspaceMixin.prototype.handleVariant = function () {
+        };
+        return CommonMspaceMixin;
     }(Base));
 }
 exports.CommonMspaceMixin = CommonMspaceMixin;

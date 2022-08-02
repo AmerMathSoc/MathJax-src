@@ -15,22 +15,25 @@ export declare const TEXCLASS: {
     PUNCT: number;
     INNER: number;
     VCENTER: number;
+    VTOP: number;
+    VBOX: number;
     NONE: number;
 };
 export declare const TEXCLASSNAMES: string[];
 export declare const indentAttributes: string[];
 export declare type MMLNODE = MmlNode | TextNode | XMLNode;
-export interface MmlNode extends Node {
+export interface MmlNode extends Node<MmlNode, MmlNodeClass> {
     readonly isToken: boolean;
     readonly isEmbellished: boolean;
     readonly isSpacelike: boolean;
     readonly linebreakContainer: boolean;
-    readonly hasNewLine: boolean;
+    readonly linebreakAlign: string;
     readonly arity: number;
     readonly isInferred: boolean;
     readonly Parent: MmlNode;
     readonly notParent: boolean;
     parent: MmlNode;
+    childNodes: MmlNode[];
     texClass: number;
     prevClass: number;
     prevLevel: number;
@@ -47,11 +50,11 @@ export interface MmlNode extends Node {
     mError(message: string, options: PropertyList, short?: boolean): MmlNode;
     verifyTree(options?: PropertyList): void;
 }
-export interface MmlNodeClass extends NodeClass {
+export interface MmlNodeClass extends NodeClass<MmlNode, MmlNodeClass> {
     defaults?: PropertyList;
     new (factory: MmlFactory, attributes?: PropertyList, children?: MmlNode[]): MmlNode;
 }
-export declare abstract class AbstractMmlNode extends AbstractNode implements MmlNode {
+export declare abstract class AbstractMmlNode extends AbstractNode<MmlNode, MmlNodeClass> implements MmlNode {
     static defaults: PropertyList;
     static noInherit: {
         [node1: string]: {
@@ -79,14 +82,14 @@ export declare abstract class AbstractMmlNode extends AbstractNode implements Mm
     get isEmbellished(): boolean;
     get isSpacelike(): boolean;
     get linebreakContainer(): boolean;
-    get hasNewLine(): boolean;
+    get linebreakAlign(): string;
     get arity(): number;
     get isInferred(): boolean;
     get Parent(): MmlNode;
     get notParent(): boolean;
     setChildren(children: MmlNode[]): void;
-    appendChild(child: MmlNode): Node;
-    replaceChild(newChild: MmlNode, oldChild: MmlNode): Node;
+    appendChild(child: MmlNode): MmlNode;
+    replaceChild(newChild: MmlNode, oldChild: MmlNode): MmlNode;
     core(): MmlNode;
     coreMO(): MmlNode;
     coreIndex(): number;
@@ -110,7 +113,7 @@ export declare abstract class AbstractMmlTokenNode extends AbstractMmlNode {
     get isToken(): boolean;
     getText(): string;
     protected setChildInheritedAttributes(attributes: AttributeList, display: boolean, level: number, prime: boolean): void;
-    walkTree(func: (node: Node, data?: any) => void, data?: any): any;
+    walkTree(func: (node: MmlNode, data?: any) => void, data?: any): any;
 }
 export declare abstract class AbstractMmlLayoutNode extends AbstractMmlNode {
     static defaults: PropertyList;
@@ -128,13 +131,14 @@ export declare abstract class AbstractMmlBaseNode extends AbstractMmlNode {
     coreMO(): MmlNode;
     setTeXclass(prev: MmlNode): MmlNode;
 }
-export declare abstract class AbstractMmlEmptyNode extends AbstractEmptyNode implements MmlNode {
+export declare abstract class AbstractMmlEmptyNode extends AbstractEmptyNode<MmlNode, MmlNodeClass> implements MmlNode {
     parent: MmlNode;
+    childNodes: MmlNode[];
     get isToken(): boolean;
     get isEmbellished(): boolean;
     get isSpacelike(): boolean;
     get linebreakContainer(): boolean;
-    get hasNewLine(): boolean;
+    get linebreakAlign(): string;
     get arity(): number;
     get isInferred(): boolean;
     get notParent(): boolean;

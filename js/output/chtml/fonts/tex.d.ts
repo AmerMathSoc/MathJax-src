@@ -1,12 +1,12 @@
-import { CHTMLFontData, CHTMLCharOptions, CHTMLVariantData, CHTMLDelimiterData, DelimiterMap, CharMapMap } from '../FontData.js';
+import { ChtmlFontData, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, DelimiterMap, CharMapMap } from '../FontData.js';
 import { StringMap } from '../Wrapper.js';
-declare const TeXFont_base: import("../FontData.js").FontDataClass<CHTMLCharOptions, CHTMLVariantData, CHTMLDelimiterData> & typeof CHTMLFontData;
+declare const TeXFont_base: import("../FontData.js").FontDataClass<ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData> & typeof ChtmlFontData;
 export declare class TeXFont extends TeXFont_base {
     protected static defaultCssFamilyPrefix: string;
     protected static defaultVariantClasses: StringMap;
     protected static defaultVariantLetters: StringMap;
-    protected static defaultDelimiters: DelimiterMap<CHTMLDelimiterData>;
-    protected static defaultChars: CharMapMap<CHTMLCharOptions>;
+    protected static defaultDelimiters: DelimiterMap<ChtmlDelimiterData>;
+    protected static defaultChars: CharMapMap<ChtmlCharOptions>;
     protected static defaultStyles: {
         '.MJX-TEX': {
             'font-family': string;

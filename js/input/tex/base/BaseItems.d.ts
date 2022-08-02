@@ -1,4 +1,6 @@
 import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+import TexParser from '../TexParser.js';
+import { PropertyList } from '../../../core/Tree/Node.js';
 import StackItemFactory from '../StackItemFactory.js';
 import { CheckType, BaseItem, StackItem, EnvList } from '../StackItem.js';
 export declare class StartItem extends BaseItem {
@@ -55,6 +57,11 @@ export declare class RightItem extends BaseItem {
     get kind(): string;
     get isClose(): boolean;
 }
+export declare class BreakItem extends BaseItem {
+    get kind(): string;
+    constructor(factory: StackItemFactory, linebreak: string, insert: boolean);
+    checkItem(item: StackItem): CheckType;
+}
 export declare class BeginItem extends BaseItem {
     get kind(): string;
     get isOpen(): boolean;
@@ -105,7 +112,9 @@ export declare class ArrayItem extends BaseItem {
     arraydef: {
         [key: string]: string | number | boolean;
     };
+    ralign: [number, string, string][];
     dashed: boolean;
+    parser: TexParser;
     get kind(): string;
     get isOpen(): boolean;
     get copyEnv(): boolean;
@@ -125,6 +134,13 @@ export declare class EqnArrayItem extends ArrayItem {
     EndRow(): void;
     EndTable(): void;
     protected extendArray(name: string, max: number): void;
+    protected addIndentshift(): void;
+}
+export declare class MstyleItem extends BeginItem {
+    get kind(): string;
+    attrList: PropertyList;
+    constructor(factory: any, attr: PropertyList, name: string);
+    checkItem(item: StackItem): CheckType;
 }
 export declare class EquationItem extends BaseItem {
     constructor(factory: any, ...args: any[]);

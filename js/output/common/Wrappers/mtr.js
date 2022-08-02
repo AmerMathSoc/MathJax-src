@@ -29,45 +29,38 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMlabeledtrMixin = exports.CommonMtrMixin = void 0;
 function CommonMtrMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
+        __extends(CommonMtrMixin, _super);
+        function CommonMtrMixin() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        Object.defineProperty(class_1.prototype, "fixesPWidth", {
-            get: function () {
-                return false;
-            },
-            enumerable: false,
-            configurable: true
-        });
-        Object.defineProperty(class_1.prototype, "numCells", {
+        Object.defineProperty(CommonMtrMixin.prototype, "numCells", {
             get: function () {
                 return this.childNodes.length;
             },
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(class_1.prototype, "labeled", {
+        Object.defineProperty(CommonMtrMixin.prototype, "labeled", {
             get: function () {
                 return false;
             },
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(class_1.prototype, "tableCells", {
+        Object.defineProperty(CommonMtrMixin.prototype, "tableCells", {
             get: function () {
                 return this.childNodes;
             },
             enumerable: false,
             configurable: true
         });
-        class_1.prototype.getChild = function (i) {
+        CommonMtrMixin.prototype.getChild = function (i) {
             return this.childNodes[i];
         };
-        class_1.prototype.getChildBBoxes = function () {
+        CommonMtrMixin.prototype.getChildBBoxes = function () {
             return this.childNodes.map(function (cell) { return cell.getBBox(); });
         };
-        class_1.prototype.stretchChildren = function (HD) {
+        CommonMtrMixin.prototype.stretchChildren = function (HD) {
             var e_1, _a, e_2, _b, e_3, _c;
             if (HD === void 0) { HD = null; }
             var stretchy = [];
@@ -90,35 +83,35 @@ function CommonMtrMixin(Base) {
             }
             var count = stretchy.length;
             var nodeCount = this.childNodes.length;
-            if (count && nodeCount > 1) {
-                if (HD === null) {
-                    var H = 0, D = 0;
-                    var all = (count > 1 && count === nodeCount);
-                    try {
-                        for (var children_2 = __values(children), children_2_1 = children_2.next(); !children_2_1.done; children_2_1 = children_2.next()) {
-                            var mtd = children_2_1.value;
-                            var child = mtd.childNodes[0];
-                            var noStretch = (child.stretch.dir === 0);
-                            if (all || noStretch) {
-                                var _d = child.getBBox(noStretch), h = _d.h, d = _d.d;
-                                if (h > H) {
-                                    H = h;
-                                }
-                                if (d > D) {
-                                    D = d;
-                                }
+            if (count && nodeCount > 1 && !HD) {
+                var H = 0, D = 0;
+                var all = (count > 1 && count === nodeCount);
+                try {
+                    for (var children_2 = __values(children), children_2_1 = children_2.next(); !children_2_1.done; children_2_1 = children_2.next()) {
+                        var mtd = children_2_1.value;
+                        var child = mtd.childNodes[0];
+                        var noStretch = (child.stretch.dir === 0);
+                        if (all || noStretch) {
+                            var _d = child.getBBox(noStretch), h = _d.h, d = _d.d;
+                            if (h > H) {
+                                H = h;
+                            }
+                            if (d > D) {
+                                D = d;
                             }
                         }
                     }
-                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
-                    finally {
-                        try {
-                            if (children_2_1 && !children_2_1.done && (_b = children_2.return)) _b.call(children_2);
-                        }
-                        finally { if (e_2) throw e_2.error; }
-                    }
-                    HD = [H, D];
                 }
+                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                finally {
+                    try {
+                        if (children_2_1 && !children_2_1.done && (_b = children_2.return)) _b.call(children_2);
+                    }
+                    finally { if (e_2) throw e_2.error; }
+                }
+                HD = [H, D];
+            }
+            if (HD) {
                 try {
                     for (var stretchy_1 = __values(stretchy), stretchy_1_1 = stretchy_1.next(); !stretchy_1_1.done; stretchy_1_1 = stretchy_1.next()) {
                         var child = stretchy_1_1.value;
@@ -134,44 +127,51 @@ function CommonMtrMixin(Base) {
                 }
             }
         };
-        return class_1;
+        Object.defineProperty(CommonMtrMixin.prototype, "fixesPWidth", {
+            get: function () {
+                return false;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        return CommonMtrMixin;
     }(Base));
 }
 exports.CommonMtrMixin = CommonMtrMixin;
 function CommonMlabeledtrMixin(Base) {
     return (function (_super) {
-        __extends(class_2, _super);
-        function class_2() {
+        __extends(CommonMlabeledtrMixin, _super);
+        function CommonMlabeledtrMixin() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        Object.defineProperty(class_2.prototype, "numCells", {
+        Object.defineProperty(CommonMlabeledtrMixin.prototype, "numCells", {
             get: function () {
                 return Math.max(0, this.childNodes.length - 1);
             },
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(class_2.prototype, "labeled", {
+        Object.defineProperty(CommonMlabeledtrMixin.prototype, "labeled", {
             get: function () {
                 return true;
             },
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(class_2.prototype, "tableCells", {
+        Object.defineProperty(CommonMlabeledtrMixin.prototype, "tableCells", {
             get: function () {
                 return this.childNodes.slice(1);
             },
             enumerable: false,
             configurable: true
         });
-        class_2.prototype.getChild = function (i) {
+        CommonMlabeledtrMixin.prototype.getChild = function (i) {
             return this.childNodes[i + 1];
         };
-        class_2.prototype.getChildBBoxes = function () {
+        CommonMlabeledtrMixin.prototype.getChildBBoxes = function () {
             return this.childNodes.slice(1).map(function (cell) { return cell.getBBox(); });
         };
-        return class_2;
+        return CommonMlabeledtrMixin;
     }(Base));
 }
 exports.CommonMlabeledtrMixin = CommonMlabeledtrMixin;

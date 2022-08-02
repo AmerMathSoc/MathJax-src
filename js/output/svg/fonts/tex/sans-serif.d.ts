@@ -1,2 +1,2 @@
-import { SVGCharMap } from '../../FontData.js';
-export declare const sansSerif: SVGCharMap;
+import { SvgCharMap } from '../../FontData.js';
+export declare const sansSerif: SvgCharMap;

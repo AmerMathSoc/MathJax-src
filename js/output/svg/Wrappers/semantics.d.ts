@@ -1,27 +1,15 @@
-import { SVGWrapper, SVGConstructor } from '../Wrapper.js';
-import { BBox } from '../../../util/BBox.js';
-import { StyleList } from '../../../util/StyleList.js';
-declare const SVGsemantics_base: import("../../common/Wrappers/semantics.js").SemanticsConstructor & SVGConstructor<any, any, any>;
-export declare class SVGsemantics<N, T, D> extends SVGsemantics_base {
-    static kind: string;
-    toSVG(parent: N): void;
+import { SVG } from '../../svg.js';
+import { SvgWrapper, SvgWrapperClass } from '../Wrapper.js';
+import { SvgWrapperFactory } from '../WrapperFactory.js';
+import { SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass } from '../FontData.js';
+import { CommonSemantics, CommonSemanticsClass } from '../../common/Wrappers/semantics.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+export interface SvgSemanticsNTD<N, T, D> extends SvgWrapper<N, T, D>, CommonSemantics<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
 }
-export declare class SVGannotation<N, T, D> extends SVGWrapper<N, T, D> {
-    static kind: string;
-    toSVG(parent: N): void;
-    computeBBox(): BBox;
+export interface SvgSemanticsClass<N, T, D> extends SvgWrapperClass<N, T, D>, CommonSemanticsClass<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
+    new (factory: SvgWrapperFactory<N, T, D>, node: MmlNode, parent?: SvgWrapper<N, T, D>): SvgSemanticsNTD<N, T, D>;
 }
-export declare class SVGannotationXML<N, T, D> extends SVGWrapper<N, T, D> {
-    static kind: string;
-    static styles: StyleList;
-}
-export declare class SVGxml<N, T, D> extends SVGWrapper<N, T, D> {
-    static kind: string;
-    static autoStyle: boolean;
-    toSVG(parent: N): void;
-    computeBBox(bbox: BBox, _recompute?: boolean): void;
-    protected getStyles(): void;
-    protected getScale(): void;
-    protected getVariant(): void;
-}
-export {};
+export declare const SvgSemantics: SvgSemanticsClass<any, any, any>;
+export declare const SvgAnnotation: SvgWrapperClass<any, any, any>;
+export declare const SvgAnnotationXML: SvgWrapperClass<any, any, any>;
+export declare const SvgXmlNode: SvgWrapperClass<any, any, any>;

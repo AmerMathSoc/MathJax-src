@@ -15,38 +15,42 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGmtd = void 0;
+exports.SvgMtd = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var mtd_js_1 = require("../../common/Wrappers/mtd.js");
 var mtd_js_2 = require("../../../core/MmlTree/MmlNodes/mtd.js");
-var SVGmtd = (function (_super) {
-    __extends(SVGmtd, _super);
-    function SVGmtd() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SVGmtd.prototype.placeCell = function (x, y, W, H, D) {
-        var bbox = this.getBBox();
-        var h = Math.max(bbox.h, .75);
-        var d = Math.max(bbox.d, .25);
-        var calign = this.node.attributes.get('columnalign');
-        var ralign = this.node.attributes.get('rowalign');
-        var alignX = this.getAlignX(W, bbox, calign);
-        var alignY = this.getAlignY(H, D, h, d, ralign);
-        this.place(x + alignX, y + alignY);
-        return [alignX, alignY];
-    };
-    SVGmtd.prototype.placeColor = function (x, y, W, H) {
-        var adaptor = this.adaptor;
-        var child = this.firstChild();
-        if (child && adaptor.kind(child) === 'rect' && adaptor.getAttribute(child, 'data-bgcolor')) {
-            adaptor.setAttribute(child, 'x', this.fixed(x));
-            adaptor.setAttribute(child, 'y', this.fixed(y));
-            adaptor.setAttribute(child, 'width', this.fixed(W));
-            adaptor.setAttribute(child, 'height', this.fixed(H));
-        }
-    };
-    SVGmtd.kind = mtd_js_2.MmlMtd.prototype.kind;
-    return SVGmtd;
-}((0, mtd_js_1.CommonMtdMixin)(Wrapper_js_1.SVGWrapper)));
-exports.SVGmtd = SVGmtd;
+exports.SvgMtd = (function () {
+    var _a;
+    var Base = (0, mtd_js_1.CommonMtdMixin)(Wrapper_js_1.SvgWrapper);
+    return _a = (function (_super) {
+            __extends(SvgMtd, _super);
+            function SvgMtd() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            SvgMtd.prototype.placeCell = function (x, y, W, H, D) {
+                var bbox = this.getBBox();
+                var h = Math.max(bbox.h, .75);
+                var d = Math.max(bbox.d, .25);
+                var calign = this.node.attributes.get('columnalign');
+                var ralign = this.node.attributes.get('rowalign');
+                var alignX = this.getAlignX(W, bbox, calign);
+                var alignY = this.getAlignY(H, D, h, d, ralign);
+                this.place(x + alignX, y + alignY);
+                return [alignX, alignY];
+            };
+            SvgMtd.prototype.placeColor = function (x, y, W, H) {
+                var adaptor = this.adaptor;
+                var child = this.firstChild();
+                if (child && adaptor.kind(child) === 'rect' && adaptor.getAttribute(child, 'data-bgcolor')) {
+                    adaptor.setAttribute(child, 'x', this.fixed(x));
+                    adaptor.setAttribute(child, 'y', this.fixed(y));
+                    adaptor.setAttribute(child, 'width', this.fixed(W));
+                    adaptor.setAttribute(child, 'height', this.fixed(H));
+                }
+            };
+            return SvgMtd;
+        }(Base)),
+        _a.kind = mtd_js_2.MmlMtd.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=mtd.js.map

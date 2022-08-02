@@ -5,7 +5,7 @@ export declare type BBoxData = {
 };
 export declare class BBox {
     static fullWidth: string;
-    static StyleAdjust: [string, string, number?][];
+    static boxSides: [string, number, string][];
     w: number;
     h: number;
     d: number;
@@ -26,4 +26,5 @@ export declare class BBox {
     combine(cbox: BBox, x?: number, y?: number): void;
     append(cbox: BBox): void;
     updateFrom(cbox: BBox): void;
+    copy(): BBox;
 }

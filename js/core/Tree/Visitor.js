@@ -37,7 +37,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AbstractVisitor = void 0;
-var Node_js_1 = require("./Node.js");
 var AbstractVisitor = (function () {
     function AbstractVisitor(factory) {
         var e_1, _a;
@@ -83,7 +82,7 @@ var AbstractVisitor = (function () {
         for (var _i = 1; _i < arguments.length; _i++) {
             args[_i - 1] = arguments[_i];
         }
-        if (node instanceof Node_js_1.AbstractNode) {
+        if ('childNodes' in node) {
             try {
                 for (var _b = __values(node.childNodes), _c = _b.next(); !_c.done; _c = _b.next()) {
                     var child = _c.value;

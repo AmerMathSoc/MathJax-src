@@ -15,17 +15,21 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGmn = void 0;
+exports.SvgMn = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var mn_js_1 = require("../../common/Wrappers/mn.js");
 var mn_js_2 = require("../../../core/MmlTree/MmlNodes/mn.js");
-var SVGmn = (function (_super) {
-    __extends(SVGmn, _super);
-    function SVGmn() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SVGmn.kind = mn_js_2.MmlMn.prototype.kind;
-    return SVGmn;
-}((0, mn_js_1.CommonMnMixin)(Wrapper_js_1.SVGWrapper)));
-exports.SVGmn = SVGmn;
+exports.SvgMn = (function () {
+    var _a;
+    var Base = (0, mn_js_1.CommonMnMixin)(Wrapper_js_1.SvgWrapper);
+    return _a = (function (_super) {
+            __extends(SvgMn, _super);
+            function SvgMn() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            return SvgMn;
+        }(Base)),
+        _a.kind = mn_js_2.MmlMn.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=mn.js.map
