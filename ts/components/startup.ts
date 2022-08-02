@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2018-2021 The MathJax Consortium
+ *  Copyright (c) 2018-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ export interface MathJaxObject extends MJObject {
     extendHandler(extend: HandlerExtension): void;
     toMML(node: MmlNode): string;
     defaultReady(): void;
-    defaultPageReady(): void,
+    defaultPageReady(): Promise<void>;
     getComponents(): void;
     makeMethods(): void;
     makeTypesetMethods(): void;

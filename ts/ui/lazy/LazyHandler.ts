@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2021-2021 The MathJax Consortium
+ *  Copyright (c) 2021-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -213,6 +213,15 @@ export function LazyMathItemMixin<N, T, D, B extends Constructor<HTMLMathItem<N,
         this.root = document.mmlFactory.create('math');
         this.state(STATE.COMPILED);
       }
+    }
+
+    /**
+     * Only update the state if restore is true or false (null is used for setting lazy states)
+     * @override
+     */
+    public state(state: number = null, restore: boolean = false) {
+      if (restore !== null) super.state(state, restore);
+      return super.state();
     }
 
     /**
@@ -616,7 +625,7 @@ B extends MathDocumentConstructor<HTMLDocument<N, T, D>>>(
       let compile = false;
       for (const item of this.math) {
         const earlier = item as LazyMathItem<N, T, D>;
-        if (earlier === math || !earlier?.lazyCompile) {
+        if (earlier === math || !earlier?.lazyCompile || !earlier.lazyTex) {
           break;
         }
         earlier.lazyCompile = false;
