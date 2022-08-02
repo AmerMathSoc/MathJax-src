@@ -10,3 +10,4 @@ fix-invisibles
 fix-movable-limits
 fix-sideset
 fix-parent
+linebreaks
