@@ -112,6 +112,8 @@ export declare class ArrayItem extends BaseItem {
     arraydef: {
         [key: string]: string | number | boolean;
     };
+    cstart: string[];
+    cend: string[];
     ralign: [number, string, string][];
     dashed: boolean;
     parser: TexParser;
@@ -120,6 +122,8 @@ export declare class ArrayItem extends BaseItem {
     get copyEnv(): boolean;
     checkItem(item: StackItem): CheckType;
     createMml(): MmlNode;
+    StartEntry(): void;
+    protected getEntry(): [string, boolean];
     EndEntry(): void;
     EndRow(): void;
     EndTable(): void;

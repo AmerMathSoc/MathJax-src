@@ -47,21 +47,31 @@ var ColumnParser = (function () {
             W: function (state) { return _this.getColumn(state, MmlNode_js_1.TEXCLASS.VTOP, ''); },
             '|': function (state) { return state.clines[state.j] = 'solid'; },
             ':': function (state) { return state.clines[state.j] = 'dashed'; },
-            '>': function (state) { return state.cstart[state.j] = _this.getBraces(state); },
-            '<': function (state) { return state.cend[state.j - 1] = _this.getBraces(state); },
+            '>': function (state) { return state.cstart[state.j] = (state.cstart[state.j] || '') + _this.getBraces(state); },
+            '<': function (state) { return state.cend[state.j - 1] = (state.cend[state.j - 1] || '') + _this.getBraces(state); },
+            P: function (state) { return _this.macroColumn(state, '>{$}p{#1}<{$}', 1); },
+            M: function (state) { return _this.macroColumn(state, '>{$}m{#1}<{$}', 1); },
+            B: function (state) { return _this.macroColumn(state, '>{$}b{#1}<{$}', 1); },
             '@': function (state) { return _this.getBraces(state); },
             '!': function (state) { return _this.getBraces(state); },
             ' ': function (_state) { },
         };
+        this.MAXCOLUMNS = 10000;
     }
-    ColumnParser.prototype.process = function (template, array) {
+    ColumnParser.prototype.process = function (parser, template, array) {
         var state = {
-            template: template, i: 0, j: 0, c: '',
+            parser: parser,
+            template: template,
+            i: 0, j: 0, c: '',
             cwidth: [], calign: [], clines: [],
-            cstart: [], cend: [],
+            cstart: array.cstart, cend: array.cend,
             ralign: array.ralign
         };
+        var n = 0;
         while (state.i < state.template.length) {
+            if (n++ > this.MAXCOLUMNS) {
+                throw new TexError_js_1.default('MaxColumns', 'Too many column specifiers (perhaps looping column definitions?)');
+            }
             var c = state.c = String.fromCodePoint(state.template.codePointAt(state.i));
             state.i += c.length;
             if (!this.columnHandler.hasOwnProperty(c)) {
@@ -102,7 +112,7 @@ var ColumnParser = (function () {
         state.j++;
     };
     ColumnParser.prototype.getDimen = function (state) {
-        var dim = this.getBraces(state);
+        var dim = this.getBraces(state) || '';
         if (!ParseUtil_js_1.default.matchDimen(dim)[0]) {
             throw new TexError_js_1.default('MissingColumnDimOrUnits', 'Missing dimension or its units for %1 column declaration', state.c);
         }
@@ -138,6 +148,14 @@ var ColumnParser = (function () {
             }
         }
         throw new TexError_js_1.default('MissingCloseBrace', 'Missing close brace');
+    };
+    ColumnParser.prototype.macroColumn = function (state, macro, n) {
+        var args = [];
+        while (n > 0 && n--) {
+            args.push(this.getBraces(state));
+        }
+        state.template = ParseUtil_js_1.default.substituteArgs(state.parser, args, macro) + state.template.slice(state.i);
+        state.i = 0;
     };
     return ColumnParser;
 }());

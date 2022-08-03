@@ -746,6 +746,8 @@ var ArrayItem = (function (_super) {
         _this.frame = [];
         _this.hfill = [];
         _this.arraydef = {};
+        _this.cstart = [];
+        _this.cend = [];
         _this.ralign = [];
         _this.dashed = false;
         return _this;
@@ -776,12 +778,14 @@ var ArrayItem = (function (_super) {
             if (item.getProperty('isEntry')) {
                 this.EndEntry();
                 this.clearEnv();
+                this.StartEntry();
                 return StackItem_js_1.BaseItem.fail;
             }
             if (item.getProperty('isCR')) {
                 this.EndEntry();
                 this.EndRow();
                 this.clearEnv();
+                this.StartEntry();
                 return StackItem_js_1.BaseItem.fail;
             }
             this.EndTable();
@@ -823,6 +827,69 @@ var ArrayItem = (function (_super) {
             mml = ParseUtil_js_1.default.fenced(this.factory.configuration, this.getProperty('open'), mml, this.getProperty('close'));
         }
         return mml;
+    };
+    ArrayItem.prototype.StartEntry = function () {
+        var n = this.row.length;
+        var start = this.cstart[n];
+        var end = this.cend[n];
+        var ralign = this.ralign[n];
+        if (!start && !end && !ralign)
+            return;
+        var _a = __read(this.getEntry(), 2), entry = _a[0], found = _a[1];
+        if (!found)
+            return;
+        var parser = this.parser;
+        if (start) {
+            entry = ParseUtil_js_1.default.addArgs(parser, start, entry);
+        }
+        if (end) {
+            entry = ParseUtil_js_1.default.addArgs(parser, entry, end);
+        }
+        if (ralign) {
+            entry = '\\text{' + entry.trim() + '}';
+        }
+        parser.string = ParseUtil_js_1.default.addArgs(parser, entry, parser.string);
+        parser.i = 0;
+    };
+    ArrayItem.prototype.getEntry = function () {
+        var parser = this.parser;
+        var pattern = /^([^]*?)([&{}]|\\\\|\\(?:begin|end)\{array\})/;
+        var braces = 0, envs = 0;
+        var i = parser.i;
+        var match;
+        var fail = ['', false];
+        while ((match = parser.string.slice(i).match(pattern)) !== null) {
+            i += match[0].length;
+            switch (match[2]) {
+                case '{':
+                    braces++;
+                    break;
+                case '}':
+                    if (!braces)
+                        return fail;
+                    braces--;
+                    break;
+                case '\\begin{array}':
+                    !braces && envs++;
+                    break;
+                case '\\end{array}':
+                    if (!braces && envs) {
+                        envs--;
+                        break;
+                    }
+                default:
+                    if (braces || envs)
+                        continue;
+                    if (match[2] !== '&' && !match[1].trim())
+                        return fail;
+                    i -= match[2].length;
+                    var entry = parser.string.slice(parser.i, i).trim();
+                    parser.string = parser.string.slice(i);
+                    parser.i = 0;
+                    return [entry, true];
+            }
+        }
+        return fail;
     };
     ArrayItem.prototype.EndEntry = function () {
         var mtd = this.create('node', 'mtd', this.nodes);

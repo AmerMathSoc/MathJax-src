@@ -603,6 +603,7 @@ new sm.CommandMap('macros', {
     label: 'HandleLabel',
     ref: 'HandleRef',
     nonumber: 'HandleNoTag',
+    newcolumntype: 'NewColumnType',
     mathchoice: 'MathChoice',
     mmlToken: 'MmlToken'
 }, BaseMethods_js_1.default);

@@ -865,6 +865,19 @@ BaseMethods.HFill = function (parser, _name) {
         throw new TexError_js_1.default('UnsupportedHFill', 'Unsupported use of %1', parser.currentCS);
     }
 };
+BaseMethods.NewColumnType = function (parser, name) {
+    var c = parser.GetArgument(name);
+    var n = parser.GetBrackets(name, '0');
+    var macro = parser.GetArgument(name);
+    if (c.length !== 1) {
+        throw new TexError_js_1.default('BadColumnName', 'Column specifier must be exactly one character: %1', c);
+    }
+    if (!n.match(/^\d+$/)) {
+        throw new TexError_js_1.default('PositiveIntegerArg', 'Argument to %1 must me a positive integer', n);
+    }
+    var cparser = parser.configuration.columnParser;
+    cparser.columnHandler[c] = function (state) { return cparser.macroColumn(state, macro, parseInt(n)); };
+};
 BaseMethods.BeginEnd = function (parser, name) {
     var env = parser.GetArgument(name);
     if (env.match(/\\/)) {
@@ -892,7 +905,7 @@ BaseMethods.Array = function (parser, begin, open, close, align, spacing, vspaci
         columnspacing: (spacing || '1em'),
         rowspacing: (vspacing || '4pt')
     };
-    parser.configuration.columnParser.process(align, array);
+    parser.configuration.columnParser.process(parser, align, array);
     if (open) {
         array.setProperty('open', parser.convertDelimiter(open));
     }
@@ -916,6 +929,7 @@ BaseMethods.Array = function (parser, begin, open, close, align, spacing, vspaci
         array.arraydef['useHeight'] = false;
     }
     parser.Push(begin);
+    array.StartEntry();
     return array;
 };
 BaseMethods.AlignedArray = function (parser, begin) {
