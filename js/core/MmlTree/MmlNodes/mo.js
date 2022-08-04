@@ -310,8 +310,12 @@ var MmlMo = (function (_super) {
         var parent = this.Parent;
         if (this.getProperty('mathaccent') !== undefined || !parent || !parent.isKind('munderover'))
             return;
-        var base = parent.childNodes[0];
+        var _a = __read(parent.childNodes, 3), base = _a[0], under = _a[1], over = _a[2];
         if (base.isEmbellished && base.coreMO() === this)
+            return;
+        var isUnder = !!(under && under.isEmbellished && under.coreMO() === this);
+        var isOver = !!(over && over.isEmbellished && under.coreMO() === this);
+        if (!isUnder && !isOver)
             return;
         var MATHACCENT = this.constructor.mathaccents;
         if (mo.match(MATHACCENT)) {
