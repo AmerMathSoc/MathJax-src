@@ -63,6 +63,11 @@ export declare abstract class AbstractMmlNode extends AbstractNode<MmlNode, MmlN
             };
         };
     };
+    static stopInherit: {
+        [node: string]: {
+            [attribute: string]: boolean;
+        };
+    };
     static alwaysInherit: {
         [name: string]: boolean;
     };

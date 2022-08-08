@@ -634,7 +634,9 @@ var Menu = (function () {
             _this.document.processed = document.processed;
             if (!Menu._loadingPromise) {
                 _this.document.outputJax.reset();
-                _this.rerender(component === 'complexity' || noEnrich ? MathItem_js_1.STATE.COMPILED : MathItem_js_1.STATE.TYPESET);
+                mathjax_js_1.mathjax.handleRetriesFor(function () {
+                    _this.rerender(component === 'complexity' || noEnrich ? MathItem_js_1.STATE.COMPILED : MathItem_js_1.STATE.TYPESET);
+                });
             }
         });
     };

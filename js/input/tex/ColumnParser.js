@@ -49,10 +49,13 @@ var ColumnParser = (function () {
             ':': function (state) { return state.clines[state.j] = 'dashed'; },
             '>': function (state) { return state.cstart[state.j] = (state.cstart[state.j] || '') + _this.getBraces(state); },
             '<': function (state) { return state.cend[state.j - 1] = (state.cend[state.j - 1] || '') + _this.getBraces(state); },
+            '@': function (state) {
+                state.cstart[state.j] = '\\mathNONE{' + _this.getBraces(state) + '}';
+                state.cspace[state.j] = '0';
+            },
             P: function (state) { return _this.macroColumn(state, '>{$}p{#1}<{$}', 1); },
             M: function (state) { return _this.macroColumn(state, '>{$}m{#1}<{$}', 1); },
             B: function (state) { return _this.macroColumn(state, '>{$}b{#1}<{$}', 1); },
-            '@': function (state) { return _this.getBraces(state); },
             '!': function (state) { return _this.getBraces(state); },
             ' ': function (_state) { },
         };
@@ -63,7 +66,7 @@ var ColumnParser = (function () {
             parser: parser,
             template: template,
             i: 0, j: 0, c: '',
-            cwidth: [], calign: [], clines: [],
+            cwidth: [], calign: [], cspace: [], clines: [],
             cstart: array.cstart, cend: array.cend,
             ralign: array.ralign
         };
@@ -83,10 +86,13 @@ var ColumnParser = (function () {
         array.arraydef.columnalign = calign.join(' ');
         if (state.cwidth.length) {
             var cwidth = __spreadArray([], __read(state.cwidth), false);
-            if (cwidth.length < calign.length) {
-                cwidth.push('auto');
-            }
+            cwidth.length < calign.length && cwidth.push('auto');
             array.arraydef.columnwidth = cwidth.map(function (w) { return w || 'auto'; }).join(' ');
+        }
+        if (state.cspace.length) {
+            var cspace = __spreadArray([], __read(state.cspace), false);
+            cspace.length < calign.length && cspace.push('1em');
+            array.arraydef.columnspacing = cspace.slice(1).map(function (d) { return d || '1em'; }).join(' ');
         }
         if (state.clines.length) {
             var clines = __spreadArray([], __read(state.clines), false);

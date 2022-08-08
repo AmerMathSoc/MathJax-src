@@ -8,6 +8,7 @@ export declare type ColumnState = {
     j: number;
     calign: string[];
     cwidth: string[];
+    cspace: string[];
     clines: string[];
     cstart: string[];
     cend: string[];

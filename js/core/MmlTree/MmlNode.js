@@ -354,27 +354,29 @@ var AbstractMmlNode = (function (_super) {
     };
     AbstractMmlNode.prototype.setInheritedAttributes = function (attributes, display, level, prime) {
         var e_5, _a;
+        var _b, _c, _d;
         if (attributes === void 0) { attributes = {}; }
         if (display === void 0) { display = false; }
         if (level === void 0) { level = 0; }
         if (prime === void 0) { prime = false; }
         var defaults = this.attributes.getAllDefaults();
         try {
-            for (var _b = __values(Object.keys(attributes)), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var key = _c.value;
+            for (var _e = __values(Object.keys(attributes)), _f = _e.next(); !_f.done; _f = _e.next()) {
+                var key = _f.value;
                 if (defaults.hasOwnProperty(key) || AbstractMmlNode.alwaysInherit.hasOwnProperty(key)) {
-                    var _d = __read(attributes[key], 2), node = _d[0], value = _d[1];
-                    var noinherit = (AbstractMmlNode.noInherit[node] || {})[this.kind] || {};
-                    if (!noinherit[key]) {
-                        this.attributes.setInherited(key, value);
-                    }
+                    var _g = __read(attributes[key], 2), node = _g[0], value = _g[1];
+                    !((_c = (_b = AbstractMmlNode.noInherit[node]) === null || _b === void 0 ? void 0 : _b[this.kind]) === null || _c === void 0 ? void 0 : _c[key]) && this.attributes.setInherited(key, value);
+                }
+                if ((_d = AbstractMmlNode.stopInherit[this.kind]) === null || _d === void 0 ? void 0 : _d[key]) {
+                    attributes = __assign({}, attributes);
+                    delete attributes[key];
                 }
             }
         }
         catch (e_5_1) { e_5 = { error: e_5_1 }; }
         finally {
             try {
-                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                if (_f && !_f.done && (_a = _e.return)) _a.call(_e);
             }
             finally { if (e_5) throw e_5.error; }
         }
@@ -555,6 +557,9 @@ var AbstractMmlNode = (function (_super) {
             mrow: { groupalign: true },
             mtable: { groupalign: true }
         }
+    };
+    AbstractMmlNode.stopInherit = {
+        mtd: { columnalign: true, rowalign: true, groupalign: true }
     };
     AbstractMmlNode.alwaysInherit = {
         scriptminsize: true,

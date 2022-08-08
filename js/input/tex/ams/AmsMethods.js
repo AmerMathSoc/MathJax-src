@@ -42,7 +42,7 @@ var BaseMethods_js_1 = __importDefault(require("../base/BaseMethods.js"));
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
 exports.AmsMethods = {};
 exports.AmsMethods.AmsEqnArray = function (parser, begin, numbered, taggable, align, spacing, style) {
-    var args = parser.GetBrackets('\\begin{' + begin.getName() + '}');
+    var args = (parser.getCodePoint() === '[' ? parser.GetBrackets('\\begin{' + begin.getName() + '}') : '');
     var array = BaseMethods_js_1.default.EqnArray(parser, begin, numbered, taggable, align, spacing, style);
     return ParseUtil_js_1.default.setArrayAlign(array, args);
 };
@@ -50,7 +50,7 @@ exports.AmsMethods.AlignAt = function (parser, begin, numbered, taggable) {
     var name = begin.getName();
     var n, valign, align = '', spacing = [];
     if (!taggable) {
-        valign = parser.GetBrackets('\\begin{' + name + '}');
+        valign = (this.getCodePoint() === '[' ? parser.GetBrackets('\\begin{' + name + '}') : '');
     }
     n = parser.GetArgument('\\begin{' + name + '}');
     if (n.match(/[^0-9]/)) {

@@ -527,6 +527,7 @@ new sm.CommandMap('macros', {
     mathrel: ['TeXAtom', MmlNode_js_1.TEXCLASS.REL],
     mathpunct: ['TeXAtom', MmlNode_js_1.TEXCLASS.PUNCT],
     mathinner: ['TeXAtom', MmlNode_js_1.TEXCLASS.INNER],
+    mathNONE: ['TeXAtom', MmlNode_js_1.TEXCLASS.NONE],
     vtop: ['TeXAtom', MmlNode_js_1.TEXCLASS.VTOP],
     vcenter: ['TeXAtom', MmlNode_js_1.TEXCLASS.VCENTER],
     vbox: ['TeXAtom', MmlNode_js_1.TEXCLASS.VBOX],

@@ -226,7 +226,11 @@ function ExplorerMathDocumentMixin(BaseDocument) {
                 }
                 var visitor = new SerializedMmlVisitor_js_1.SerializedMmlVisitor(_this.mmlFactory);
                 var toMathML = (function (node) { return visitor.visitTree(node); });
-                _this.options.MathItem = ExplorerMathItemMixin(_this.options.MathItem, toMathML);
+                var options = _this.options;
+                if (!options.a11y.speechRules) {
+                    options.a11y.speechRules = "".concat(options.sre.domain, "-").concat(options.sre.style);
+                }
+                options.MathItem = ExplorerMathItemMixin(options.MathItem, toMathML);
                 _this.explorerRegions = initExplorerRegions(_this);
                 return _this;
             }
