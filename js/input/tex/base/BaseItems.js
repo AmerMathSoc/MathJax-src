@@ -880,10 +880,10 @@ var ArrayItem = (function (_super) {
                 default:
                     if (braces || envs)
                         continue;
-                    if (match[2] !== '&' && !match[1].trim())
-                        return fail;
                     i -= match[2].length;
                     var entry = parser.string.slice(parser.i, i).trim();
+                    if (match[2] !== '&' && !entry.trim())
+                        return fail;
                     parser.string = parser.string.slice(i);
                     parser.i = 0;
                     return [entry, true];

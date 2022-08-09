@@ -54,11 +54,11 @@ exports.ColorMethods.DefineColor = function (parser, name) {
     colorModel.defineColor(model, cname, def);
 };
 exports.ColorMethods.ColorBox = function (parser, name) {
-    var model = parser.GetBrackets(name, "");
+    var model = parser.GetBrackets(name, '');
     var cdef = parser.GetArgument(name);
     var math = ParseUtil_js_1.default.internalMath(parser, parser.GetArgument(name));
-    var colorModel = parser.configuration.packageData.get("color").model;
-    var node = parser.create("node", "mpadded", math, {
+    var colorModel = parser.configuration.packageData.get('color').model;
+    var node = parser.create('node', 'mpadded', math, {
         mathbackground: colorModel.getColor(model, cdef),
     });
     NodeUtil_js_1.default.setProperties(node, padding(parser.options.color.padding));
