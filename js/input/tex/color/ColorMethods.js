@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ColorMethods = void 0;
+exports.ColorMethods = exports.padding = void 0;
 var NodeUtil_js_1 = __importDefault(require("../NodeUtil.js"));
 var ParseUtil_js_1 = __importDefault(require("../ParseUtil.js"));
 function padding(colorPadding) {
@@ -17,6 +17,7 @@ function padding(colorPadding) {
         lspace: colorPadding,
     };
 }
+exports.padding = padding;
 exports.ColorMethods = {};
 exports.ColorMethods.Color = function (parser, name) {
     var model = parser.GetBrackets(name, '');
@@ -64,14 +65,16 @@ exports.ColorMethods.ColorBox = function (parser, name) {
     parser.Push(node);
 };
 exports.ColorMethods.FColorBox = function (parser, name) {
+    var fmodel = parser.GetBrackets(name, '');
     var fname = parser.GetArgument(name);
+    var cmodel = parser.GetBrackets(name, fmodel);
     var cname = parser.GetArgument(name);
     var math = ParseUtil_js_1.default.internalMath(parser, parser.GetArgument(name));
     var options = parser.options.color;
     var colorModel = parser.configuration.packageData.get('color').model;
     var node = parser.create('node', 'mpadded', math, {
-        mathbackground: colorModel.getColor('named', cname),
-        style: "border: ".concat(options.borderWidth, " solid ").concat(colorModel.getColor('named', fname))
+        mathbackground: colorModel.getColor(cmodel, cname),
+        style: "border: ".concat(options.borderWidth, " solid ").concat(colorModel.getColor(fmodel, fname))
     });
     NodeUtil_js_1.default.setProperties(node, padding(options.padding));
     parser.Push(node);

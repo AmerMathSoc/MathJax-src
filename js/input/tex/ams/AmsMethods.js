@@ -50,7 +50,7 @@ exports.AmsMethods.AlignAt = function (parser, begin, numbered, taggable) {
     var name = begin.getName();
     var n, valign, align = '', spacing = [];
     if (!taggable) {
-        valign = (this.getCodePoint() === '[' ? parser.GetBrackets('\\begin{' + name + '}') : '');
+        valign = (parser.getCodePoint() === '[' ? parser.GetBrackets('\\begin{' + name + '}') : '');
     }
     n = parser.GetArgument('\\begin{' + name + '}');
     if (n.match(/[^0-9]/)) {
