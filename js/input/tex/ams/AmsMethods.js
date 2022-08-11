@@ -42,19 +42,21 @@ var BaseMethods_js_1 = __importDefault(require("../base/BaseMethods.js"));
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
 exports.AmsMethods = {};
 exports.AmsMethods.AmsEqnArray = function (parser, begin, numbered, taggable, align, spacing, style) {
-    var args = (parser.getCodePoint() === '[' ? parser.GetBrackets('\\begin{' + begin.getName() + '}') : '');
+    var i = parser.i;
+    var args = parser.GetBrackets('\\begin{' + begin.getName() + '}');
     var array = BaseMethods_js_1.default.EqnArray(parser, begin, numbered, taggable, align, spacing, style);
-    return ParseUtil_js_1.default.setArrayAlign(array, args);
+    return ParseUtil_js_1.default.setArrayAlign(array, args, parser, i);
 };
 exports.AmsMethods.AlignAt = function (parser, begin, numbered, taggable) {
     var name = begin.getName();
-    var n, valign, align = '', spacing = [];
+    var n, valign, align = '', spacing = [], i;
     if (!taggable) {
-        valign = (parser.getCodePoint() === '[' ? parser.GetBrackets('\\begin{' + name + '}') : '');
+        i = parser.i;
+        valign = parser.GetBrackets('\\begin{' + name + '}');
     }
     n = parser.GetArgument('\\begin{' + name + '}');
     if (n.match(/[^0-9]/)) {
-        throw new TexError_js_1.default('PositiveIntegerArg', 'Argument to %1 must me a positive integer', '\\begin{' + name + '}');
+        throw new TexError_js_1.default('PositiveIntegerArg', 'Argument to %1 must be a positive integer', '\\begin{' + name + '}');
     }
     var count = parseInt(n, 10);
     while (count > 0) {
@@ -67,7 +69,7 @@ exports.AmsMethods.AlignAt = function (parser, begin, numbered, taggable) {
         return exports.AmsMethods.EqnArray(parser, begin, numbered, taggable, align, spaceStr);
     }
     var array = exports.AmsMethods.EqnArray(parser, begin, numbered, taggable, align, spaceStr);
-    return ParseUtil_js_1.default.setArrayAlign(array, valign);
+    return ParseUtil_js_1.default.setArrayAlign(array, valign, !taggable ? parser : null, i);
 };
 exports.AmsMethods.Multline = function (parser, begin, numbered) {
     parser.Push(begin);
@@ -89,7 +91,7 @@ exports.AmsMethods.Multline = function (parser, begin, numbered) {
 exports.AmsMethods.XalignAt = function (parser, begin, numbered, padded) {
     var n = parser.GetArgument('\\begin{' + begin.getName() + '}');
     if (n.match(/[^0-9]/)) {
-        throw new TexError_js_1.default('PositiveIntegerArg', 'Argument to %1 must me a positive integer', '\\begin{' + begin.getName() + '}');
+        throw new TexError_js_1.default('PositiveIntegerArg', 'Argument to %1 must be a positive integer', '\\begin{' + begin.getName() + '}');
     }
     var align = (padded ? 'crl' : 'rlc');
     var width = (padded ? 'fit auto auto' : 'auto auto fit');
