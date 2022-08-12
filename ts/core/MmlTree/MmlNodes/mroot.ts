@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -56,6 +56,14 @@ export class MmlMroot extends AbstractMmlNode {
    */
   public get arity() {
     return 2;
+  }
+
+  /**
+   * <mroot> can contain line breaks
+   * @override
+   */
+  public get linebreakContainer() {
+    return true;
   }
 
   /**

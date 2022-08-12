@@ -40,6 +40,13 @@ var MmlMpadded = (function (_super) {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(MmlMpadded.prototype, "linebreakContainer", {
+        get: function () {
+            return true;
+        },
+        enumerable: false,
+        configurable: true
+    });
     MmlMpadded.defaults = __assign(__assign({}, MmlNode_js_1.AbstractMmlLayoutNode.defaults), { width: '', height: '', depth: '', lspace: 0, voffset: 0 });
     return MmlMpadded;
 }(MmlNode_js_1.AbstractMmlLayoutNode));

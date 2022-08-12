@@ -17,7 +17,7 @@ declare namespace ParseUtil {
     function underOver(parser: TexParser, base: MmlNode, script: MmlNode, pos: string, stack: boolean): MmlNode;
     function checkMovableLimits(base: MmlNode): void;
     function trimSpaces(text: string): string;
-    function setArrayAlign(array: ArrayItem, align: string): ArrayItem;
+    function setArrayAlign(array: ArrayItem, align: string, parser?: TexParser, i?: number): ArrayItem;
     function substituteArgs(parser: TexParser, args: string[], str: string): string;
     function addArgs(parser: TexParser, s1: string, s2: string): string;
     function checkMaxMacros(parser: TexParser, isMacro?: boolean): void;

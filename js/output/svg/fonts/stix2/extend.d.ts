@@ -1,2 +1,2 @@
-import { CharMap, SVGCharOptions } from '../../FontData.js';
-export declare const extend: CharMap<SVGCharOptions>;
+import { CharMap, SvgCharOptions } from '../../FontData.js';
+export declare const extend: CharMap<SvgCharOptions>;

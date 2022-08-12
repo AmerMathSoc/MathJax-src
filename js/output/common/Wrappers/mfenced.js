@@ -14,31 +14,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 var __values = (this && this.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
@@ -54,26 +29,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMfencedMixin = void 0;
 function CommonMfencedMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
-            }
-            var _this = _super.apply(this, __spreadArray([], __read(args), false)) || this;
+        __extends(CommonMfencedMixin, _super);
+        function CommonMfencedMixin(factory, node, parent) {
+            if (parent === void 0) { parent = null; }
+            var _this = _super.call(this, factory, node, parent) || this;
             _this.mrow = null;
             _this.createMrow();
             _this.addMrowChildren();
             return _this;
         }
-        class_1.prototype.createMrow = function () {
+        CommonMfencedMixin.prototype.createMrow = function () {
             var mmlFactory = this.node.factory;
             var mrow = mmlFactory.create('inferredMrow');
             mrow.inheritAttributesFrom(this.node);
             this.mrow = this.wrap(mrow);
             this.mrow.parent = this;
         };
-        class_1.prototype.addMrowChildren = function () {
+        CommonMfencedMixin.prototype.addMrowChildren = function () {
             var e_1, _a;
             var mfenced = this.node;
             var mrow = this.mrow;
@@ -99,19 +71,29 @@ function CommonMfencedMixin(Base) {
             this.addMo(mfenced.close);
             mrow.stretchChildren();
         };
-        class_1.prototype.addMo = function (node) {
+        CommonMfencedMixin.prototype.addMo = function (node) {
             if (!node)
                 return;
             var mo = this.wrap(node);
             this.mrow.childNodes.push(mo);
             mo.parent = this.mrow;
         };
-        class_1.prototype.computeBBox = function (bbox, recompute) {
+        CommonMfencedMixin.prototype.computeBBox = function (bbox, recompute) {
             if (recompute === void 0) { recompute = false; }
             bbox.updateFrom(this.mrow.getOuterBBox());
             this.setChildPWidths(recompute);
         };
-        return class_1;
+        Object.defineProperty(CommonMfencedMixin.prototype, "breakCount", {
+            get: function () {
+                return this.mrow.breakCount;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        CommonMfencedMixin.prototype.computeLineBBox = function (i) {
+            return this.mrow.getLineBBox(i);
+        };
+        return CommonMfencedMixin;
     }(Base));
 }
 exports.CommonMfencedMixin = CommonMfencedMixin;

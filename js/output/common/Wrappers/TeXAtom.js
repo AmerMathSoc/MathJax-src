@@ -19,11 +19,13 @@ exports.CommonTeXAtomMixin = void 0;
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
 function CommonTeXAtomMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
-            return _super !== null && _super.apply(this, arguments) || this;
+        __extends(CommonTeXAtomMixin, _super);
+        function CommonTeXAtomMixin() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.dh = 0;
+            return _this;
         }
-        class_1.prototype.computeBBox = function (bbox, recompute) {
+        CommonTeXAtomMixin.prototype.computeBBox = function (bbox, recompute) {
             if (recompute === void 0) { recompute = false; }
             _super.prototype.computeBBox.call(this, bbox, recompute);
             if (this.childNodes[0] && this.childNodes[0].bbox.ic) {
@@ -32,12 +34,27 @@ function CommonTeXAtomMixin(Base) {
             if (this.node.texClass === MmlNode_js_1.TEXCLASS.VCENTER) {
                 var h = bbox.h, d = bbox.d;
                 var a = this.font.params.axis_height;
-                var dh = ((h + d) / 2 + a) - h;
-                bbox.h += dh;
-                bbox.d -= dh;
+                this.dh = ((h + d) / 2 + a) - h;
+                bbox.h += this.dh;
+                bbox.d -= this.dh;
+            }
+            else if (this.node.texClass === MmlNode_js_1.TEXCLASS.VBOX) {
+                if (this.vboxAdjust(this.childNodes[0], bbox) || this.childNodes[0].childNodes.length > 1)
+                    return;
+                var child = this.childNodes[0].childNodes[0];
+                (child.node.isKind('mpadded') && this.vboxAdjust(child.childNodes[0], bbox)) || this.vboxAdjust(child, bbox);
             }
         };
-        return class_1;
+        CommonTeXAtomMixin.prototype.vboxAdjust = function (child, bbox) {
+            var n = child.lineBBox.length;
+            if (!n)
+                return false;
+            this.dh = bbox.d - child.lineBBox[n - 1].d;
+            bbox.h += this.dh;
+            bbox.d -= this.dh;
+            return true;
+        };
+        return CommonTeXAtomMixin;
     }(Base));
 }
 exports.CommonTeXAtomMixin = CommonTeXAtomMixin;

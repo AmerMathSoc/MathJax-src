@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -85,6 +85,14 @@ export class MmlMtable extends AbstractMmlNode {
   }
 
   /**
+   * Don't reset indent attributes
+   * @override
+   */
+  public get linebreakAlign() {
+    return '';
+  }
+
+  /**
    * @override
    */
   public setInheritedAttributes(attributes: AttributeList, display: boolean, level: number, prime: boolean) {
@@ -153,7 +161,7 @@ export class MmlMtable extends AbstractMmlNode {
           this.removeChild(child);
           i--;   // there is one fewer child now
         } else {
-          mtr = this.replaceChild(factory.create('mtr'), child) as MmlNode;
+          mtr = this.replaceChild(factory.create('mtr'), child);
         }
         mtr.appendChild(isMtd ? child : factory.create('mtd', {}, [child]));  // Move the child into the mtr
         if (!options['fixMtables']) {

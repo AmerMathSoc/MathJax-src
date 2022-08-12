@@ -26,61 +26,65 @@ var __values = (this && this.__values) || function(o) {
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHTMLTextNode = void 0;
-var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
+exports.ChtmlTextNode = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var TextNode_js_1 = require("../../common/Wrappers/TextNode.js");
-var CHTMLTextNode = (function (_super) {
-    __extends(CHTMLTextNode, _super);
-    function CHTMLTextNode() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CHTMLTextNode.prototype.toCHTML = function (parent) {
-        var e_1, _a;
-        this.markUsed();
-        var adaptor = this.adaptor;
-        var variant = this.parent.variant;
-        var text = this.node.getText();
-        if (text.length === 0)
-            return;
-        if (variant === '-explicitFont') {
-            adaptor.append(parent, this.jax.unknownText(text, variant, this.getBBox().w));
-        }
-        else {
-            var chars = this.remappedText(text, variant);
-            try {
-                for (var chars_1 = __values(chars), chars_1_1 = chars_1.next(); !chars_1_1.done; chars_1_1 = chars_1.next()) {
-                    var n = chars_1_1.value;
-                    var data = this.getVariantChar(variant, n)[3];
-                    var font = (data.f ? ' TEX-' + data.f : '');
-                    var node = (data.unknown ?
-                        this.jax.unknownText(String.fromCodePoint(n), variant) :
-                        this.html('mjx-c', { class: this.char(n) + font }));
-                    adaptor.append(parent, node);
-                    !data.unknown && this.font.charUsage.add([variant, n]);
-                }
+var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
+exports.ChtmlTextNode = (function () {
+    var _a;
+    var Base = (0, TextNode_js_1.CommonTextNodeMixin)(Wrapper_js_1.ChtmlWrapper);
+    return _a = (function (_super) {
+            __extends(ChtmlTextNode, _super);
+            function ChtmlTextNode() {
+                return _super !== null && _super.apply(this, arguments) || this;
             }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (chars_1_1 && !chars_1_1.done && (_a = chars_1.return)) _a.call(chars_1);
+            ChtmlTextNode.prototype.toCHTML = function (parents) {
+                var e_1, _a;
+                this.markUsed();
+                var adaptor = this.adaptor;
+                var variant = this.parent.variant;
+                var text = this.node.getText();
+                if (text.length === 0)
+                    return;
+                if (variant === '-explicitFont') {
+                    adaptor.append(parents[0], this.jax.unknownText(text, variant, this.getBBox().w));
                 }
-                finally { if (e_1) throw e_1.error; }
+                else {
+                    var chars = this.remappedText(text, variant);
+                    try {
+                        for (var chars_1 = __values(chars), chars_1_1 = chars_1.next(); !chars_1_1.done; chars_1_1 = chars_1.next()) {
+                            var n = chars_1_1.value;
+                            var data = this.getVariantChar(variant, n)[3];
+                            var font = (data.f ? ' TEX-' + data.f : '');
+                            var node = (data.unknown ?
+                                this.jax.unknownText(String.fromCodePoint(n), variant) :
+                                this.html('mjx-c', { class: this.char(n) + font }));
+                            adaptor.append(parents[0], node);
+                            !data.unknown && this.font.charUsage.add([variant, n]);
+                        }
+                    }
+                    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                    finally {
+                        try {
+                            if (chars_1_1 && !chars_1_1.done && (_a = chars_1.return)) _a.call(chars_1);
+                        }
+                        finally { if (e_1) throw e_1.error; }
+                    }
+                }
+            };
+            return ChtmlTextNode;
+        }(Base)),
+        _a.kind = MmlNode_js_1.TextNode.prototype.kind,
+        _a.autoStyle = false,
+        _a.styles = {
+            'mjx-c': {
+                display: 'inline-block'
+            },
+            'mjx-utext': {
+                display: 'inline-block',
+                padding: '.75em 0 .2em 0'
             }
-        }
-    };
-    CHTMLTextNode.kind = MmlNode_js_1.TextNode.prototype.kind;
-    CHTMLTextNode.autoStyle = false;
-    CHTMLTextNode.styles = {
-        'mjx-c': {
-            display: 'inline-block'
         },
-        'mjx-utext': {
-            display: 'inline-block',
-            padding: '.75em 0 .2em 0'
-        }
-    };
-    return CHTMLTextNode;
-}((0, TextNode_js_1.CommonTextNodeMixin)(Wrapper_js_1.CHTMLWrapper)));
-exports.CHTMLTextNode = CHTMLTextNode;
+        _a;
+})();
 //# sourceMappingURL=TextNode.js.map

@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -48,6 +48,13 @@ export class MmlMpadded extends AbstractMmlLayoutNode {
    */
   public get kind() {
     return 'mpadded';
+  }
+
+  /**
+   * @override
+   */
+  public get linebreakContainer() {
+    return true;
   }
 
 }

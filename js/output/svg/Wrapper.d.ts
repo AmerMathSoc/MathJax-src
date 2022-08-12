@@ -1,36 +1,33 @@
 import { OptionList } from '../../util/Options.js';
-import { CommonWrapper, AnyWrapperClass, Constructor } from '../common/Wrapper.js';
+import { CommonWrapper, CommonWrapperClass, CommonWrapperConstructor } from '../common/Wrapper.js';
+import { SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass } from './FontData.js';
 import { SVG } from '../svg.js';
-import { SVGWrapperFactory } from './WrapperFactory.js';
-import { SVGFontData, SVGDelimiterData, SVGCharOptions } from './FontData.js';
+import { SvgWrapperFactory } from './WrapperFactory.js';
 export { Constructor, StringMap } from '../common/Wrapper.js';
-export declare type SVGConstructor<N, T, D> = Constructor<SVGWrapper<N, T, D>>;
-export interface SVGWrapperClass extends AnyWrapperClass {
-    kind: string;
+export declare type SvgConstructor<N, T, D> = CommonWrapperConstructor<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass>;
+export interface SvgWrapperClass<N, T, D> extends CommonWrapperClass<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
 }
-export declare class SVGWrapper<N, T, D> extends CommonWrapper<SVG<N, T, D>, SVGWrapper<N, T, D>, SVGWrapperClass, SVGCharOptions, SVGDelimiterData, SVGFontData> {
+export declare class SvgWrapper<N, T, D> extends CommonWrapper<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
     static kind: string;
     static borderFuzz: number;
-    protected factory: SVGWrapperFactory<N, T, D>;
-    parent: SVGWrapper<N, T, D>;
-    childNodes: SVGWrapper<N, T, D>[];
-    element: N;
     dx: number;
-    font: SVGFontData;
-    toSVG(parent: N): void;
-    addChildren(parent: N): void;
-    protected standardSVGnode(parent: N): N;
-    protected createSVGnode(parent: N): N;
+    font: SvgFontData;
+    toSVG(parents: N[]): void;
+    toEmbellishedSVG(parents: N[]): boolean;
+    addChildren(parents: N[]): void;
+    protected standardSvgNodes(parents: N[]): N[];
+    protected createSvgNodes(parents: N[]): N[];
+    protected handleHref(parents: N[]): N[];
     protected handleStyles(): void;
     protected handleScale(): void;
     protected handleColor(): void;
     protected handleBorder(): void;
-    protected addBorderSolid(path: number[][], color: string, child: N): void;
-    protected addBorderBroken(path: number[][], color: string, style: string, t: number, i: number): void;
+    protected addBorderSolid(path: number[][], color: string, child: N, parent: N, dx: number): void;
+    protected addBorderBroken(path: number[][], color: string, style: string, t: number, i: number, parent: N, dx: number): void;
     protected handleAttributes(): void;
     place(x: number, y: number, element?: N): void;
     protected handleId(y: number): number;
-    firstChild(): N;
+    firstChild(dom?: N): N;
     placeChar(n: number, x: number, y: number, parent: N, variant?: string): number;
     protected charNode(variant: string, C: string, path: string): N;
     protected pathNode(C: string, path: string): N;

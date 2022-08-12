@@ -27,7 +27,11 @@ var __assign = (this && this.__assign) || function () {
 };
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -63,32 +67,32 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddCSS = exports.CHTMLFontData = void 0;
+exports.AddCSS = exports.ChtmlFontData = void 0;
 var FontData_js_1 = require("../common/FontData.js");
 var Usage_js_1 = require("./Usage.js");
 var lengths_js_1 = require("../../util/lengths.js");
 __exportStar(require("../common/FontData.js"), exports);
-var CHTMLFontData = (function (_super) {
-    __extends(CHTMLFontData, _super);
-    function CHTMLFontData() {
+var ChtmlFontData = (function (_super) {
+    __extends(ChtmlFontData, _super);
+    function ChtmlFontData() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.charUsage = new Usage_js_1.Usage();
         _this.delimUsage = new Usage_js_1.Usage();
         return _this;
     }
-    CHTMLFontData.charOptions = function (font, n) {
+    ChtmlFontData.charOptions = function (font, n) {
         return _super.charOptions.call(this, font, n);
     };
-    CHTMLFontData.prototype.adaptiveCSS = function (adapt) {
+    ChtmlFontData.prototype.adaptiveCSS = function (adapt) {
         this.options.adaptiveCSS = adapt;
     };
-    CHTMLFontData.prototype.clearCache = function () {
+    ChtmlFontData.prototype.clearCache = function () {
         if (this.options.adaptiveCSS) {
             this.charUsage.clear();
             this.delimUsage.clear();
         }
     };
-    CHTMLFontData.prototype.createVariant = function (name, inherit, link) {
+    ChtmlFontData.prototype.createVariant = function (name, inherit, link) {
         if (inherit === void 0) { inherit = null; }
         if (link === void 0) { link = null; }
         _super.prototype.createVariant.call(this, name, inherit, link);
@@ -96,14 +100,14 @@ var CHTMLFontData = (function (_super) {
         this.variant[name].classes = CLASS.defaultVariantClasses[name];
         this.variant[name].letter = CLASS.defaultVariantLetters[name];
     };
-    CHTMLFontData.prototype.defineChars = function (name, chars) {
+    ChtmlFontData.prototype.defineChars = function (name, chars) {
         var e_1, _a;
         _super.prototype.defineChars.call(this, name, chars);
         var letter = this.variant[name].letter;
         try {
             for (var _b = __values(Object.keys(chars)), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var n = _c.value;
-                var options = CHTMLFontData.charOptions(chars, parseInt(n));
+                var options = ChtmlFontData.charOptions(chars, parseInt(n));
                 if (options.f === undefined) {
                     options.f = letter;
                 }
@@ -117,7 +121,7 @@ var CHTMLFontData = (function (_super) {
             finally { if (e_1) throw e_1.error; }
         }
     };
-    Object.defineProperty(CHTMLFontData.prototype, "styles", {
+    Object.defineProperty(ChtmlFontData.prototype, "styles", {
         get: function () {
             var CLASS = this.constructor;
             var styles = __assign({}, CLASS.defaultStyles);
@@ -133,7 +137,7 @@ var CHTMLFontData = (function (_super) {
         enumerable: false,
         configurable: true
     });
-    CHTMLFontData.prototype.updateStyles = function (styles) {
+    ChtmlFontData.prototype.updateStyles = function (styles) {
         var e_2, _a, e_3, _b;
         try {
             for (var _c = __values(this.delimUsage.update()), _d = _c.next(); !_d.done; _d = _c.next()) {
@@ -164,7 +168,7 @@ var CHTMLFontData = (function (_super) {
         }
         return styles;
     };
-    CHTMLFontData.prototype.allStyles = function (styles) {
+    ChtmlFontData.prototype.allStyles = function (styles) {
         var e_4, _a, e_5, _b, e_6, _c;
         try {
             for (var _d = __values(Object.keys(this.delimiters)), _e = _d.next(); !_e.done; _e = _d.next()) {
@@ -215,7 +219,7 @@ var CHTMLFontData = (function (_super) {
             finally { if (e_5) throw e_5.error; }
         }
     };
-    CHTMLFontData.prototype.addFontURLs = function (styles, fonts, url) {
+    ChtmlFontData.prototype.addFontURLs = function (styles, fonts, url) {
         var e_7, _a;
         try {
             for (var _b = __values(Object.keys(fonts)), _c = _b.next(); !_c.done; _c = _b.next()) {
@@ -233,7 +237,7 @@ var CHTMLFontData = (function (_super) {
             finally { if (e_7) throw e_7.error; }
         }
     };
-    CHTMLFontData.prototype.addDelimiterStyles = function (styles, n, data) {
+    ChtmlFontData.prototype.addDelimiterStyles = function (styles, n, data) {
         var c = this.charSelector(n);
         if (data.c && data.c !== n) {
             c = this.charSelector(data.c);
@@ -250,7 +254,7 @@ var CHTMLFontData = (function (_super) {
             this.addDelimiterHStyles(styles, c, data);
         }
     };
-    CHTMLFontData.prototype.addDelimiterVStyles = function (styles, c, data) {
+    ChtmlFontData.prototype.addDelimiterVStyles = function (styles, c, data) {
         var HDW = data.HDW;
         var _a = __read(data.stretch, 4), beg = _a[0], ext = _a[1], end = _a[2], mid = _a[3];
         var Hb = this.addDelimiterVPart(styles, c, 'beg', beg, HDW);
@@ -276,7 +280,7 @@ var CHTMLFontData = (function (_super) {
             styles['mjx-stretchy-v' + c + ' > mjx-ext'] = css;
         }
     };
-    CHTMLFontData.prototype.addDelimiterVPart = function (styles, c, part, n, HDW) {
+    ChtmlFontData.prototype.addDelimiterVPart = function (styles, c, part, n, HDW) {
         if (!n)
             return 0;
         var data = this.getDelimiterData(n);
@@ -294,7 +298,7 @@ var CHTMLFontData = (function (_super) {
         styles['mjx-stretchy-v' + c + ' mjx-' + part + ' mjx-c::before'] = css;
         return data[0] + data[1];
     };
-    CHTMLFontData.prototype.addDelimiterHStyles = function (styles, c, data) {
+    ChtmlFontData.prototype.addDelimiterHStyles = function (styles, c, data) {
         var _a = __read(data.stretch, 4), beg = _a[0], ext = _a[1], end = _a[2], mid = _a[3];
         var HDW = data.HDW;
         this.addDelimiterHPart(styles, c, 'beg', beg, HDW);
@@ -305,7 +309,7 @@ var CHTMLFontData = (function (_super) {
             styles['mjx-stretchy-h' + c + ' > mjx-ext'] = { width: '50%' };
         }
     };
-    CHTMLFontData.prototype.addDelimiterHPart = function (styles, c, part, n, HDW) {
+    ChtmlFontData.prototype.addDelimiterHPart = function (styles, c, part, n, HDW) {
         if (!n)
             return;
         var data = this.getDelimiterData(n);
@@ -314,7 +318,7 @@ var CHTMLFontData = (function (_super) {
         css.padding = this.padding(HDW, 0, -HDW[2]);
         styles['mjx-stretchy-h' + c + ' mjx-' + part + ' mjx-c::before'] = css;
     };
-    CHTMLFontData.prototype.addCharStyles = function (styles, vletter, n, data) {
+    ChtmlFontData.prototype.addCharStyles = function (styles, vletter, n, data) {
         var options = data[3];
         var letter = (options.f !== undefined ? options.f : vletter);
         var selector = 'mjx-c' + this.charSelector(n) + (letter ? '.TEX-' + letter : '');
@@ -323,47 +327,47 @@ var CHTMLFontData = (function (_super) {
             content: (options.c != null ? '"' + options.c + '"' : this.charContent(n))
         };
     };
-    CHTMLFontData.prototype.getDelimiterData = function (n) {
+    ChtmlFontData.prototype.getDelimiterData = function (n) {
         return this.getChar('-smallop', n);
     };
-    CHTMLFontData.prototype.em = function (n) {
+    ChtmlFontData.prototype.em = function (n) {
         return (0, lengths_js_1.em)(n);
     };
-    CHTMLFontData.prototype.em0 = function (n) {
+    ChtmlFontData.prototype.em0 = function (n) {
         return (0, lengths_js_1.em)(Math.max(0, n));
     };
-    CHTMLFontData.prototype.padding = function (_a, dw, ic) {
+    ChtmlFontData.prototype.padding = function (_a, dw, ic) {
         var _b = __read(_a, 3), h = _b[0], d = _b[1], w = _b[2];
         if (dw === void 0) { dw = 0; }
         if (ic === void 0) { ic = 0; }
         return [h, w + ic, d, dw].map(this.em0).join(' ');
     };
-    CHTMLFontData.prototype.charContent = function (n) {
+    ChtmlFontData.prototype.charContent = function (n) {
         return '"' + (n >= 0x20 && n <= 0x7E && n !== 0x22 && n !== 0x27 && n !== 0x5C ?
             String.fromCharCode(n) : '\\' + n.toString(16).toUpperCase()) + '"';
     };
-    CHTMLFontData.prototype.charSelector = function (n) {
+    ChtmlFontData.prototype.charSelector = function (n) {
         return '.mjx-c' + n.toString(16).toUpperCase();
     };
-    CHTMLFontData.OPTIONS = __assign(__assign({}, FontData_js_1.FontData.OPTIONS), { fontURL: 'js/output/chtml/fonts/tex-woff-v2' });
-    CHTMLFontData.JAX = 'CHTML';
-    CHTMLFontData.defaultVariantClasses = {};
-    CHTMLFontData.defaultVariantLetters = {};
-    CHTMLFontData.defaultStyles = {
+    ChtmlFontData.OPTIONS = __assign(__assign({}, FontData_js_1.FontData.OPTIONS), { fontURL: 'js/output/chtml/fonts/tex-woff-v2' });
+    ChtmlFontData.JAX = 'CHTML';
+    ChtmlFontData.defaultVariantClasses = {};
+    ChtmlFontData.defaultVariantLetters = {};
+    ChtmlFontData.defaultStyles = {
         'mjx-c::before': {
             display: 'block',
             width: 0
         }
     };
-    CHTMLFontData.defaultFonts = {
+    ChtmlFontData.defaultFonts = {
         '@font-face /* 0 */': {
             'font-family': 'MJXZERO',
             src: 'url("%%URL%%/MathJax_Zero.woff") format("woff")'
         }
     };
-    return CHTMLFontData;
+    return ChtmlFontData;
 }(FontData_js_1.FontData));
-exports.CHTMLFontData = CHTMLFontData;
+exports.ChtmlFontData = ChtmlFontData;
 function AddCSS(font, options) {
     var e_8, _a;
     try {

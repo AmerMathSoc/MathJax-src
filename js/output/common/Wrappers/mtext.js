@@ -14,16 +14,54 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMtextMixin = void 0;
+var LineBBox_js_1 = require("../LineBBox.js");
 function CommonMtextMixin(Base) {
     var _a;
     return _a = (function (_super) {
-            __extends(class_1, _super);
-            function class_1() {
-                return _super !== null && _super.apply(this, arguments) || this;
+            __extends(CommonMtextMixin, _super);
+            function CommonMtextMixin() {
+                var _this = _super !== null && _super.apply(this, arguments) || this;
+                _this.breakPoints = [];
+                return _this;
             }
-            class_1.prototype.getVariant = function () {
+            CommonMtextMixin.prototype.textWidth = function (text) {
+                var textNode = this.textNode;
+                if (!textNode) {
+                    var text_1 = this.node.factory.create('text');
+                    text_1.parent = this.node;
+                    textNode = this.textNode = this.factory.wrap(text_1);
+                    textNode.parent = this;
+                }
+                textNode.node.setText(text);
+                textNode.invalidateBBox(false);
+                return textNode.getBBox().w;
+            };
+            Object.defineProperty(CommonMtextMixin.prototype, "breakCount", {
+                get: function () {
+                    return this.breakPoints.length;
+                },
+                enumerable: false,
+                configurable: true
+            });
+            CommonMtextMixin.prototype.getVariant = function () {
                 var options = this.jax.options;
                 var data = this.jax.math.outputData;
                 var merror = ((!!data.merrorFamily || !!options.merrorFont) && this.node.Parent.isKind('merror'));
@@ -37,7 +75,46 @@ function CommonMtextMixin(Base) {
                 }
                 _super.prototype.getVariant.call(this);
             };
-            return class_1;
+            CommonMtextMixin.prototype.setBreakAt = function (ij) {
+                this.breakPoints.push(ij);
+            };
+            CommonMtextMixin.prototype.clearBreakPoints = function () {
+                this.breakPoints = [];
+            };
+            CommonMtextMixin.prototype.computeLineBBox = function (i) {
+                var bbox = LineBBox_js_1.LineBBox.from(this.getOuterBBox(), this.linebreakOptions.lineleading);
+                if (!this.breakCount)
+                    return bbox;
+                bbox.w = this.getBreakWidth(i);
+                if (i === 0) {
+                    bbox.R = 0;
+                    this.addLeftBorders(bbox);
+                }
+                else {
+                    bbox.L = 0;
+                    bbox.indentData = [['left', '0'], ['left', '0'], ['left', '0']];
+                    i === this.breakCount && this.addRightBorders(bbox);
+                }
+                return bbox;
+            };
+            CommonMtextMixin.prototype.getBreakWidth = function (i) {
+                var childNodes = this.childNodes;
+                var _a = __read(this.breakPoints[i - 1] || [0, 0], 2), si = _a[0], sj = _a[1];
+                var _b = __read(this.breakPoints[i] || [childNodes.length, 0], 2), ei = _b[0], ej = _b[1];
+                var words = childNodes[si].node.getText().split(/ /);
+                if (si === ei)
+                    return this.textWidth(words.slice(sj, ej).join(' '));
+                var w = this.textWidth(words.slice(sj).join(' '));
+                while (++si < ei && si < childNodes.length) {
+                    w += childNodes[si].getBBox().w;
+                }
+                if (si < childNodes.length) {
+                    words = childNodes[si].node.getText().split(/ /);
+                    w += this.textWidth(words.slice(0, ej).join(' '));
+                }
+                return w;
+            };
+            return CommonMtextMixin;
         }(Base)),
         _a.INHERITFONTS = {
             normal: ['', false, false],

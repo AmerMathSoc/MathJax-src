@@ -26,7 +26,7 @@ export interface DOMAdaptor<N, T, D> {
     insert(nchild: N | T, ochild: N | T): void;
     remove(child: N | T): N | T;
     replace(nnode: N | T, onode: N | T): N | T;
-    clone(node: N): N;
+    clone(node: N, deep?: boolean): N;
     split(node: T, n: number): T;
     next(node: N | T): N | T;
     previous(node: N | T): N | T;
@@ -79,7 +79,7 @@ export declare abstract class AbstractDOMAdaptor<N, T, D> implements DOMAdaptor<
     abstract insert(nchild: N | T, ochild: N | T): void;
     abstract remove(child: N | T): N | T;
     replace(nnode: N | T, onode: N | T): N | T;
-    abstract clone(node: N): N;
+    abstract clone(node: N, deep: boolean): N;
     abstract split(node: T, n: number): T;
     abstract next(node: N | T): N | T;
     abstract previous(node: N | T): N | T;

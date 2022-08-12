@@ -1,12 +1,15 @@
-import { SVGWrapper, SVGConstructor } from '../Wrapper.js';
+import { SVG } from '../../svg.js';
+import { SvgWrapper, SvgWrapperClass } from '../Wrapper.js';
+import { SvgWrapperFactory } from '../WrapperFactory.js';
+import { SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass } from '../FontData.js';
+import { CommonMaction, CommonMactionClass } from '../../common/Wrappers/maction.js';
 import { EventHandler } from '../../common/Wrappers/maction.js';
-import { StyleList } from '../../../util/StyleList.js';
-declare const SVGmaction_base: import("../../common/Wrappers/maction.js").MactionConstructor<SVGWrapper<any, any, any>> & SVGConstructor<any, any, any>;
-export declare class SVGmaction<N, T, D> extends SVGmaction_base {
-    static kind: string;
-    static styles: StyleList;
-    static actions: Map<string, [import("../../common/Wrappers/maction.js").ActionHandler<SVGmaction<any, any, any>>, import("../../common/Wrappers/maction.js").ActionData]>;
-    toSVG(parent: N): void;
-    setEventHandler(type: string, handler: EventHandler): void;
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+export interface SvgMactionNTD<N, T, D> extends SvgWrapper<N, T, D>, CommonMaction<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
+    setEventHandler(type: string, handler: EventHandler, dom?: N): void;
+    Px(m: number): string;
 }
-export {};
+export interface SvgMactionClass<N, T, D> extends SvgWrapperClass<N, T, D>, CommonMactionClass<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
+    new (factory: SvgWrapperFactory<N, T, D>, node: MmlNode, parent?: SvgWrapper<N, T, D>): SvgMactionNTD<N, T, D>;
+}
+export declare const SvgMaction: SvgMactionClass<any, any, any>;

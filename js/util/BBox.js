@@ -68,16 +68,14 @@ var BBox = (function () {
             this.pwidth = cbox.pwidth;
         }
     };
+    BBox.prototype.copy = function () {
+        var bbox = new BBox();
+        Object.assign(bbox, this);
+        return bbox;
+    };
     BBox.fullWidth = '100%';
-    BBox.StyleAdjust = [
-        ['borderTopWidth', 'h'],
-        ['borderRightWidth', 'w'],
-        ['borderBottomWidth', 'd'],
-        ['borderLeftWidth', 'w', 0],
-        ['paddingTop', 'h'],
-        ['paddingRight', 'w'],
-        ['paddingBottom', 'd'],
-        ['paddingLeft', 'w', 0]
+    BBox.boxSides = [
+        ['Top', 0, 'h'], ['Right', 1, 'w'], ['Bottom', 2, 'd'], ['Left', 3, 'w']
     ];
     return BBox;
 }());

@@ -1,13 +1,12 @@
-import { SVGConstructor } from '../Wrapper.js';
-import { StyleList } from '../../../util/StyleList.js';
-declare const SVGmath_base: import("../../common/Wrappers/math.js").MathConstructor & SVGConstructor<any, any, any>;
-export declare class SVGmath<N, T, D> extends SVGmath_base {
-    static kind: string;
-    static styles: StyleList;
-    toSVG(parent: N): void;
-    protected handleDisplay(): void;
-    protected handleSpeech(): void;
-    protected getTitleID(): string;
-    setChildPWidths(recompute: boolean, w?: number, _clear?: boolean): boolean;
+import { SVG } from '../../svg.js';
+import { SvgWrapper, SvgWrapperClass } from '../Wrapper.js';
+import { SvgWrapperFactory } from '../WrapperFactory.js';
+import { SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass } from '../FontData.js';
+import { CommonMath, CommonMathClass } from '../../common/Wrappers/math.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+export interface SvgMathNTD<N, T, D> extends SvgWrapper<N, T, D>, CommonMath<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
 }
-export {};
+export interface SvgMathClass<N, T, D> extends SvgWrapperClass<N, T, D>, CommonMathClass<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
+    new (factory: SvgWrapperFactory<N, T, D>, node: MmlNode, parent?: SvgWrapper<N, T, D>): SvgMathNTD<N, T, D>;
+}
+export declare const SvgMath: SvgMathClass<any, any, any>;

@@ -43,10 +43,12 @@ var StackItemFactory_js_1 = __importDefault(require("./StackItemFactory.js"));
 var NodeFactory_js_1 = require("./NodeFactory.js");
 var NodeUtil_js_1 = __importDefault(require("./NodeUtil.js"));
 var Options_js_1 = require("../../util/Options.js");
+var ColumnParser_js_1 = require("./ColumnParser.js");
 var ParseOptions = (function () {
     function ParseOptions(configuration, options) {
         if (options === void 0) { options = []; }
         this.options = {};
+        this.columnParser = new ColumnParser_js_1.ColumnParser();
         this.packageData = new Map();
         this.parsers = [];
         this.root = null;

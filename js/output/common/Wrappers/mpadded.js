@@ -34,13 +34,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMpaddedMixin = void 0;
 function CommonMpaddedMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
+        __extends(CommonMpaddedMixin, _super);
+        function CommonMpaddedMixin() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        class_1.prototype.getDimens = function () {
+        CommonMpaddedMixin.prototype.getDimens = function () {
             var values = this.node.attributes.getList('width', 'height', 'depth', 'lspace', 'voffset');
-            var bbox = this.childNodes[0].getBBox();
+            var bbox = this.childNodes[0].getOuterBBox();
             var w = bbox.w, h = bbox.h, d = bbox.d;
             var W = w, H = h, D = d, x = 0, y = 0, dx = 0;
             if (values.width !== '')
@@ -59,7 +59,7 @@ function CommonMpaddedMixin(Base) {
             }
             return [H, D, W, h - H, d - D, w - W, x, y, dx];
         };
-        class_1.prototype.dimen = function (length, bbox, d, m) {
+        CommonMpaddedMixin.prototype.dimen = function (length, bbox, d, m) {
             if (d === void 0) { d = ''; }
             if (m === void 0) { m = null; }
             length = String(length);
@@ -75,21 +75,33 @@ function CommonMpaddedMixin(Base) {
             }
             return dimen;
         };
-        class_1.prototype.computeBBox = function (bbox, recompute) {
-            if (recompute === void 0) { recompute = false; }
+        CommonMpaddedMixin.prototype.setBBoxDimens = function (bbox) {
             var _a = __read(this.getDimens(), 6), H = _a[0], D = _a[1], W = _a[2], dh = _a[3], dd = _a[4], dw = _a[5];
             bbox.w = W + dw;
             bbox.h = H + dh;
             bbox.d = D + dd;
+        };
+        CommonMpaddedMixin.prototype.computeBBox = function (bbox, recompute) {
+            if (recompute === void 0) { recompute = false; }
+            this.setBBoxDimens(bbox);
+            var w = this.childNodes[0].getOuterBBox().w;
+            if (w > bbox.w) {
+                var overflow = this.node.attributes.get('data-overflow');
+                if (overflow === 'linebreak' ||
+                    (overflow === 'auto' && this.jax.math.root.attributes.get('overflow') === 'linebreak')) {
+                    this.childNodes[0].breakToWidth(bbox.w);
+                    this.setBBoxDimens(bbox);
+                }
+            }
             this.setChildPWidths(recompute, bbox.w);
         };
-        class_1.prototype.getWrapWidth = function (_i) {
+        CommonMpaddedMixin.prototype.getWrapWidth = function (_i) {
             return this.getBBox().w;
         };
-        class_1.prototype.getChildAlign = function (_i) {
+        CommonMpaddedMixin.prototype.getChildAlign = function (_i) {
             return this.node.attributes.get('data-align') || 'left';
         };
-        return class_1;
+        return CommonMpaddedMixin;
     }(Base));
 }
 exports.CommonMpaddedMixin = CommonMpaddedMixin;

@@ -31,7 +31,7 @@ exports.SafeMethods = void 0;
 var lengths_js_1 = require("../../util/lengths.js");
 exports.SafeMethods = {
     filterURL: function (safe, url) {
-        var protocol = (url.match(/^\s*([a-z]+):/i) || [null, ''])[1].toLowerCase();
+        var protocol = (url.match(/^\s*([a-z\n\r]+):/i) || [null, ''])[1].replace(/[\n\r]/g, '').toLowerCase();
         var allow = safe.allow.URLs;
         return (allow === 'all' || (allow === 'safe' &&
             (safe.options.safeProtocols[protocol] || !protocol))) ? url : null;

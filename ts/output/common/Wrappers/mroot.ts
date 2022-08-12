@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,39 +21,107 @@
  * @author dpvc@mathjax.org (Davide Cervone)
  */
 
-import {Constructor} from '../../common/Wrapper.js';
-import {CommonMsqrt, MsqrtConstructor} from './msqrt.js';
-import {CommonMo} from './mo.js';
+import {CommonWrapper, CommonWrapperClass, Constructor} from '../Wrapper.js';
+import {CommonWrapperFactory} from '../WrapperFactory.js';
+import {CharOptions, VariantData, DelimiterData, FontData, FontDataClass} from '../FontData.js';
+import {CommonOutputJax} from '../../common.js';
+import {CommonMsqrt, CommonMsqrtClass} from './msqrt.js';
 import {BBox} from '../../../util/BBox.js';
 
 /*****************************************************************/
 /**
  * The CommonMroot interface
+ *
+ * @template N   The DOM node type
+ * @template T   The DOM text node type
+ * @template D   The DOM document type
+ * @template JX  The OutputJax type
+ * @template WW  The Wrapper type
+ * @template WF  The WrapperFactory type
+ * @template WC  The WrapperClass type
+ * @template CC  The CharOptions type
+ * @template VV  The VariantData type
+ * @template DD  The DelimiterData type
+ * @template FD  The FontData type
+ * @template FC  The FontDataClass type
  */
-export interface CommonMroot extends CommonMsqrt {
-}
+export interface CommonMroot<
+  N, T, D,
+  JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  CC extends CharOptions,
+  VV extends VariantData<CC>,
+  DD extends DelimiterData,
+  FD extends FontData<CC, VV, DD>,
+  FC extends FontDataClass<CC, VV, DD>
+> extends CommonMsqrt<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {}
 
 /**
- * Shorthand for the CommonMroot constructor
+ * The CommonMrootClass interface
+ *
+ * @template N   The DOM node type
+ * @template T   The DOM text node type
+ * @template D   The DOM document type
+ * @template JX  The OutputJax type
+ * @template WW  The Wrapper type
+ * @template WF  The WrapperFactory type
+ * @template WC  The WrapperClass type
+ * @template CC  The CharOptions type
+ * @template VV  The VariantData type
+ * @template DD  The DelimiterData type
+ * @template FD  The FontData type
+ * @template FC  The FontDataClass type
  */
-export type MrootConstructor = Constructor<CommonMroot>;
+export interface CommonMrootClass<
+  N, T, D,
+  JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  CC extends CharOptions,
+  VV extends VariantData<CC>,
+  DD extends DelimiterData,
+  FD extends FontData<CC, VV, DD>,
+  FC extends FontDataClass<CC, VV, DD>
+> extends CommonMsqrtClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {}
 
 /*****************************************************************/
 /**
  * The CommonMroot wrapper mixin for the MmlMroot object (extends CommonMsqrt)
  *
- * @template T  The Wrapper class constructor type
+ * @template N   The DOM node type
+ * @template T   The DOM text node type
+ * @template D   The DOM document type
+ * @template JX  The OutputJax type
+ * @template WW  The Wrapper type
+ * @template WF  The WrapperFactory type
+ * @template WC  The WrapperClass type
+ * @template CC  The CharOptions type
+ * @template VV  The VariantData type
+ * @template DD  The DelimiterData type
+ * @template FD  The FontData type
+ * @template FC  The FontDataClass type
+ *
+ * @template B   The mixin interface to create
  */
-export function CommonMrootMixin<T extends MsqrtConstructor>(Base: T): MrootConstructor & T {
+export function CommonMrootMixin<
+  N, T, D,
+  JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>,
+  CC extends CharOptions,
+  VV extends VariantData<CC>,
+  DD extends DelimiterData,
+  FD extends FontData<CC, VV, DD>,
+  FC extends FontDataClass<CC, VV, DD>,
+  B extends CommonMsqrtClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>
+>(Base: Constructor<CommonMsqrt<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>>): B {
 
-  return class extends Base {
-
-    /**
-     * @override
-     */
-    get surd() {
-      return 2;
-    }
+  return class CommonMrootMixin extends Base
+  implements CommonMroot<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
 
     /**
      * @override
@@ -75,7 +143,7 @@ export function CommonMrootMixin<T extends MsqrtConstructor>(Base: T): MrootCons
      * @override
      */
     public getRootDimens(sbox: BBox, H: number) {
-      const surd = this.childNodes[this.surd] as CommonMo;
+      const surd = this.surd;
       const bbox = this.childNodes[this.root].getOuterBBox();
       const offset = (surd.size < 0 ? .5 : .6) * sbox.w;
       const {w, rscale} = bbox;
@@ -87,11 +155,7 @@ export function CommonMrootMixin<T extends MsqrtConstructor>(Base: T): MrootCons
     }
 
     /**
-     * @param {BBox} rbox      The bbox of the root
-     * @param {BBox} sbox      The bbox of the surd
-     * @param {number} size    The size of the surd
-     * @param {number} H       The height of the root as a whole
-     * @return {number}        The height of the root within the surd
+     * @override
      */
     public rootHeight(rbox: BBox, sbox: BBox, size: number, H: number): number {
       const h = sbox.h + sbox.d;
@@ -99,6 +163,14 @@ export function CommonMrootMixin<T extends MsqrtConstructor>(Base: T): MrootCons
       return b + Math.max(0, rbox.d * rbox.rscale);
     }
 
-  };
+    /**
+     * @override
+     */
+    public rootWidth() {
+      const bbox = this.childNodes[this.root].getOuterBBox();
+      return .4 + bbox.w * bbox.rscale;
+    }
+
+  } as any as B;
 
 }

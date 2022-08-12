@@ -30,15 +30,6 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMactionMixin = exports.TooltipData = void 0;
 var string_js_1 = require("../../../util/string.js");
@@ -62,13 +53,10 @@ exports.TooltipData = {
 };
 function CommonMactionMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
-            }
-            var _this = _super.apply(this, __spreadArray([], __read(args), false)) || this;
+        __extends(CommonMactionMixin, _super);
+        function CommonMactionMixin(factory, node, parent) {
+            if (parent === void 0) { parent = null; }
+            var _this = _super.call(this, factory, node, parent) || this;
             var actions = _this.constructor.actions;
             var action = _this.node.attributes.get('actiontype');
             var _a = __read(actions.get(action) || [(function (_node, _data) { }), {}], 2), handler = _a[0], data = _a[1];
@@ -77,7 +65,7 @@ function CommonMactionMixin(Base) {
             _this.getParameters();
             return _this;
         }
-        Object.defineProperty(class_1.prototype, "selected", {
+        Object.defineProperty(CommonMactionMixin.prototype, "selected", {
             get: function () {
                 var selection = this.node.attributes.get('selection');
                 var i = Math.max(1, Math.min(this.childNodes.length, selection)) - 1;
@@ -86,18 +74,28 @@ function CommonMactionMixin(Base) {
             enumerable: false,
             configurable: true
         });
-        class_1.prototype.getParameters = function () {
+        CommonMactionMixin.prototype.getParameters = function () {
             var offsets = this.node.attributes.get('data-offsets');
             var _a = __read((0, string_js_1.split)(offsets || ''), 2), dx = _a[0], dy = _a[1];
-            this.dx = this.length2em(dx || exports.TooltipData.dx);
-            this.dy = this.length2em(dy || exports.TooltipData.dy);
+            this.tipDx = this.length2em(dx || exports.TooltipData.dx);
+            this.tipDy = this.length2em(dy || exports.TooltipData.dy);
         };
-        class_1.prototype.computeBBox = function (bbox, recompute) {
+        CommonMactionMixin.prototype.computeBBox = function (bbox, recompute) {
             if (recompute === void 0) { recompute = false; }
             bbox.updateFrom(this.selected.getOuterBBox());
             this.selected.setChildPWidths(recompute);
         };
-        return class_1;
+        Object.defineProperty(CommonMactionMixin.prototype, "breakCount", {
+            get: function () {
+                return (this.node.isEmbellished ? this.selected.coreMO().embellishedBreakCount : this.selected.breakCount);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        CommonMactionMixin.prototype.computeLineBBox = function (i) {
+            return this.getChildLineBBox(this.selected, i);
+        };
+        return CommonMactionMixin;
     }(Base));
 }
 exports.CommonMactionMixin = CommonMactionMixin;

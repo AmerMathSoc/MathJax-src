@@ -114,8 +114,9 @@ var TeX = (function (_super) {
         var node;
         this.parseOptions.tags.startEquation(math);
         var globalEnv;
+        var parser;
         try {
-            var parser = new TexParser_js_1.default(this.latex, { display: display, isInner: false }, this.parseOptions);
+            parser = new TexParser_js_1.default(this.latex, { display: display, isInner: false }, this.parseOptions);
             node = parser.mml();
             globalEnv = parser.stack.global;
         }
@@ -136,6 +137,10 @@ var TeX = (function (_super) {
         this.parseOptions.tags.finishEquation(math);
         this.parseOptions.root = node;
         this.executeFilters(this.postFilters, math, document, this.parseOptions);
+        if (parser && parser.stack.env.hsize) {
+            NodeUtil_js_1.default.setAttribute(node, 'maxwidth', parser.stack.env.hsize);
+            NodeUtil_js_1.default.setAttribute(node, 'overflow', 'linebreak');
+        }
         this.mathNode = this.parseOptions.root;
         return this.mathNode;
     };

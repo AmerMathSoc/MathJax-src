@@ -3,35 +3,35 @@ export declare type Property = string | number | boolean;
 export declare type PropertyList = {
     [key: string]: Property;
 };
-export interface Node {
+export interface Node<N extends Node<N, C>, C extends NodeClass<N, C>> {
     readonly kind: string;
-    readonly factory: NodeFactory<Node, NodeClass>;
-    parent: Node;
-    childNodes: Node[];
+    readonly factory: NodeFactory<N, C>;
+    parent: N;
+    childNodes: N[];
     setProperty(name: string, value: Property): void;
     getProperty(name: string): Property;
     getPropertyNames(): string[];
     getAllProperties(): PropertyList;
     removeProperty(...names: string[]): void;
     isKind(kind: string): boolean;
-    setChildren(children: Node[]): void;
-    appendChild(child: Node): Node;
-    replaceChild(newChild: Node, oldChild: Node): Node;
-    removeChild(child: Node): Node;
-    childIndex(child: Node): number;
-    copy(): Node;
-    findNodes(kind: string): Node[];
-    walkTree(func: (node: Node, data?: any) => void, data?: any): void;
+    setChildren(children: N[]): void;
+    appendChild(child: N): N;
+    replaceChild(newChild: N, oldChild: N): N;
+    removeChild(child: N): N;
+    childIndex(child: N): number;
+    copy(): N;
+    findNodes(kind: string): N[];
+    walkTree(func: (node: N, data?: any) => void, data?: any): void;
 }
-export interface NodeClass {
-    new (factory: NodeFactory<Node, NodeClass>, properties?: PropertyList, children?: Node[]): Node;
+export interface NodeClass<N extends Node<N, C>, C extends NodeClass<N, C>> {
+    new (factory: NodeFactory<N, C>, properties?: PropertyList, children?: N[]): N;
 }
-export declare abstract class AbstractNode implements Node {
-    readonly factory: NodeFactory<Node, NodeClass>;
-    parent: Node;
+export declare abstract class AbstractNode<N extends Node<N, C>, C extends NodeClass<N, C>> implements Node<N, C> {
+    readonly factory: NodeFactory<N, C>;
+    parent: N;
     protected properties: PropertyList;
-    childNodes: Node[];
-    constructor(factory: NodeFactory<Node, NodeClass>, properties?: PropertyList, children?: Node[]);
+    childNodes: N[];
+    constructor(factory: NodeFactory<N, C>, properties?: PropertyList, children?: N[]);
     get kind(): string;
     setProperty(name: string, value: Property): void;
     getProperty(name: string): Property;
@@ -39,21 +39,21 @@ export declare abstract class AbstractNode implements Node {
     getAllProperties(): PropertyList;
     removeProperty(...names: string[]): void;
     isKind(kind: string): boolean;
-    setChildren(children: Node[]): void;
-    appendChild(child: Node): Node;
-    replaceChild(newChild: Node, oldChild: Node): Node;
-    removeChild(child: Node): Node;
-    childIndex(node: Node): number;
-    copy(): AbstractNode;
-    findNodes(kind: string): Node[];
-    walkTree(func: (node: Node, data?: any) => void, data?: any): any;
+    setChildren(children: N[]): void;
+    appendChild(child: N): N;
+    replaceChild(newChild: N, oldChild: N): N;
+    removeChild(child: N): N;
+    childIndex(node: N): number;
+    copy(): N;
+    findNodes(kind: string): N[];
+    walkTree(func: (node: N, data?: any) => void, data?: any): any;
     toString(): string;
 }
-export declare abstract class AbstractEmptyNode extends AbstractNode {
-    setChildren(_children: Node[]): void;
-    appendChild(child: Node): Node;
-    replaceChild(_newChild: Node, oldChild: Node): Node;
-    childIndex(_node: Node): number;
-    walkTree(func: (node: Node, data?: any) => void, data?: any): any;
+export declare abstract class AbstractEmptyNode<N extends Node<N, C>, C extends NodeClass<N, C>> extends AbstractNode<N, C> {
+    setChildren(_children: N[]): void;
+    appendChild(child: N): N;
+    replaceChild(_newChild: N, oldChild: N): N;
+    childIndex(_node: N): number;
+    walkTree(func: (node: N, data?: any) => void, data?: any): any;
     toString(): string;
 }

@@ -45,11 +45,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonTextNodeMixin = void 0;
 function CommonTextNodeMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
+        __extends(CommonTextNodeMixin, _super);
+        function CommonTextNodeMixin() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        class_1.prototype.computeBBox = function (bbox, _recompute) {
+        CommonTextNodeMixin.prototype.remappedText = function (text, variant) {
+            var c = this.parent.stretch.c;
+            return (c ? [c] : this.parent.remapChars(this.unicodeChars(text, variant)));
+        };
+        CommonTextNodeMixin.prototype.computeBBox = function (bbox, _recompute) {
             var e_1, _a;
             if (_recompute === void 0) { _recompute = false; }
             var variant = this.parent.variant;
@@ -97,15 +101,11 @@ function CommonTextNodeMixin(Base) {
                 bbox.clean();
             }
         };
-        class_1.prototype.remappedText = function (text, variant) {
-            var c = this.parent.stretch.c;
-            return (c ? [c] : this.parent.remapChars(this.unicodeChars(text, variant)));
-        };
-        class_1.prototype.getStyles = function () { };
-        class_1.prototype.getVariant = function () { };
-        class_1.prototype.getScale = function () { };
-        class_1.prototype.getSpace = function () { };
-        return class_1;
+        CommonTextNodeMixin.prototype.getStyles = function () { };
+        CommonTextNodeMixin.prototype.getVariant = function () { };
+        CommonTextNodeMixin.prototype.getScale = function () { };
+        CommonTextNodeMixin.prototype.getSpace = function () { };
+        return CommonTextNodeMixin;
     }(Base));
 }
 exports.CommonTextNodeMixin = CommonTextNodeMixin;

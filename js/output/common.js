@@ -54,12 +54,15 @@ var __values = (this && this.__values) || function(o) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonOutputJax = void 0;
-var OutputJax_js_1 = require("../../core/OutputJax.js");
-var MathItem_js_1 = require("../../core/MathItem.js");
-var Options_js_1 = require("../../util/Options.js");
-var lengths_js_1 = require("../../util/lengths.js");
-var Styles_js_1 = require("../../util/Styles.js");
-var StyleList_js_1 = require("../../util/StyleList.js");
+var OutputJax_js_1 = require("../core/OutputJax.js");
+var MathItem_js_1 = require("../core/MathItem.js");
+var MmlNode_js_1 = require("../core/MmlTree/MmlNode.js");
+var Options_js_1 = require("../util/Options.js");
+var LinebreakVisitor_js_1 = require("./common/LinebreakVisitor.js");
+var lengths_js_1 = require("../util/lengths.js");
+var lengths_js_2 = require("../util/lengths.js");
+var Styles_js_1 = require("../util/Styles.js");
+var StyleList_js_1 = require("../util/StyleList.js");
 var CommonOutputJax = (function (_super) {
     __extends(CommonOutputJax, _super);
     function CommonOutputJax(options, defaultFactory, defaultFont) {
@@ -75,8 +78,17 @@ var CommonOutputJax = (function (_super) {
         _this.cssStyles = _this.options.cssStyles || new StyleList_js_1.CssStyles();
         _this.font = _this.options.font || new defaultFont(fontOptions);
         _this.unknownCache = new Map();
+        var linebreaks = (_this.options.linebreaks.LinebreakVisitor || LinebreakVisitor_js_1.LinebreakVisitor);
+        _this.linebreaks = new linebreaks(_this.factory);
         return _this;
     }
+    Object.defineProperty(CommonOutputJax.prototype, "forceInlineBreaks", {
+        get: function () {
+            return false;
+        },
+        enumerable: false,
+        configurable: true
+    });
     CommonOutputJax.prototype.typeset = function (math, html) {
         this.setDocument(html);
         var node = this.createNode();
@@ -87,22 +99,46 @@ var CommonOutputJax = (function (_super) {
         var jax = this.constructor.NAME;
         return this.html('mjx-container', { 'class': 'MathJax', jax: jax });
     };
-    CommonOutputJax.prototype.setScale = function (node) {
-        var scale = this.math.metrics.scale * this.options.scale;
+    CommonOutputJax.prototype.setScale = function (node, wrapper) {
+        var scale = this.getInitialScale() * this.options.scale;
+        if (wrapper.node.attributes.get('overflow') === 'scale' && this.math.display) {
+            var w = wrapper.getOuterBBox().w;
+            var W = this.math.metrics.containerWidth / this.pxPerEm;
+            if (w > W && w) {
+                scale *= W / w;
+            }
+        }
         if (scale !== 1) {
             this.adaptor.setStyle(node, 'fontSize', (0, lengths_js_1.percent)(scale));
         }
     };
+    CommonOutputJax.prototype.getInitialScale = function () {
+        return this.math.metrics.scale;
+    };
     CommonOutputJax.prototype.toDOM = function (math, node, html) {
+        var _a;
         if (html === void 0) { html = null; }
         this.setDocument(html);
         this.math = math;
-        this.pxPerEm = math.metrics.ex / this.font.params.x_height;
-        math.root.setTeXclass(null);
-        this.setScale(node);
-        this.nodeMap = new Map();
         this.container = node;
-        this.processMath(math.root, node);
+        this.pxPerEm = math.metrics.ex / this.font.params.x_height;
+        this.nodeMap = new Map();
+        math.root.attributes.getAllInherited().overflow = this.options.displayOverflow;
+        var overflow = math.root.attributes.get('overflow');
+        if (math.display) {
+            overflow === 'scroll' && this.adaptor.setStyle(node, 'overflow-x', 'auto');
+            overflow === 'truncate' && this.adaptor.setStyle(node, 'overflow-x', 'hidden');
+        }
+        var linebreak = (overflow === 'linebreak');
+        linebreak && this.getLinebreakWidth();
+        if (this.options.linebreaks.inline && !math.display && !math.outputData.inlineMarked) {
+            this.markInlineBreaks((_a = math.root.childNodes) === null || _a === void 0 ? void 0 : _a[0]);
+            math.outputData.inlineMarked = true;
+        }
+        math.root.setTeXclass(null);
+        var wrapper = this.factory.wrap(math.root);
+        this.setScale(node, wrapper);
+        this.processMath(wrapper, node);
         this.nodeMap = null;
         this.executeFilters(this.postFilters, math, html, node);
     };
@@ -115,8 +151,54 @@ var CommonOutputJax = (function (_super) {
         this.nodeMap = null;
         return bbox;
     };
-    CommonOutputJax.prototype.getMetrics = function (html) {
+    CommonOutputJax.prototype.getLinebreakWidth = function () {
+        var W = this.math.metrics.containerWidth / this.pxPerEm;
+        var width = this.math.root.attributes.get('maxwidth') || this.options.linebreaks.width;
+        this.containerWidth = (0, lengths_js_2.length2em)(width, W, 1, this.pxPerEm);
+    };
+    CommonOutputJax.prototype.markInlineBreaks = function (node) {
         var e_1, _a;
+        if (!node)
+            return;
+        var forcebreak = this.forceInlineBreaks;
+        var marked = false;
+        try {
+            for (var _b = __values(node.childNodes), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var child = _c.value;
+                if (child.isEmbellished) {
+                    var mo = child.coreMO();
+                    var _d = mo.attributes.getList('linebreak', 'linebreakstyle'), linebreak = _d.linebreak, linebreakstyle = _d.linebreakstyle;
+                    if ((mo.texClass === MmlNode_js_1.TEXCLASS.BIN || mo.texClass === MmlNode_js_1.TEXCLASS.REL ||
+                        mo.attributes.get('data-allowbreak') || linebreak !== 'auto') &&
+                        linebreak !== 'nobreak' && linebreakstyle === 'before') {
+                        child.setProperty('breakable', true);
+                        if (forcebreak && linebreak !== 'newline') {
+                            child.setProperty('forcebreak', true);
+                            mo.setProperty('forcebreak', true);
+                        }
+                        if (!marked) {
+                            node.setProperty('breakable', true);
+                            node.parent.setProperty('breakable', true);
+                            marked = true;
+                        }
+                    }
+                }
+                else if ((child.isKind('mstyle') && !child.attributes.get('style')) ||
+                    child.isKind('semantics') || child.isKind('MathChoice')) {
+                    this.markInlineBreaks(child.childNodes[0]);
+                }
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+    };
+    CommonOutputJax.prototype.getMetrics = function (html) {
+        var e_2, _a;
         this.setDocument(html);
         var adaptor = this.adaptor;
         var maps = this.getMetricMaps(html);
@@ -138,12 +220,12 @@ var CommonOutputJax = (function (_super) {
                 }
             }
         }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
         finally {
             try {
                 if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
-            finally { if (e_1) throw e_1.error; }
+            finally { if (e_2) throw e_2.error; }
         }
     };
     CommonOutputJax.prototype.getMetricsFor = function (node, display) {
@@ -154,7 +236,7 @@ var CommonOutputJax = (function (_super) {
         return metrics;
     };
     CommonOutputJax.prototype.getMetricMaps = function (html) {
-        var e_2, _a, e_3, _b, e_4, _c, e_5, _d, e_6, _e;
+        var e_3, _a, e_4, _b, e_5, _c, e_6, _d, e_7, _e;
         var adaptor = this.adaptor;
         var domMaps = [new Map(), new Map()];
         try {
@@ -169,12 +251,12 @@ var CommonOutputJax = (function (_super) {
                 }
             }
         }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        catch (e_3_1) { e_3 = { error: e_3_1 }; }
         finally {
             try {
                 if (_g && !_g.done && (_a = _f.return)) _a.call(_f);
             }
-            finally { if (e_2) throw e_2.error; }
+            finally { if (e_3) throw e_3.error; }
         }
         var getFamily = this.options.mtextInheritFont || this.options.merrorInheritFont;
         var maps = [new Map(), new Map()];
@@ -182,51 +264,51 @@ var CommonOutputJax = (function (_super) {
             for (var _h = __values(maps.keys()), _j = _h.next(); !_j.done; _j = _h.next()) {
                 var i = _j.value;
                 try {
-                    for (var _k = (e_4 = void 0, __values(domMaps[i].keys())), _l = _k.next(); !_l.done; _l = _k.next()) {
+                    for (var _k = (e_5 = void 0, __values(domMaps[i].keys())), _l = _k.next(); !_l.done; _l = _k.next()) {
                         var node = _l.value;
                         maps[i].set(node, this.measureMetrics(domMaps[i].get(node), getFamily));
                     }
                 }
-                catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                catch (e_5_1) { e_5 = { error: e_5_1 }; }
                 finally {
                     try {
                         if (_l && !_l.done && (_c = _k.return)) _c.call(_k);
                     }
-                    finally { if (e_4) throw e_4.error; }
+                    finally { if (e_5) throw e_5.error; }
                 }
             }
         }
-        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
         finally {
             try {
                 if (_j && !_j.done && (_b = _h.return)) _b.call(_h);
             }
-            finally { if (e_3) throw e_3.error; }
+            finally { if (e_4) throw e_4.error; }
         }
         try {
             for (var _m = __values(maps.keys()), _o = _m.next(); !_o.done; _o = _m.next()) {
                 var i = _o.value;
                 try {
-                    for (var _p = (e_6 = void 0, __values(domMaps[i].values())), _q = _p.next(); !_q.done; _q = _p.next()) {
+                    for (var _p = (e_7 = void 0, __values(domMaps[i].values())), _q = _p.next(); !_q.done; _q = _p.next()) {
                         var node = _q.value;
                         adaptor.remove(node);
                     }
                 }
-                catch (e_6_1) { e_6 = { error: e_6_1 }; }
+                catch (e_7_1) { e_7 = { error: e_7_1 }; }
                 finally {
                     try {
                         if (_q && !_q.done && (_e = _p.return)) _e.call(_p);
                     }
-                    finally { if (e_6) throw e_6.error; }
+                    finally { if (e_7) throw e_7.error; }
                 }
             }
         }
-        catch (e_5_1) { e_5 = { error: e_5_1 }; }
+        catch (e_6_1) { e_6 = { error: e_6_1 }; }
         finally {
             try {
                 if (_o && !_o.done && (_d = _m.return)) _d.call(_m);
             }
-            finally { if (e_5) throw e_5.error; }
+            finally { if (e_6) throw e_6.error; }
         }
         return maps;
     };
@@ -290,7 +372,7 @@ var CommonOutputJax = (function (_super) {
         return { em: em, ex: ex, containerWidth: containerWidth, lineWidth: lineWidth, scale: scale, family: family };
     };
     CommonOutputJax.prototype.styleSheet = function (html) {
-        var e_7, _a;
+        var e_8, _a;
         this.setDocument(html);
         this.cssStyles.clear();
         this.cssStyles.addStyles(this.constructor.commonStyles);
@@ -301,12 +383,12 @@ var CommonOutputJax = (function (_super) {
                     this.cssStyles.addStyles(styles);
                 }
             }
-            catch (e_7_1) { e_7 = { error: e_7_1 }; }
+            catch (e_8_1) { e_8 = { error: e_8_1 }; }
             finally {
                 try {
                     if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                 }
-                finally { if (e_7) throw e_7.error; }
+                finally { if (e_8) throw e_8.error; }
             }
         }
         this.addWrapperStyles(this.cssStyles);
@@ -318,19 +400,19 @@ var CommonOutputJax = (function (_super) {
         styles.addStyles(this.font.styles);
     };
     CommonOutputJax.prototype.addWrapperStyles = function (styles) {
-        var e_8, _a;
+        var e_9, _a;
         try {
             for (var _b = __values(this.factory.getKinds()), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var kind = _c.value;
                 this.addClassStyles(this.factory.getNodeClass(kind), styles);
             }
         }
-        catch (e_8_1) { e_8 = { error: e_8_1 }; }
+        catch (e_9_1) { e_9 = { error: e_9_1 }; }
         finally {
             try {
                 if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
-            finally { if (e_8) throw e_8.error; }
+            finally { if (e_9) throw e_9.error; }
         }
     };
     CommonOutputJax.prototype.addClassStyles = function (CLASS, styles) {
@@ -423,9 +505,14 @@ var CommonOutputJax = (function (_super) {
             styles.get('font-weight') === 'bold'];
     };
     CommonOutputJax.NAME = 'Common';
-    CommonOutputJax.OPTIONS = __assign(__assign({}, OutputJax_js_1.AbstractOutputJax.OPTIONS), { scale: 1, minScale: .5, mtextInheritFont: false, merrorInheritFont: false, mtextFont: '', merrorFont: 'serif', mathmlSpacing: false, skipAttributes: {}, exFactor: .5, displayAlign: 'center', displayIndent: '0', wrapperFactory: null, font: null, cssStyles: null });
+    CommonOutputJax.OPTIONS = __assign(__assign({}, OutputJax_js_1.AbstractOutputJax.OPTIONS), { scale: 1, minScale: .5, mtextInheritFont: false, merrorInheritFont: false, mtextFont: '', merrorFont: 'serif', mathmlSpacing: false, skipAttributes: {}, exFactor: .5, displayAlign: 'center', displayIndent: '0', displayOverflow: 'overflow', linebreaks: {
+            inline: true,
+            width: '100%',
+            lineleading: .2,
+            LinebreakVisitor: null,
+        }, wrapperFactory: null, font: null, cssStyles: null });
     CommonOutputJax.commonStyles = {};
     return CommonOutputJax;
 }(OutputJax_js_1.AbstractOutputJax));
 exports.CommonOutputJax = CommonOutputJax;
-//# sourceMappingURL=OutputJax.js.map
+//# sourceMappingURL=common.js.map

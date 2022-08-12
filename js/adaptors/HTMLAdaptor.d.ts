@@ -108,7 +108,7 @@ export declare class HTMLAdaptor<N extends MinHTMLElement<N, T>, T extends MinTe
     insert(nchild: N | T, ochild: N | T): void;
     remove(child: N | T): N | T;
     replace(nnode: N | T, onode: N | T): N | T;
-    clone(node: N): N;
+    clone(node: N, deep?: boolean): N;
     split(node: T, n: number): T;
     next(node: N | T): N | T;
     previous(node: N | T): N | T;

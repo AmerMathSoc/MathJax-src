@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -61,11 +61,18 @@ export class TeXAtom extends AbstractMmlBaseNode {
   }
 
   /**
+   * @override
+   */
+  public get linebreakContainer(): boolean {
+    return (this.texClass >= TEXCLASS.VCENTER);
+  }
+
+  /**
    * This element is not considered a MathML container
    * @override
    */
   public get notParent() {
-    return this.childNodes[0] && this.childNodes[0].childNodes.length === 1;
+    return (this.texClass < TEXCLASS.VCENTER);
   }
 
   /**

@@ -8,6 +8,7 @@ export declare class MmlMtable extends AbstractMmlNode {
     protected texclass: number;
     get kind(): string;
     get linebreakContainer(): boolean;
+    get linebreakAlign(): string;
     setInheritedAttributes(attributes: AttributeList, display: boolean, level: number, prime: boolean): void;
     protected setChildInheritedAttributes(attributes: AttributeList, display: boolean, level: number, _prime: boolean): void;
     protected verifyChildren(options: PropertyList): void;

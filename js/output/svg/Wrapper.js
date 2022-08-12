@@ -42,33 +42,42 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGWrapper = void 0;
-var BBox_js_1 = require("../../util/BBox.js");
+exports.SvgWrapper = void 0;
+var string_js_1 = require("../../util/string.js");
 var Wrapper_js_1 = require("../common/Wrapper.js");
 var svg_js_1 = require("../svg.js");
-var SVGWrapper = (function (_super) {
-    __extends(SVGWrapper, _super);
-    function SVGWrapper() {
+var SvgWrapper = (function (_super) {
+    __extends(SvgWrapper, _super);
+    function SvgWrapper() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.element = null;
         _this.dx = 0;
         return _this;
     }
-    SVGWrapper.prototype.toSVG = function (parent) {
-        this.addChildren(this.standardSVGnode(parent));
+    SvgWrapper.prototype.toSVG = function (parents) {
+        if (this.toEmbellishedSVG(parents))
+            return;
+        this.addChildren(this.standardSvgNodes(parents));
     };
-    SVGWrapper.prototype.addChildren = function (parent) {
+    SvgWrapper.prototype.toEmbellishedSVG = function (parents) {
         var e_1, _a;
-        var x = 0;
+        var _this = this;
+        if (parents.length <= 1 || !this.node.isEmbellished)
+            return false;
+        var adaptor = this.adaptor;
+        parents.forEach(function (dom) { return adaptor.append(dom, _this.html('mjx-linestrut')); });
+        var style = this.coreMO().embellishedBreakStyle;
+        var dom = [];
         try {
-            for (var _b = __values(this.childNodes), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var child = _c.value;
-                child.toSVG(parent);
-                var bbox = child.getOuterBBox();
-                if (child.element) {
-                    child.place(x + bbox.L * bbox.rscale, 0);
+            for (var _b = __values([[parents[0], 'before'], [parents[1], 'after']]), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var _d = __read(_c.value, 2), parent_1 = _d[0], STYLE = _d[1];
+                if (style !== STYLE) {
+                    this.toSVG([parent_1]);
+                    dom.push(this.dom[0]);
+                    this.place(0, 0);
                 }
-                x += (bbox.L + bbox.w + bbox.R) * bbox.rscale;
+                else {
+                    dom.push(this.createSvgNodes([parent_1])[0]);
+                }
             }
         }
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -78,9 +87,33 @@ var SVGWrapper = (function (_super) {
             }
             finally { if (e_1) throw e_1.error; }
         }
+        this.dom = dom;
+        return true;
     };
-    SVGWrapper.prototype.standardSVGnode = function (parent) {
-        var svg = this.createSVGnode(parent);
+    SvgWrapper.prototype.addChildren = function (parents) {
+        var e_2, _a;
+        var x = 0;
+        try {
+            for (var _b = __values(this.childNodes), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var child = _c.value;
+                child.toSVG(parents);
+                var bbox = child.getOuterBBox();
+                if (child.dom) {
+                    child.place(x + bbox.L * bbox.rscale, 0);
+                }
+                x += (bbox.L + bbox.w + bbox.R) * bbox.rscale;
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+    };
+    SvgWrapper.prototype.standardSvgNodes = function (parents) {
+        var svg = this.createSvgNodes(parents);
         this.handleStyles();
         this.handleScale();
         this.handleBorder();
@@ -88,148 +121,174 @@ var SVGWrapper = (function (_super) {
         this.handleAttributes();
         return svg;
     };
-    SVGWrapper.prototype.createSVGnode = function (parent) {
-        this.element = this.svg('g', { 'data-mml-node': this.node.kind });
-        var href = this.node.attributes.get('href');
-        if (href) {
-            parent = this.adaptor.append(parent, this.svg('a', { href: href }));
-            var _a = this.getOuterBBox(), h = _a.h, d = _a.d, w = _a.w;
-            this.adaptor.append(this.element, this.svg('rect', {
-                'data-hitbox': true, fill: 'none', stroke: 'none', 'pointer-events': 'all',
-                width: this.fixed(w), height: this.fixed(h + d), y: this.fixed(-d)
-            }));
-        }
-        this.adaptor.append(parent, this.element);
-        return this.element;
-    };
-    SVGWrapper.prototype.handleStyles = function () {
+    SvgWrapper.prototype.createSvgNodes = function (parents) {
+        var e_3, _a;
         var _this = this;
-        if (!this.styles)
-            return;
-        var styles = this.styles.cssText;
-        if (styles) {
-            this.adaptor.setAttribute(this.element, 'style', styles);
-        }
-        BBox_js_1.BBox.StyleAdjust.forEach(function (_a) {
-            var _b = __read(_a, 3), name = _b[0], lr = _b[2];
-            if (lr !== 0)
-                return;
-            var x = _this.styles.get(name);
-            if (x) {
-                _this.dx += _this.length2em(x, 1, _this.bbox.rscale);
-            }
-        });
-    };
-    SVGWrapper.prototype.handleScale = function () {
-        if (this.bbox.rscale !== 1) {
-            var scale = 'scale(' + this.fixed(this.bbox.rscale / 1000, 3) + ')';
-            this.adaptor.setAttribute(this.element, 'transform', scale);
-        }
-    };
-    SVGWrapper.prototype.handleColor = function () {
-        var _a;
-        var adaptor = this.adaptor;
-        var attributes = this.node.attributes;
-        var mathcolor = attributes.getExplicit('mathcolor');
-        var color = attributes.getExplicit('color');
-        var mathbackground = attributes.getExplicit('mathbackground');
-        var background = attributes.getExplicit('background');
-        var bgcolor = (((_a = this.styles) === null || _a === void 0 ? void 0 : _a.get('background-color')) || '');
-        if (mathcolor || color) {
-            adaptor.setAttribute(this.element, 'fill', mathcolor || color);
-            adaptor.setAttribute(this.element, 'stroke', mathcolor || color);
-        }
-        if (mathbackground || background || bgcolor) {
-            var _b = this.getOuterBBox(), h = _b.h, d = _b.d, w = _b.w;
-            var rect = this.svg('rect', {
-                fill: mathbackground || background || bgcolor,
-                x: this.fixed(-this.dx), y: this.fixed(-d),
-                width: this.fixed(w),
-                height: this.fixed(h + d),
-                'data-bgcolor': true
-            });
-            var child = adaptor.firstChild(this.element);
-            if (child) {
-                adaptor.insert(rect, child);
-            }
-            else {
-                adaptor.append(this.element, rect);
-            }
-        }
-    };
-    SVGWrapper.prototype.handleBorder = function () {
-        var e_2, _a, e_3, _b;
-        if (!this.styles)
-            return;
-        var width = Array(4).fill(0);
-        var style = Array(4);
-        var color = Array(4);
+        this.dom = parents.map(function (_parent) { return _this.svg('g', { 'data-mml-node': _this.node.kind }); });
+        parents = this.handleHref(parents);
         try {
-            for (var _c = __values([['Top', 0], ['Right', 1], ['Bottom', 2], ['Left', 3]]), _d = _c.next(); !_d.done; _d = _c.next()) {
-                var _e = __read(_d.value, 2), name_1 = _e[0], i = _e[1];
-                var key = 'border' + name_1;
-                var w_1 = this.styles.get(key + 'Width');
-                if (!w_1)
-                    continue;
-                width[i] = Math.max(0, this.length2em(w_1, 1, this.bbox.rscale));
-                style[i] = this.styles.get(key + 'Style') || 'solid';
-                color[i] = this.styles.get(key + 'Color') || 'currentColor';
-            }
-        }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
-        finally {
-            try {
-                if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
-            }
-            finally { if (e_2) throw e_2.error; }
-        }
-        var f = SVGWrapper.borderFuzz;
-        var bbox = this.getOuterBBox();
-        var _f = __read([bbox.h + f, bbox.d + f, bbox.w + f], 3), h = _f[0], d = _f[1], w = _f[2];
-        var outerRT = [w, h];
-        var outerLT = [-f, h];
-        var outerRB = [w, -d];
-        var outerLB = [-f, -d];
-        var innerRT = [w - width[1], h - width[0]];
-        var innerLT = [-f + width[3], h - width[0]];
-        var innerRB = [w - width[1], -d + width[2]];
-        var innerLB = [-f + width[3], -d + width[2]];
-        var paths = [
-            [outerLT, outerRT, innerRT, innerLT],
-            [outerRB, outerRT, innerRT, innerRB],
-            [outerLB, outerRB, innerRB, innerLB],
-            [outerLB, outerLT, innerLT, innerLB]
-        ];
-        var adaptor = this.adaptor;
-        var child = adaptor.firstChild(this.element);
-        try {
-            for (var _g = __values([0, 1, 2, 3]), _h = _g.next(); !_h.done; _h = _g.next()) {
-                var i = _h.value;
-                if (!width[i])
-                    continue;
-                var path = paths[i];
-                if (style[i] === 'dashed' || style[i] === 'dotted') {
-                    this.addBorderBroken(path, color[i], style[i], width[i], i);
-                }
-                else {
-                    this.addBorderSolid(path, color[i], child);
-                }
+            for (var _b = __values(parents.keys()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var i = _c.value;
+                this.adaptor.append(parents[i], this.dom[i]);
             }
         }
         catch (e_3_1) { e_3 = { error: e_3_1 }; }
         finally {
             try {
-                if (_h && !_h.done && (_b = _g.return)) _b.call(_g);
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
             finally { if (e_3) throw e_3.error; }
         }
+        return this.dom;
     };
-    SVGWrapper.prototype.addBorderSolid = function (path, color, child) {
+    SvgWrapper.prototype.handleHref = function (parents) {
+        var _this = this;
+        var href = this.node.attributes.get('href');
+        if (!href)
+            return parents;
+        var i = 0;
+        var isEmbellished = this.node.isEmbellished && !this.node.isKind('mo');
+        return parents.map(function (parent) {
+            parent = _this.adaptor.append(parent, _this.svg('a', { href: href }));
+            var _a = (isEmbellished ? _this.getOuterBBox() : _this.getLineBBox(i)), h = _a.h, d = _a.d, w = _a.w;
+            _this.adaptor.append(_this.dom[i++], _this.svg('rect', {
+                'data-hitbox': true, fill: 'none', stroke: 'none', 'pointer-events': 'all',
+                width: _this.fixed(w), height: _this.fixed(h + d),
+                x: (i === 1 || isEmbellished ? _this.fixed(-_this.dx) : 0), y: _this.fixed(-d)
+            }));
+            return parent;
+        });
+    };
+    SvgWrapper.prototype.handleStyles = function () {
+        var _this = this;
+        var _a, _b, _c;
+        if (!this.styles)
+            return;
+        var styles = this.styles.cssText;
+        if (styles) {
+            this.dom.forEach(function (node) { return _this.adaptor.setAttribute(node, 'style', styles); });
+        }
+        var padding = (((_a = this.styleData) === null || _a === void 0 ? void 0 : _a.padding) || [0, 0, 0, 0])[3];
+        var border = (((_c = (_b = this.styleData) === null || _b === void 0 ? void 0 : _b.border) === null || _c === void 0 ? void 0 : _c.width) || [0, 0, 0, 0])[3];
+        if (padding || border) {
+            this.dx = padding + border;
+        }
+    };
+    SvgWrapper.prototype.handleScale = function () {
+        var _this = this;
+        if (this.bbox.rscale !== 1) {
+            var scale_1 = 'scale(' + this.fixed(this.bbox.rscale / 1000, 3) + ')';
+            this.dom.forEach(function (node) { return _this.adaptor.setAttribute(node, 'transform', scale_1); });
+        }
+    };
+    SvgWrapper.prototype.handleColor = function () {
+        var _this = this;
+        var _a;
+        var adaptor = this.adaptor;
+        var attributes = this.node.attributes;
+        var color = (attributes.getExplicit('mathcolor') || attributes.getExplicit('color'));
+        var background = (attributes.getExplicit('mathbackground') ||
+            attributes.getExplicit('background') ||
+            ((_a = this.styles) === null || _a === void 0 ? void 0 : _a.get('background-color')));
+        if (color) {
+            this.dom.forEach(function (node) {
+                adaptor.setAttribute(node, 'fill', color);
+                adaptor.setAttribute(node, 'stroke', color);
+            });
+        }
+        if (background) {
+            var i_1 = 0;
+            var isEmbellished_1 = this.node.isEmbellished && !this.node.isKind('mo');
+            this.dom.forEach(function (node) {
+                var _a = (isEmbellished_1 ? _this.getOuterBBox() : _this.getLineBBox(i_1++)), h = _a.h, d = _a.d, w = _a.w;
+                var rect = _this.svg('rect', {
+                    fill: background,
+                    x: (i_1 === 1 || isEmbellished_1 ? _this.fixed(-_this.dx) : 0), y: _this.fixed(-d),
+                    width: _this.fixed(w),
+                    height: _this.fixed(h + d),
+                    'data-bgcolor': true
+                });
+                var child = adaptor.firstChild(node);
+                if (child) {
+                    adaptor.insert(rect, child);
+                }
+                else {
+                    adaptor.append(node, rect);
+                }
+            });
+        }
+    };
+    SvgWrapper.prototype.handleBorder = function () {
+        var e_4, _a, e_5, _b;
+        var _c;
+        var border = (_c = this.styleData) === null || _c === void 0 ? void 0 : _c.border;
+        if (!border)
+            return;
+        var f = SvgWrapper.borderFuzz;
+        var adaptor = this.adaptor;
+        var k = 0;
+        var n = this.dom.length - 1;
+        var isEmbellished = this.node.isEmbellished && !this.node.isKind('mo');
+        try {
+            for (var _d = __values(this.dom), _e = _d.next(); !_e.done; _e = _d.next()) {
+                var dom = _e.value;
+                var L = (!n || !k ? 1 : 0);
+                var R = (!n || k === n ? 1 : 0);
+                var bbox = (isEmbellished ? this.getOuterBBox() : this.getLineBBox(k++));
+                var _f = __read([bbox.h + f, bbox.d + f, bbox.w + f], 3), h = _f[0], d = _f[1], w = _f[2];
+                var outerRT = [w, h];
+                var outerLT = [-f, h];
+                var outerRB = [w, -d];
+                var outerLB = [-f, -d];
+                var innerRT = [w - R * border.width[1], h - border.width[0]];
+                var innerLT = [-f + L * border.width[3], h - border.width[0]];
+                var innerRB = [w - R * border.width[1], -d + border.width[2]];
+                var innerLB = [-f + L * border.width[3], -d + border.width[2]];
+                var paths = [
+                    [outerLT, outerRT, innerRT, innerLT],
+                    [outerRB, outerRT, innerRT, innerRB],
+                    [outerLB, outerRB, innerRB, innerLB],
+                    [outerLB, outerLT, innerLT, innerLB]
+                ];
+                var child = adaptor.firstChild(dom);
+                var dx = L * this.dx;
+                try {
+                    for (var _g = (e_5 = void 0, __values([0, 1, 2, 3])), _h = _g.next(); !_h.done; _h = _g.next()) {
+                        var i = _h.value;
+                        if (!border.width[i] || (i === 3 && !L) || (i === 1 && !R))
+                            continue;
+                        var path = paths[i];
+                        if (border.style[i] === 'dashed' || border.style[i] === 'dotted') {
+                            this.addBorderBroken(path, border.color[i], border.style[i], border.width[i], i, dom, dx);
+                        }
+                        else {
+                            this.addBorderSolid(path, border.color[i], child, dom, dx);
+                        }
+                    }
+                }
+                catch (e_5_1) { e_5 = { error: e_5_1 }; }
+                finally {
+                    try {
+                        if (_h && !_h.done && (_b = _g.return)) _b.call(_g);
+                    }
+                    finally { if (e_5) throw e_5.error; }
+                }
+            }
+        }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        finally {
+            try {
+                if (_e && !_e.done && (_a = _d.return)) _a.call(_d);
+            }
+            finally { if (e_4) throw e_4.error; }
+        }
+    };
+    SvgWrapper.prototype.addBorderSolid = function (path, color, child, parent, dx) {
         var _this = this;
         var border = this.svg('polygon', {
             points: path.map(function (_a) {
                 var _b = __read(_a, 2), x = _b[0], y = _b[1];
-                return "".concat(_this.fixed(x - _this.dx), ",").concat(_this.fixed(y));
+                return "".concat(_this.fixed(x - dx), ",").concat(_this.fixed(y));
             }).join(' '),
             stroke: 'none',
             fill: color
@@ -238,16 +297,16 @@ var SVGWrapper = (function (_super) {
             this.adaptor.insert(border, child);
         }
         else {
-            this.adaptor.append(this.element, border);
+            this.adaptor.append(parent, border);
         }
     };
-    SVGWrapper.prototype.addBorderBroken = function (path, color, style, t, i) {
+    SvgWrapper.prototype.addBorderBroken = function (path, color, style, t, i, parent, dx) {
         var dot = (style === 'dotted');
         var t2 = t / 2;
         var _a = __read([[t2, -t2, -t2, -t2], [-t2, t2, -t2, -t2], [t2, t2, -t2, t2], [t2, t2, t2, -t2]][i], 4), tx1 = _a[0], ty1 = _a[1], tx2 = _a[2], ty2 = _a[3];
         var _b = __read(path, 2), A = _b[0], B = _b[1];
-        var x1 = A[0] + tx1 - this.dx, y1 = A[1] + ty1;
-        var x2 = B[0] + tx2 - this.dx, y2 = B[1] + ty2;
+        var x1 = A[0] + tx1 - dx, y1 = A[1] + ty1;
+        var x2 = B[0] + tx2 - dx, y2 = B[1] + ty2;
         var W = Math.abs(i % 2 ? y2 - y1 : x2 - x1);
         var n = (dot ? Math.ceil(W / (2 * t)) : Math.ceil((W - t) / (4 * t)));
         var m = W / (4 * n + 1);
@@ -258,81 +317,92 @@ var SVGWrapper = (function (_super) {
             'stroke-dasharray': dot ? [1, this.fixed(W / n - .002)].join(' ') : [this.fixed(m), this.fixed(3 * m)].join(' ')
         });
         var adaptor = this.adaptor;
-        var child = adaptor.firstChild(this.element);
+        var child = adaptor.firstChild(parent);
         if (child) {
             adaptor.insert(line, child);
         }
         else {
-            adaptor.append(this.element, line);
+            adaptor.append(parent, line);
         }
     };
-    SVGWrapper.prototype.handleAttributes = function () {
-        var e_4, _a, e_5, _b;
+    SvgWrapper.prototype.handleAttributes = function () {
+        var e_6, _a, e_7, _b;
+        var adaptor = this.adaptor;
         var attributes = this.node.attributes;
         var defaults = attributes.getAllDefaults();
-        var skip = SVGWrapper.skipAttributes;
+        var skip = SvgWrapper.skipAttributes;
+        var _loop_1 = function (name_1) {
+            if (skip[name_1] === false || (!(name_1 in defaults) && !skip[name_1] &&
+                !adaptor.hasAttribute(this_1.dom[0], name_1))) {
+                this_1.dom.forEach(function (dom) { return adaptor.setAttribute(dom, name_1, attributes.getExplicit(name_1)); });
+            }
+        };
+        var this_1 = this;
         try {
             for (var _c = __values(attributes.getExplicitNames()), _d = _c.next(); !_d.done; _d = _c.next()) {
-                var name_2 = _d.value;
-                if (skip[name_2] === false || (!(name_2 in defaults) && !skip[name_2] &&
-                    !this.adaptor.hasAttribute(this.element, name_2))) {
-                    this.adaptor.setAttribute(this.element, name_2, attributes.getExplicit(name_2));
-                }
+                var name_1 = _d.value;
+                _loop_1(name_1);
             }
         }
-        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        catch (e_6_1) { e_6 = { error: e_6_1 }; }
         finally {
             try {
                 if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
             }
-            finally { if (e_4) throw e_4.error; }
+            finally { if (e_6) throw e_6.error; }
         }
         if (attributes.get('class')) {
-            var names = attributes.get('class').trim().split(/ +/);
+            var _loop_2 = function (name_2) {
+                this_2.dom.forEach(function (node) { return adaptor.addClass(node, name_2); });
+            };
+            var this_2 = this;
             try {
-                for (var names_1 = __values(names), names_1_1 = names_1.next(); !names_1_1.done; names_1_1 = names_1.next()) {
-                    var name_3 = names_1_1.value;
-                    this.adaptor.addClass(this.element, name_3);
+                for (var _e = __values((0, string_js_1.split)(attributes.get('class'))), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    var name_2 = _f.value;
+                    _loop_2(name_2);
                 }
             }
-            catch (e_5_1) { e_5 = { error: e_5_1 }; }
+            catch (e_7_1) { e_7 = { error: e_7_1 }; }
             finally {
                 try {
-                    if (names_1_1 && !names_1_1.done && (_b = names_1.return)) _b.call(names_1);
+                    if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
                 }
-                finally { if (e_5) throw e_5.error; }
+                finally { if (e_7) throw e_7.error; }
             }
         }
     };
-    SVGWrapper.prototype.place = function (x, y, element) {
+    SvgWrapper.prototype.place = function (x, y, element) {
         if (element === void 0) { element = null; }
-        x += this.dx;
+        if (!element) {
+            x += this.dx * this.bbox.rscale;
+        }
         if (!(x || y))
             return;
         if (!element) {
-            element = this.element;
+            element = this.dom[0];
             y = this.handleId(y);
         }
         var translate = "translate(".concat(this.fixed(x), ",").concat(this.fixed(y), ")");
         var transform = this.adaptor.getAttribute(element, 'transform') || '';
         this.adaptor.setAttribute(element, 'transform', translate + (transform ? ' ' + transform : ''));
     };
-    SVGWrapper.prototype.handleId = function (y) {
+    SvgWrapper.prototype.handleId = function (y) {
         if (!this.node.attributes || !this.node.attributes.get('id')) {
             return y;
         }
         var adaptor = this.adaptor;
         var h = this.getBBox().h;
-        var children = adaptor.childNodes(this.element);
+        var children = adaptor.childNodes(this.dom[0]);
         children.forEach(function (child) { return adaptor.remove(child); });
         var g = this.svg('g', { 'data-idbox': true, transform: "translate(0,".concat(this.fixed(-h), ")") }, children);
-        adaptor.append(this.element, this.svg('text', { 'data-id-align': true }, [this.text('')]));
-        adaptor.append(this.element, g);
+        adaptor.append(this.dom[0], this.svg('text', { 'data-id-align': true }, [this.text('')]));
+        adaptor.append(this.dom[0], g);
         return y + h;
     };
-    SVGWrapper.prototype.firstChild = function () {
+    SvgWrapper.prototype.firstChild = function (dom) {
+        if (dom === void 0) { dom = this.dom[0]; }
         var adaptor = this.adaptor;
-        var child = adaptor.firstChild(this.element);
+        var child = adaptor.firstChild(dom);
         if (child && adaptor.kind(child) === 'text' && adaptor.getAttribute(child, 'data-id-align')) {
             child = adaptor.firstChild(adaptor.next(child));
         }
@@ -341,8 +411,8 @@ var SVGWrapper = (function (_super) {
         }
         return child;
     };
-    SVGWrapper.prototype.placeChar = function (n, x, y, parent, variant) {
-        var e_6, _a;
+    SvgWrapper.prototype.placeChar = function (n, x, y, parent, variant) {
+        var e_8, _a;
         if (variant === void 0) { variant = null; }
         if (variant === null) {
             variant = this.variant;
@@ -363,12 +433,12 @@ var SVGWrapper = (function (_super) {
                     x += this.placeChar(n_1, x, y, g, variant);
                 }
             }
-            catch (e_6_1) { e_6 = { error: e_6_1 }; }
+            catch (e_8_1) { e_8 = { error: e_8_1 }; }
             finally {
                 try {
                     if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
                 }
-                finally { if (e_6) throw e_6.error; }
+                finally { if (e_8) throw e_8.error; }
             }
         }
         else if (data.unknown) {
@@ -379,20 +449,20 @@ var SVGWrapper = (function (_super) {
         }
         return w;
     };
-    SVGWrapper.prototype.charNode = function (variant, C, path) {
+    SvgWrapper.prototype.charNode = function (variant, C, path) {
         var cache = this.jax.options.fontCache;
         return (cache !== 'none' ? this.useNode(variant, C, path) : this.pathNode(C, path));
     };
-    SVGWrapper.prototype.pathNode = function (C, path) {
+    SvgWrapper.prototype.pathNode = function (C, path) {
         return this.svg('path', { 'data-c': C, d: path });
     };
-    SVGWrapper.prototype.useNode = function (variant, C, path) {
+    SvgWrapper.prototype.useNode = function (variant, C, path) {
         var use = this.svg('use', { 'data-c': C });
         var id = '#' + this.jax.fontCache.cachePath(variant, C, path);
         this.adaptor.setAttribute(use, 'href', id, svg_js_1.XLINKNS);
         return use;
     };
-    SVGWrapper.prototype.drawBBox = function () {
+    SvgWrapper.prototype.drawBBox = function () {
         var _a = this.getBBox(), w = _a.w, h = _a.h, d = _a.d;
         var box = this.svg('g', { style: {
                 opacity: .25
@@ -409,29 +479,29 @@ var SVGWrapper = (function (_super) {
                 y: this.fixed(-d)
             })
         ]);
-        var node = this.element || this.parent.element;
+        var node = this.dom[0] || this.parent.dom[0];
         this.adaptor.append(node, box);
     };
-    SVGWrapper.prototype.html = function (type, def, content) {
+    SvgWrapper.prototype.html = function (type, def, content) {
         if (def === void 0) { def = {}; }
         if (content === void 0) { content = []; }
         return this.jax.html(type, def, content);
     };
-    SVGWrapper.prototype.svg = function (type, def, content) {
+    SvgWrapper.prototype.svg = function (type, def, content) {
         if (def === void 0) { def = {}; }
         if (content === void 0) { content = []; }
         return this.jax.svg(type, def, content);
     };
-    SVGWrapper.prototype.text = function (text) {
+    SvgWrapper.prototype.text = function (text) {
         return this.jax.text(text);
     };
-    SVGWrapper.prototype.fixed = function (x, n) {
+    SvgWrapper.prototype.fixed = function (x, n) {
         if (n === void 0) { n = 1; }
         return this.jax.fixed(x * 1000, n);
     };
-    SVGWrapper.kind = 'unknown';
-    SVGWrapper.borderFuzz = 0.005;
-    return SVGWrapper;
+    SvgWrapper.kind = 'unknown';
+    SvgWrapper.borderFuzz = 0.005;
+    return SvgWrapper;
 }(Wrapper_js_1.CommonWrapper));
-exports.SVGWrapper = SVGWrapper;
+exports.SvgWrapper = SvgWrapper;
 //# sourceMappingURL=Wrapper.js.map

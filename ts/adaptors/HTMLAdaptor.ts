@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2018-2021 The MathJax Consortium
+ *  Copyright (c) 2018-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -323,8 +323,8 @@ AbstractDOMAdaptor<N, T, D> implements MinHTMLAdaptor<N, T, D> {
   /**
    * @override
    */
-  public clone(node: N) {
-    return node.cloneNode(true) as N;
+  public clone(node: N, deep: boolean = true) {
+    return node.cloneNode(deep) as N;
   }
 
   /**

@@ -31,24 +31,31 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGscriptbase = void 0;
+exports.SvgScriptbase = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var scriptbase_js_1 = require("../../common/Wrappers/scriptbase.js");
-var SVGscriptbase = (function (_super) {
-    __extends(SVGscriptbase, _super);
-    function SVGscriptbase() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SVGscriptbase.prototype.toSVG = function (parent) {
-        var svg = this.standardSVGnode(parent);
-        var w = this.getBaseWidth();
-        var _a = __read(this.getOffset(), 2), x = _a[0], v = _a[1];
-        this.baseChild.toSVG(svg);
-        this.scriptChild.toSVG(svg);
-        this.scriptChild.place(w + x, v);
-    };
-    SVGscriptbase.kind = 'scriptbase';
-    return SVGscriptbase;
-}((0, scriptbase_js_1.CommonScriptbaseMixin)(Wrapper_js_1.SVGWrapper)));
-exports.SVGscriptbase = SVGscriptbase;
+exports.SvgScriptbase = (function () {
+    var _a;
+    var Base = (0, scriptbase_js_1.CommonScriptbaseMixin)(Wrapper_js_1.SvgWrapper);
+    return _a = (function (_super) {
+            __extends(SvgScriptbase, _super);
+            function SvgScriptbase() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            SvgScriptbase.prototype.toSVG = function (parents) {
+                if (this.toEmbellishedSVG(parents))
+                    return;
+                var svg = this.standardSvgNodes(parents);
+                var w = this.getBaseWidth();
+                var _a = __read(this.getOffset(), 2), x = _a[0], v = _a[1];
+                this.baseChild.toSVG(svg);
+                this.baseChild.place(0, 0);
+                this.scriptChild.toSVG([svg[svg.length - 1]]);
+                this.scriptChild.place(w + x, v);
+            };
+            return SvgScriptbase;
+        }(Base)),
+        _a.kind = 'scriptbase',
+        _a;
+})();
 //# sourceMappingURL=scriptbase.js.map

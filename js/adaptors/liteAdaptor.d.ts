@@ -31,7 +31,7 @@ export declare class LiteBase extends AbstractDOMAdaptor<LiteElement, LiteText, 
     insert(nchild: LiteNode, ochild: LiteNode): void;
     remove(child: LiteNode): LiteNode;
     replace(nnode: LiteNode, onode: LiteNode): LiteNode;
-    clone(node: LiteElement): LiteElement;
+    clone(node: LiteElement, deep?: boolean): LiteElement;
     split(node: LiteText, n: number): LiteText;
     next(node: LiteNode): LiteNode;
     previous(node: LiteNode): LiteNode;

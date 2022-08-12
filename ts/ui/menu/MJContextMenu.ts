@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2019-2021 The MathJax Consortium
+ *  Copyright (c) 2019-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ export class MJContextMenu extends ContextMenu {
     let node: MmlNode = this.mathItem.root;
     while (node && !node.isKind('semantics'))  {
       if (node.isToken || node.childNodes.length !== 1) return null;
-      node = node.childNodes[0] as MmlNode;
+      node = node.childNodes[0];
     }
     return node;
   }
@@ -163,7 +163,7 @@ export class MJContextMenu extends ContextMenu {
   protected getAnnotations(node: MmlNode): [string, string][] {
     const annotations = [] as [string, string][];
     if (!node) return annotations;
-    for (const child of node.childNodes as MmlNode[]) {
+    for (const child of node.childNodes) {
       if (child.isKind('annotation')) {
         const match = this.annotationMatch(child);
         if (match) {

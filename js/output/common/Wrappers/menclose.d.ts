@@ -1,9 +1,12 @@
-import { AnyWrapper, WrapperConstructor, Constructor, AnyWrapperClass } from '../Wrapper.js';
-import * as Notation from '../Notation.js';
+import { CommonWrapper, CommonWrapperClass, CommonWrapperConstructor } from '../Wrapper.js';
+import { CommonWrapperFactory } from '../WrapperFactory.js';
+import { CharOptions, VariantData, DelimiterData, FontData, FontDataClass } from '../FontData.js';
+import { CommonOutputJax } from '../../common.js';
 import { CommonMsqrt } from './msqrt.js';
-export interface CommonMenclose<W extends AnyWrapper, S extends CommonMsqrt, N> extends AnyWrapper {
-    notations: Notation.List<W, N>;
-    renderChild: Notation.Renderer<W, N>;
+import * as Notation from '../Notation.js';
+export interface CommonMenclose<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, S extends CommonMsqrt<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
+    notations: Notation.List<WW, N>;
+    renderChild: Notation.Renderer<WW, N>;
     msqrt: S;
     padding: number;
     thickness: number;
@@ -30,11 +33,10 @@ export interface CommonMenclose<W extends AnyWrapper, S extends CommonMsqrt, N> 
         y: number;
     };
     arrowAW(): [number, number];
-    createMsqrt(child: W): S;
+    createMsqrt(child: WW): S;
     sqrtTRBL(): number[];
 }
-export interface CommonMencloseClass<W extends AnyWrapper, N> extends AnyWrapperClass {
-    notations: Notation.DefList<W, N>;
+export interface CommonMencloseClass<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
+    notations: Notation.DefList<WW, N>;
 }
-export declare type MencloseConstructor<W extends AnyWrapper, S extends CommonMsqrt, N> = Constructor<CommonMenclose<W, S, N>>;
-export declare function CommonMencloseMixin<W extends AnyWrapper, S extends CommonMsqrt, N, T extends WrapperConstructor>(Base: T): MencloseConstructor<W, S, N> & T;
+export declare function CommonMencloseMixin<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, S extends CommonMsqrt<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, B extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>>(Base: CommonWrapperConstructor<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>): B;

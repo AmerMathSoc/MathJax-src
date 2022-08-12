@@ -15,30 +15,32 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGTeXAtom = void 0;
+exports.SvgTeXAtom = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var TeXAtom_js_1 = require("../../common/Wrappers/TeXAtom.js");
 var TeXAtom_js_2 = require("../../../core/MmlTree/MmlNodes/TeXAtom.js");
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
-var SVGTeXAtom = (function (_super) {
-    __extends(SVGTeXAtom, _super);
-    function SVGTeXAtom() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SVGTeXAtom.prototype.toSVG = function (parent) {
-        _super.prototype.toSVG.call(this, parent);
-        this.adaptor.setAttribute(this.element, 'data-mjx-texclass', MmlNode_js_1.TEXCLASSNAMES[this.node.texClass]);
-        if (this.node.texClass === MmlNode_js_1.TEXCLASS.VCENTER) {
-            var bbox = this.childNodes[0].getBBox();
-            var h = bbox.h, d = bbox.d;
-            var a = this.font.params.axis_height;
-            var dh = ((h + d) / 2 + a) - h;
-            var translate = 'translate(0 ' + this.fixed(dh) + ')';
-            this.adaptor.setAttribute(this.element, 'transform', translate);
-        }
-    };
-    SVGTeXAtom.kind = TeXAtom_js_2.TeXAtom.prototype.kind;
-    return SVGTeXAtom;
-}((0, TeXAtom_js_1.CommonTeXAtomMixin)(Wrapper_js_1.SVGWrapper)));
-exports.SVGTeXAtom = SVGTeXAtom;
+exports.SvgTeXAtom = (function () {
+    var _a;
+    var Base = (0, TeXAtom_js_1.CommonTeXAtomMixin)(Wrapper_js_1.SvgWrapper);
+    return _a = (function (_super) {
+            __extends(SvgTeXAtom, _super);
+            function SvgTeXAtom() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            SvgTeXAtom.prototype.toSVG = function (parents) {
+                var _this = this;
+                _super.prototype.toSVG.call(this, parents);
+                this.adaptor.setAttribute(this.dom[0], 'data-mjx-texclass', MmlNode_js_1.TEXCLASSNAMES[this.node.texClass]);
+                if (this.dh) {
+                    var translate_1 = 'translate(0 ' + this.fixed(this.dh) + ')';
+                    this.dom.forEach(function (node) { return _this.adaptor.setAttribute(node, 'transform', translate_1); });
+                    return;
+                }
+            };
+            return SvgTeXAtom;
+        }(Base)),
+        _a.kind = TeXAtom_js_2.TeXAtom.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=TeXAtom.js.map

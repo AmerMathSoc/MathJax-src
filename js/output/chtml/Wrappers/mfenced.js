@@ -15,21 +15,25 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHTMLmfenced = void 0;
+exports.ChtmlMfenced = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var mfenced_js_1 = require("../../common/Wrappers/mfenced.js");
 var mfenced_js_2 = require("../../../core/MmlTree/MmlNodes/mfenced.js");
-var CHTMLmfenced = (function (_super) {
-    __extends(CHTMLmfenced, _super);
-    function CHTMLmfenced() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CHTMLmfenced.prototype.toCHTML = function (parent) {
-        var chtml = this.standardCHTMLnode(parent);
-        this.mrow.toCHTML(chtml);
-    };
-    CHTMLmfenced.kind = mfenced_js_2.MmlMfenced.prototype.kind;
-    return CHTMLmfenced;
-}((0, mfenced_js_1.CommonMfencedMixin)(Wrapper_js_1.CHTMLWrapper)));
-exports.CHTMLmfenced = CHTMLmfenced;
+exports.ChtmlMfenced = (function () {
+    var _a;
+    var Base = (0, mfenced_js_1.CommonMfencedMixin)(Wrapper_js_1.ChtmlWrapper);
+    return _a = (function (_super) {
+            __extends(ChtmlMfenced, _super);
+            function ChtmlMfenced() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            ChtmlMfenced.prototype.toCHTML = function (parents) {
+                var chtml = this.standardChtmlNodes(parents);
+                this.mrow.toCHTML(chtml);
+            };
+            return ChtmlMfenced;
+        }(Base)),
+        _a.kind = mfenced_js_2.MmlMfenced.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=mfenced.js.map

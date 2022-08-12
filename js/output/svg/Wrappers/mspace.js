@@ -15,17 +15,21 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGmspace = void 0;
+exports.SvgMspace = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var mspace_js_1 = require("../../common/Wrappers/mspace.js");
 var mspace_js_2 = require("../../../core/MmlTree/MmlNodes/mspace.js");
-var SVGmspace = (function (_super) {
-    __extends(SVGmspace, _super);
-    function SVGmspace() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SVGmspace.kind = mspace_js_2.MmlMspace.prototype.kind;
-    return SVGmspace;
-}((0, mspace_js_1.CommonMspaceMixin)(Wrapper_js_1.SVGWrapper)));
-exports.SVGmspace = SVGmspace;
+exports.SvgMspace = (function () {
+    var _a;
+    var Base = (0, mspace_js_1.CommonMspaceMixin)(Wrapper_js_1.SvgWrapper);
+    return _a = (function (_super) {
+            __extends(SvgMspace, _super);
+            function SvgMspace() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            return SvgMspace;
+        }(Base)),
+        _a.kind = mspace_js_2.MmlMspace.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=mspace.js.map

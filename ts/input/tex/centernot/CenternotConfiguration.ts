@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2021-2021 The MathJax Consortium
+ *  Copyright (c) 2021-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import ParseOptions from '../ParseOptions.js';
 import TexParser from '../TexParser.js';
 import NodeUtil from '../NodeUtil.js';
 import {CommandMap} from '../SymbolMap.js';
-import {MmlNode} from '../../../core/MmlTree/MmlNode.js';
 import BaseMethods from '../base/BaseMethods.js';
 
 new CommandMap('centernot', {
@@ -65,7 +64,7 @@ new CommandMap('centernot', {
  */
 export function filterCenterOver({data}: {data: ParseOptions}) {
   for (const base of data.getList('centerOver')) {
-    const texClass = NodeUtil.getTexClass(base.childNodes[0].childNodes[0] as MmlNode);
+    const texClass = NodeUtil.getTexClass(base.childNodes[0].childNodes[0]);
     if (texClass !== null) {
       NodeUtil.setProperties(base.parent.parent.parent.parent.parent.parent, {texClass});
     }

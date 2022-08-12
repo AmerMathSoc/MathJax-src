@@ -16,7 +16,11 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -147,6 +151,7 @@ exports.BaseConfiguration = Configuration_js_1.Configuration.create('base', {
         _a[bitem.LeftItem.prototype.kind] = bitem.LeftItem,
         _a[bitem.Middle.prototype.kind] = bitem.Middle,
         _a[bitem.RightItem.prototype.kind] = bitem.RightItem,
+        _a[bitem.BreakItem.prototype.kind] = bitem.BreakItem,
         _a[bitem.BeginItem.prototype.kind] = bitem.BeginItem,
         _a[bitem.EndItem.prototype.kind] = bitem.EndItem,
         _a[bitem.StyleItem.prototype.kind] = bitem.StyleItem,
@@ -160,6 +165,7 @@ exports.BaseConfiguration = Configuration_js_1.Configuration.create('base', {
         _a[bitem.ArrayItem.prototype.kind] = bitem.ArrayItem,
         _a[bitem.EqnArrayItem.prototype.kind] = bitem.EqnArrayItem,
         _a[bitem.EquationItem.prototype.kind] = bitem.EquationItem,
+        _a[bitem.MstyleItem.prototype.kind] = bitem.MstyleItem,
         _a),
     options: {
         maxMacros: 1000,

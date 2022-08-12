@@ -53,6 +53,7 @@ var __values = (this && this.__values) || function(o) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMmultiscriptsMixin = exports.ScriptNames = exports.NextScript = void 0;
 var BBox_js_1 = require("../../../util/BBox.js");
+var LineBBox_js_1 = require("../LineBBox.js");
 exports.NextScript = {
     base: 'subList',
     subList: 'supList',
@@ -63,8 +64,8 @@ exports.NextScript = {
 exports.ScriptNames = ['sup', 'sup', 'psup', 'psub'];
 function CommonMmultiscriptsMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
+        __extends(CommonMmultiscriptsMixin, _super);
+        function CommonMmultiscriptsMixin() {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 args[_i] = arguments[_i];
@@ -75,34 +76,12 @@ function CommonMmultiscriptsMixin(Base) {
             _this.getScriptData();
             return _this;
         }
-        class_1.prototype.combinePrePost = function (pre, post) {
+        CommonMmultiscriptsMixin.prototype.combinePrePost = function (pre, post) {
             var bbox = new BBox_js_1.BBox(pre);
             bbox.combine(post, 0, 0);
             return bbox;
         };
-        class_1.prototype.computeBBox = function (bbox, recompute) {
-            if (recompute === void 0) { recompute = false; }
-            var scriptspace = this.font.params.scriptspace;
-            var data = this.scriptData;
-            var sub = this.combinePrePost(data.sub, data.psub);
-            var sup = this.combinePrePost(data.sup, data.psup);
-            var _a = __read(this.getUVQ(sub, sup), 2), u = _a[0], v = _a[1];
-            bbox.empty();
-            if (data.numPrescripts) {
-                bbox.combine(data.psup, scriptspace, u);
-                bbox.combine(data.psub, scriptspace, v);
-            }
-            bbox.append(data.base);
-            if (data.numScripts) {
-                var w = bbox.w;
-                bbox.combine(data.sup, w, u);
-                bbox.combine(data.sub, w, v);
-                bbox.w += scriptspace;
-            }
-            bbox.clean();
-            this.setChildPWidths(recompute);
-        };
-        class_1.prototype.getScriptData = function () {
+        CommonMmultiscriptsMixin.prototype.getScriptData = function () {
             var data = this.scriptData = {
                 base: null, sub: BBox_js_1.BBox.empty(), sup: BBox_js_1.BBox.empty(), psub: BBox_js_1.BBox.empty(), psup: BBox_js_1.BBox.empty(),
                 numPrescripts: 0, numScripts: 0
@@ -114,7 +93,7 @@ function CommonMmultiscriptsMixin(Base) {
             data.numPrescripts = lists.psubList.length;
             data.numScripts = lists.subList.length;
         };
-        class_1.prototype.getScriptBBoxLists = function () {
+        CommonMmultiscriptsMixin.prototype.getScriptBBoxLists = function () {
             var e_1, _a;
             var lists = {
                 base: [], subList: [], supList: [], psubList: [], psupList: []
@@ -144,12 +123,12 @@ function CommonMmultiscriptsMixin(Base) {
             this.padLists(lists.psubList, lists.psupList);
             return lists;
         };
-        class_1.prototype.padLists = function (list1, list2) {
+        CommonMmultiscriptsMixin.prototype.padLists = function (list1, list2) {
             if (list1.length > list2.length) {
                 list2.push(BBox_js_1.BBox.empty());
             }
         };
-        class_1.prototype.combineBBoxLists = function (bbox1, bbox2, list1, list2) {
+        CommonMmultiscriptsMixin.prototype.combineBBoxLists = function (bbox1, bbox2, list1, list2) {
             for (var i = 0; i < list1.length; i++) {
                 var _a = __read(this.getScaledWHD(list1[i]), 3), w1 = _a[0], h1 = _a[1], d1 = _a[2];
                 var _b = __read(this.getScaledWHD(list2[i]), 3), w2 = _b[0], h2 = _b[1], d2 = _b[2];
@@ -166,18 +145,71 @@ function CommonMmultiscriptsMixin(Base) {
                     bbox2.d = d2;
             }
         };
-        class_1.prototype.getScaledWHD = function (bbox) {
+        CommonMmultiscriptsMixin.prototype.getScaledWHD = function (bbox) {
             var w = bbox.w, h = bbox.h, d = bbox.d, rscale = bbox.rscale;
             return [w * rscale, h * rscale, d * rscale];
         };
-        class_1.prototype.getUVQ = function (subbox, supbox) {
+        CommonMmultiscriptsMixin.prototype.getCombinedUV = function () {
+            var data = this.scriptData;
+            var sub = this.combinePrePost(data.sub, data.psub);
+            var sup = this.combinePrePost(data.sup, data.psup);
+            return this.getUVQ(sub, sup);
+        };
+        CommonMmultiscriptsMixin.prototype.addPrescripts = function (bbox, u, v) {
+            var data = this.scriptData;
+            if (data.numPrescripts) {
+                var scriptspace = this.font.params.scriptspace;
+                bbox.combine(data.psup, scriptspace, u);
+                bbox.combine(data.psub, scriptspace, v);
+            }
+            return bbox;
+        };
+        CommonMmultiscriptsMixin.prototype.addPostscripts = function (bbox, u, v) {
+            var data = this.scriptData;
+            if (data.numScripts) {
+                var x = bbox.w;
+                bbox.combine(data.sup, x, u);
+                bbox.combine(data.sub, x, v);
+                bbox.w += this.font.params.scriptspace;
+            }
+            return bbox;
+        };
+        CommonMmultiscriptsMixin.prototype.appendScripts = function (bbox) {
+            bbox.empty();
+            var _a = __read(this.getCombinedUV(), 2), u = _a[0], v = _a[1];
+            this.addPrescripts(bbox, u, v);
+            bbox.append(this.scriptData.base);
+            this.addPostscripts(bbox, u, v);
+            bbox.clean();
+            return bbox;
+        };
+        CommonMmultiscriptsMixin.prototype.computeLineBBox = function (i) {
+            var n = this.baseChild.breakCount;
+            var cbox = this.baseChild.getLineBBox(i).copy();
+            var bbox = cbox;
+            var _a = __read(this.getCombinedUV(), 2), u = _a[0], v = _a[1];
+            if (i === 0) {
+                bbox = LineBBox_js_1.LineBBox.from(this.addPrescripts(BBox_js_1.BBox.zero(), u, v), this.linebreakOptions.lineleading);
+                bbox.append(cbox);
+                this.addLeftBorders(bbox);
+                bbox.L = this.bbox.L;
+            }
+            else if (i === n) {
+                bbox = this.addPostscripts(bbox, u, v);
+                this.addRightBorders(bbox);
+                bbox.R = this.bbox.R;
+            }
+            this.addMiddleBorders(bbox);
+            return bbox;
+        };
+        CommonMmultiscriptsMixin.prototype.getUVQ = function (subbox, supbox) {
             var _a;
             if (!this.UVQ) {
                 var _b = __read([0, 0, 0], 3), u = _b[0], v = _b[1], q = _b[2];
-                if (subbox.h === 0 && subbox.d === 0) {
+                if (subbox.w === 0) {
                     u = this.getU();
                 }
-                else if (supbox.h === 0 && supbox.d === 0) {
+                else if (supbox.w === 0) {
                     u = -this.getV();
                 }
                 else {
@@ -187,7 +219,7 @@ function CommonMmultiscriptsMixin(Base) {
             }
             return this.UVQ;
         };
-        return class_1;
+        return CommonMmultiscriptsMixin;
     }(Base));
 }
 exports.CommonMmultiscriptsMixin = CommonMmultiscriptsMixin;

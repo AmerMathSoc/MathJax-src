@@ -5,6 +5,6 @@ export declare class MmlMenclose extends AbstractMmlNode {
     protected texclass: number;
     get kind(): string;
     get arity(): number;
-    get linebreakContininer(): boolean;
+    get linebreakContainer(): boolean;
     setTeXclass(prev: MmlNode): MmlNode;
 }

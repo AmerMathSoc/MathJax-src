@@ -17,7 +17,7 @@ export declare class MathML<N, T, D> extends AbstractInputJax<N, T, D> {
     setAdaptor(adaptor: DOMAdaptor<N, T, D>): void;
     setMmlFactory(mmlFactory: MmlFactory): void;
     get processStrings(): boolean;
-    compile(math: MathItem<N, T, D>, document: MathDocument<N, T, D>): any;
+    compile(math: MathItem<N, T, D>, document: MathDocument<N, T, D>): import("../core/MmlTree/MmlNode.js").MmlNode;
     protected checkForErrors(doc: D): D;
     protected error(message: string): void;
     findMath(node: N): import("../core/MathItem.js").ProtoItem<N, T>[];

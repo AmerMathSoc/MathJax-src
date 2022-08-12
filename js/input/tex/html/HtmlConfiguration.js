@@ -8,6 +8,7 @@ var Configuration_js_1 = require("../Configuration.js");
 var SymbolMap_js_1 = require("../SymbolMap.js");
 var HtmlMethods_js_1 = __importDefault(require("./HtmlMethods.js"));
 new SymbolMap_js_1.CommandMap('html_macros', {
+    data: 'Data',
     href: 'Href',
     'class': 'Class',
     style: 'Style',

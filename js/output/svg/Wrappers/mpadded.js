@@ -31,28 +31,34 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SVGmpadded = void 0;
+exports.SvgMpadded = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var mpadded_js_1 = require("../../common/Wrappers/mpadded.js");
 var mpadded_js_2 = require("../../../core/MmlTree/MmlNodes/mpadded.js");
-var SVGmpadded = (function (_super) {
-    __extends(SVGmpadded, _super);
-    function SVGmpadded() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SVGmpadded.prototype.toSVG = function (parent) {
-        var svg = this.standardSVGnode(parent);
-        var _a = __read(this.getDimens(), 9), dw = _a[5], x = _a[6], y = _a[7], dx = _a[8];
-        var align = this.node.attributes.get('data-align') || 'left';
-        var X = x + dx - (dw < 0 && align !== 'left' ? align === 'center' ? dw / 2 : dw : 0);
-        if (X || y) {
-            svg = this.adaptor.append(svg, this.svg('g'));
-            this.place(X, y, svg);
-        }
-        this.addChildren(svg);
-    };
-    SVGmpadded.kind = mpadded_js_2.MmlMpadded.prototype.kind;
-    return SVGmpadded;
-}((0, mpadded_js_1.CommonMpaddedMixin)(Wrapper_js_1.SVGWrapper)));
-exports.SVGmpadded = SVGmpadded;
+exports.SvgMpadded = (function () {
+    var _a;
+    var Base = (0, mpadded_js_1.CommonMpaddedMixin)(Wrapper_js_1.SvgWrapper);
+    return _a = (function (_super) {
+            __extends(SvgMpadded, _super);
+            function SvgMpadded() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            SvgMpadded.prototype.toSVG = function (parents) {
+                if (this.toEmbellishedSVG(parents))
+                    return;
+                var svg = this.standardSvgNodes(parents);
+                var _a = __read(this.getDimens(), 9), dw = _a[5], x = _a[6], y = _a[7], dx = _a[8];
+                var align = this.node.attributes.get('data-align') || 'left';
+                var X = x + dx - (dw < 0 && align !== 'left' ? align === 'center' ? dw / 2 : dw : 0);
+                if (X || y) {
+                    svg = [this.adaptor.append(svg[0], this.svg('g'))];
+                    this.place(X, y, svg[0]);
+                }
+                this.addChildren(svg);
+            };
+            return SvgMpadded;
+        }(Base)),
+        _a.kind = mpadded_js_2.MmlMpadded.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=mpadded.js.map

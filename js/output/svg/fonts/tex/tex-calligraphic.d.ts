@@ -1,2 +1,2 @@
-import { SVGCharMap } from '../../FontData.js';
-export declare const texCalligraphic: SVGCharMap;
+import { SvgCharMap } from '../../FontData.js';
+export declare const texCalligraphic: SvgCharMap;

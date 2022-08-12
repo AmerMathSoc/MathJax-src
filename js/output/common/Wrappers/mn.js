@@ -18,11 +18,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMnMixin = void 0;
 function CommonMnMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
+        __extends(CommonMnMixin, _super);
+        function CommonMnMixin() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        class_1.prototype.remapChars = function (chars) {
+        CommonMnMixin.prototype.remapChars = function (chars) {
             if (chars.length) {
                 var text = this.font.getRemappedChar('mn', chars[0]);
                 if (text) {
@@ -37,7 +37,7 @@ function CommonMnMixin(Base) {
             }
             return chars;
         };
-        return class_1;
+        return CommonMnMixin;
     }(Base));
 }
 exports.CommonMnMixin = CommonMnMixin;

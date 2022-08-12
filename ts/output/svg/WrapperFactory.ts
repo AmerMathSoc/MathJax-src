@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2018-2021 The MathJax Consortium
+ *  Copyright (c) 2018-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,43 +16,35 @@
  */
 
 /**
- * @fileoverview  Implements the SVGWrapperFactory class
+ * @fileoverview  Implements the SvgWrapperFactory class
  *
  * @author dpvc@mathjax.org (Davide Cervone)
  */
 
 import {SVG} from '../svg.js';
 import {CommonWrapperFactory} from '../common/WrapperFactory.js';
-import {SVGWrapper, SVGWrapperClass} from './Wrapper.js';
-import {SVGWrappers} from './Wrappers.js';
-import {SVGCharOptions, SVGDelimiterData, SVGFontData} from './FontData.js';
+import {SvgWrapper, SvgWrapperClass} from './Wrapper.js';
+import {SvgWrappers} from './Wrappers.js';
+import {SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass} from './FontData.js';
 
 /*****************************************************************/
 /*
- *  The SVGWrapperFactory class for creating CHTMLWrapper nodes
+ *  The SvgWrapperFactory class for creating SvgWrapper nodes
  *
  * @template N  The HTMLElement node class
  * @template T  The Text node class
  * @template D  The Document class
  */
-export class SVGWrapperFactory<N, T, D> extends
+export class SvgWrapperFactory<N, T, D> extends
 CommonWrapperFactory<
-  SVG<N, T, D>,
-  SVGWrapper<N, T, D>,
-  SVGWrapperClass,
-  SVGCharOptions,
-  SVGDelimiterData,
-  SVGFontData
+  N, T, D,
+  SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>,
+  SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass
 > {
 
   /**
    * The default list of wrapper nodes this factory can create
    */
-  public static defaultNodes = SVGWrappers;
-
-  /**
-   * The CHTML output jax associated with this factory
-   */
-  public jax: SVG<N, T, D> = null;
+  public static defaultNodes = SvgWrappers;
 
 }

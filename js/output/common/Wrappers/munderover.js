@@ -43,8 +43,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMunderoverMixin = exports.CommonMoverMixin = exports.CommonMunderMixin = void 0;
 function CommonMunderMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
+        __extends(CommonMunderMixin, _super);
+        function CommonMunderMixin() {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 args[_i] = arguments[_i];
@@ -53,14 +53,14 @@ function CommonMunderMixin(Base) {
             _this.stretchChildren();
             return _this;
         }
-        Object.defineProperty(class_1.prototype, "scriptChild", {
+        Object.defineProperty(CommonMunderMixin.prototype, "scriptChild", {
             get: function () {
                 return this.childNodes[this.node.under];
             },
             enumerable: false,
             configurable: true
         });
-        class_1.prototype.computeBBox = function (bbox, recompute) {
+        CommonMunderMixin.prototype.computeBBox = function (bbox, recompute) {
             if (recompute === void 0) { recompute = false; }
             if (this.hasMovableLimits()) {
                 _super.prototype.computeBBox.call(this, bbox, recompute);
@@ -78,14 +78,14 @@ function CommonMunderMixin(Base) {
             bbox.clean();
             this.setChildPWidths(recompute);
         };
-        return class_1;
+        return CommonMunderMixin;
     }(Base));
 }
 exports.CommonMunderMixin = CommonMunderMixin;
 function CommonMoverMixin(Base) {
     return (function (_super) {
-        __extends(class_2, _super);
-        function class_2() {
+        __extends(CommonMoverMixin, _super);
+        function CommonMoverMixin() {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 args[_i] = arguments[_i];
@@ -94,14 +94,14 @@ function CommonMoverMixin(Base) {
             _this.stretchChildren();
             return _this;
         }
-        Object.defineProperty(class_2.prototype, "scriptChild", {
+        Object.defineProperty(CommonMoverMixin.prototype, "scriptChild", {
             get: function () {
                 return this.childNodes[this.node.over];
             },
             enumerable: false,
             configurable: true
         });
-        class_2.prototype.computeBBox = function (bbox) {
+        CommonMoverMixin.prototype.computeBBox = function (bbox) {
             if (this.hasMovableLimits()) {
                 _super.prototype.computeBBox.call(this, bbox);
                 return;
@@ -120,14 +120,14 @@ function CommonMoverMixin(Base) {
             bbox.h += this.font.params.big_op_spacing5;
             bbox.clean();
         };
-        return class_2;
+        return CommonMoverMixin;
     }(Base));
 }
 exports.CommonMoverMixin = CommonMoverMixin;
 function CommonMunderoverMixin(Base) {
     return (function (_super) {
-        __extends(class_3, _super);
-        function class_3() {
+        __extends(CommonMunderoverMixin, _super);
+        function CommonMunderoverMixin() {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 args[_i] = arguments[_i];
@@ -136,35 +136,35 @@ function CommonMunderoverMixin(Base) {
             _this.stretchChildren();
             return _this;
         }
-        Object.defineProperty(class_3.prototype, "underChild", {
+        Object.defineProperty(CommonMunderoverMixin.prototype, "underChild", {
             get: function () {
                 return this.childNodes[this.node.under];
             },
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(class_3.prototype, "overChild", {
+        Object.defineProperty(CommonMunderoverMixin.prototype, "overChild", {
             get: function () {
                 return this.childNodes[this.node.over];
             },
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(class_3.prototype, "subChild", {
+        Object.defineProperty(CommonMunderoverMixin.prototype, "subChild", {
             get: function () {
                 return this.underChild;
             },
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(class_3.prototype, "supChild", {
+        Object.defineProperty(CommonMunderoverMixin.prototype, "supChild", {
             get: function () {
                 return this.overChild;
             },
             enumerable: false,
             configurable: true
         });
-        class_3.prototype.computeBBox = function (bbox) {
+        CommonMunderoverMixin.prototype.computeBBox = function (bbox) {
             if (this.hasMovableLimits()) {
                 _super.prototype.computeBBox.call(this, bbox);
                 return;
@@ -188,7 +188,7 @@ function CommonMunderoverMixin(Base) {
             bbox.d += z;
             bbox.clean();
         };
-        return class_3;
+        return CommonMunderoverMixin;
     }(Base));
 }
 exports.CommonMunderoverMixin = CommonMunderoverMixin;

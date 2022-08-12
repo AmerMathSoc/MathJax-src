@@ -1,2 +1,2 @@
-import { CHTMLCharMap } from '../../FontData.js';
-export declare const fraktur: CHTMLCharMap;
+import { ChtmlCharMap } from '../../FontData.js';
+export declare const fraktur: ChtmlCharMap;

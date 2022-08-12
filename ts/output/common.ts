@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,17 +21,19 @@
  * @author dpvc@mathjax.org (Davide Cervone)
  */
 
-import {AbstractOutputJax} from '../../core/OutputJax.js';
-import {MathDocument} from '../../core/MathDocument.js';
-import {MathItem, Metrics, STATE} from '../../core/MathItem.js';
-import {MmlNode} from '../../core/MmlTree/MmlNode.js';
-import {FontData, FontDataClass, CharOptions, DelimiterData, CssFontData} from './FontData.js';
-import {OptionList, separateOptions} from '../../util/Options.js';
-import {CommonWrapper, AnyWrapper, AnyWrapperClass} from './Wrapper.js';
-import {CommonWrapperFactory, AnyWrapperFactory} from './WrapperFactory.js';
-import {percent} from '../../util/lengths.js';
-import {StyleList, Styles} from '../../util/Styles.js';
-import {StyleList as CssStyleList, CssStyles} from '../../util/StyleList.js';
+import {AbstractOutputJax} from '../core/OutputJax.js';
+import {MathDocument} from '../core/MathDocument.js';
+import {MathItem, Metrics, STATE} from '../core/MathItem.js';
+import {MmlNode, TEXCLASS} from '../core/MmlTree/MmlNode.js';
+import {FontData, FontDataClass, CharOptions, VariantData, DelimiterData, CssFontData} from './common/FontData.js';
+import {OptionList, separateOptions} from '../util/Options.js';
+import {CommonWrapper, CommonWrapperClass} from './common/Wrapper.js';
+import {CommonWrapperFactory} from './common/WrapperFactory.js';
+import {Linebreaks, LinebreakVisitor} from './common/LinebreakVisitor.js';
+import {percent} from '../util/lengths.js';
+import {length2em} from '../util/lengths.js';
+import {StyleList, Styles} from '../util/Styles.js';
+import {StyleList as CssStyleList, CssStyles} from '../util/StyleList.js';
 
 /*****************************************************************/
 
@@ -58,20 +60,32 @@ export type UnknownVariantMap = Map<string, UnknownMap>;
 /**
  *  The CommonOutputJax class on which the CHTML and SVG jax are built
  *
- * @template N  The HTMLElement node class
- * @template T  The Text node class
- * @template D  The Document class
- * @template W  The Wrapper class
- * @template F  The WrapperFactory class
- * @template FD The FontData class
- * @template FC The FontDataClass object
+ * @template N   The DOM node type
+ * @template T   The DOM text node type
+ * @template D   The DOM document type
+ * @template JX  The OutputJax type
+ * @template WW  The Wrapper type
+ * @template WF  The WrapperFactory type
+ * @template WC  The WrapperClass type
+ * @template CC  The CharOptions type
+ * @template VV  The VariantData type
+ * @template DD  The DelimiterData type
+ * @template FD  The FontData type
+ * @template FC  The FontDataClass type
  */
 export abstract class CommonOutputJax<
   N, T, D,
-  W extends AnyWrapper,
-  F extends AnyWrapperFactory,
-  FD extends FontData<any, any, any>,
-  FC extends FontDataClass<any, any, any>
+  WW extends CommonWrapper<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>,
+                           WW, WF, WC, CC, VV, DD, FD, FC>,
+  WF extends CommonWrapperFactory<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>,
+                                  WW, WF, WC, CC, VV, DD, FD, FC>,
+  WC extends CommonWrapperClass<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>,
+                                WW, WF, WC, CC, VV, DD, FD, FC>,
+  CC extends CharOptions,
+  VV extends VariantData<CC>,
+  DD extends DelimiterData,
+  FD extends FontData<CC, VV, DD>,
+  FC extends FontDataClass<CC, VV, DD>
 > extends AbstractOutputJax<N, T, D> {
 
   /**
@@ -95,9 +109,16 @@ export abstract class CommonOutputJax<
     exFactor: .5,                  // default size of ex in em units
     displayAlign: 'center',        // default for indentalign when set to 'auto'
     displayIndent: '0',            // default for indentshift when set to 'auto'
+    displayOverflow: 'overflow',   // default for overflow (scroll/scale/truncate/elide/linebreak/overflow)
+    linebreaks: {                  // options for when overflow is linebreak
+      inline: true,                   // true for browser-based breaking of inline equations
+      width: '100%',                  // a fixed size or a percentage of the container width
+      lineleading: .2,                // the default lineleading in em units
+      LinebreakVisitor: null,         // The LinebreakVisitor to use
+    },
     wrapperFactory: null,          // The wrapper factory to use
     font: null,                    // The FontData object to use
-    cssStyles: null                // The CssStyles object to use
+    cssStyles: null,               // The CssStyles object to use
   };
 
   /**
@@ -128,7 +149,7 @@ export abstract class CommonOutputJax<
   /**
    * The top-level table, if any
    */
-  public table: AnyWrapper;
+  public table: WW;
 
   /**
    * The pixels per em for the math item being processed
@@ -143,14 +164,33 @@ export abstract class CommonOutputJax<
   /**
    * The wrapper factory for the MathML nodes
    */
-  public factory: F;
+  public factory: WF;
+
+  /**
+   * The linebreak visitor to use for automatic linebreaks
+   */
+  public linebreaks: Linebreaks<
+    N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW, WF, WC, CC, VV, DD, FD, FC
+  >;
+
+  /**
+   * True when inkline breaks need to be forced (e.g., for SVG output)
+   */
+  get forceInlineBreaks() {
+    return false;
+  }
+
+  /**
+   * The container width for linebreaking;
+   */
+  public containerWidth: number;
 
   /**
    * A map from the nodes in the expression currently being processed to the
    * wrapper nodes for them (used by functions like core() to locate the wrappers
    * from the core nodes)
    */
-  public nodeMap: Map<MmlNode, W>;
+  public nodeMap: Map<MmlNode, WW>;
 
   /**
    * Node used to test for in-line metric data
@@ -173,9 +213,9 @@ export abstract class CommonOutputJax<
    * Get the WrapperFactory and connect it to this output jax
    * Get the cssStyle and font objects
    *
-   * @param {OptionList} options         The configuration options
+   * @param {OptionList} options                   The configuration options
    * @param {CommonWrapperFactory} defaultFactory  The default wrapper factory class
-   * @param {FC} defaultFont  The default FontData constructor
+   * @param {FC} defaultFont                       The default FontData constructor
    * @constructor
    */
   constructor(options: OptionList = null,
@@ -184,12 +224,14 @@ export abstract class CommonOutputJax<
     const [jaxOptions, fontOptions] = separateOptions(options, defaultFont.OPTIONS);
     super(jaxOptions);
     this.factory = this.options.wrapperFactory ||
-      new defaultFactory<CommonOutputJax<N, T, D, W, F, FD, FC>, W,
-    AnyWrapperClass, CharOptions, DelimiterData, FD>();
+      new defaultFactory<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>,
+                         WW, WF, WC, CC, VV, DD, FD, FC>();
     this.factory.jax = this;
     this.cssStyles = this.options.cssStyles || new CssStyles();
     this.font = this.options.font || new defaultFont(fontOptions);
     this.unknownCache = new Map();
+    const linebreaks = (this.options.linebreaks.LinebreakVisitor || LinebreakVisitor) as typeof Linebreaks;
+    this.linebreaks = new linebreaks(this.factory);
   }
 
   /*****************************************************************/
@@ -218,18 +260,33 @@ export abstract class CommonOutputJax<
   }
 
   /**
-   * @param {N} node   The container whose scale is to be set
+   * @param {N} node         The container whose scale is to be set
+   * @param {WW} wrapper     The wrapper for the math element being scaled
    */
-  protected setScale(node: N) {
-    const scale = this.math.metrics.scale * this.options.scale;
+  protected setScale(node: N, wrapper: WW) {
+    let scale = this.getInitialScale() * this.options.scale;
+    if (wrapper.node.attributes.get('overflow') === 'scale' && this.math.display) {
+      const w = wrapper.getOuterBBox().w;
+      const W = this.math.metrics.containerWidth / this.pxPerEm;
+      if (w > W && w) {
+        scale *= W / w;
+      }
+    }
     if (scale !== 1) {
       this.adaptor.setStyle(node, 'fontSize', percent(scale));
     }
   }
 
   /**
-   * Save the math document, if any, and the math item
+   * The initial scaling value for the math node
+   */
+  protected getInitialScale() {
+    return this.math.metrics.scale;
+  }
+
+  /**
    * Set the document where HTML nodes will be created via the adaptor
+   * Set up global values
    * Recursively set the TeX classes for the nodes
    * Set the scaling for the DOM node
    * Create the nodeMap (maps MathML nodes to corresponding wrappers)
@@ -244,12 +301,25 @@ export abstract class CommonOutputJax<
   public toDOM(math: MathItem<N, T, D>, node: N, html: MathDocument<N, T, D> = null) {
     this.setDocument(html);
     this.math = math;
-    this.pxPerEm = math.metrics.ex / this.font.params.x_height;
-    math.root.setTeXclass(null);
-    this.setScale(node);
-    this.nodeMap = new Map<MmlNode, W>();
     this.container = node;
-    this.processMath(math.root, node);
+    this.pxPerEm = math.metrics.ex / this.font.params.x_height;
+    this.nodeMap = new Map<MmlNode, WW>();
+    math.root.attributes.getAllInherited().overflow = this.options.displayOverflow;
+    const overflow = math.root.attributes.get('overflow');
+    if (math.display) {
+      overflow === 'scroll' && this.adaptor.setStyle(node, 'overflow-x', 'auto');
+      overflow === 'truncate' && this.adaptor.setStyle(node, 'overflow-x', 'hidden');
+    }
+    const linebreak = (overflow === 'linebreak');
+    linebreak && this.getLinebreakWidth();
+    if (this.options.linebreaks.inline && !math.display && !math.outputData.inlineMarked) {
+      this.markInlineBreaks(math.root.childNodes?.[0]);
+      math.outputData.inlineMarked = true;
+    }
+    math.root.setTeXclass(null);
+    const wrapper = this.factory.wrap(math.root);
+    this.setScale(node, wrapper);
+    this.processMath(wrapper, node);
     this.nodeMap = null;
     this.executeFilters(this.postFilters, math, html, node);
   }
@@ -257,10 +327,10 @@ export abstract class CommonOutputJax<
   /**
    * This is the actual typesetting function supplied by the subclass
    *
-   * @param {MmlNode} math   The intenral MathML node of the root math element to process
-   * @param {N} node         The container node where the math is to be typeset
+   * @param {WW} wrapper   The wrapped intenral MathML node of the root math element to process
+   * @param {N} node       The container node where the math is to be typeset
    */
-  protected abstract processMath(math: MmlNode, node: N): void;
+  public abstract processMath(wrapper: WW, node: N): void;
 
   /*****************************************************************/
 
@@ -272,13 +342,54 @@ export abstract class CommonOutputJax<
     this.setDocument(html);
     this.math = math;
     math.root.setTeXclass(null);
-    this.nodeMap = new Map<MmlNode, W>();
+    this.nodeMap = new Map<MmlNode, WW>();
     let bbox = this.factory.wrap(math.root).getOuterBBox();
     this.nodeMap = null;
     return bbox;
   }
 
   /*****************************************************************/
+
+  /**
+   * Determine the linebreak width
+   */
+  public getLinebreakWidth() {
+    const W = this.math.metrics.containerWidth / this.pxPerEm;
+    const width = this.math.root.attributes.get('maxwidth') || this.options.linebreaks.width;
+    this.containerWidth = length2em(width, W, 1, this.pxPerEm);
+  }
+
+  /**
+   * @parm {MmlNode} node   The node to check for potential inline breakpoints
+   */
+  public markInlineBreaks(node: MmlNode) {
+    if (!node) return;
+    const forcebreak = this.forceInlineBreaks;
+    let marked = false;
+    for (const child of node.childNodes) {
+      if (child.isEmbellished) {
+        const mo = child.coreMO();
+        const {linebreak, linebreakstyle} = mo.attributes.getList('linebreak', 'linebreakstyle');
+        if ((mo.texClass === TEXCLASS.BIN || mo.texClass === TEXCLASS.REL ||
+             mo.attributes.get('data-allowbreak') || linebreak !== 'auto') &&
+            linebreak !== 'nobreak' && linebreakstyle === 'before') {
+          child.setProperty('breakable', true);
+          if (forcebreak && linebreak !== 'newline') {
+            child.setProperty('forcebreak', true);
+            mo.setProperty('forcebreak', true);
+          }
+          if (!marked) {
+            node.setProperty('breakable', true);
+            node.parent.setProperty('breakable', true);
+            marked = true;
+          }
+        }
+      } else if ((child.isKind('mstyle') && !child.attributes.get('style')) ||
+                 child.isKind('semantics') || child.isKind('MathChoice')) {
+        this.markInlineBreaks(child.childNodes[0]);
+      }
+    }
+  }
 
   /**
    * @override
@@ -570,11 +681,11 @@ export abstract class CommonOutputJax<
    * Get the size of a text node, caching the result, and using
    *   a cached result, if there is one.
    *
-   * @param {N} text         The text element to measure
-   * @param {string} chars   The string contained in the text node
+   * @param {N} text             The text element to measure
+   * @param {string} chars       The string contained in the text node
    * @param {string} variant     The variant for the text
    * @param {CssFontData} font   The family, italic, and bold data for explicit fonts
-   * @return {UnknownBBox}   The width, height and depth for the text
+   * @return {UnknownBBox}       The width, height and depth for the text
    */
   public measureTextNodeWithCache(
     text: N, chars: string, variant: string,

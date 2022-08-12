@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2020-2021 The MathJax Consortium
+ *  Copyright (c) 2020-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ new CommandMap('text-macros', {
   ' ':          'SelfQuote',
   '&':          'SelfQuote',
   '#':          'SelfQuote',
-  '\\':         'SelfQuote',
+  '\\':         ['Macro', '$\\\\$'],
 
   '\'':         ['Accent', '\u00B4'],
   '\u2019':     ['Accent', '\u00B4'],
@@ -142,6 +142,7 @@ new CommandMap('text-macros', {
   href:         'CheckAutoload',
   style:        'CheckAutoload',
   class:        'CheckAutoload',
+  data:         'CheckAutoload',
   cssId:        'CheckAutoload',
   unicode:      'CheckAutoload',
 

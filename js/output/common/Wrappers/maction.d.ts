@@ -1,11 +1,14 @@
-import { AnyWrapper, WrapperConstructor, Constructor, AnyWrapperClass } from '../Wrapper.js';
+import { CommonWrapper, CommonWrapperClass, CommonWrapperConstructor } from '../Wrapper.js';
+import { CommonWrapperFactory } from '../WrapperFactory.js';
+import { CharOptions, VariantData, DelimiterData, FontData, FontDataClass } from '../FontData.js';
+import { CommonOutputJax } from '../../common.js';
 export declare type ActionData = {
     [name: string]: any;
 };
-export declare type ActionHandler<W extends AnyWrapper> = (node: W, data?: ActionData) => void;
-export declare type ActionPair<W extends AnyWrapper> = [ActionHandler<W>, ActionData];
-export declare type ActionMap<W extends AnyWrapper> = Map<string, ActionPair<W>>;
-export declare type ActionDef<W extends AnyWrapper> = [string, [ActionHandler<W>, ActionData]];
+export declare type ActionHandler<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, MA extends CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> = (node: MA, data?: ActionData) => void;
+export declare type ActionPair<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, MA extends CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> = [ActionHandler<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC, MA>, ActionData];
+export declare type ActionMap<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, MA extends CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> = Map<string, ActionPair<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC, MA>>;
+export declare type ActionDef<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, MA extends CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> = [string, [ActionHandler<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC, MA>, ActionData]];
 export declare type EventHandler = (event: Event) => void;
 export declare const TooltipData: {
     dx: string;
@@ -16,15 +19,15 @@ export declare const TooltipData: {
     clearTimer: Map<any, number>;
     stopTimers: (node: any, data: ActionData) => void;
 };
-export interface CommonMaction<W extends AnyWrapper> extends AnyWrapper {
-    action: ActionHandler<W>;
+export interface CommonMaction<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
+    action: ActionHandler<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC, CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>>;
     data: ActionData;
-    dx: number;
-    dy: number;
-    readonly selected: W;
+    tipDx: number;
+    tipDy: number;
+    readonly selected: WW;
+    getParameters(): void;
 }
-export interface CommonMactionClass<W extends AnyWrapper> extends AnyWrapperClass {
-    actions: ActionMap<W>;
+export interface CommonMactionClass<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
+    actions: ActionMap<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC, CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>>;
 }
-export declare type MactionConstructor<W extends AnyWrapper> = Constructor<CommonMaction<W>>;
-export declare function CommonMactionMixin<W extends AnyWrapper, T extends WrapperConstructor>(Base: T): MactionConstructor<W> & T;
+export declare function CommonMactionMixin<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, B extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>>(Base: CommonWrapperConstructor<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>): B;

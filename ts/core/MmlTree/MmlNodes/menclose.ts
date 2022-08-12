@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ export class MmlMenclose extends AbstractMmlNode {
    * <menclose> is a linebreak container
    * @override
    */
-  public get linebreakContininer() {
+  public get linebreakContainer() {
     return true;
   }
 

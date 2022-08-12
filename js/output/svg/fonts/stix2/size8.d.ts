@@ -1,2 +1,2 @@
-import { CharMap, SVGCharOptions } from '../../FontData.js';
-export declare const size8: CharMap<SVGCharOptions>;
+import { CharMap, SvgCharOptions } from '../../FontData.js';
+export declare const size8: CharMap<SvgCharOptions>;

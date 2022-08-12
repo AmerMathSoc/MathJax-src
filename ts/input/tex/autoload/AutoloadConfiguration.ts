@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2019-2021 The MathJax Consortium
+ *  Copyright (c) 2019-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ export const AutoloadConfiguration = Configuration.create(
         color: ['color', 'definecolor', 'textcolor', 'colorbox', 'fcolorbox'],
         enclose: ['enclose'],
         extpfeil: ['xtwoheadrightarrow', 'xtwoheadleftarrow', 'xmapsto', 'xlongequal', 'xtofrom', 'Newextarrow'],
-        html: ['href', 'class', 'style', 'cssId'],
+        html: ['data', 'href', 'class', 'style', 'cssId'],
         mhchem: ['ce', 'pu'],
         newcommand: ['newcommand', 'renewcommand', 'newenvironment', 'renewenvironment', 'def', 'let'],
         unicode: ['unicode'],

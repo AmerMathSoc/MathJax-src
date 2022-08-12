@@ -16,7 +16,11 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -60,15 +64,6 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonWrapper = void 0;
 var Wrapper_js_1 = require("../../core/Tree/Wrapper.js");
@@ -77,6 +72,7 @@ var string_js_1 = require("../../util/string.js");
 var LENGTHS = __importStar(require("../../util/lengths.js"));
 var Styles_js_1 = require("../../util/Styles.js");
 var BBox_js_1 = require("../../util/BBox.js");
+var LineBBox_js_1 = require("./LineBBox.js");
 var FontData_js_1 = require("./FontData.js");
 var SMALLSIZE = 2 / 18;
 function MathMLSpace(script, size) {
@@ -88,16 +84,21 @@ var CommonWrapper = (function (_super) {
         if (parent === void 0) { parent = null; }
         var _this = _super.call(this, factory, node) || this;
         _this.parent = null;
+        _this.dom = null;
         _this.removedStyles = null;
         _this.styles = null;
+        _this.styleData = null;
         _this.variant = '';
         _this.bboxComputed = false;
+        _this._breakCount = -1;
+        _this.lineBBox = [];
         _this.stretch = FontData_js_1.NOSTRETCH;
         _this.font = null;
         _this.parent = parent;
         _this.font = factory.jax.font;
         _this.bbox = BBox_js_1.BBox.zero();
         _this.getStyles();
+        _this.getStyleData();
         _this.getVariant();
         _this.getScale();
         _this.getSpace();
@@ -131,6 +132,27 @@ var CommonWrapper = (function (_super) {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(CommonWrapper.prototype, "containerWidth", {
+        get: function () {
+            return this.jax.containerWidth;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(CommonWrapper.prototype, "linebreaks", {
+        get: function () {
+            return this.jax.linebreaks;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(CommonWrapper.prototype, "linebreakOptions", {
+        get: function () {
+            return this.jax.options.linebreaks;
+        },
+        enumerable: false,
+        configurable: true
+    });
     Object.defineProperty(CommonWrapper.prototype, "fixesPWidth", {
         get: function () {
             return !this.node.notParent && !this.node.isToken;
@@ -138,6 +160,23 @@ var CommonWrapper = (function (_super) {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(CommonWrapper.prototype, "breakCount", {
+        get: function () {
+            if (this._breakCount < 0) {
+                var node = this.node;
+                this._breakCount = (node.isEmbellished ? this.coreMO().embellishedBreakCount :
+                    node.arity < 0 && !node.linebreakContainer &&
+                        this.childNodes[0].isStack ?
+                        this.childNodes[0].breakCount : 0);
+            }
+            return this._breakCount;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    CommonWrapper.prototype.breakTop = function (mrow, _child) {
+        return ((this.node.linebreakContainer || !this.parent) ? mrow : this.parent.breakTop(mrow, this));
+    };
     CommonWrapper.prototype.wrap = function (node, parent) {
         if (parent === void 0) { parent = null; }
         var wrapped = this.factory.wrap(node, parent || this);
@@ -159,29 +198,43 @@ var CommonWrapper = (function (_super) {
     };
     CommonWrapper.prototype.getOuterBBox = function (save) {
         var e_1, _a;
+        var _b;
         if (save === void 0) { save = true; }
         var bbox = this.getBBox(save);
-        if (!this.styles)
+        if (!this.styleData)
             return bbox;
-        var obox = new BBox_js_1.BBox();
-        Object.assign(obox, bbox);
+        var padding = this.styleData.padding;
+        var border = ((_b = this.styleData.border) === null || _b === void 0 ? void 0 : _b.width) || [0, 0, 0, 0];
+        var obox = bbox.copy();
         try {
-            for (var _b = __values(BBox_js_1.BBox.StyleAdjust), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var _d = __read(_c.value, 2), name_1 = _d[0], side = _d[1];
-                var x = this.styles.get(name_1);
-                if (x) {
-                    obox[side] += this.length2em(x, 1, obox.rscale);
-                }
+            for (var _c = __values(BBox_js_1.BBox.boxSides), _d = _c.next(); !_d.done; _d = _c.next()) {
+                var _e = __read(_d.value, 3), i = _e[1], side = _e[2];
+                obox[side] += (padding[i] + border[i]);
             }
         }
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
         finally {
             try {
-                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
             }
             finally { if (e_1) throw e_1.error; }
         }
         return obox;
+    };
+    CommonWrapper.prototype.getUnbrokenHD = function () {
+        var n = this.breakCount + 1;
+        var H = 0;
+        var D = 0;
+        for (var i = 0; i < n; i++) {
+            var _a = this.getLineBBox(i), h = _a.h, d = _a.d;
+            if (h > H) {
+                H = h;
+            }
+            if (d > D) {
+                D = d;
+            }
+        }
+        return [H, D];
     };
     CommonWrapper.prototype.computeBBox = function (bbox, recompute) {
         var e_2, _a;
@@ -205,6 +258,89 @@ var CommonWrapper = (function (_super) {
             this.computeBBox(bbox, true);
         }
     };
+    CommonWrapper.prototype.getLineBBox = function (i) {
+        if (!this.lineBBox[i]) {
+            var n = this.breakCount;
+            if (n) {
+                var line = (this.embellishedBBox(i) || this.computeLineBBox(i));
+                this.lineBBox[i] = line;
+                if (i === 0) {
+                    if (!this.node.isKind('mo') && this.node.isEmbellished) {
+                        line.originalL = this.getBBox().L;
+                    }
+                    else {
+                        line.L = this.getBBox().L;
+                    }
+                }
+                if (i === n) {
+                    line.R = this.getBBox().R;
+                }
+            }
+            else {
+                this.lineBBox[i] = LineBBox_js_1.LineBBox.from(this.getOuterBBox(), this.linebreakOptions.lineleading);
+            }
+        }
+        return this.lineBBox[i];
+    };
+    CommonWrapper.prototype.embellishedBBox = function (i) {
+        if (!this.node.isEmbellished || this.node.isKind('mo'))
+            return null;
+        var mo = this.coreMO();
+        return mo.moLineBBox(i, mo.embellishedBreakStyle, this.getOuterBBox());
+    };
+    CommonWrapper.prototype.computeLineBBox = function (i) {
+        return this.getChildLineBBox(this.childNodes[0], i);
+    };
+    CommonWrapper.prototype.getBreakNode = function (bbox) {
+        var _a = __read(bbox.start || [0, 0], 2), i = _a[0], j = _a[1];
+        if (this.node.isEmbellished)
+            return [this, this.coreMO()];
+        if (this.node.isToken || !this.childNodes[i])
+            return [this, null];
+        return this.childNodes[i].getBreakNode(this.childNodes[i].getLineBBox(j));
+    };
+    CommonWrapper.prototype.getChildLineBBox = function (child, i) {
+        var n = this.breakCount;
+        var cbox = child.getLineBBox(i);
+        if (this.styleData || this.bbox.L || this.bbox.R) {
+            cbox = cbox.copy();
+        }
+        this.addMiddleBorders(cbox);
+        if (i === 0) {
+            cbox.L += this.bbox.L;
+            this.addLeftBorders(cbox);
+        }
+        else if (i === n) {
+            cbox.R += this.bbox.R;
+            this.addRightBorders(cbox);
+        }
+        return cbox;
+    };
+    CommonWrapper.prototype.addLeftBorders = function (bbox) {
+        var _a;
+        if (!this.styleData)
+            return;
+        var border = this.styleData.border;
+        var padding = this.styleData.padding;
+        bbox.w += (((_a = border === null || border === void 0 ? void 0 : border.width) === null || _a === void 0 ? void 0 : _a[3]) || 0) + ((padding === null || padding === void 0 ? void 0 : padding[3]) || 0);
+    };
+    CommonWrapper.prototype.addMiddleBorders = function (bbox) {
+        var _a, _b;
+        if (!this.styleData)
+            return;
+        var border = this.styleData.border;
+        var padding = this.styleData.padding;
+        bbox.h += (((_a = border === null || border === void 0 ? void 0 : border.width) === null || _a === void 0 ? void 0 : _a[0]) || 0) + ((padding === null || padding === void 0 ? void 0 : padding[0]) || 0);
+        bbox.d += (((_b = border === null || border === void 0 ? void 0 : border.width) === null || _b === void 0 ? void 0 : _b[2]) || 0) + ((padding === null || padding === void 0 ? void 0 : padding[2]) || 0);
+    };
+    CommonWrapper.prototype.addRightBorders = function (bbox) {
+        var _a;
+        if (!this.styleData)
+            return;
+        var border = this.styleData.border;
+        var padding = this.styleData.padding;
+        bbox.w += (((_a = border === null || border === void 0 ? void 0 : border.width) === null || _a === void 0 ? void 0 : _a[1]) || 0) + ((padding === null || padding === void 0 ? void 0 : padding[1]) || 0);
+    };
     CommonWrapper.prototype.setChildPWidths = function (recompute, w, clear) {
         var e_3, _a;
         if (w === void 0) { w = null; }
@@ -219,7 +355,7 @@ var CommonWrapper = (function (_super) {
         try {
             for (var _b = __values(this.childNodes), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var child = _c.value;
-                var cbox = child.getOuterBBox();
+                var cbox = child.getBBox();
                 if (cbox.pwidth && child.setChildPWidths(recompute, w === null ? cbox.w : w, clear)) {
                     changed = true;
                 }
@@ -234,10 +370,15 @@ var CommonWrapper = (function (_super) {
         }
         return changed;
     };
-    CommonWrapper.prototype.invalidateBBox = function () {
+    CommonWrapper.prototype.breakToWidth = function (_W) {
+    };
+    CommonWrapper.prototype.invalidateBBox = function (bubble) {
+        if (bubble === void 0) { bubble = true; }
         if (this.bboxComputed) {
             this.bboxComputed = false;
-            if (this.parent) {
+            this.lineBBox = [];
+            this._breakCount = -1;
+            if (this.parent && bubble) {
                 this.parent.invalidateBBox();
             }
         }
@@ -270,6 +411,46 @@ var CommonWrapper = (function (_super) {
                 style.set(id, '');
             }
         }
+    };
+    CommonWrapper.prototype.getStyleData = function () {
+        var e_4, _a;
+        if (!this.styles)
+            return;
+        var padding = Array(4).fill(0);
+        var width = Array(4).fill(0);
+        var style = Array(4);
+        var color = Array(4);
+        var hasPadding = false;
+        var hasBorder = false;
+        try {
+            for (var _b = __values(BBox_js_1.BBox.boxSides), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var _d = __read(_c.value, 2), name_1 = _d[0], i = _d[1];
+                var key = 'border' + name_1;
+                var w = this.styles.get(key + 'Width');
+                if (w) {
+                    hasBorder = true;
+                    width[i] = Math.max(0, this.length2em(w, 1));
+                    style[i] = this.styles.get(key + 'Style') || 'solid';
+                    color[i] = this.styles.get(key + 'Color') || 'currentColor';
+                }
+                var p = this.styles.get('padding' + name_1);
+                if (p) {
+                    hasPadding = true;
+                    padding[i] = Math.max(0, this.length2em(p, 1));
+                }
+            }
+        }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_4) throw e_4.error; }
+        }
+        this.styleData = (hasPadding || hasBorder) ? {
+            padding: padding,
+            border: (hasBorder ? { width: width, style: style, color: color } : null)
+        } : null;
     };
     CommonWrapper.prototype.getVariant = function () {
         if (!this.node.isToken)
@@ -408,7 +589,7 @@ var CommonWrapper = (function (_super) {
         return this.jax.nodeMap.get(this.node.coreMO());
     };
     CommonWrapper.prototype.getText = function () {
-        var e_4, _a;
+        var e_5, _a;
         var text = '';
         if (this.node.isToken) {
             try {
@@ -419,12 +600,12 @@ var CommonWrapper = (function (_super) {
                     }
                 }
             }
-            catch (e_4_1) { e_4 = { error: e_4_1 }; }
+            catch (e_5_1) { e_5 = { error: e_5_1 }; }
             finally {
                 try {
                     if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
                 }
-                finally { if (e_4) throw e_4.error; }
+                finally { if (e_5) throw e_5.error; }
             }
         }
         return text;
@@ -442,25 +623,36 @@ var CommonWrapper = (function (_super) {
         return this.stretch.dir !== 0;
     };
     CommonWrapper.prototype.getAlignShift = function () {
-        var _a;
-        var _b = (_a = this.node.attributes).getList.apply(_a, __spreadArray([], __read(MmlNode_js_1.indentAttributes), false)), indentalign = _b.indentalign, indentshift = _b.indentshift, indentalignfirst = _b.indentalignfirst, indentshiftfirst = _b.indentshiftfirst;
+        var _a = this.node.attributes.getAllAttributes(), indentalign = _a.indentalign, indentshift = _a.indentshift, indentalignfirst = _a.indentalignfirst, indentshiftfirst = _a.indentshiftfirst;
         if (indentalignfirst !== 'indentalign') {
             indentalign = indentalignfirst;
-        }
-        if (indentalign === 'auto') {
-            indentalign = this.jax.options.displayAlign;
         }
         if (indentshiftfirst !== 'indentshift') {
             indentshift = indentshiftfirst;
         }
+        return this.processIndent(indentalign, indentshift);
+    };
+    CommonWrapper.prototype.processIndent = function (indentalign, indentshift, align, shift, width) {
+        if (align === void 0) { align = ''; }
+        if (shift === void 0) { shift = ''; }
+        if (width === void 0) { width = this.metrics.containerWidth; }
+        if (!align || align === 'auto') {
+            align = this.jax.math.outputData.inlineMarked ? 'left' : this.jax.options.displayAlign;
+        }
+        if (!shift || shift === 'auto') {
+            shift = this.jax.math.outputData.inlineMarked ? '0' : this.jax.options.displayIndent;
+        }
+        if (indentalign === 'auto') {
+            indentalign = align;
+        }
         if (indentshift === 'auto') {
-            indentshift = this.jax.options.displayIndent;
+            indentshift = shift;
             if (indentalign === 'right' && !indentshift.match(/^\s*0[a-z]*\s*$/)) {
                 indentshift = ('-' + indentshift.trim()).replace(/^--/, '');
             }
         }
-        var shift = this.length2em(indentshift, this.metrics.containerWidth);
-        return [indentalign, shift];
+        var indent = this.length2em(indentshift, width);
+        return [indentalign, indent];
     };
     CommonWrapper.prototype.getAlignX = function (W, bbox, align) {
         return (align === 'right' ? W - (bbox.w + bbox.R) * bbox.rscale :
@@ -523,6 +715,7 @@ var CommonWrapper = (function (_super) {
         var textNode = mmlFactory.create('text').setText(text);
         var mml = mmlFactory.create('mo', { stretchy: true }, [textNode]);
         mml.inheritAttributesFrom(this.node);
+        mml.parent = this.node.parent;
         var node = this.wrap(mml);
         node.parent = this;
         return node;

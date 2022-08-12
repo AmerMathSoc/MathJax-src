@@ -292,8 +292,10 @@ var ParseUtil;
         return TEXT;
     }
     ParseUtil.trimSpaces = trimSpaces;
-    function setArrayAlign(array, align) {
-        align = ParseUtil.trimSpaces(align || '');
+    function setArrayAlign(array, align, parser, i) {
+        if (!parser) {
+            align = ParseUtil.trimSpaces(align || '');
+        }
         if (align === 't') {
             array.arraydef.align = 'baseline 1';
         }
@@ -302,6 +304,9 @@ var ParseUtil;
         }
         else if (align === 'c') {
             array.arraydef.align = 'axis';
+        }
+        else if (parser) {
+            parser.i = i;
         }
         else if (align) {
             array.arraydef.align = align;

@@ -31,26 +31,31 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHTMLmroot = void 0;
-var msqrt_js_1 = require("./msqrt.js");
+exports.ChtmlMroot = void 0;
 var mroot_js_1 = require("../../common/Wrappers/mroot.js");
+var msqrt_js_1 = require("./msqrt.js");
 var mroot_js_2 = require("../../../core/MmlTree/MmlNodes/mroot.js");
-var CHTMLmroot = (function (_super) {
-    __extends(CHTMLmroot, _super);
-    function CHTMLmroot() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CHTMLmroot.prototype.addRoot = function (ROOT, root, sbox, H) {
-        root.toCHTML(ROOT);
-        var _a = __read(this.getRootDimens(sbox, H), 3), x = _a[0], h = _a[1], dx = _a[2];
-        this.adaptor.setStyle(ROOT, 'verticalAlign', this.em(h));
-        this.adaptor.setStyle(ROOT, 'width', this.em(x));
-        if (dx) {
-            this.adaptor.setStyle(this.adaptor.firstChild(ROOT), 'paddingLeft', this.em(dx));
-        }
-    };
-    CHTMLmroot.kind = mroot_js_2.MmlMroot.prototype.kind;
-    return CHTMLmroot;
-}((0, mroot_js_1.CommonMrootMixin)(msqrt_js_1.CHTMLmsqrt)));
-exports.CHTMLmroot = CHTMLmroot;
+exports.ChtmlMroot = (function () {
+    var _a;
+    var Base = (0, mroot_js_1.CommonMrootMixin)(msqrt_js_1.ChtmlMsqrt);
+    return _a = (function (_super) {
+            __extends(ChtmlMroot, _super);
+            function ChtmlMroot() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            ChtmlMroot.prototype.addRoot = function (ROOT, root, sbox, H) {
+                root.toCHTML([ROOT]);
+                var adaptor = this.adaptor;
+                var _a = __read(this.getRootDimens(sbox, H), 3), x = _a[0], h = _a[1], dx = _a[2];
+                adaptor.setStyle(ROOT, 'verticalAlign', this.em(h));
+                adaptor.setStyle(ROOT, 'width', this.em(x));
+                if (dx) {
+                    adaptor.setStyle(adaptor.firstChild(ROOT), 'paddingLeft', this.em(dx));
+                }
+            };
+            return ChtmlMroot;
+        }(Base)),
+        _a.kind = mroot_js_2.MmlMroot.prototype.kind,
+        _a;
+})();
 //# sourceMappingURL=mroot.js.map

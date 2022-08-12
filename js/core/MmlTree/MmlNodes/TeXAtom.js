@@ -51,9 +51,16 @@ var TeXAtom = (function (_super) {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(TeXAtom.prototype, "linebreakContainer", {
+        get: function () {
+            return (this.texClass >= MmlNode_js_1.TEXCLASS.VCENTER);
+        },
+        enumerable: false,
+        configurable: true
+    });
     Object.defineProperty(TeXAtom.prototype, "notParent", {
         get: function () {
-            return this.childNodes[0] && this.childNodes[0].childNodes.length === 1;
+            return (this.texClass < MmlNode_js_1.TEXCLASS.VCENTER);
         },
         enumerable: false,
         configurable: true

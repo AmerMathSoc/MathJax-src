@@ -97,13 +97,6 @@ var MmlMo = (function (_super) {
         enumerable: false,
         configurable: true
     });
-    Object.defineProperty(MmlMo.prototype, "hasNewLine", {
-        get: function () {
-            return this.attributes.get('linebreak') === 'newline';
-        },
-        enumerable: false,
-        configurable: true
-    });
     MmlMo.prototype.coreParent = function () {
         var embellished = this;
         var parent = this;
@@ -122,7 +115,7 @@ var MmlMo = (function (_super) {
             return parent.coreMO().getText();
         }
         while ((((parent.isKind('mrow') ||
-            (parent.isKind('TeXAtom') && parent.texClass !== MmlNode_js_1.TEXCLASS.VCENTER) ||
+            (parent.isKind('TeXAtom') && parent.texClass < MmlNode_js_1.TEXCLASS.VCENTER) ||
             parent.isKind('mstyle') ||
             parent.isKind('mphantom')) && parent.childNodes.length === 1) ||
             parent.isKind('munderover')) && parent.childNodes[0]) {
@@ -317,15 +310,19 @@ var MmlMo = (function (_super) {
         var parent = this.Parent;
         if (this.getProperty('mathaccent') !== undefined || !parent || !parent.isKind('munderover'))
             return;
-        var base = parent.childNodes[0];
+        var _a = __read(parent.childNodes, 3), base = _a[0], under = _a[1], over = _a[2];
         if (base.isEmbellished && base.coreMO() === this)
+            return;
+        var isUnder = !!(under && under.isEmbellished && under.coreMO() === this);
+        var isOver = !!(over && over.isEmbellished && under.coreMO() === this);
+        if (!isUnder && !isOver)
             return;
         var MATHACCENT = this.constructor.mathaccents;
         if (mo.match(MATHACCENT)) {
             this.setProperty('mathaccent', true);
         }
     };
-    MmlMo.defaults = __assign(__assign({}, MmlNode_js_1.AbstractMmlTokenNode.defaults), { form: 'infix', fence: false, separator: false, lspace: 'thickmathspace', rspace: 'thickmathspace', stretchy: false, symmetric: false, maxsize: 'infinity', minsize: '0em', largeop: false, movablelimits: false, accent: false, linebreak: 'auto', lineleading: '1ex', linebreakstyle: 'before', indentalign: 'auto', indentshift: '0', indenttarget: '', indentalignfirst: 'indentalign', indentshiftfirst: 'indentshift', indentalignlast: 'indentalign', indentshiftlast: 'indentshift' });
+    MmlMo.defaults = __assign(__assign({}, MmlNode_js_1.AbstractMmlTokenNode.defaults), { form: 'infix', fence: false, separator: false, lspace: 'thickmathspace', rspace: 'thickmathspace', stretchy: false, symmetric: false, maxsize: 'infinity', minsize: '0em', largeop: false, movablelimits: false, accent: false, linebreak: 'auto', lineleading: '100%', linebreakstyle: 'before', indentalign: 'auto', indentshift: '0', indenttarget: '', indentalignfirst: 'indentalign', indentshiftfirst: 'indentshift', indentalignlast: 'indentalign', indentshiftlast: 'indentshift' });
     MmlMo.MMLSPACING = OperatorDictionary_js_1.MMLSPACING;
     MmlMo.OPTABLE = OperatorDictionary_js_1.OPTABLE;
     MmlMo.pseudoScripts = new RegExp([

@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -148,7 +148,10 @@ export class MathML<N, T, D> extends AbstractInputJax<N, T, D> {
       }
     }
     mml = this.executeFilters(this.mmlFilters, math, document, mml);
-    return this.executeFilters(this.postFilters, math, document, this.mathml.compile(mml as N));
+    let root = this.mathml.compile(mml as N);
+    root = this.executeFilters(this.postFilters, math, document, root);
+    math.display = root.attributes.get('display') === 'block';
+    return root;
   }
 
   /**

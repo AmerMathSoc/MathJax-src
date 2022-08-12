@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -182,10 +182,11 @@ export class TeX<N, T, D> extends AbstractInputJax<N, T, D> {
     let node: MmlNode;
     this.parseOptions.tags.startEquation(math);
     let globalEnv;
+    let parser;
     try {
-      let parser = new TexParser(this.latex,
-                                 {display: display, isInner: false},
-                                 this.parseOptions);
+      parser = new TexParser(this.latex,
+                             {display: display, isInner: false},
+                             this.parseOptions);
       node = parser.mml();
       globalEnv = parser.stack.global;
     } catch (err) {
@@ -205,6 +206,13 @@ export class TeX<N, T, D> extends AbstractInputJax<N, T, D> {
     this.parseOptions.tags.finishEquation(math);
     this.parseOptions.root = node;
     this.executeFilters(this.postFilters, math, document, this.parseOptions);
+    //
+    // Add these here to not lose overlow during filtering attributes in postFilters
+    //
+    if (parser && parser.stack.env.hsize) {
+      NodeUtil.setAttribute(node, 'maxwidth', parser.stack.env.hsize);
+      NodeUtil.setAttribute(node, 'overflow', 'linebreak');
+    }
     this.mathNode = this.parseOptions.root;
     return this.mathNode;
   }

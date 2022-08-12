@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2018-2021 The MathJax Consortium
+ *  Copyright (c) 2018-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -310,10 +310,10 @@ export class LiteBase extends AbstractDOMAdaptor<LiteElement, LiteText, LiteDocu
   /**
    * @override
    */
-  public clone(node: LiteElement) {
+  public clone(node: LiteElement, deep: boolean = true) {
     const nnode = new LiteElement(node.kind);
     nnode.attributes = {...node.attributes};
-    nnode.children = node.children.map(n => {
+    nnode.children = !deep ? [] : node.children.map(n => {
       if (n.kind === '#text') {
         return new LiteText((n as LiteText).value);
       } else if (n.kind === '#comment') {

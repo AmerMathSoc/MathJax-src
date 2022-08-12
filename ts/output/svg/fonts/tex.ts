@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
  * @author dpvc@mathjax.org (Davide Cervone)
  */
 
-import {SVGFontData, SVGFontDataClass, SVGCharOptions, SVGVariantData, SVGDelimiterData,
+import {SvgFontData, SvgFontDataClass, SvgCharOptions, SvgVariantData, SvgDelimiterData,
         DelimiterMap, CharMapMap} from '../FontData.js';
 import {CommonTeXFontMixin} from '../../common/fonts/tex.js';
 import {OptionList} from '../../../util/Options.js';
@@ -58,17 +58,17 @@ import {delimiters} from '../../common/fonts/tex/delimiters.js';
  *  The TeXFont class
  */
 export class TeXFont extends
-CommonTeXFontMixin<SVGCharOptions, SVGVariantData, SVGDelimiterData, SVGFontDataClass>(SVGFontData) {
+CommonTeXFontMixin<SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontDataClass>(SvgFontData) {
 
   /**
    *  The stretchy delimiter data
    */
-  protected static defaultDelimiters: DelimiterMap<SVGDelimiterData> = delimiters;
+  protected static defaultDelimiters: DelimiterMap<SvgDelimiterData> = delimiters;
 
   /**
    *  The character data by variant
    */
-  protected static defaultChars: CharMapMap<SVGCharOptions> = {
+  protected static defaultChars: CharMapMap<SvgCharOptions> = {
     'normal': normal,
     'bold': bold,
     'italic': italic,

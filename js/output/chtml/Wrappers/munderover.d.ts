@@ -1,23 +1,25 @@
-import { CHTMLWrapper, Constructor } from '../Wrapper.js';
-import { CHTMLmsubsup, CHTMLmsub, CHTMLmsup } from './msubsup.js';
-import { StyleList } from '../../../util/StyleList.js';
-declare const CHTMLmunder_base: import("../../common/Wrappers/munderover.js").MunderConstructor<CHTMLWrapper<any, any, any>> & Constructor<CHTMLmsub<any, any, any>>;
-export declare class CHTMLmunder<N, T, D> extends CHTMLmunder_base {
-    static kind: string;
-    static styles: StyleList;
-    toCHTML(parent: N): void;
+import { CHTML } from '../../chtml.js';
+import { ChtmlWrapper, ChtmlWrapperClass } from '../Wrapper.js';
+import { ChtmlWrapperFactory } from '../WrapperFactory.js';
+import { ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass } from '../FontData.js';
+import { CommonMunder, CommonMunderClass, CommonMover, CommonMoverClass, CommonMunderover, CommonMunderoverClass } from '../../common/Wrappers/munderover.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+import { ChtmlMsubClass, ChtmlMsubNTD, ChtmlMsupClass, ChtmlMsupNTD, ChtmlMsubsupClass, ChtmlMsubsupNTD } from './msubsup.js';
+export interface ChtmlMunderNTD<N, T, D> extends ChtmlMsubNTD<N, T, D>, CommonMunder<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
 }
-declare const CHTMLmover_base: import("../../common/Wrappers/munderover.js").MoverConstructor<CHTMLWrapper<any, any, any>> & Constructor<CHTMLmsup<any, any, any>>;
-export declare class CHTMLmover<N, T, D> extends CHTMLmover_base {
-    static kind: string;
-    static styles: StyleList;
-    toCHTML(parent: N): void;
+export interface ChtmlMunderClass<N, T, D> extends ChtmlMsubClass<N, T, D>, CommonMunderClass<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
+    new (factory: ChtmlWrapperFactory<N, T, D>, node: MmlNode, parent?: ChtmlWrapper<N, T, D>): ChtmlMunderNTD<N, T, D>;
 }
-declare const CHTMLmunderover_base: import("../../common/Wrappers/munderover.js").MunderoverConstructor<CHTMLWrapper<any, any, any>> & Constructor<CHTMLmsubsup<any, any, any>>;
-export declare class CHTMLmunderover<N, T, D> extends CHTMLmunderover_base {
-    static kind: string;
-    static styles: StyleList;
-    toCHTML(parent: N): void;
-    markUsed(): void;
+export declare const ChtmlMunder: ChtmlMunderClass<any, any, any>;
+export interface ChtmlMoverNTD<N, T, D> extends ChtmlMsupNTD<N, T, D>, CommonMover<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
 }
-export {};
+export interface ChtmlMoverClass<N, T, D> extends ChtmlMsupClass<N, T, D>, CommonMoverClass<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
+    new (factory: ChtmlWrapperFactory<N, T, D>, node: MmlNode, parent?: ChtmlWrapper<N, T, D>): ChtmlMoverNTD<N, T, D>;
+}
+export declare const ChtmlMover: ChtmlMoverClass<any, any, any>;
+export interface ChtmlMunderoverNTD<N, T, D> extends ChtmlMsubsupNTD<N, T, D>, CommonMunderover<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
+}
+export interface ChtmlMunderoverClass<N, T, D> extends ChtmlMsubsupClass<N, T, D>, CommonMunderoverClass<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
+    new (factory: ChtmlWrapperFactory<N, T, D>, node: MmlNode, parent?: ChtmlWrapper<N, T, D>): ChtmlMunderoverNTD<N, T, D>;
+}
+export declare const ChtmlMunderover: ChtmlMunderoverClass<any, any, any>;

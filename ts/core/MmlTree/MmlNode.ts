@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -44,10 +44,12 @@ export const TEXCLASS = {
   PUNCT: 6,
   INNER: 7,
   VCENTER: 8,  // Used in TeXAtom, but not for spacing
+  VTOP: 9,     // Used in TeXAtom, but not for spacing
+  VBOX: 10,    // Used in TeXAtom, but not for spacing
   NONE:   -1
 };
 
-export const TEXCLASSNAMES = ['ORD', 'OP', 'BIN', 'REL', 'OPEN', 'CLOSE', 'PUNCT', 'INNER', 'VCENTER'];
+export const TEXCLASSNAMES = ['ORD', 'OP', 'BIN', 'REL', 'OPEN', 'CLOSE', 'PUNCT', 'INNER', 'VCENTER', 'VTOP', 'VBOX'];
 
 /**
  *  The spacing sizes used by the TeX spacing table below.
@@ -86,7 +88,7 @@ export type MMLNODE = MmlNode | TextNode | XMLNode;
  *  The MmlNode interface (extends Node interface)
  */
 
-export interface MmlNode extends Node {
+export interface MmlNode extends Node<MmlNode, MmlNodeClass> {
 
   /**
    * Test various properties of MathML nodes
@@ -95,7 +97,7 @@ export interface MmlNode extends Node {
   readonly isEmbellished: boolean;
   readonly isSpacelike: boolean;
   readonly linebreakContainer: boolean;
-  readonly hasNewLine: boolean;
+  readonly linebreakAlign: string;
 
   /**
    *  The expected number of children (-1 means use inferred mrow)
@@ -114,6 +116,11 @@ export interface MmlNode extends Node {
    * The actual parent in the tree
    */
   parent: MmlNode;
+
+  /**
+   * @ override
+   */
+  childNodes: MmlNode[];
 
   /**
    *  values needed for TeX spacing computations
@@ -211,7 +218,7 @@ export interface MmlNode extends Node {
  *  The MmlNode class interface (extends the NodeClass)
  */
 
-export interface MmlNodeClass extends NodeClass {
+export interface MmlNodeClass extends NodeClass<MmlNode, MmlNodeClass> {
 
   /**
    *  The list of default attribute values for nodes of this class
@@ -239,7 +246,7 @@ export interface MmlNodeClass extends NodeClass {
  *  the IMmlNode interface)
  */
 
-export abstract class AbstractMmlNode extends AbstractNode implements MmlNode {
+export abstract class AbstractMmlNode extends AbstractNode<MmlNode, MmlNodeClass> implements MmlNode {
 
   /**
    * The properties common to all MathML nodes
@@ -272,12 +279,22 @@ export abstract class AbstractMmlNode extends AbstractNode implements MmlNode {
   };
 
   /**
+   * This lists the attributes that should not be propagated to child nodes of the
+   *   given kind of node (so that table attributes don't bleed through to nested
+   *   tables -- see issue mathjax/MathJax#2890).
+   */
+  public static stopInherit: {[node: string]: {[attribute: string]: boolean}} = {
+    mtd: {columnalign: true, rowalign: true, groupalign: true}
+  };
+
+  /**
    * This lists the attributes that should always be inherited,
    *   even when there is no default value for the attribute.
    */
   public static alwaysInherit: {[name: string]: boolean} = {
     scriptminsize: true,
-    scriptsizemultiplier: true
+    scriptsizemultiplier: true,
+    infixlinebreakstyle: true
   };
 
   /**
@@ -430,10 +447,11 @@ export abstract class AbstractMmlNode extends AbstractNode implements MmlNode {
   }
 
   /**
-   * @return {boolean}  true if this node contains a line break
+   * @return {string}  the attribute used to seed the indentalign value in
+   *                   linebreak containers (overridden in subclasses when needed)
    */
-  public get hasNewLine(): boolean {
-    return false;
+  public get linebreakAlign(): string {
+    return 'data-align';
   }
 
   /**
@@ -613,10 +631,10 @@ export abstract class AbstractMmlNode extends AbstractNode implements MmlNode {
     if (prevClass === TEXCLASS.NONE || texClass === TEXCLASS.NONE) {
       return '';
     }
-    if (prevClass === TEXCLASS.VCENTER) {
+    if (prevClass >= TEXCLASS.VCENTER) {
       prevClass = TEXCLASS.ORD;
     }
-    if (texClass === TEXCLASS.VCENTER) {
+    if (texClass >= TEXCLASS.VCENTER) {
       texClass = TEXCLASS.ORD;
     }
     let space = TEXSPACE[prevClass][texClass];
@@ -643,6 +661,7 @@ export abstract class AbstractMmlNode extends AbstractNode implements MmlNode {
    *   If the node doesn't have an explicit scriptstyle, inherit it
    *   If the prime style is true, set it as a property (it is not a MathML attribute)
    *   Check that the number of children is correct
+   *   Reset the indent attributes for linebreak containers
    *   Finally, push any inherited attributes to teh children.
    *
    * @override
@@ -653,10 +672,11 @@ export abstract class AbstractMmlNode extends AbstractNode implements MmlNode {
     for (const key of Object.keys(attributes)) {
       if (defaults.hasOwnProperty(key) || AbstractMmlNode.alwaysInherit.hasOwnProperty(key)) {
         let [node, value] = attributes[key];
-        let noinherit = (AbstractMmlNode.noInherit[node] || {})[this.kind] || {};
-        if (!noinherit[key]) {
-          this.attributes.setInherited(key, value);
-        }
+        !AbstractMmlNode.noInherit[node]?.[this.kind]?.[key] && this.attributes.setInherited(key, value);
+      }
+      if (AbstractMmlNode.stopInherit[this.kind]?.[key]) {
+        attributes = {...attributes};
+        delete attributes[key];
       }
     }
     let displaystyle = this.attributes.getExplicit('displaystyle');
@@ -683,6 +703,20 @@ export abstract class AbstractMmlNode extends AbstractNode implements MmlNode {
         while (this.childNodes.length < arity) {
           this.appendChild(this.factory.create('mrow'));
         }
+      }
+    }
+    //
+    //  If this is a linebreak container, reset the indent attributes
+    //
+    if (this.linebreakContainer && !this.isEmbellished) {
+      const align = this.linebreakAlign;
+      if (align) {
+        const indentalign = this.attributes.get(align) || 'left';
+        attributes = this.addInheritedAttributes(attributes, {
+          indentalign, indentshift: '0',
+          indentalignfirst: indentalign, indentshiftfirst: '0',
+          indentalignlast: 'indentalign', indentshiftlast: 'indentshift'
+        });
       }
     }
     this.setChildInheritedAttributes(attributes, display, level, prime);
@@ -808,9 +842,9 @@ export abstract class AbstractMmlNode extends AbstractNode implements MmlNode {
     merror.attributes.set('data-mjx-message', message);
     if (options['fullErrors'] || short) {
       let mtext = this.factory.create('mtext');
-      let text = this.factory.create('text') as TextNode;
+      let text = this.factory.create('text') as any as TextNode;
       text.setText(options['fullErrors'] ? message : this.kind);
-      mtext.appendChild(text);
+      mtext.appendChild(text as any);
       merror.appendChild(mtext);
       this.parent.replaceChild(merror, this);
     } else {
@@ -876,7 +910,7 @@ export abstract class AbstractMmlTokenNode extends AbstractMmlNode {
    * Only step into children that are AbstractMmlNodes (not TextNodes)
    * @override
    */
-  public walkTree(func: (node: Node, data?: any) => void, data?: any) {
+  public walkTree(func: (node: MmlNode, data?: any) => void, data?: any) {
     func(this, data);
     for (const child of this.childNodes) {
       if (child instanceof AbstractMmlNode) {
@@ -1022,12 +1056,17 @@ export abstract class AbstractMmlBaseNode extends AbstractMmlNode {
  *  goes with an MmlNode.
  */
 
-export abstract class AbstractMmlEmptyNode extends AbstractEmptyNode implements MmlNode {
+export abstract class AbstractMmlEmptyNode extends AbstractEmptyNode<MmlNode, MmlNodeClass> implements MmlNode {
 
   /**
    *  Parent is an MmlNode
    */
   public parent: MmlNode;
+
+  /**
+   *  @override
+   */
+  public childNodes: MmlNode[];
 
   /**
    * @return {boolean}  Not a token element
@@ -1058,10 +1097,10 @@ export abstract class AbstractMmlEmptyNode extends AbstractEmptyNode implements 
   }
 
   /**
-   * @return {boolean}  Does not contain new lines
+   * @return {string}  Don't set the indentalign and indentshift attributes in this case
    */
-  public get hasNewLine(): boolean {
-    return false;
+  public get linebreakAlign(): string {
+    return '';
   }
 
   /**

@@ -12,7 +12,11 @@ var __assign = (this && this.__assign) || function () {
 };
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -44,6 +48,26 @@ var __read = (this && this.__read) || function (o, n) {
         finally { if (e) throw e.error; }
     }
     return ar;
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -172,7 +196,7 @@ BaseMethods.Subscript = function (parser, _c) {
 BaseMethods.Prime = function (parser, c) {
     var base = parser.stack.Prev();
     if (!base) {
-        base = parser.create('node', 'mi');
+        base = parser.create('token', 'mi');
     }
     if (NodeUtil_js_1.default.isType(base, 'msubsup') && !NodeUtil_js_1.default.isType(base, 'msup') &&
         NodeUtil_js_1.default.getChildAt(base, base.sup)) {
@@ -217,6 +241,29 @@ BaseMethods.Spacer = function (parser, _name, space) {
     var node = parser.create('node', 'mspace', [], { width: (0, lengths_js_1.em)(space) });
     var style = parser.create('node', 'mstyle', [node], { scriptlevel: 0 });
     parser.Push(style);
+};
+BaseMethods.DiscretionaryTimes = function (parser, _name) {
+    parser.Push(parser.create('token', 'mo', { linebreakmultchar: '\u00D7' }, '\u2062'));
+};
+BaseMethods.AllowBreak = function (parser, _name) {
+    parser.Push(parser.create('token', 'mo', { 'data-allowbreak': true }));
+};
+BaseMethods.Break = function (parser, _name) {
+    parser.Push(parser.create('token', 'mo', { linebreak: TexConstants_js_1.TexConstant.LineBreak.NEWLINE }));
+};
+BaseMethods.Linebreak = function (parser, _name, linebreak) {
+    var _a, _b;
+    var insert = true;
+    var prev = parser.stack.Prev(true);
+    if (prev && prev.isKind('mo')) {
+        var style = ((_b = (_a = NodeUtil_js_1.default.getOp(prev)) === null || _a === void 0 ? void 0 : _a[3]) === null || _b === void 0 ? void 0 : _b.linebreakstyle) ||
+            NodeUtil_js_1.default.getAttribute(prev, 'linebreakstyle');
+        if (style !== TexConstants_js_1.TexConstant.LineBreakStyle.BEFORE) {
+            prev.attributes.set('linebreak', linebreak);
+            insert = false;
+        }
+    }
+    parser.Push(parser.itemFactory.create('break', linebreak, insert));
 };
 BaseMethods.LeftRight = function (parser, name) {
     var first = name.substr(1);
@@ -413,7 +460,6 @@ BaseMethods.TeXAtom = function (parser, name, mclass) {
     var def = { texClass: mclass };
     var mml;
     var node;
-    var parsed;
     if (mclass === MmlNode_js_1.TEXCLASS.OP) {
         def['movesupsub'] = def['movablelimits'] = true;
         var arg = parser.GetArgument(name);
@@ -423,16 +469,29 @@ BaseMethods.TeXAtom = function (parser, name, mclass) {
             node = parser.create('token', 'mi', def, match[1]);
         }
         else {
-            parsed = new TexParser_js_1.default(arg, parser.stack.env, parser.configuration).mml();
+            var parsed = new TexParser_js_1.default(arg, parser.stack.env, parser.configuration).mml();
             node = parser.create('node', 'TeXAtom', [parsed], def);
         }
         mml = parser.itemFactory.create('fn', node);
     }
     else {
-        parsed = parser.ParseArg(name);
-        mml = parser.create('node', 'TeXAtom', [parsed], def);
+        mml = parser.create('node', 'TeXAtom', [], def);
+        var arg = new TexParser_js_1.default(parser.GetArgument(name), parser.stack.env, parser.configuration);
+        if (mclass >= MmlNode_js_1.TEXCLASS.VCENTER && arg.stack.env.hsize) {
+            mml.appendChild(parser.create('node', 'mpadded', [arg.mml()], {
+                width: arg.stack.env.hsize,
+                'data-overflow': 'linebreak'
+            }));
+        }
+        else {
+            mml.appendChild(arg.mml());
+        }
     }
     parser.Push(mml);
+};
+BaseMethods.Hsize = function (parser, name) {
+    parser.GetNext() === '=' && parser.i++;
+    parser.stack.env.hsize = parser.GetDimen(name);
 };
 BaseMethods.MmlToken = function (parser, name) {
     var kind = parser.GetArgument(name);
@@ -555,8 +614,10 @@ BaseMethods.MoveLeftRight = function (parser, name) {
         right: parser.create('node', 'mspace', [], { width: nh })
     }));
 };
-BaseMethods.Hskip = function (parser, name) {
+BaseMethods.Hskip = function (parser, name, nobreak) {
+    if (nobreak === void 0) { nobreak = false; }
     var node = parser.create('node', 'mspace', [], { width: parser.GetDimen(name) });
+    nobreak && NodeUtil_js_1.default.setAttribute(node, 'linebreak', 'nobreak');
     parser.Push(node);
 };
 BaseMethods.Nonscript = function (parser, _name) {
@@ -630,6 +691,16 @@ BaseMethods.FrameBox = function (parser, name) {
     }
     var node = parser.create('node', 'TeXAtom', [parser.create('node', 'menclose', mml, { notation: 'box' })], { texClass: MmlNode_js_1.TEXCLASS.ORD });
     parser.Push(node);
+};
+BaseMethods.MakeBox = function (parser, name) {
+    var width = parser.GetBrackets(name);
+    var pos = parser.GetBrackets(name, 'c');
+    var mml = parser.create('node', 'mpadded', ParseUtil_js_1.default.internalMath(parser, parser.GetArgument(name)));
+    width && NodeUtil_js_1.default.setAttribute(mml, 'width', width);
+    var align = (0, Options_js_1.lookup)(pos.toLowerCase(), { c: 'center', r: 'right' }, '');
+    align && NodeUtil_js_1.default.setAttribute(mml, 'data-align', align);
+    pos.toLowerCase() !== pos && NodeUtil_js_1.default.setAttribute(mml, 'data-overflow', 'linebreak');
+    parser.Push(mml);
 };
 BaseMethods.Not = function (parser, _name) {
     parser.Push(parser.itemFactory.create('not'));
@@ -759,11 +830,9 @@ BaseMethods.CrLaTeX = function (parser, name, nobrackets) {
         }
     }
     else {
-        if (n) {
-            node = parser.create('node', 'mspace', [], { depth: n });
-            parser.Push(node);
-        }
         node = parser.create('node', 'mspace', [], { linebreak: TexConstants_js_1.TexConstant.LineBreak.NEWLINE });
+        if (n)
+            NodeUtil_js_1.default.setAttribute(node, 'data-lineleading', n);
         parser.Push(node);
     }
 };
@@ -796,9 +865,22 @@ BaseMethods.HFill = function (parser, _name) {
         throw new TexError_js_1.default('UnsupportedHFill', 'Unsupported use of %1', parser.currentCS);
     }
 };
+BaseMethods.NewColumnType = function (parser, name) {
+    var c = parser.GetArgument(name);
+    var n = parser.GetBrackets(name, '0');
+    var macro = parser.GetArgument(name);
+    if (c.length !== 1) {
+        throw new TexError_js_1.default('BadColumnName', 'Column specifier must be exactly one character: %1', c);
+    }
+    if (!n.match(/^\d+$/)) {
+        throw new TexError_js_1.default('PositiveIntegerArg', 'Argument to %1 must me a positive integer', n);
+    }
+    var cparser = parser.configuration.columnParser;
+    cparser.columnHandler[c] = function (state) { return cparser.macroColumn(state, macro, parseInt(n)); };
+};
 BaseMethods.BeginEnd = function (parser, name) {
     var env = parser.GetArgument(name);
-    if (env.match(/\\/i)) {
+    if (env.match(/\\/)) {
         throw new TexError_js_1.default('InvalidEnv', 'Invalid environment name \'%1\'', env);
     }
     var macro = parser.configuration.handlers.get('environment').lookup(env);
@@ -817,27 +899,13 @@ BaseMethods.Array = function (parser, begin, open, close, align, spacing, vspaci
     if (!align) {
         align = parser.GetArgument('\\begin{' + begin.getName() + '}');
     }
-    var lines = ('c' + align).replace(/[^clr|:]/g, '').replace(/[^|:]([|:])+/g, '$1');
-    align = align.replace(/[^clr]/g, '').split('').join(' ');
-    align = align.replace(/l/g, 'left').replace(/r/g, 'right').replace(/c/g, 'center');
     var array = parser.itemFactory.create('array');
+    array.parser = parser;
     array.arraydef = {
-        columnalign: align,
         columnspacing: (spacing || '1em'),
         rowspacing: (vspacing || '4pt')
     };
-    if (lines.match(/[|:]/)) {
-        if (lines.charAt(0).match(/[|:]/)) {
-            array.frame.push('left');
-            array.dashed = lines.charAt(0) === ':';
-        }
-        if (lines.charAt(lines.length - 1).match(/[|:]/)) {
-            array.frame.push('right');
-        }
-        lines = lines.substr(1, lines.length - 2);
-        array.arraydef.columnlines =
-            lines.split('').join(' ').replace(/[^|: ]/g, 'none').replace(/\|/g, 'solid').replace(/:/g, 'dashed');
-    }
+    parser.configuration.columnParser.process(parser, align, array);
     if (open) {
         array.setProperty('open', parser.convertDelimiter(open));
     }
@@ -861,12 +929,51 @@ BaseMethods.Array = function (parser, begin, open, close, align, spacing, vspaci
         array.arraydef['useHeight'] = false;
     }
     parser.Push(begin);
+    array.StartEntry();
     return array;
 };
 BaseMethods.AlignedArray = function (parser, begin) {
     var align = parser.GetBrackets('\\begin{' + begin.getName() + '}');
     var item = BaseMethods.Array(parser, begin);
     return ParseUtil_js_1.default.setArrayAlign(item, align);
+};
+BaseMethods.IndentAlign = function (parser, begin) {
+    var e_1, _a;
+    var name = "\\begin{".concat(begin.getName(), "}");
+    var first = parser.GetBrackets(name, '');
+    var shift = parser.GetBrackets(name, '');
+    var last = parser.GetBrackets(name, '');
+    if ((first && !ParseUtil_js_1.default.matchDimen(first)[0]) ||
+        (shift && !ParseUtil_js_1.default.matchDimen(shift)[0]) ||
+        (last && !ParseUtil_js_1.default.matchDimen(last)[0])) {
+        throw new TexError_js_1.default('BracketMustBeDimension', 'Bracket argument to %1 must be a dimension', name);
+    }
+    var lcr = parser.GetArgument(name);
+    if (lcr && !lcr.match(/^([lcr]{1,3})?$/)) {
+        throw new TexError_js_1.default('BadAlignment', 'Alignment must be one to three copies of l, c, or r');
+    }
+    var align = __spreadArray([], __read(lcr), false).map(function (c) { return ({ l: 'left', c: 'center', r: 'right' })[c]; });
+    align.length === 1 && align.push(align[0]);
+    var attr = {};
+    try {
+        for (var _b = __values([
+            ['indentshiftfirst', first], ['indentshift', shift || first], ['indentshiftlast', last],
+            ['indentalignfirst', align[0]], ['indentalign', align[1]], ['indentalignlast', align[2]]
+        ]), _d = _b.next(); !_d.done; _d = _b.next()) {
+            var _e = __read(_d.value, 2), name_1 = _e[0], value = _e[1];
+            if (value) {
+                attr[name_1] = value;
+            }
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_d && !_d.done && (_a = _b.return)) _a.call(_b);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    parser.Push(parser.itemFactory.create('mstyle', attr, begin.getName()));
 };
 BaseMethods.Equation = function (parser, begin, numbered) {
     parser.Push(begin);

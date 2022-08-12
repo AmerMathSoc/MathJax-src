@@ -1,12 +1,12 @@
-import { SVGConstructor } from '../Wrapper.js';
-import { SVGmo } from './mo.js';
-declare const SVGmfrac_base: import("../../common/Wrappers/mfrac.js").MfracConstructor & SVGConstructor<any, any, any>;
-export declare class SVGmfrac<N, T, D> extends SVGmfrac_base {
-    static kind: string;
-    bevel: SVGmo<N, T, D>;
-    toSVG(parent: N): void;
-    protected makeFraction(display: boolean, t: number): void;
-    protected makeAtop(display: boolean): void;
-    protected makeBevelled(display: boolean): void;
+import { SVG } from '../../svg.js';
+import { SvgWrapper, SvgWrapperClass } from '../Wrapper.js';
+import { SvgWrapperFactory } from '../WrapperFactory.js';
+import { SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass } from '../FontData.js';
+import { CommonMfrac, CommonMfracClass } from '../../common/Wrappers/mfrac.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+export interface SvgMfracNTD<N, T, D> extends SvgWrapper<N, T, D>, CommonMfrac<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
 }
-export {};
+export interface SvgMfracClass<N, T, D> extends SvgWrapperClass<N, T, D>, CommonMfracClass<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
+    new (factory: SvgWrapperFactory<N, T, D>, node: MmlNode, parent?: SvgWrapper<N, T, D>): SvgMfracNTD<N, T, D>;
+}
+export declare const SvgMfrac: SvgMfracClass<any, any, any>;

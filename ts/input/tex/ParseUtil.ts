@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2009-2021 The MathJax Consortium
+ *  Copyright (c) 2009-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -426,17 +426,23 @@ namespace ParseUtil {
    * Sets alignment in array definitions.
    * @param {ArrayItem} array The array item.
    * @param {string} align The alignment string.
+   * @param {TexParser?} parser The current tex parser.
+   * @param {number?} i The position to return to if the alignment isn't t, b, or c.
    * @return {ArrayItem} The altered array item.
    */
-  export function setArrayAlign(array: ArrayItem, align: string): ArrayItem {
+  export function setArrayAlign(array: ArrayItem, align: string, parser?: TexParser, i?: number): ArrayItem {
     // @test Array1, Array2, Array Test
-    align = ParseUtil.trimSpaces(align || '');
+    if (!parser) {
+      align = ParseUtil.trimSpaces(align || '');
+    }
     if (align === 't') {
       array.arraydef.align = 'baseline 1';
     } else if (align === 'b') {
       array.arraydef.align = 'baseline -1';
     } else if (align === 'c') {
       array.arraydef.align = 'axis';
+    } else if (parser) {
+      parser.i = i;
     } else if (align) {
       array.arraydef.align = align;
     } // FIXME: should be an error?
@@ -543,7 +549,7 @@ namespace ParseUtil {
    * @return {MmlNode}           The duplicate tree
    */
   export function copyNode(node: MmlNode, parser: TexParser): MmlNode  {
-    const tree = node.copy() as MmlNode;
+    const tree = node.copy();
     const options = parser.configuration;
     tree.walkTree((n: MmlNode) => {
       options.addNode(n.kind, n);

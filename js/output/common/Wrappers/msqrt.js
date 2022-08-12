@@ -30,65 +30,60 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonMsqrtMixin = void 0;
 var BBox_js_1 = require("../../../util/BBox.js");
 function CommonMsqrtMixin(Base) {
     return (function (_super) {
-        __extends(class_1, _super);
-        function class_1() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
-            }
-            var _this = _super.apply(this, __spreadArray([], __read(args), false)) || this;
-            var surd = _this.createMo('\u221A');
-            surd.canStretch(1);
-            var _a = _this.childNodes[_this.base].getOuterBBox(), h = _a.h, d = _a.d;
-            var t = _this.font.params.rule_thickness;
-            var p = (_this.node.attributes.get('displaystyle') ? _this.font.params.x_height : t);
-            _this.surdH = h + d + 2 * t + p / 4;
-            surd.getStretchedVariant([_this.surdH - d, d], true);
+        __extends(CommonMsqrtMixin, _super);
+        function CommonMsqrtMixin(factory, node, parent) {
+            if (parent === void 0) { parent = null; }
+            var _this = _super.call(this, factory, node, parent) || this;
+            _this.surd = _this.createMo('\u221A');
+            _this.surd.canStretch(1);
+            _this.getStretchedSurd();
             return _this;
         }
-        Object.defineProperty(class_1.prototype, "base", {
+        Object.defineProperty(CommonMsqrtMixin.prototype, "base", {
             get: function () {
                 return 0;
             },
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(class_1.prototype, "surd", {
-            get: function () {
-                return 1;
-            },
-            enumerable: false,
-            configurable: true
-        });
-        Object.defineProperty(class_1.prototype, "root", {
+        Object.defineProperty(CommonMsqrtMixin.prototype, "root", {
             get: function () {
                 return null;
             },
             enumerable: false,
             configurable: true
         });
-        class_1.prototype.createMo = function (text) {
-            var node = _super.prototype.createMo.call(this, text);
-            this.childNodes.push(node);
-            return node;
+        CommonMsqrtMixin.prototype.combineRootBBox = function (_bbox, _sbox, _H) {
         };
-        class_1.prototype.computeBBox = function (bbox, recompute) {
+        CommonMsqrtMixin.prototype.getPQ = function (sbox) {
+            var t = this.font.params.rule_thickness;
+            var p = (this.node.attributes.get('displaystyle') ? this.font.params.x_height : t);
+            var q = (sbox.h + sbox.d > this.surdH ?
+                ((sbox.h + sbox.d) - (this.surdH - 2 * t - p / 2)) / 2 :
+                t + p / 4);
+            return [p, q];
+        };
+        CommonMsqrtMixin.prototype.getRootDimens = function (_sbox, _H) {
+            return [0, 0, 0, 0];
+        };
+        CommonMsqrtMixin.prototype.rootWidth = function () {
+            return 1.25;
+        };
+        CommonMsqrtMixin.prototype.getStretchedSurd = function () {
+            var t = this.font.params.rule_thickness;
+            var p = (this.node.attributes.get('displaystyle') ? this.font.params.x_height : t);
+            var _a = this.childNodes[this.base].getOuterBBox(), h = _a.h, d = _a.d;
+            this.surdH = h + d + 2 * t + p / 4;
+            this.surd.getStretchedVariant([this.surdH - d, d], true);
+        };
+        CommonMsqrtMixin.prototype.computeBBox = function (bbox, recompute) {
             if (recompute === void 0) { recompute = false; }
-            var surdbox = this.childNodes[this.surd].getBBox();
+            var surdbox = this.surd.getBBox();
             var basebox = new BBox_js_1.BBox(this.childNodes[this.base].getOuterBBox());
             var q = this.getPQ(surdbox)[1];
             var t = this.font.params.rule_thickness;
@@ -101,20 +96,11 @@ function CommonMsqrtMixin(Base) {
             bbox.clean();
             this.setChildPWidths(recompute);
         };
-        class_1.prototype.combineRootBBox = function (_bbox, _sbox, _H) {
+        CommonMsqrtMixin.prototype.invalidateBBox = function () {
+            _super.prototype.invalidateBBox.call(this);
+            this.surd.childNodes[0].invalidateBBox();
         };
-        class_1.prototype.getPQ = function (sbox) {
-            var t = this.font.params.rule_thickness;
-            var p = (this.node.attributes.get('displaystyle') ? this.font.params.x_height : t);
-            var q = (sbox.h + sbox.d > this.surdH ?
-                ((sbox.h + sbox.d) - (this.surdH - 2 * t - p / 2)) / 2 :
-                t + p / 4);
-            return [p, q];
-        };
-        class_1.prototype.getRootDimens = function (_sbox, _H) {
-            return [0, 0, 0, 0];
-        };
-        return class_1;
+        return CommonMsqrtMixin;
     }(Base));
 }
 exports.CommonMsqrtMixin = CommonMsqrtMixin;

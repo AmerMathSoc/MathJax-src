@@ -1,32 +1,31 @@
 import { OptionList } from '../../util/Options.js';
-import { CommonWrapper, AnyWrapperClass, Constructor, StringMap } from '../common/Wrapper.js';
+import { CommonWrapper, CommonWrapperClass, Constructor, StringMap } from '../common/Wrapper.js';
 import { CHTML } from '../chtml.js';
-import { CHTMLWrapperFactory } from './WrapperFactory.js';
-import { CHTMLFontData, CHTMLCharOptions, CHTMLDelimiterData } from './FontData.js';
+import { ChtmlWrapperFactory } from './WrapperFactory.js';
+import { ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass } from './FontData.js';
 export { Constructor, StringMap } from '../common/Wrapper.js';
 export declare const FONTSIZE: StringMap;
 export declare const SPACE: StringMap;
-export declare type CHTMLConstructor<N, T, D> = Constructor<CHTMLWrapper<N, T, D>>;
-export interface CHTMLWrapperClass extends AnyWrapperClass {
-    kind: string;
+export declare type ChtmlConstructor<N, T, D> = Constructor<ChtmlWrapper<N, T, D>>;
+export interface ChtmlWrapperClass<N, T, D> extends CommonWrapperClass<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
     autoStyle: boolean;
 }
-export declare class CHTMLWrapper<N, T, D> extends CommonWrapper<CHTML<N, T, D>, CHTMLWrapper<N, T, D>, CHTMLWrapperClass, CHTMLCharOptions, CHTMLDelimiterData, CHTMLFontData> {
+export declare class ChtmlWrapper<N, T, D> extends CommonWrapper<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
     static kind: string;
     static autoStyle: boolean;
-    protected factory: CHTMLWrapperFactory<N, T, D>;
-    parent: CHTMLWrapper<N, T, D>;
-    childNodes: CHTMLWrapper<N, T, D>[];
-    chtml: N;
-    toCHTML(parent: N): void;
-    protected standardCHTMLnode(parent: N): N;
+    toCHTML(parents: N[]): void;
+    toEmbellishedCHTML(parents: N[]): boolean;
+    addChildren(parents: N[]): void;
+    protected standardChtmlNodes(parents: N[]): N[];
     markUsed(): void;
-    protected createCHTMLnode(parent: N): N;
+    protected createChtmlNodes(parents: N[]): N[];
+    protected handleHref(parents: N[]): N[];
     protected handleStyles(): void;
     protected handleVariant(): void;
     protected handleScale(): void;
     protected setScale(chtml: N, rscale: number): N;
     protected handleSpace(): void;
+    protected handleBorders(): void;
     protected handleColor(): void;
     protected handleAttributes(): void;
     protected handlePWidth(): void;

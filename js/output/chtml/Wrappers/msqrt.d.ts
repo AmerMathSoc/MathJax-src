@@ -1,11 +1,12 @@
-import { CHTMLWrapper, CHTMLConstructor } from '../Wrapper.js';
-import { BBox } from '../../../util/BBox.js';
-import { StyleList } from '../../../util/StyleList.js';
-declare const CHTMLmsqrt_base: import("../../common/Wrappers/msqrt.js").MsqrtConstructor & CHTMLConstructor<any, any, any>;
-export declare class CHTMLmsqrt<N, T, D> extends CHTMLmsqrt_base {
-    static kind: string;
-    static styles: StyleList;
-    toCHTML(parent: N): void;
-    protected addRoot(_ROOT: N, _root: CHTMLWrapper<N, T, D>, _sbox: BBox, _H: number): void;
+import { CHTML } from '../../chtml.js';
+import { ChtmlWrapper, ChtmlWrapperClass } from '../Wrapper.js';
+import { ChtmlWrapperFactory } from '../WrapperFactory.js';
+import { ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass } from '../FontData.js';
+import { CommonMsqrt, CommonMsqrtClass } from '../../common/Wrappers/msqrt.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+export interface ChtmlMsqrtNTD<N, T, D> extends ChtmlWrapper<N, T, D>, CommonMsqrt<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
 }
-export {};
+export interface ChtmlMsqrtClass<N, T, D> extends ChtmlWrapperClass<N, T, D>, CommonMsqrtClass<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
+    new (factory: ChtmlWrapperFactory<N, T, D>, node: MmlNode, parent?: ChtmlWrapper<N, T, D>): ChtmlMsqrtNTD<N, T, D>;
+}
+export declare const ChtmlMsqrt: ChtmlMsqrtClass<any, any, any>;

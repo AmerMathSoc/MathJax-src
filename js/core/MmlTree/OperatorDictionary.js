@@ -378,7 +378,7 @@ exports.OPTABLE = {
         '-': exports.MO.BIN4,
         '-=': exports.MO.BIN4,
         '->': exports.MO.BIN5,
-        '.': [0, 3, MmlNode_js_1.TEXCLASS.PUNCT, { separator: true }],
+        '.': [0, 3, MmlNode_js_1.TEXCLASS.PUNCT, { linebreakstyle: 'after', separator: true }],
         '/': exports.MO.ORD11,
         '//': OPDEF(1, 1),
         '/=': exports.MO.BIN4,

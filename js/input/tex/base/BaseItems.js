@@ -39,11 +39,22 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EquationItem = exports.EqnArrayItem = exports.ArrayItem = exports.DotsItem = exports.NonscriptItem = exports.NotItem = exports.FnItem = exports.MmlItem = exports.CellItem = exports.PositionItem = exports.StyleItem = exports.EndItem = exports.BeginItem = exports.RightItem = exports.Middle = exports.LeftItem = exports.OverItem = exports.SubsupItem = exports.PrimeItem = exports.CloseItem = exports.OpenItem = exports.StopItem = exports.StartItem = void 0;
+exports.EquationItem = exports.MstyleItem = exports.EqnArrayItem = exports.ArrayItem = exports.DotsItem = exports.NonscriptItem = exports.NotItem = exports.FnItem = exports.MmlItem = exports.CellItem = exports.PositionItem = exports.StyleItem = exports.EndItem = exports.BeginItem = exports.BreakItem = exports.RightItem = exports.Middle = exports.LeftItem = exports.OverItem = exports.SubsupItem = exports.PrimeItem = exports.CloseItem = exports.OpenItem = exports.StopItem = exports.StartItem = void 0;
 var MapHandler_js_1 = require("../MapHandler.js");
 var Entities_js_1 = require("../../../util/Entities.js");
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
@@ -378,6 +389,43 @@ var RightItem = (function (_super) {
     return RightItem;
 }(StackItem_js_1.BaseItem));
 exports.RightItem = RightItem;
+var BreakItem = (function (_super) {
+    __extends(BreakItem, _super);
+    function BreakItem(factory, linebreak, insert) {
+        var _this = _super.call(this, factory) || this;
+        _this.setProperty('linebreak', linebreak);
+        _this.setProperty('insert', insert);
+        return _this;
+    }
+    Object.defineProperty(BreakItem.prototype, "kind", {
+        get: function () {
+            return 'break';
+        },
+        enumerable: false,
+        configurable: true
+    });
+    BreakItem.prototype.checkItem = function (item) {
+        var _a, _b;
+        var linebreak = this.getProperty('linebreak');
+        if (item.isKind('mml')) {
+            var mml_1 = item.First;
+            if (mml_1.isKind('mo')) {
+                var style = ((_b = (_a = NodeUtil_js_1.default.getOp(mml_1)) === null || _a === void 0 ? void 0 : _a[3]) === null || _b === void 0 ? void 0 : _b.linebreakstyle) ||
+                    NodeUtil_js_1.default.getAttribute(mml_1, 'linebreakstyle');
+                if (style !== 'after') {
+                    NodeUtil_js_1.default.setAttribute(mml_1, 'linebreak', linebreak);
+                    return [[item], true];
+                }
+                if (!this.getProperty('insert'))
+                    return [[item], true];
+            }
+        }
+        var mml = this.create('token', 'mo', { linebreak: linebreak });
+        return [[this.factory.create('mml', mml), item], true];
+    };
+    return BreakItem;
+}(StackItem_js_1.BaseItem));
+exports.BreakItem = BreakItem;
 var BeginItem = (function (_super) {
     __extends(BeginItem, _super);
     function BeginItem() {
@@ -698,6 +746,9 @@ var ArrayItem = (function (_super) {
         _this.frame = [];
         _this.hfill = [];
         _this.arraydef = {};
+        _this.cstart = [];
+        _this.cend = [];
+        _this.ralign = [];
         _this.dashed = false;
         return _this;
     }
@@ -727,12 +778,14 @@ var ArrayItem = (function (_super) {
             if (item.getProperty('isEntry')) {
                 this.EndEntry();
                 this.clearEnv();
+                this.StartEntry();
                 return StackItem_js_1.BaseItem.fail;
             }
             if (item.getProperty('isCR')) {
                 this.EndEntry();
                 this.EndRow();
                 this.clearEnv();
+                this.StartEntry();
                 return StackItem_js_1.BaseItem.fail;
             }
             this.EndTable();
@@ -763,7 +816,7 @@ var ArrayItem = (function (_super) {
                 this.arraydef['rowlines'] =
                     this.arraydef['rowlines'].replace(/none( none)+$/, 'none');
             }
-            NodeUtil_js_1.default.setAttribute(mml, 'frame', '');
+            NodeUtil_js_1.default.removeAttribute(mml, 'frame');
             mml = this.create('node', 'menclose', [mml], { notation: this.frame.join(' ') });
             if ((this.arraydef['columnlines'] || 'none') !== 'none' ||
                 (this.arraydef['rowlines'] || 'none') !== 'none') {
@@ -775,6 +828,69 @@ var ArrayItem = (function (_super) {
         }
         return mml;
     };
+    ArrayItem.prototype.StartEntry = function () {
+        var n = this.row.length;
+        var start = this.cstart[n];
+        var end = this.cend[n];
+        var ralign = this.ralign[n];
+        if (!start && !end && !ralign)
+            return;
+        var _a = __read(this.getEntry(), 2), entry = _a[0], found = _a[1];
+        if (!found)
+            return;
+        var parser = this.parser;
+        if (start) {
+            entry = ParseUtil_js_1.default.addArgs(parser, start, entry);
+        }
+        if (end) {
+            entry = ParseUtil_js_1.default.addArgs(parser, entry, end);
+        }
+        if (ralign) {
+            entry = '\\text{' + entry.trim() + '}';
+        }
+        parser.string = ParseUtil_js_1.default.addArgs(parser, entry, parser.string);
+        parser.i = 0;
+    };
+    ArrayItem.prototype.getEntry = function () {
+        var parser = this.parser;
+        var pattern = /^([^]*?)([&{}]|\\\\|\\(?:begin|end)\{array\})/;
+        var braces = 0, envs = 0;
+        var i = parser.i;
+        var match;
+        var fail = ['', false];
+        while ((match = parser.string.slice(i).match(pattern)) !== null) {
+            i += match[0].length;
+            switch (match[2]) {
+                case '{':
+                    braces++;
+                    break;
+                case '}':
+                    if (!braces)
+                        return fail;
+                    braces--;
+                    break;
+                case '\\begin{array}':
+                    !braces && envs++;
+                    break;
+                case '\\end{array}':
+                    if (!braces && envs) {
+                        envs--;
+                        break;
+                    }
+                default:
+                    if (braces || envs)
+                        continue;
+                    i -= match[2].length;
+                    var entry = parser.string.slice(parser.i, i).trim();
+                    if (match[2] !== '&' && !entry.trim())
+                        return fail;
+                    parser.string = parser.string.slice(i);
+                    parser.i = 0;
+                    return [entry, true];
+            }
+        }
+        return fail;
+    };
     ArrayItem.prototype.EndEntry = function () {
         var mtd = this.create('node', 'mtd', this.nodes);
         if (this.hfill.length) {
@@ -784,6 +900,19 @@ var ArrayItem = (function (_super) {
             if (this.hfill[this.hfill.length - 1] === this.Size()) {
                 NodeUtil_js_1.default.setAttribute(mtd, 'columnalign', NodeUtil_js_1.default.getAttribute(mtd, 'columnalign') ? 'center' : 'left');
             }
+        }
+        var ralign = this.ralign[this.row.length];
+        if (ralign) {
+            var _a = __read(ralign, 3), tclass = _a[0], cwidth = _a[1], calign = _a[2];
+            var texatom = this.create('node', 'TeXAtom', [
+                this.create('node', 'mpadded', mtd.childNodes[0].childNodes, {
+                    width: cwidth,
+                    'data-overflow': 'auto',
+                    'data-align': calign
+                })
+            ], { texClass: tclass });
+            mtd.childNodes[0].childNodes = [];
+            mtd.appendChild(texatom);
         }
         this.row.push(mtd);
         this.Clear();
@@ -894,6 +1023,7 @@ var EqnArrayItem = (function (_super) {
         this.extendArray('columnalign', this.maxrow);
         this.extendArray('columnwidth', this.maxrow);
         this.extendArray('columnspacing', this.maxrow - 1);
+        this.addIndentshift();
     };
     EqnArrayItem.prototype.extendArray = function (name, max) {
         if (!this.arraydef[name])
@@ -907,9 +1037,75 @@ var EqnArrayItem = (function (_super) {
             this.arraydef[name] = columns.slice(0, max).join(' ');
         }
     };
+    EqnArrayItem.prototype.addIndentshift = function () {
+        var e_1, _a, e_2, _b;
+        if (!this.arraydef.columnalign)
+            return;
+        var align = this.arraydef.columnalign.split(/ /);
+        var prev = '';
+        try {
+            for (var _c = __values(align.keys()), _d = _c.next(); !_d.done; _d = _c.next()) {
+                var i = _d.value;
+                if (align[i] === 'left') {
+                    var indentshift = (prev === 'center' ? '.7em' : '2em');
+                    try {
+                        for (var _e = (e_2 = void 0, __values(this.table)), _f = _e.next(); !_f.done; _f = _e.next()) {
+                            var row = _f.value;
+                            var cell = row.childNodes[row.isKind('mlabeledtr') ? i + 1 : i];
+                            if (cell) {
+                                var mstyle = this.create('node', 'mstyle', cell.childNodes[0].childNodes, { indentshift: indentshift });
+                                cell.childNodes[0].childNodes = [];
+                                cell.appendChild(mstyle);
+                            }
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                }
+                prev = align[i];
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+    };
     return EqnArrayItem;
 }(ArrayItem));
 exports.EqnArrayItem = EqnArrayItem;
+var MstyleItem = (function (_super) {
+    __extends(MstyleItem, _super);
+    function MstyleItem(factory, attr, name) {
+        var _this = _super.call(this, factory) || this;
+        _this.attrList = attr;
+        _this.setProperty('name', name);
+        return _this;
+    }
+    Object.defineProperty(MstyleItem.prototype, "kind", {
+        get: function () {
+            return 'mstyle';
+        },
+        enumerable: false,
+        configurable: true
+    });
+    MstyleItem.prototype.checkItem = function (item) {
+        if (item.isKind('end') && item.getName() === this.getName()) {
+            var mml = this.create('node', 'mstyle', [this.toMml()], this.attrList);
+            return [[mml], true];
+        }
+        return _super.prototype.checkItem.call(this, item);
+    };
+    return MstyleItem;
+}(BeginItem));
+exports.MstyleItem = MstyleItem;
 var EquationItem = (function (_super) {
     __extends(EquationItem, _super);
     function EquationItem(factory) {

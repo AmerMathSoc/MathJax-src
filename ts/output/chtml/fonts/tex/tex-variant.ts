@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2018-2021 The MathJax Consortium
+ *  Copyright (c) 2018-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import {CHTMLCharMap, AddCSS} from '../../FontData.js';
+import {ChtmlCharMap, AddCSS} from '../../FontData.js';
 import {texVariant as font} from '../../../common/fonts/tex/tex-variant.js';
 
-export const texVariant: CHTMLCharMap = AddCSS(font, {
+export const texVariant: ChtmlCharMap = AddCSS(font, {
     0x3F0: {c: '\\E009'},
     0x210F: {f: ''},
     0x2224: {c: '\\E006'},

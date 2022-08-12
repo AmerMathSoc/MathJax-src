@@ -1,9 +1,13 @@
-import { SVGWrapper, Constructor } from '../Wrapper.js';
-import { SVGmsqrt } from './msqrt.js';
-import { BBox } from '../../../util/BBox.js';
-declare const SVGmroot_base: import("../../common/Wrappers/mroot.js").MrootConstructor & Constructor<SVGmsqrt<any, any, any>>;
-export declare class SVGmroot<N, T, D> extends SVGmroot_base {
-    static kind: string;
-    protected addRoot(ROOT: N, root: SVGWrapper<N, T, D>, sbox: BBox, H: number): void;
+import { SVG } from '../../svg.js';
+import { SvgWrapper, SvgWrapperClass } from '../Wrapper.js';
+import { SvgWrapperFactory } from '../WrapperFactory.js';
+import { SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass } from '../FontData.js';
+import { CommonMroot, CommonMrootClass } from '../../common/Wrappers/mroot.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+import { SvgMsqrtClass, SvgMsqrtNTD } from './msqrt.js';
+export interface SvgMrootNTD<N, T, D> extends SvgMsqrtNTD<N, T, D>, CommonMroot<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
 }
-export {};
+export interface SvgMrootClass<N, T, D> extends SvgMsqrtClass<N, T, D>, CommonMrootClass<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
+    new (factory: SvgWrapperFactory<N, T, D>, node: MmlNode, parent?: SvgWrapper<N, T, D>): SvgMrootNTD<N, T, D>;
+}
+export declare const SvgMroot: SvgMrootClass<any, any, any>;

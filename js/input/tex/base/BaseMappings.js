@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -483,12 +487,18 @@ new sm.CommandMap('macros', {
     qquad: ['Spacer', 2],
     thinspace: ['Spacer', lengths_js_1.MATHSPACE.thinmathspace],
     negthinspace: ['Spacer', lengths_js_1.MATHSPACE.negativethinmathspace],
+    '*': 'DiscretionaryTimes',
+    allowbreak: 'AllowBreak',
+    goodbreak: ['Linebreak', TexConstants_js_1.TexConstant.LineBreak.GOODBREAK],
+    badbreak: ['Linebreak', TexConstants_js_1.TexConstant.LineBreak.BADBREAK],
+    nobreak: ['Linebreak', TexConstants_js_1.TexConstant.LineBreak.NOBREAK],
+    break: 'Break',
     hskip: 'Hskip',
     hspace: 'Hskip',
-    kern: 'Hskip',
+    kern: ['Hskip', true],
     mskip: 'Hskip',
     mspace: 'Hskip',
-    mkern: 'Hskip',
+    mkern: ['Hskip', true],
     rule: 'rule',
     Rule: ['Rule'],
     Space: ['Rule', 'blank'],
@@ -517,7 +527,11 @@ new sm.CommandMap('macros', {
     mathrel: ['TeXAtom', MmlNode_js_1.TEXCLASS.REL],
     mathpunct: ['TeXAtom', MmlNode_js_1.TEXCLASS.PUNCT],
     mathinner: ['TeXAtom', MmlNode_js_1.TEXCLASS.INNER],
+    mathNONE: ['TeXAtom', MmlNode_js_1.TEXCLASS.NONE],
+    vtop: ['TeXAtom', MmlNode_js_1.TEXCLASS.VTOP],
     vcenter: ['TeXAtom', MmlNode_js_1.TEXCLASS.VCENTER],
+    vbox: ['TeXAtom', MmlNode_js_1.TEXCLASS.VBOX],
+    hsize: 'Hsize',
     buildrel: 'BuildRel',
     hbox: ['HBox', 0],
     text: 'HBox',
@@ -525,6 +539,7 @@ new sm.CommandMap('macros', {
     fbox: 'FBox',
     boxed: ['Macro', '\\fbox{$\\displaystyle{#1}$}', 1],
     framebox: 'FrameBox',
+    makebox: 'MakeBox',
     strut: 'Strut',
     mathstrut: ['Macro', '\\vphantom{(}'],
     phantom: 'Phantom',
@@ -589,6 +604,7 @@ new sm.CommandMap('macros', {
     label: 'HandleLabel',
     ref: 'HandleRef',
     nonumber: 'HandleNoTag',
+    newcolumntype: 'NewColumnType',
     mathchoice: 'MathChoice',
     mmlToken: 'MmlToken'
 }, BaseMethods_js_1.default);
@@ -596,7 +612,8 @@ new sm.EnvironmentMap('environment', ParseMethods_js_1.default.environment, {
     array: ['AlignedArray'],
     equation: ['Equation', null, true],
     eqnarray: ['EqnArray', null, true, true, 'rcl',
-        ParseUtil_js_1.default.cols(0, lengths_js_1.MATHSPACE.thickmathspace), '.5em']
+        ParseUtil_js_1.default.cols(0, lengths_js_1.MATHSPACE.thickmathspace), '.5em'],
+    indentalign: ['IndentAlign']
 }, BaseMethods_js_1.default);
 new sm.CharacterMap('not_remap', null, {
     '\u2190': '\u219A',

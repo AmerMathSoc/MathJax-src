@@ -1,10 +1,9 @@
 import { SVG } from '../svg.js';
 import { CommonWrapperFactory } from '../common/WrapperFactory.js';
-import { SVGWrapper, SVGWrapperClass } from './Wrapper.js';
-import { SVGCharOptions, SVGDelimiterData, SVGFontData } from './FontData.js';
-export declare class SVGWrapperFactory<N, T, D> extends CommonWrapperFactory<SVG<N, T, D>, SVGWrapper<N, T, D>, SVGWrapperClass, SVGCharOptions, SVGDelimiterData, SVGFontData> {
+import { SvgWrapper, SvgWrapperClass } from './Wrapper.js';
+import { SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass } from './FontData.js';
+export declare class SvgWrapperFactory<N, T, D> extends CommonWrapperFactory<N, T, D, SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
     static defaultNodes: {
-        [kind: string]: import("../common/Wrapper.js").WrapperConstructor;
+        [kind: string]: SvgWrapperClass<any, any, any>;
     };
-    jax: SVG<N, T, D>;
 }

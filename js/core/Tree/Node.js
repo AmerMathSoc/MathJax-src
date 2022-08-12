@@ -133,7 +133,9 @@ var AbstractNode = (function () {
         if (i !== null) {
             this.childNodes[i] = newChild;
             newChild.parent = this;
-            oldChild.parent = null;
+            if (oldChild.parent === this) {
+                oldChild.parent = null;
+            }
         }
         return newChild;
     };

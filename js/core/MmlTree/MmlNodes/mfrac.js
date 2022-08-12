@@ -65,6 +65,13 @@ var MmlMfrac = (function (_super) {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(MmlMfrac.prototype, "linebreakAlign", {
+        get: function () {
+            return '';
+        },
+        enumerable: false,
+        configurable: true
+    });
     MmlMfrac.prototype.setTeXclass = function (prev) {
         var e_1, _a;
         this.getPrevClass(prev);
@@ -87,8 +94,22 @@ var MmlMfrac = (function (_super) {
         if (!display || level > 0) {
             level++;
         }
-        this.childNodes[0].setInheritedAttributes(attributes, false, level, prime);
-        this.childNodes[1].setInheritedAttributes(attributes, false, level, true);
+        var numalign = this.attributes.get('numalign');
+        var denalign = this.attributes.get('denomalign');
+        var numAttributes = this.addInheritedAttributes(__assign({}, attributes), {
+            numalign: numalign,
+            indentshift: '0',
+            indentalignfirst: numalign, indentshiftfirst: '0',
+            indentalignlast: 'indentalign', indentshiftlast: 'indentshift'
+        });
+        var denAttributes = this.addInheritedAttributes(__assign({}, attributes), {
+            denalign: denalign,
+            indentshift: '0',
+            indentalignfirst: denalign, indentshiftfirst: '0',
+            indentalignlast: 'indentalign', indentshiftlast: 'indentshift'
+        });
+        this.childNodes[0].setInheritedAttributes(numAttributes, false, level, prime);
+        this.childNodes[1].setInheritedAttributes(denAttributes, false, level, true);
     };
     MmlMfrac.defaults = __assign(__assign({}, MmlNode_js_1.AbstractMmlBaseNode.defaults), { linethickness: 'medium', numalign: 'center', denomalign: 'center', bevelled: false });
     return MmlMfrac;

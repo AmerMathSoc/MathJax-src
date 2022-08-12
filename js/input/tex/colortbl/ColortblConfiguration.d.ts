@@ -1,6 +1,5 @@
 import { ArrayItem } from '../base/BaseItems.js';
 import { Configuration } from '../Configuration.js';
-import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
 export interface ColorData {
     cell: string;
     row: string;
@@ -11,6 +10,6 @@ export declare class ColorArrayItem extends ArrayItem {
     hasColor: boolean;
     EndEntry(): void;
     EndRow(): void;
-    createMml(): MmlNode;
+    createMml(): import("../../../core/MmlTree/MmlNode.js").MmlNode;
 }
 export declare const ColortblConfiguration: Configuration;

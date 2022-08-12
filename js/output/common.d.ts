@@ -1,13 +1,14 @@
-import { AbstractOutputJax } from '../../core/OutputJax.js';
-import { MathDocument } from '../../core/MathDocument.js';
-import { MathItem, Metrics } from '../../core/MathItem.js';
-import { MmlNode } from '../../core/MmlTree/MmlNode.js';
-import { FontData, FontDataClass, CssFontData } from './FontData.js';
-import { OptionList } from '../../util/Options.js';
-import { CommonWrapper, AnyWrapper } from './Wrapper.js';
-import { CommonWrapperFactory, AnyWrapperFactory } from './WrapperFactory.js';
-import { StyleList, Styles } from '../../util/Styles.js';
-import { StyleList as CssStyleList, CssStyles } from '../../util/StyleList.js';
+import { AbstractOutputJax } from '../core/OutputJax.js';
+import { MathDocument } from '../core/MathDocument.js';
+import { MathItem, Metrics } from '../core/MathItem.js';
+import { MmlNode } from '../core/MmlTree/MmlNode.js';
+import { FontData, FontDataClass, CharOptions, VariantData, DelimiterData, CssFontData } from './common/FontData.js';
+import { OptionList } from '../util/Options.js';
+import { CommonWrapper, CommonWrapperClass } from './common/Wrapper.js';
+import { CommonWrapperFactory } from './common/WrapperFactory.js';
+import { Linebreaks } from './common/LinebreakVisitor.js';
+import { StyleList, Styles } from '../util/Styles.js';
+import { StyleList as CssStyleList, CssStyles } from '../util/StyleList.js';
 export interface ExtendedMetrics extends Metrics {
     family: string;
 }
@@ -19,7 +20,7 @@ export declare type UnknownBBox = {
 };
 export declare type UnknownMap = Map<string, UnknownBBox>;
 export declare type UnknownVariantMap = Map<string, UnknownMap>;
-export declare abstract class CommonOutputJax<N, T, D, W extends AnyWrapper, F extends AnyWrapperFactory, FD extends FontData<any, any, any>, FC extends FontDataClass<any, any, any>> extends AbstractOutputJax<N, T, D> {
+export declare abstract class CommonOutputJax<N, T, D, WW extends CommonWrapper<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends AbstractOutputJax<N, T, D> {
     static NAME: string;
     static OPTIONS: OptionList;
     static commonStyles: CssStyleList;
@@ -27,21 +28,27 @@ export declare abstract class CommonOutputJax<N, T, D, W extends AnyWrapper, F e
     document: MathDocument<N, T, D>;
     math: MathItem<N, T, D>;
     container: N;
-    table: AnyWrapper;
+    table: WW;
     pxPerEm: number;
     font: FD;
-    factory: F;
-    nodeMap: Map<MmlNode, W>;
+    factory: WF;
+    linebreaks: Linebreaks<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW, WF, WC, CC, VV, DD, FD, FC>;
+    get forceInlineBreaks(): boolean;
+    containerWidth: number;
+    nodeMap: Map<MmlNode, WW>;
     testInline: N;
     testDisplay: N;
     protected unknownCache: UnknownVariantMap;
     constructor(options?: OptionList, defaultFactory?: typeof CommonWrapperFactory, defaultFont?: FC);
     typeset(math: MathItem<N, T, D>, html: MathDocument<N, T, D>): N;
     protected createNode(): N;
-    protected setScale(node: N): void;
+    protected setScale(node: N, wrapper: WW): void;
+    protected getInitialScale(): number;
     toDOM(math: MathItem<N, T, D>, node: N, html?: MathDocument<N, T, D>): void;
-    protected abstract processMath(math: MmlNode, node: N): void;
-    getBBox(math: MathItem<N, T, D>, html: MathDocument<N, T, D>): any;
+    abstract processMath(wrapper: WW, node: N): void;
+    getBBox(math: MathItem<N, T, D>, html: MathDocument<N, T, D>): import("../util/BBox.js").BBox;
+    getLinebreakWidth(): void;
+    markInlineBreaks(node: MmlNode): void;
     getMetrics(html: MathDocument<N, T, D>): void;
     getMetricsFor(node: N, display: boolean): ExtendedMetrics;
     protected getMetricMaps(html: MathDocument<N, T, D>): MetricMap<N>[];

@@ -47,6 +47,13 @@ var MmlMath = (function (_super) {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(MmlMath.prototype, "linebreakAlign", {
+        get: function () {
+            return '';
+        },
+        enumerable: false,
+        configurable: true
+    });
     MmlMath.prototype.setChildInheritedAttributes = function (attributes, display, level, prime) {
         if (this.attributes.get('mode') === 'display') {
             this.attributes.setInherited('display', 'block');
@@ -59,7 +66,7 @@ var MmlMath = (function (_super) {
             this.constructor.defaults['scriptlevel']);
         _super.prototype.setChildInheritedAttributes.call(this, attributes, display, level, prime);
     };
-    MmlMath.defaults = __assign(__assign({}, MmlNode_js_1.AbstractMmlLayoutNode.defaults), { mathvariant: 'normal', mathsize: 'normal', mathcolor: '', mathbackground: 'transparent', dir: 'ltr', scriptlevel: 0, displaystyle: false, display: 'inline', maxwidth: '', overflow: 'linebreak', altimg: '', 'altimg-width': '', 'altimg-height': '', 'altimg-valign': '', alttext: '', cdgroup: '', scriptsizemultiplier: 1 / Math.sqrt(2), scriptminsize: '8px', infixlinebreakstyle: 'before', lineleading: '1ex', linebreakmultchar: '\u2062', indentshift: 'auto', indentalign: 'auto', indenttarget: '', indentalignfirst: 'indentalign', indentshiftfirst: 'indentshift', indentalignlast: 'indentalign', indentshiftlast: 'indentshift' });
+    MmlMath.defaults = __assign(__assign({}, MmlNode_js_1.AbstractMmlLayoutNode.defaults), { mathvariant: 'normal', mathsize: 'normal', mathcolor: '', mathbackground: 'transparent', dir: 'ltr', scriptlevel: 0, displaystyle: false, display: 'inline', maxwidth: '', overflow: 'linebreak', altimg: '', 'altimg-width': '', 'altimg-height': '', 'altimg-valign': '', alttext: '', cdgroup: '', scriptsizemultiplier: 1 / Math.sqrt(2), scriptminsize: '8px', infixlinebreakstyle: 'before', lineleading: '100%', linebreakmultchar: '\u2062', indentshift: 'auto', indentalign: 'auto', indenttarget: '', indentalignfirst: 'indentalign', indentshiftfirst: 'indentshift', indentalignlast: 'indentalign', indentshiftlast: 'indentshift' });
     return MmlMath;
 }(MmlNode_js_1.AbstractMmlLayoutNode));
 exports.MmlMath = MmlMath;

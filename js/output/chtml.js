@@ -27,7 +27,11 @@ var __assign = (this && this.__assign) || function () {
 };
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -57,7 +61,7 @@ var __values = (this && this.__values) || function(o) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CHTML = void 0;
-var OutputJax_js_1 = require("./common/OutputJax.js");
+var common_js_1 = require("./common.js");
 var StyleList_js_1 = require("../util/StyleList.js");
 var WrapperFactory_js_1 = require("./chtml/WrapperFactory.js");
 var Usage_js_1 = require("./chtml/Usage.js");
@@ -68,7 +72,7 @@ var CHTML = (function (_super) {
     __extends(CHTML, _super);
     function CHTML(options) {
         if (options === void 0) { options = null; }
-        var _this = _super.call(this, options, WrapperFactory_js_1.CHTMLWrapperFactory, tex_js_1.TeXFont) || this;
+        var _this = _super.call(this, options, WrapperFactory_js_1.ChtmlWrapperFactory, tex_js_1.TeXFont) || this;
         _this.chtmlStyles = null;
         _this.font.adaptiveCSS(_this.options.adaptiveCSS);
         _this.wrapperUsage = new Usage_js_1.Usage();
@@ -131,8 +135,8 @@ var CHTML = (function (_super) {
         this.wrapperUsage.add(CLASS.kind);
         _super.prototype.addClassStyles.call(this, wrapper, styles);
     };
-    CHTML.prototype.processMath = function (math, parent) {
-        this.factory.wrap(math).toCHTML(parent);
+    CHTML.prototype.processMath = function (wrapper, parent) {
+        wrapper.toCHTML([parent]);
     };
     CHTML.prototype.clearCache = function () {
         this.cssStyles.clear();
@@ -142,6 +146,9 @@ var CHTML = (function (_super) {
     };
     CHTML.prototype.reset = function () {
         this.clearCache();
+    };
+    CHTML.prototype.getInitialScale = function () {
+        return this.math.metrics.scale;
     };
     CHTML.prototype.unknownText = function (text, variant, width) {
         if (width === void 0) { width = null; }
@@ -177,9 +184,11 @@ var CHTML = (function (_super) {
         return { w: w, h: .75, d: .2 };
     };
     CHTML.NAME = 'CHTML';
-    CHTML.OPTIONS = __assign(__assign({}, OutputJax_js_1.CommonOutputJax.OPTIONS), { adaptiveCSS: true, matchFontHeight: true });
+    CHTML.OPTIONS = __assign(__assign({}, common_js_1.CommonOutputJax.OPTIONS), { adaptiveCSS: true, matchFontHeight: true });
     CHTML.commonStyles = {
-        'mjx-container[jax="CHTML"]': { 'line-height': 0 },
+        'mjx-container[jax="CHTML"]': {
+            'white-space': 'nowrap'
+        },
         'mjx-container [space="1"]': { 'margin-left': '.111em' },
         'mjx-container [space="2"]': { 'margin-left': '.167em' },
         'mjx-container [space="3"]': { 'margin-left': '.222em' },
@@ -225,6 +234,6 @@ var CHTML = (function (_super) {
     };
     CHTML.STYLESHEETID = 'MJX-CHTML-styles';
     return CHTML;
-}(OutputJax_js_1.CommonOutputJax));
+}(common_js_1.CommonOutputJax));
 exports.CHTML = CHTML;
 //# sourceMappingURL=chtml.js.map

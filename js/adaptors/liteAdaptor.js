@@ -254,11 +254,12 @@ var LiteBase = (function (_super) {
         }
         return onode;
     };
-    LiteBase.prototype.clone = function (node) {
+    LiteBase.prototype.clone = function (node, deep) {
         var _this = this;
+        if (deep === void 0) { deep = true; }
         var nnode = new Element_js_1.LiteElement(node.kind);
         nnode.attributes = __assign({}, node.attributes);
-        nnode.children = node.children.map(function (n) {
+        nnode.children = !deep ? [] : node.children.map(function (n) {
             if (n.kind === '#text') {
                 return new Text_js_1.LiteText(n.value);
             }

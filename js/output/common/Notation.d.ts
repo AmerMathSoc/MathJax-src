@@ -1,10 +1,11 @@
-import { AnyWrapper } from './Wrapper.js';
+import { CommonWrapper } from './Wrapper.js';
 import { CommonMenclose } from './Wrappers/menclose.js';
 export declare const ARROWX = 4, ARROWDX = 1, ARROWY = 2;
 export declare const THICKNESS = 0.067;
 export declare const PADDING = 0.2;
 export declare const SOLID: string;
-export declare type Menclose = CommonMenclose<any, any, any>;
+export declare type Menclose = CommonMenclose<any, any, any, any, any, any, any, any, any, any, any, any, any>;
+export declare type AnyWrapper = CommonWrapper<any, any, any, any, any, any, any, any, any, any, any, any>;
 export declare type PaddingData = [number, number, number, number];
 export declare type Renderer<W extends AnyWrapper, N> = (node: W, child: N) => void;
 export declare type BBoxExtender<W extends AnyWrapper> = (node: W) => PaddingData;

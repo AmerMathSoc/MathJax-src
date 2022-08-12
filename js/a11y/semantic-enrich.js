@@ -98,7 +98,7 @@ function EnrichedMathItemMixin(BaseMathItem, MmlJax, toMathML) {
             if (!this.isEscaped && (document.options.enableEnrichment || force)) {
                 if (document.options.sre.speech !== currentSpeech) {
                     currentSpeech = document.options.sre.speech;
-                    mathjax_js_1.mathjax.retryAfter(sre_js_1.default.setupEngine(document.options.sre));
+                    mathjax_js_1.mathjax.retryAfter(sre_js_1.default.setupEngine(document.options.sre).then(function () { return sre_js_1.default.sreReady(); }));
                 }
                 var math = new document.options.MathItem('', MmlJax);
                 try {

@@ -4,5 +4,6 @@ export declare class MmlMath extends AbstractMmlLayoutNode {
     static defaults: PropertyList;
     get kind(): string;
     get linebreakContainer(): boolean;
+    get linebreakAlign(): string;
     protected setChildInheritedAttributes(attributes: AttributeList, display: boolean, level: number, prime: boolean): void;
 }

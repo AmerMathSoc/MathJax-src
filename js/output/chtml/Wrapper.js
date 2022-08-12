@@ -16,7 +16,11 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -62,7 +66,7 @@ var __read = (this && this.__read) || function (o, n) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHTMLWrapper = exports.SPACE = exports.FONTSIZE = void 0;
+exports.ChtmlWrapper = exports.SPACE = exports.FONTSIZE = void 0;
 var LENGTHS = __importStar(require("../../util/lengths.js"));
 var Wrapper_js_1 = require("../common/Wrapper.js");
 var BBox_js_1 = require("../../util/BBox.js");
@@ -85,20 +89,36 @@ exports.SPACE = (_a = {},
     _a[LENGTHS.em(5 / 18)] = '4',
     _a[LENGTHS.em(6 / 18)] = '5',
     _a);
-var CHTMLWrapper = (function (_super) {
-    __extends(CHTMLWrapper, _super);
-    function CHTMLWrapper() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.chtml = null;
-        return _this;
+var ChtmlWrapper = (function (_super) {
+    __extends(ChtmlWrapper, _super);
+    function ChtmlWrapper() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    CHTMLWrapper.prototype.toCHTML = function (parent) {
+    ChtmlWrapper.prototype.toCHTML = function (parents) {
+        if (this.toEmbellishedCHTML(parents))
+            return;
+        this.addChildren(this.standardChtmlNodes(parents));
+    };
+    ChtmlWrapper.prototype.toEmbellishedCHTML = function (parents) {
         var e_1, _a;
-        var chtml = this.standardCHTMLnode(parent);
+        var _this = this;
+        if (parents.length <= 1 || !this.node.isEmbellished)
+            return false;
+        var adaptor = this.adaptor;
+        parents.forEach(function (dom) { return adaptor.append(dom, _this.html('mjx-linestrut')); });
+        var style = this.coreMO().embellishedBreakStyle;
+        var dom = [];
         try {
-            for (var _b = __values(this.childNodes), _c = _b.next(); !_c.done; _c = _b.next()) {
-                var child = _c.value;
-                child.toCHTML(chtml);
+            for (var _b = __values([[parents[0], 'before'], [parents[1], 'after']]), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var _d = __read(_c.value, 2), parent_1 = _d[0], STYLE = _d[1];
+                if (style !== STYLE) {
+                    this.toCHTML([parent_1]);
+                    dom.push(this.dom[0]);
+                    STYLE === 'after' && adaptor.removeAttribute(this.dom[0], 'space');
+                }
+                else {
+                    dom.push(this.createChtmlNodes([parent_1])[0]);
+                }
             }
         }
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -108,51 +128,93 @@ var CHTMLWrapper = (function (_super) {
             }
             finally { if (e_1) throw e_1.error; }
         }
+        this.dom = dom;
+        return true;
     };
-    CHTMLWrapper.prototype.standardCHTMLnode = function (parent) {
+    ChtmlWrapper.prototype.addChildren = function (parents) {
+        var e_2, _a;
+        try {
+            for (var _b = __values(this.childNodes), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var child = _c.value;
+                child.toCHTML(parents);
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+    };
+    ChtmlWrapper.prototype.standardChtmlNodes = function (parents) {
         this.markUsed();
-        var chtml = this.createCHTMLnode(parent);
+        var chtml = this.createChtmlNodes(parents);
         this.handleStyles();
         this.handleVariant();
         this.handleScale();
+        this.handleBorders();
         this.handleColor();
         this.handleSpace();
         this.handleAttributes();
         this.handlePWidth();
         return chtml;
     };
-    CHTMLWrapper.prototype.markUsed = function () {
+    ChtmlWrapper.prototype.markUsed = function () {
         this.jax.wrapperUsage.add(this.kind);
     };
-    CHTMLWrapper.prototype.createCHTMLnode = function (parent) {
-        var href = this.node.attributes.get('href');
-        if (href) {
-            parent = this.adaptor.append(parent, this.html('a', { href: href }));
+    ChtmlWrapper.prototype.createChtmlNodes = function (parents) {
+        var e_3, _a;
+        var _this = this;
+        this.dom = parents.map(function (_parent) { return _this.html('mjx-' + _this.node.kind); });
+        parents = this.handleHref(parents);
+        try {
+            for (var _b = __values(parents.keys()), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var i = _c.value;
+                this.adaptor.append(parents[i], this.dom[i]);
+            }
         }
-        this.chtml = this.adaptor.append(parent, this.html('mjx-' + this.node.kind));
-        return this.chtml;
+        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_3) throw e_3.error; }
+        }
+        return this.dom;
     };
-    CHTMLWrapper.prototype.handleStyles = function () {
+    ChtmlWrapper.prototype.handleHref = function (parents) {
+        var _this = this;
+        var href = this.node.attributes.get('href');
+        if (!href)
+            return parents;
+        return parents.map(function (parent) { return _this.adaptor.append(parent, _this.html('a', { href: href })); });
+    };
+    ChtmlWrapper.prototype.handleStyles = function () {
         if (!this.styles)
             return;
         var styles = this.styles.cssText;
         if (styles) {
-            this.adaptor.setAttribute(this.chtml, 'style', styles);
-            var family = this.styles.get('font-family');
-            if (family) {
-                this.adaptor.setStyle(this.chtml, 'font-family', 'MJXZERO, ' + family);
+            var adaptor_1 = this.adaptor;
+            this.dom.forEach(function (dom) { return adaptor_1.setAttribute(dom, 'style', styles); });
+            var family_1 = this.styles.get('font-family');
+            if (family_1) {
+                this.dom.forEach(function (dom) { return adaptor_1.setStyle(dom, 'font-family', 'MJXZERO, ' + family_1); });
             }
         }
     };
-    CHTMLWrapper.prototype.handleVariant = function () {
+    ChtmlWrapper.prototype.handleVariant = function () {
+        var _this = this;
         if (this.node.isToken && this.variant !== '-explicitFont') {
-            this.adaptor.setAttribute(this.chtml, 'class', (this.font.getVariant(this.variant) || this.font.getVariant('normal')).classes);
+            var adaptor_2 = this.adaptor;
+            this.dom.forEach(function (dom) { return adaptor_2.setAttribute(dom, 'class', (_this.font.getVariant(_this.variant) || _this.font.getVariant('normal')).classes); });
         }
     };
-    CHTMLWrapper.prototype.handleScale = function () {
-        this.setScale(this.chtml, this.bbox.rscale);
+    ChtmlWrapper.prototype.handleScale = function () {
+        var _this = this;
+        this.dom.forEach(function (dom) { return _this.setScale(dom, _this.bbox.rscale); });
     };
-    CHTMLWrapper.prototype.setScale = function (chtml, rscale) {
+    ChtmlWrapper.prototype.setScale = function (chtml, rscale) {
         var scale = (Math.abs(rscale - 1) < .001 ? 1 : rscale);
         if (chtml && scale !== 1) {
             var size = this.percent(scale);
@@ -165,94 +227,160 @@ var CHTMLWrapper = (function (_super) {
         }
         return chtml;
     };
-    CHTMLWrapper.prototype.handleSpace = function () {
-        var e_2, _a;
+    ChtmlWrapper.prototype.handleSpace = function () {
+        var e_4, _a;
+        var adaptor = this.adaptor;
+        var breakable = !!this.node.getProperty('breakable');
+        var n = this.dom.length - 1;
         try {
-            for (var _b = __values([[this.bbox.L, 'space', 'marginLeft'],
-                [this.bbox.R, 'rspace', 'marginRight']]), _c = _b.next(); !_c.done; _c = _b.next()) {
+            for (var _b = __values([[this.getLineBBox(0).L, 'space', 'marginLeft', 0],
+                [this.getLineBBox(n).R, 'rspace', 'marginRight', n]]), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var data = _c.value;
-                var _d = __read(data, 3), dimen = _d[0], name_1 = _d[1], margin = _d[2];
+                var _d = __read(data, 4), dimen = _d[0], name_1 = _d[1], margin = _d[2], i = _d[3];
                 if (dimen) {
                     var space = this.em(dimen);
-                    if (exports.SPACE[space]) {
-                        this.adaptor.setAttribute(this.chtml, name_1, exports.SPACE[space]);
+                    if (breakable) {
+                        var node = adaptor.node('mjx-break', exports.SPACE[space] ? { size: exports.SPACE[space] } :
+                            { style: { 'font-size': (dimen * 400).toFixed(1) + '%' } });
+                        adaptor.insert(node, this.dom[i]);
                     }
                     else {
-                        this.adaptor.setStyle(this.chtml, margin, space);
+                        if (exports.SPACE[space]) {
+                            adaptor.setAttribute(this.dom[i], name_1, exports.SPACE[space]);
+                        }
+                        else {
+                            adaptor.setStyle(this.dom[i], margin, space);
+                        }
                     }
+                }
+                else if (breakable) {
+                    adaptor.insert(adaptor.node('mjx-break', { style: { 'font-size': 0 } }), this.dom[i]);
                 }
             }
         }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
         finally {
             try {
                 if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
-            finally { if (e_2) throw e_2.error; }
+            finally { if (e_4) throw e_4.error; }
         }
     };
-    CHTMLWrapper.prototype.handleColor = function () {
-        var attributes = this.node.attributes;
-        var mathcolor = attributes.getExplicit('mathcolor');
-        var color = attributes.getExplicit('color');
-        var mathbackground = attributes.getExplicit('mathbackground');
-        var background = attributes.getExplicit('background');
-        if (mathcolor || color) {
-            this.adaptor.setStyle(this.chtml, 'color', mathcolor || color);
-        }
-        if (mathbackground || background) {
-            this.adaptor.setStyle(this.chtml, 'backgroundColor', mathbackground || background);
-        }
-    };
-    CHTMLWrapper.prototype.handleAttributes = function () {
-        var e_3, _a, e_4, _b;
-        var attributes = this.node.attributes;
-        var defaults = attributes.getAllDefaults();
-        var skip = CHTMLWrapper.skipAttributes;
+    ChtmlWrapper.prototype.handleBorders = function () {
+        var e_5, _a;
+        var _b, _c;
+        var border = (_b = this.styleData) === null || _b === void 0 ? void 0 : _b.border;
+        var padding = (_c = this.styleData) === null || _c === void 0 ? void 0 : _c.padding;
+        var n = this.dom.length - 1;
+        if (!border || !n)
+            return;
+        var adaptor = this.adaptor;
         try {
-            for (var _c = __values(attributes.getExplicitNames()), _d = _c.next(); !_d.done; _d = _c.next()) {
-                var name_2 = _d.value;
-                if (skip[name_2] === false || (!(name_2 in defaults) && !skip[name_2] &&
-                    !this.adaptor.hasAttribute(this.chtml, name_2))) {
-                    this.adaptor.setAttribute(this.chtml, name_2, attributes.getExplicit(name_2));
+            for (var _d = __values(this.dom.keys()), _e = _d.next(); !_e.done; _e = _d.next()) {
+                var k = _e.value;
+                var dom = this.dom[k];
+                if (k) {
+                    if (border.width[3]) {
+                        adaptor.setStyle(dom, 'border-left', ' none');
+                    }
+                    if (padding[3]) {
+                        adaptor.setStyle(dom, 'padding-left', '0');
+                    }
+                }
+                if (k !== n) {
+                    if (border.width[1]) {
+                        adaptor.setStyle(dom, 'border-right', 'none');
+                    }
+                    if (padding[1]) {
+                        adaptor.setStyle(dom, 'padding-right', '0');
+                    }
                 }
             }
         }
-        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+        catch (e_5_1) { e_5 = { error: e_5_1 }; }
+        finally {
+            try {
+                if (_e && !_e.done && (_a = _d.return)) _a.call(_d);
+            }
+            finally { if (e_5) throw e_5.error; }
+        }
+    };
+    ChtmlWrapper.prototype.handleColor = function () {
+        var _a;
+        var adaptor = this.adaptor;
+        var attributes = this.node.attributes;
+        var color = (attributes.getExplicit('mathcolor') || attributes.getExplicit('color'));
+        var background = (attributes.getExplicit('mathbackground') ||
+            attributes.getExplicit('background') ||
+            ((_a = this.styles) === null || _a === void 0 ? void 0 : _a.get('background-color')));
+        if (color) {
+            this.dom.forEach(function (dom) { return adaptor.setStyle(dom, 'color', color); });
+        }
+        if (background) {
+            this.dom.forEach(function (dom) { return adaptor.setStyle(dom, 'backgroundColor', background); });
+        }
+    };
+    ChtmlWrapper.prototype.handleAttributes = function () {
+        var e_6, _a, e_7, _b;
+        var adaptor = this.adaptor;
+        var attributes = this.node.attributes;
+        var defaults = attributes.getAllDefaults();
+        var skip = ChtmlWrapper.skipAttributes;
+        var _loop_1 = function (name_2) {
+            if (skip[name_2] === false || (!(name_2 in defaults) && !skip[name_2] &&
+                !adaptor.hasAttribute(this_1.dom[0], name_2))) {
+                var value_1 = attributes.getExplicit(name_2);
+                this_1.dom.forEach(function (dom) { return adaptor.setAttribute(dom, name_2, value_1); });
+            }
+        };
+        var this_1 = this;
+        try {
+            for (var _c = __values(attributes.getExplicitNames()), _d = _c.next(); !_d.done; _d = _c.next()) {
+                var name_2 = _d.value;
+                _loop_1(name_2);
+            }
+        }
+        catch (e_6_1) { e_6 = { error: e_6_1 }; }
         finally {
             try {
                 if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
             }
-            finally { if (e_3) throw e_3.error; }
+            finally { if (e_6) throw e_6.error; }
         }
         if (attributes.get('class')) {
             var names = attributes.get('class').trim().split(/ +/);
+            var _loop_2 = function (name_3) {
+                this_2.dom.forEach(function (dom) { return adaptor.addClass(dom, name_3); });
+            };
+            var this_2 = this;
             try {
                 for (var names_1 = __values(names), names_1_1 = names_1.next(); !names_1_1.done; names_1_1 = names_1.next()) {
                     var name_3 = names_1_1.value;
-                    this.adaptor.addClass(this.chtml, name_3);
+                    _loop_2(name_3);
                 }
             }
-            catch (e_4_1) { e_4 = { error: e_4_1 }; }
+            catch (e_7_1) { e_7 = { error: e_7_1 }; }
             finally {
                 try {
                     if (names_1_1 && !names_1_1.done && (_b = names_1.return)) _b.call(names_1);
                 }
-                finally { if (e_4) throw e_4.error; }
+                finally { if (e_7) throw e_7.error; }
             }
         }
     };
-    CHTMLWrapper.prototype.handlePWidth = function () {
+    ChtmlWrapper.prototype.handlePWidth = function () {
+        var _this = this;
         if (this.bbox.pwidth) {
+            var adaptor_3 = this.adaptor;
             if (this.bbox.pwidth === BBox_js_1.BBox.fullWidth) {
-                this.adaptor.setAttribute(this.chtml, 'width', 'full');
+                this.dom.forEach(function (dom) { return adaptor_3.setAttribute(dom, 'width', 'full'); });
             }
             else {
-                this.adaptor.setStyle(this.chtml, 'width', this.bbox.pwidth);
+                this.dom.forEach(function (dom) { return adaptor_3.setStyle(dom, 'width', _this.bbox.pwidth); });
             }
         }
     };
-    CHTMLWrapper.prototype.setIndent = function (chtml, align, shift) {
+    ChtmlWrapper.prototype.setIndent = function (chtml, align, shift) {
         var adaptor = this.adaptor;
         if (align === 'center' || align === 'left') {
             var L = this.getBBox().L;
@@ -263,8 +391,8 @@ var CHTMLWrapper = (function (_super) {
             adaptor.setStyle(chtml, 'margin-right', this.em(-shift + R));
         }
     };
-    CHTMLWrapper.prototype.drawBBox = function () {
-        var _a = this.getBBox(), w = _a.w, h = _a.h, d = _a.d, R = _a.R;
+    ChtmlWrapper.prototype.drawBBox = function () {
+        var _a = this.getOuterBBox(), w = _a.w, h = _a.h, d = _a.d, R = _a.R;
         var box = this.html('mjx-box', { style: {
                 opacity: .25, 'margin-left': this.em(-w - R)
             } }, [
@@ -281,7 +409,7 @@ var CHTMLWrapper = (function (_super) {
                     'background-color': 'green'
                 } })
         ]);
-        var node = this.chtml || this.parent.chtml;
+        var node = this.dom[0] || this.parent.dom[0];
         var size = this.adaptor.getAttribute(node, 'size');
         if (size) {
             this.adaptor.setAttribute(box, 'size', size);
@@ -293,20 +421,20 @@ var CHTMLWrapper = (function (_super) {
         this.adaptor.append(this.adaptor.parent(node), box);
         this.adaptor.setStyle(node, 'backgroundColor', '#FFEE00');
     };
-    CHTMLWrapper.prototype.html = function (type, def, content) {
+    ChtmlWrapper.prototype.html = function (type, def, content) {
         if (def === void 0) { def = {}; }
         if (content === void 0) { content = []; }
         return this.jax.html(type, def, content);
     };
-    CHTMLWrapper.prototype.text = function (text) {
+    ChtmlWrapper.prototype.text = function (text) {
         return this.jax.text(text);
     };
-    CHTMLWrapper.prototype.char = function (n) {
+    ChtmlWrapper.prototype.char = function (n) {
         return this.font.charSelector(n).substr(1);
     };
-    CHTMLWrapper.kind = 'unknown';
-    CHTMLWrapper.autoStyle = true;
-    return CHTMLWrapper;
+    ChtmlWrapper.kind = 'unknown';
+    ChtmlWrapper.autoStyle = true;
+    return ChtmlWrapper;
 }(Wrapper_js_1.CommonWrapper));
-exports.CHTMLWrapper = CHTMLWrapper;
+exports.ChtmlWrapper = ChtmlWrapper;
 //# sourceMappingURL=Wrapper.js.map

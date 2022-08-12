@@ -1,5 +1,5 @@
 /*************************************************************
- *  Copyright (c) 2020-2021 MathJax Consortium
+ *  Copyright (c) 2020-2022 MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -260,13 +260,10 @@ export const MathtoolsMethods: Record<string, ParseMethod> = {
     const width = parser.GetBrackets(name);
     const pos = parser.GetBrackets(name, 'c');
     const mml = parser.create('node', 'mpadded', [parser.ParseArg(name)]);
-    if (width) {
-      NodeUtil.setAttribute(mml, 'width', width);
-    }
-    const align = lookup(pos, {c: 'center', r: 'right'}, '');
-    if (align) {
-      NodeUtil.setAttribute(mml, 'data-align', align);
-    }
+    width && NodeUtil.setAttribute(mml, 'width', width);
+    const align = lookup(pos.toLowerCase(), {c: 'center', r: 'right'}, '');
+    align && NodeUtil.setAttribute(mml, 'data-align', align);
+    pos.toLowerCase() !== pos && NodeUtil.setAttribute(mml, 'data-overflow', 'linebreak');
     parser.Push(mml);
   },
 

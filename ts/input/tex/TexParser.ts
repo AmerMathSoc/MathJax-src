@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2017-2021 The MathJax Consortium
+ *  Copyright (c) 2017-2022 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ export default class TexParser {
     this.stack = new Stack(this.itemFactory, ENV, inner ? isInner : true);
     this.Parse();
     this.Push(this.itemFactory.create('stop'));
+    this.stack.env = ENV;
   }
 
   /**

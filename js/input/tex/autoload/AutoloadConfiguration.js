@@ -149,7 +149,7 @@ exports.AutoloadConfiguration = Configuration_js_1.Configuration.create('autoloa
             color: ['color', 'definecolor', 'textcolor', 'colorbox', 'fcolorbox'],
             enclose: ['enclose'],
             extpfeil: ['xtwoheadrightarrow', 'xtwoheadleftarrow', 'xmapsto', 'xlongequal', 'xtofrom', 'Newextarrow'],
-            html: ['href', 'class', 'style', 'cssId'],
+            html: ['data', 'href', 'class', 'style', 'cssId'],
             mhchem: ['ce', 'pu'],
             newcommand: ['newcommand', 'renewcommand', 'newenvironment', 'renewenvironment', 'def', 'let'],
             unicode: ['unicode'],

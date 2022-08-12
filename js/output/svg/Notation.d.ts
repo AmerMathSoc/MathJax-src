@@ -1,9 +1,9 @@
-import { SVGmenclose } from './Wrappers/menclose.js';
+import { SvgMencloseNTD } from './Wrappers/menclose.js';
 import * as Notation from '../common/Notation.js';
 export * from '../common/Notation.js';
-export declare type Menclose = SVGmenclose<any, any, any>;
-export declare type RENDERER<N, T, D> = Notation.Renderer<SVGmenclose<N, T, D>, N>;
-export declare type DEFPAIR<N, T, D> = Notation.DefPair<SVGmenclose<N, T, D>, N>;
+export declare type Menclose = SvgMencloseNTD<any, any, any>;
+export declare type RENDERER<N, T, D> = Notation.Renderer<SvgMencloseNTD<N, T, D>, N>;
+export declare type DEFPAIR<N, T, D> = Notation.DefPair<SvgMencloseNTD<N, T, D>, N>;
 export declare type LineName = Notation.Side | ('vertical' | 'horizontal' | 'up' | 'down');
 export declare type LineData = [number, number, number, number];
 export declare const computeLineData: {
