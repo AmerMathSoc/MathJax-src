@@ -110,15 +110,18 @@ var FindMathML = (function (_super) {
     };
     FindMathML.prototype.processMath = function (set) {
         var e_5, _a;
+        var adaptor = this.adaptor;
         var math = [];
         try {
-            for (var _b = __values(Array.from(set)), _c = _b.next(); !_c.done; _c = _b.next()) {
+            for (var _b = __values(set.values()), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var mml = _c.value;
-                var display = (this.adaptor.getAttribute(mml, 'display') === 'block' ||
-                    this.adaptor.getAttribute(mml, 'mode') === 'display');
+                if (adaptor.kind(adaptor.parent(mml)) === 'mjx-assistive-mml')
+                    continue;
+                var display = (adaptor.getAttribute(mml, 'display') === 'block' ||
+                    adaptor.getAttribute(mml, 'mode') === 'display');
                 var start = { node: mml, n: 0, delim: '' };
                 var end = { node: mml, n: 0, delim: '' };
-                math.push({ math: this.adaptor.outerHTML(mml), start: start, end: end, display: display });
+                math.push({ math: adaptor.outerHTML(mml), start: start, end: end, display: display });
             }
         }
         catch (e_5_1) { e_5 = { error: e_5_1 }; }

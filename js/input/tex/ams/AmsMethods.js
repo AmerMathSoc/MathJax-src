@@ -42,16 +42,14 @@ var BaseMethods_js_1 = __importDefault(require("../base/BaseMethods.js"));
 var MmlNode_js_1 = require("../../../core/MmlTree/MmlNode.js");
 exports.AmsMethods = {};
 exports.AmsMethods.AmsEqnArray = function (parser, begin, numbered, taggable, align, spacing, style) {
-    var i = parser.i;
     var args = parser.GetBrackets('\\begin{' + begin.getName() + '}');
     var array = BaseMethods_js_1.default.EqnArray(parser, begin, numbered, taggable, align, spacing, style);
-    return ParseUtil_js_1.default.setArrayAlign(array, args, parser, i);
+    return ParseUtil_js_1.default.setArrayAlign(array, args, parser);
 };
 exports.AmsMethods.AlignAt = function (parser, begin, numbered, taggable) {
     var name = begin.getName();
-    var n, valign, align = '', spacing = [], i;
+    var n, valign, align = '', spacing = [];
     if (!taggable) {
-        i = parser.i;
         valign = parser.GetBrackets('\\begin{' + name + '}');
     }
     n = parser.GetArgument('\\begin{' + name + '}');
@@ -69,7 +67,7 @@ exports.AmsMethods.AlignAt = function (parser, begin, numbered, taggable) {
         return exports.AmsMethods.EqnArray(parser, begin, numbered, taggable, align, spaceStr);
     }
     var array = exports.AmsMethods.EqnArray(parser, begin, numbered, taggable, align, spaceStr);
-    return ParseUtil_js_1.default.setArrayAlign(array, valign, !taggable ? parser : null, i);
+    return ParseUtil_js_1.default.setArrayAlign(array, valign, !taggable ? parser : null);
 };
 exports.AmsMethods.Multline = function (parser, begin, numbered) {
     parser.Push(begin);

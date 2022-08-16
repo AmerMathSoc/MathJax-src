@@ -99,7 +99,7 @@ exports.RANGES = [
     [0x1DF00, 0x1F7FF, MmlNode_js_1.TEXCLASS.ORD, 'mo'],
     [0x1F800, 0x1F8FF, MmlNode_js_1.TEXCLASS.REL, 'mo'],
     [0x1F900, 0x1F9FF, MmlNode_js_1.TEXCLASS.ORD, 'mo'],
-    [0x20000, 0x2FA1F, MmlNode_js_1.TEXCLASS.ORD, 'mi', 'normnal'],
+    [0x20000, 0x2FA1F, MmlNode_js_1.TEXCLASS.ORD, 'mi', 'normal'],
 ];
 function getRange(text) {
     var e_1, _a;

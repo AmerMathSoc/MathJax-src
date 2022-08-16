@@ -106,16 +106,18 @@ NewcommandMethods.MacroWithTemplate = function (parser, name, text, n) {
         params[_i - 4] = arguments[_i];
     }
     var argCount = parseInt(n, 10);
-    if (argCount) {
+    if (params.length) {
         var args = [];
         parser.GetNext();
         if (params[0] && !NewcommandUtil_js_1.default.MatchParam(parser, params[0])) {
             throw new TexError_js_1.default('MismatchUseDef', 'Use of %1 doesn\'t match its definition', name);
         }
-        for (var i = 0; i < argCount; i++) {
-            args.push(NewcommandUtil_js_1.default.GetParameter(parser, name, params[i + 1]));
+        if (argCount) {
+            for (var i = 0; i < argCount; i++) {
+                args.push(NewcommandUtil_js_1.default.GetParameter(parser, name, params[i + 1]));
+            }
+            text = ParseUtil_js_1.default.substituteArgs(parser, args, text);
         }
-        text = ParseUtil_js_1.default.substituteArgs(parser, args, text);
     }
     parser.string = ParseUtil_js_1.default.addArgs(parser, text, parser.string.slice(parser.i));
     parser.i = 0;

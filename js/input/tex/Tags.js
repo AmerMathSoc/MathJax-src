@@ -93,7 +93,9 @@ var AbstractTags = (function () {
         if (this.currentTag) {
             this.stack.push(this.currentTag);
         }
+        var label = this.label;
         this.currentTag = new TagInfo(env, taggable, defaultTags);
+        this.label = label;
     };
     Object.defineProperty(AbstractTags.prototype, "env", {
         get: function () {
@@ -104,7 +106,11 @@ var AbstractTags = (function () {
     });
     AbstractTags.prototype.end = function () {
         this.history.push(this.currentTag);
+        var label = this.label;
         this.currentTag = this.stack.pop();
+        if (label && !this.label) {
+            this.label = label;
+        }
     };
     AbstractTags.prototype.tag = function (tag, noFormat) {
         this.currentTag.tag = tag;
@@ -151,7 +157,6 @@ var AbstractTags = (function () {
         }
     };
     AbstractTags.prototype.clearTag = function () {
-        this.label = '';
         this.tag(null, true);
         this.currentTag.tagId = '';
     };
@@ -184,6 +189,7 @@ var AbstractTags = (function () {
         this.counter = this.allCounter = offset;
         this.allLabels = {};
         this.allIds = {};
+        this.label = '';
     };
     AbstractTags.prototype.startEquation = function (math) {
         this.history = [];
@@ -230,6 +236,7 @@ var AbstractTags = (function () {
         this.makeId();
         if (this.label) {
             this.labels[this.label] = new Label(this.currentTag.tag, this.currentTag.tagId);
+            this.label = '';
         }
         var mml = new TexParser_js_1.default('\\text{' + this.currentTag.tagFormat + '}', {}, this.configuration).mml();
         return this.configuration.nodeFactory.create('node', 'mtd', [mml], { id: this.currentTag.tagId });

@@ -292,7 +292,7 @@ var ParseUtil;
         return TEXT;
     }
     ParseUtil.trimSpaces = trimSpaces;
-    function setArrayAlign(array, align, parser, i) {
+    function setArrayAlign(array, align, parser) {
         if (!parser) {
             align = ParseUtil.trimSpaces(align || '');
         }
@@ -305,11 +305,14 @@ var ParseUtil;
         else if (align === 'c') {
             array.arraydef.align = 'axis';
         }
-        else if (parser) {
-            parser.i = i;
-        }
         else if (align) {
-            array.arraydef.align = align;
+            if (parser) {
+                parser.string = "[".concat(align, "]") + parser.string.slice(parser.i);
+                parser.i = 0;
+            }
+            else {
+                array.arraydef.align = align;
+            }
         }
         return array;
     }
