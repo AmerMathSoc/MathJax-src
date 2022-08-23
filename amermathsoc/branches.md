@@ -13,3 +13,4 @@ fix-parent
 linebreaks
 fix-align
 fix-align-2
+fix-stretchy-widths
