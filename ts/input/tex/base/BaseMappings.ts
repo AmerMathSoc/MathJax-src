@@ -610,12 +610,12 @@ new sm.CommandMap('macros', {
   mathrel:           ['TeXAtom', TEXCLASS.REL],
   mathpunct:         ['TeXAtom', TEXCLASS.PUNCT],
   mathinner:         ['TeXAtom', TEXCLASS.INNER],
-  mathNONE:          ['TeXAtom', TEXCLASS.NONE],  // internal use
 
   vtop:              ['TeXAtom', TEXCLASS.VTOP],
   vcenter:           ['TeXAtom', TEXCLASS.VCENTER],
   vbox:              ['TeXAtom', TEXCLASS.VBOX],
   hsize:              'Hsize',
+  parbox:             'ParBox',
 
   buildrel:           'BuildRel',
 
@@ -650,7 +650,7 @@ new sm.CommandMap('macros', {
   matrix:             'Matrix',
   array:              'Matrix',
   pmatrix:           ['Matrix', '(', ')'],
-  cases:             ['Matrix', '{', '', 'left left', null, '.1em', null,
+  cases:             ['Matrix', '{', '', 'left left', null, '.2em', null,
                       true],
   eqalign:           ['Matrix', null, null, 'right left',
                       em(MATHSPACE.thickmathspace), '.5em', 'D'],

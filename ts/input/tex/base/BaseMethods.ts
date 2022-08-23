@@ -777,10 +777,30 @@ BaseMethods.TeXAtom = function(parser: TexParser, name: string, mclass: number) 
  * @param {TexParser} parser The calling parser.
  * @param {string} name The macro name.
  */
-BaseMethods.Hsize = function (parser:TexParser, name: string) {
+BaseMethods.Hsize = function (parser: TexParser, name: string) {
   parser.GetNext() === '=' && parser.i++;
   parser.stack.env.hsize = parser.GetDimen(name);
-}
+};
+
+/**
+ * Handle \parbox[align]{width}{text}
+ * @param {TexParser} parser The calling parser.
+ * @param {string} name The macro name.
+ */
+BaseMethods.ParBox = function (parser: TexParser, name: string) {
+  const align = parser.GetBrackets(name, 'c');
+  const width = parser.GetDimen(name);
+  const text = ParseUtil.internalMath(parser, parser.GetArgument(name));
+  const box = lookup(align, {
+    t: TEXCLASS.VTOP,
+    b: TEXCLASS.VBOX,
+    c: TEXCLASS.VCENTER,
+    m: TEXCLASS.VCENTER
+  }, TEXCLASS.VCENTER);
+  parser.Push(parser.create('node', 'TeXAtom', [
+    parser.create('node', 'mpadded', text, {width: width, 'data-overflow': 'linebreak'})
+  ], {texClass: box}));
+};
 
 
 /**
@@ -1205,6 +1225,7 @@ BaseMethods.Matrix = function(parser: TexParser, _name: string,
   }
   // @test Matrix Braces, Matrix Columns, Matrix Rows.
   const array = parser.itemFactory.create('array').setProperty('requireClose', true) as sitem.ArrayItem;
+  (open || !align) && array.setProperty('arrayPadding', '.2em .125em');
   array.arraydef = {
     rowspacing: (vspacing || '4pt'),
     columnspacing: (spacing || '1em')
@@ -1502,6 +1523,7 @@ BaseMethods.Array = function(parser: TexParser, begin: StackItem,
     align = parser.GetArgument('\\begin{' + begin.getName() + '}');
   }
   const array = parser.itemFactory.create('array') as sitem.ArrayItem;
+  begin.getName() === 'array' && array.setProperty('arrayPadding', '.5em .125em');
   array.parser = parser;
   array.arraydef = {
     columnspacing: (spacing || '1em'),

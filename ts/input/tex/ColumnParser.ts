@@ -45,6 +45,7 @@ export type ColumnState = {
   clines: string[];                     // the column lines
   cstart: string[];                     // the '>' declarations (not currently used)
   cend:   string[];                     // the '<' declarations (not currently used)
+  cextra: boolean[];                    // the extra columns from '@' and '!' declarations
   ralign: [number, string, string][];   // the row alignment and column width/align when specified
 }
 
@@ -73,14 +74,12 @@ export class ColumnParser {
     b: (state) => this.getColumn(state, TEXCLASS.VBOX),
     w: (state) => this.getColumn(state, TEXCLASS.VTOP, ''),
     W: (state) => this.getColumn(state, TEXCLASS.VTOP, ''),
-    '|': (state) => state.clines[state.j] = 'solid',
-    ':': (state) => state.clines[state.j] = 'dashed',
+    '|': (state) => this.addRule(state, 'solid'),
+    ':': (state) => this.addRule(state, 'dashed'),
     '>': (state) => state.cstart[state.j] = (state.cstart[state.j] || '') + this.getBraces(state),
     '<': (state) => state.cend[state.j - 1] = (state.cend[state.j - 1] || '') + this.getBraces(state),
-    '@': (state) => {
-      state.cstart[state.j] = '\\mathNONE{' + this.getBraces(state) + '}';
-      state.cspace[state.j] = '0';
-    },
+    '@': (state) => this.addAt(state, this.getBraces(state)),
+    '!': (state) => this.addBang(state, this.getBraces(state)),
     //
     // Non-standard for math-mode versions
     //
@@ -90,7 +89,6 @@ export class ColumnParser {
     //
     // Ignored
     //
-    '!': (state) => this.getBraces(state),
     ' ': (_state) => {},
   };
 
@@ -114,7 +112,7 @@ export class ColumnParser {
       parser, template, i: 0, j: 0, c: '',
       cwidth: [], calign: [], cspace: [], clines: [],
       cstart: array.cstart, cend: array.cend,
-      ralign: array.ralign
+      ralign: array.ralign, cextra: array.cextra
     };
     //
     // Loop through the template to process the column specifiers
@@ -127,7 +125,7 @@ export class ColumnParser {
       const c = state.c = String.fromCodePoint(state.template.codePointAt(state.i));
       state.i += c.length;
       if (!this.columnHandler.hasOwnProperty(c)) {
-        throw new TexError('BadColumnCharacter', 'Unknown column specifier: %1', c);
+        throw new TexError('BadPreamToken', 'Illegal pream-token (%1)', c);
       }
       this.columnHandler[c](state);
     }
@@ -171,6 +169,10 @@ export class ColumnParser {
       }
       // @test Enclosed left right
       array.arraydef.columnlines = clines.slice(1).map(l => l || 'none').join(' ');
+    }
+    if (state.cextra[0] || state.cextra[calign.length - 1]) {
+      const cspace = state.cspace;
+      array.arraydef['data-array-padding'] = [cspace[0] || '.5em', cspace[calign.length - 1] || '.5em'].join(' ');
     }
   }
 
@@ -254,6 +256,57 @@ export class ColumnParser {
     }
     state.template = ParseUtil.substituteArgs(state.parser, args, macro) + state.template.slice(state.i);
     state.i = 0;
+  }
+
+  /**
+   * @param {ColumnState} state   The current state of the parser
+   * @param {string} rule         The type of rule to add (solid or dashed)
+   */
+  public addRule(state: ColumnState, rule: string) {
+    state.clines[state.j] && this.addAt(state, '\\,');
+    state.clines[state.j] = rule;
+    if (state.cspace[state.j] === '0') {
+      state.cstart[state.j] = '\\hspace{.5em}';
+    }
+  }
+
+  /**
+   * Add an @{...} entry
+   *
+   * @param {ColumnState} state   The current state of the parser
+   * @param {string} macro        The replacement string for the column type
+   */
+  public addAt(state: ColumnState, macro: string) {
+    const {cstart, cspace, j} = state;
+    state.cextra[j] = true;
+    state.calign[j] = 'center';
+    if (state.clines[j]) {
+      if (cspace[j] === '.5em') {
+        cstart[j - 1] += '\\hspace{.25em}';
+      } else if (!cspace[j]) {
+        state.cend[j - 1] = (state.cend[j-1] || '') + '\\hspace{.5em}';
+      }
+    }
+    cstart[j] = macro;
+    cspace[j] = '0';
+    cspace[++state.j] = '0';
+  }
+
+  /**
+   * Add a !{...} entry
+   *
+   * @param {ColumnState} state   The current state of the parser
+   * @param {string} macro        The replacement string for the column type
+   */
+  public addBang(state: ColumnState, macro: string) {
+    const {cstart, cspace, j} = state;
+    state.cextra[j] = true;
+    state.calign[j] = 'center';
+    cstart[j] = (cspace[j] === '0' && state.clines[j] ? '\\hspace{.25em}' : '') + macro;
+    if (!cspace[j]) {
+      cspace[j] = '.5em';
+    }
+    cspace[++state.j] = '.5em';
   }
 
 }

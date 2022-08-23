@@ -951,6 +951,16 @@ export class ArrayItem extends BaseItem {
   public cend: string[] = [];
 
   /**
+   * True for columns from @{...} and !{...}
+   */
+  public cextra: boolean[] = [];
+
+  /**
+   * True if adding extra columns at the end of a row
+   */
+  public atEnd: boolean = false;
+
+  /**
    * Row alignments to specify on particular columns
    */
   public ralign: [number, string, string][] = [];
@@ -1038,6 +1048,10 @@ export class ArrayItem extends BaseItem {
     if (scriptlevel) {
       mml.setProperty('scriptlevel', scriptlevel);
     }
+    if (this.getProperty('arrayPadding')) {
+      NodeUtil.setAttribute(mml, 'frame', '');   // empty frame forces fspacing to be used in MathJax
+      NodeUtil.setAttribute(mml, 'framespacing', this.getProperty('arrayPadding') as string);
+    }
     if (this.frame.length === 4) {
       // @test Enclosed frame solid, Enclosed frame dashed
       NodeUtil.setAttribute(mml, 'frame', this.dashed ? 'dashed' : 'solid');
@@ -1049,7 +1063,9 @@ export class ArrayItem extends BaseItem {
           (this.arraydef['rowlines'] as string).replace(/none( none)+$/, 'none');
       }
       // @test Enclosed left right
-      NodeUtil.removeAttribute(mml, 'frame');
+      if (!this.getProperty('arrayPadding')) {
+        NodeUtil.removeAttribute(mml, 'frame');
+      }
       mml = this.create('node', 'menclose', [mml], {notation: this.frame.join(' ')});
       if ((this.arraydef['columnlines'] || 'none') !== 'none' ||
           (this.arraydef['rowlines'] || 'none') !== 'none') {
@@ -1073,22 +1089,62 @@ export class ArrayItem extends BaseItem {
    */
   public StartEntry() {
     const n = this.row.length;
-    const start = this.cstart[n];
-    const end = this.cend[n];
+    let start = this.cstart[n];
+    let end = this.cend[n];
     const ralign = this.ralign[n];
-    if (!start && !end && !ralign) return;
-    let [entry, found] = this.getEntry();
-    if (!found) return;
+    const cextra = this.cextra;
+    if (!start && !end && !ralign && !cextra[n] && !cextra[n + 1]) return;
+    let [prefix, entry, term, found] = this.getEntry();
+    //
+    // Add & to an extra column if it is not at the end of the line
+    //
+    if (cextra[n] && !this.atEnd) {
+      start += '&';
+    }
+    //
+    // Check if there are extra entries at the end of a row to be added
+    //
+    if (term !== '&') {
+      if (cextra[n]) {
+        found = true;
+      } else if (cextra[n + 1]) {
+        found = !!entry.trim();
+        if (found) {
+          end = (end || '') + '&';        // extra entries follow this one
+          this.atEnd = !cextra[n];
+        }
+      } else if (!entry.trim()) {
+        found = false;
+      }
+    }
+    if (!found && !prefix) return;
     const parser = this.parser;
-    if (start) {
-      entry = ParseUtil.addArgs(parser, start, entry);
+    if (found) {
+      //
+      //  Add the start, entry, and end values together
+      //
+      if (start) {
+        entry = ParseUtil.addArgs(parser, start, entry);
+      }
+      if (end) {
+        entry = ParseUtil.addArgs(parser, entry, end);
+      }
+      //
+      //  If row aligning, use text mode
+      //
+      if (ralign) {
+        entry = '\\text{' + entry.trim() + '}';
+      }
     }
-    if (end) {
-      entry = ParseUtil.addArgs(parser, entry, end);
+    //
+    //  Add any \hline or \hfill macros
+    //
+    if (prefix) {
+      entry = ParseUtil.addArgs(parser, prefix, entry);
     }
-    if (ralign) {
-      entry = '\\text{' + entry.trim() + '}';
-    }
+    //
+    //  Insert the entry into the parser string
+    //
     parser.string = ParseUtil.addArgs(parser, entry, parser.string);
     parser.i = 0;
   }
@@ -1096,13 +1152,13 @@ export class ArrayItem extends BaseItem {
   /**
    * Get the TeX string for the contents of the coming cell (if any)
    */
-  protected getEntry(): [string, boolean] {
+  protected getEntry(): [string, string, string, boolean] {
     const parser = this.parser;
-    const pattern = /^([^]*?)([&{}]|\\\\|\\(?:begin|end)\{array\})/;
+    const pattern = /^([^]*?)([&{}]|\\\\|\\(?:begin|end)\{array\}|\\cr)/;
     let braces = 0, envs = 0;
     let i = parser.i;
     let match;
-    const fail: [string, boolean] = ['', false];
+    const fail: [string, string, string, boolean] = ['', '', '', false];
     while ((match = parser.string.slice(i).match(pattern)) !== null) {
       i += match[0].length;
       switch (match[2]) {
@@ -1125,11 +1181,14 @@ export class ArrayItem extends BaseItem {
       default:
         if (braces || envs) continue;
         i -= match[2].length;
-        const entry = parser.string.slice(parser.i, i).trim();
-        if (match[2] !== '&' && !entry.trim()) return fail;
+        let entry = parser.string.slice(parser.i, i).trim();
+        const prefix = entry.match(/^(?:\s*\\(?:hline|hfil{1,3}|rowcolor\s*\{.*?\}))+/);
+        if (prefix) {
+          entry = entry.slice(prefix[0].length);
+        }
         parser.string = parser.string.slice(i);
         parser.i = 0;
-        return [entry, true];
+        return [prefix?.[0] ||'', entry, match[2], true];
       }
     }
     return fail;
@@ -1195,6 +1254,7 @@ export class ArrayItem extends BaseItem {
     }
     this.table.push(node);
     this.row = [];
+    this.atEnd = false;
   }
 
 
