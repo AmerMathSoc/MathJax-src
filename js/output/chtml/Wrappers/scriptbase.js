@@ -45,6 +45,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChtmlScriptbase = void 0;
 var Wrapper_js_1 = require("../Wrapper.js");
 var scriptbase_js_1 = require("../../common/Wrappers/scriptbase.js");
+var msubsup_js_1 = require("./msubsup.js");
 exports.ChtmlScriptbase = (function () {
     var _a;
     var Base = (0, scriptbase_js_1.CommonScriptbaseMixin)(Wrapper_js_1.ChtmlWrapper);
@@ -66,6 +67,10 @@ exports.ChtmlScriptbase = (function () {
                 this.baseChild.toCHTML(this.dom);
                 var dom = this.dom[this.dom.length - 1];
                 this.scriptChild.toCHTML([this.adaptor.append(dom, this.html('mjx-script', { style: style }))]);
+            };
+            ChtmlScriptbase.prototype.markUsed = function () {
+                _super.prototype.markUsed.call(this);
+                this.jax.wrapperUsage.add(msubsup_js_1.ChtmlMsubsup.kind);
             };
             ChtmlScriptbase.prototype.setDeltaW = function (nodes, dx) {
                 for (var i = 0; i < dx.length; i++) {

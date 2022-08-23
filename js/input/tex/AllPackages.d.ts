@@ -26,6 +26,7 @@ import './noundefined/NoUndefinedConfiguration.js';
 import './physics/PhysicsConfiguration.js';
 import './setoptions/SetOptionsConfiguration.js';
 import './tagformat/TagFormatConfiguration.js';
+import './texhtml/TexHtmlConfiguration.js';
 import './textcomp/TextcompConfiguration.js';
 import './textmacros/TextMacrosConfiguration.js';
 import './upgreek/UpgreekConfiguration.js';

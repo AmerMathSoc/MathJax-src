@@ -127,7 +127,7 @@ exports.ChtmlMtable = (function () {
             ChtmlMtable.prototype.handleColumnSpacing = function () {
                 var e_3, _a, e_4, _b;
                 var scale = (this.childNodes[0] ? 1 / this.childNodes[0].getBBox().rscale : 1);
-                var spacing = this.getEmHalfSpacing(this.fSpace[0], this.cSpace, scale);
+                var spacing = this.getEmHalfSpacing([this.fSpace[0], this.fSpace[2]], this.cSpace, scale);
                 var frame = this.frame;
                 try {
                     for (var _c = __values(this.tableRows), _d = _c.next(); !_d.done; _d = _c.next()) {
@@ -237,7 +237,7 @@ exports.ChtmlMtable = (function () {
             ChtmlMtable.prototype.handleRowSpacing = function () {
                 var e_9, _a, e_10, _b;
                 var scale = (this.childNodes[0] ? 1 / this.childNodes[0].getBBox().rscale : 1);
-                var spacing = this.getEmHalfSpacing(this.fSpace[1], this.rSpace, scale);
+                var spacing = this.getEmHalfSpacing([this.fSpace[1], this.fSpace[1]], this.rSpace, scale);
                 var frame = this.frame;
                 var i = 0;
                 try {

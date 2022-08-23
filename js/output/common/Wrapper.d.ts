@@ -4,6 +4,7 @@ import { MmlNode, MmlNodeClass, TextNode } from '../../core/MmlTree/MmlNode.js';
 import { Property } from '../../core/Tree/Node.js';
 import { Styles } from '../../util/Styles.js';
 import { StyleList } from '../../util/StyleList.js';
+import { OptionList } from '../../util/Options.js';
 import { CommonOutputJax } from '../common.js';
 import { CommonWrapperFactory } from './WrapperFactory.js';
 import { CommonMo } from './Wrappers/mo.js';
@@ -13,6 +14,7 @@ import { FontData, FontDataClass, DelimiterData, VariantData, CharData, CharOpti
 export declare type StringMap = {
     [key: string]: string;
 };
+export declare const SPACE: StringMap;
 export declare type StyleData = {
     padding: [number, number, number, number];
     border: {
@@ -55,7 +57,7 @@ export declare class CommonWrapper<N, T, D, JX extends CommonOutputJax<N, T, D, 
     parent: WW;
     childNodes: WW[];
     dom: N[];
-    protected removedStyles: StringMap;
+    removedStyles: StringMap;
     styles: Styles;
     styleData: StyleData;
     variant: string;
@@ -103,6 +105,7 @@ export declare class CommonWrapper<N, T, D, JX extends CommonOutputJax<N, T, D, 
     protected isTopEmbellished(): boolean;
     core(): WW;
     coreMO(): CommonMo<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>;
+    coreRScale(): number;
     getText(): string;
     canStretch(direction: DIRECTION): boolean;
     protected getAlignShift(): [string, number];
@@ -121,4 +124,5 @@ export declare class CommonWrapper<N, T, D, JX extends CommonOutputJax<N, T, D, 
     mmlNode(kind: string, properties?: PropertyList, children?: MmlNode[]): MmlNode;
     protected createMo(text: string): CommonMo<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>;
     protected getVariantChar(variant: string, n: number): CharData<CC>;
+    html(type: string, def?: OptionList, content?: (N | T)[]): N;
 }

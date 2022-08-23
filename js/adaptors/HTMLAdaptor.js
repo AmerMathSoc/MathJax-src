@@ -32,6 +32,7 @@ var HTMLAdaptor = (function (_super) {
     __extends(HTMLAdaptor, _super);
     function HTMLAdaptor(window) {
         var _this = _super.call(this, window.document) || this;
+        _this.canMeasureNodes = true;
         _this.window = window;
         _this.parser = new window.DOMParser();
         return _this;

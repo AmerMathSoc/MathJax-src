@@ -90,6 +90,7 @@ export interface MinHTMLAdaptor<N, T, D> extends DOMAdaptor<N, T, D> {
     window: MinWindow<N, D>;
 }
 export declare class HTMLAdaptor<N extends MinHTMLElement<N, T>, T extends MinText<N, T>, D extends MinDocument<N, T>> extends AbstractDOMAdaptor<N, T, D> implements MinHTMLAdaptor<N, T, D> {
+    canMeasureNodes: boolean;
     window: MinWindow<N, D>;
     parser: MinDOMParser<D>;
     constructor(window: MinWindow<N, D>);

@@ -5,7 +5,6 @@ import { ChtmlWrapperFactory } from './WrapperFactory.js';
 import { ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass } from './FontData.js';
 export { Constructor, StringMap } from '../common/Wrapper.js';
 export declare const FONTSIZE: StringMap;
-export declare const SPACE: StringMap;
 export declare type ChtmlConstructor<N, T, D> = Constructor<ChtmlWrapper<N, T, D>>;
 export interface ChtmlWrapperClass<N, T, D> extends CommonWrapperClass<N, T, D, CHTML<N, T, D>, ChtmlWrapper<N, T, D>, ChtmlWrapperFactory<N, T, D>, ChtmlWrapperClass<N, T, D>, ChtmlCharOptions, ChtmlVariantData, ChtmlDelimiterData, ChtmlFontData, ChtmlFontDataClass> {
     autoStyle: boolean;

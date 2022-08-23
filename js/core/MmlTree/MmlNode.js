@@ -597,6 +597,9 @@ var AbstractMmlTokenNode = (function (_super) {
                 if (child instanceof TextNode) {
                     text += child.getText();
                 }
+                else if ('textContent' in child) {
+                    text += child.textContent();
+                }
             }
         }
         catch (e_10_1) { e_10 = { error: e_10_1 }; }

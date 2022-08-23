@@ -33,6 +33,7 @@ var mglyph_js_1 = require("./MmlNodes/mglyph.js");
 var semantics_js_1 = require("./MmlNodes/semantics.js");
 var TeXAtom_js_1 = require("./MmlNodes/TeXAtom.js");
 var mathchoice_js_1 = require("./MmlNodes/mathchoice.js");
+var HtmlNode_js_1 = require("./MmlNodes/HtmlNode.js");
 exports.MML = (_a = {},
     _a[math_js_1.MmlMath.prototype.kind] = math_js_1.MmlMath,
     _a[mi_js_1.MmlMi.prototype.kind] = mi_js_1.MmlMi,
@@ -76,5 +77,6 @@ exports.MML = (_a = {},
     _a[mathchoice_js_1.MathChoice.prototype.kind] = mathchoice_js_1.MathChoice,
     _a[MmlNode_js_1.TextNode.prototype.kind] = MmlNode_js_1.TextNode,
     _a[MmlNode_js_1.XMLNode.prototype.kind] = MmlNode_js_1.XMLNode,
+    _a[HtmlNode_js_1.HtmlNode.prototype.kind] = HtmlNode_js_1.HtmlNode,
     _a);
 //# sourceMappingURL=MML.js.map

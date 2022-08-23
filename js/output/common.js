@@ -89,6 +89,12 @@ var CommonOutputJax = (function (_super) {
         enumerable: false,
         configurable: true
     });
+    CommonOutputJax.prototype.setAdaptor = function (adaptor) {
+        _super.prototype.setAdaptor.call(this, adaptor);
+        if (this.options.htmlHDW === 'auto') {
+            this.options.htmlHDW = (adaptor.canMeasureNodes ? 'ignore' : 'force');
+        }
+    };
     CommonOutputJax.prototype.typeset = function (math, html) {
         this.setDocument(html);
         var node = this.createNode();
@@ -510,7 +516,7 @@ var CommonOutputJax = (function (_super) {
             width: '100%',
             lineleading: .2,
             LinebreakVisitor: null,
-        }, wrapperFactory: null, font: null, cssStyles: null });
+        }, htmlHDW: 'auto', wrapperFactory: null, font: null, cssStyles: null });
     CommonOutputJax.commonStyles = {};
     return CommonOutputJax;
 }(OutputJax_js_1.AbstractOutputJax));

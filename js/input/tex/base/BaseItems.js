@@ -748,6 +748,8 @@ var ArrayItem = (function (_super) {
         _this.arraydef = {};
         _this.cstart = [];
         _this.cend = [];
+        _this.cextra = [];
+        _this.atEnd = false;
         _this.ralign = [];
         _this.dashed = false;
         return _this;
@@ -808,6 +810,10 @@ var ArrayItem = (function (_super) {
         if (scriptlevel) {
             mml.setProperty('scriptlevel', scriptlevel);
         }
+        if (this.getProperty('arrayPadding')) {
+            NodeUtil_js_1.default.setAttribute(mml, 'frame', '');
+            NodeUtil_js_1.default.setAttribute(mml, 'framespacing', this.getProperty('arrayPadding'));
+        }
         if (this.frame.length === 4) {
             NodeUtil_js_1.default.setAttribute(mml, 'frame', this.dashed ? 'dashed' : 'solid');
         }
@@ -816,7 +822,9 @@ var ArrayItem = (function (_super) {
                 this.arraydef['rowlines'] =
                     this.arraydef['rowlines'].replace(/none( none)+$/, 'none');
             }
-            NodeUtil_js_1.default.removeAttribute(mml, 'frame');
+            if (!this.getProperty('arrayPadding')) {
+                NodeUtil_js_1.default.removeAttribute(mml, 'frame');
+            }
             mml = this.create('node', 'menclose', [mml], { notation: this.frame.join(' ') });
             if ((this.arraydef['columnlines'] || 'none') !== 'none' ||
                 (this.arraydef['rowlines'] || 'none') !== 'none') {
@@ -833,31 +841,55 @@ var ArrayItem = (function (_super) {
         var start = this.cstart[n];
         var end = this.cend[n];
         var ralign = this.ralign[n];
-        if (!start && !end && !ralign)
+        var cextra = this.cextra;
+        if (!start && !end && !ralign && !cextra[n] && !cextra[n + 1])
             return;
-        var _a = __read(this.getEntry(), 2), entry = _a[0], found = _a[1];
-        if (!found)
+        var _a = __read(this.getEntry(), 4), prefix = _a[0], entry = _a[1], term = _a[2], found = _a[3];
+        if (cextra[n] && !this.atEnd) {
+            start += '&';
+        }
+        if (term !== '&') {
+            if (cextra[n]) {
+                found = true;
+            }
+            else if (cextra[n + 1]) {
+                found = !!entry.trim();
+                if (found) {
+                    end = (end || '') + '&';
+                    this.atEnd = !cextra[n];
+                }
+            }
+            else if (!entry.trim()) {
+                found = false;
+            }
+        }
+        if (!found && !prefix)
             return;
         var parser = this.parser;
-        if (start) {
-            entry = ParseUtil_js_1.default.addArgs(parser, start, entry);
+        if (found) {
+            if (start) {
+                entry = ParseUtil_js_1.default.addArgs(parser, start, entry);
+            }
+            if (end) {
+                entry = ParseUtil_js_1.default.addArgs(parser, entry, end);
+            }
+            if (ralign) {
+                entry = '\\text{' + entry.trim() + '}';
+            }
         }
-        if (end) {
-            entry = ParseUtil_js_1.default.addArgs(parser, entry, end);
-        }
-        if (ralign) {
-            entry = '\\text{' + entry.trim() + '}';
+        if (prefix) {
+            entry = ParseUtil_js_1.default.addArgs(parser, prefix, entry);
         }
         parser.string = ParseUtil_js_1.default.addArgs(parser, entry, parser.string);
         parser.i = 0;
     };
     ArrayItem.prototype.getEntry = function () {
         var parser = this.parser;
-        var pattern = /^([^]*?)([&{}]|\\\\|\\(?:begin|end)\{array\})/;
+        var pattern = /^([^]*?)([&{}]|\\\\|\\(?:begin|end)\{array\}|\\cr)/;
         var braces = 0, envs = 0;
         var i = parser.i;
         var match;
-        var fail = ['', false];
+        var fail = ['', '', '', false];
         while ((match = parser.string.slice(i).match(pattern)) !== null) {
             i += match[0].length;
             switch (match[2]) {
@@ -882,11 +914,13 @@ var ArrayItem = (function (_super) {
                         continue;
                     i -= match[2].length;
                     var entry = parser.string.slice(parser.i, i).trim();
-                    if (match[2] !== '&' && !entry.trim())
-                        return fail;
+                    var prefix = entry.match(/^(?:\s*\\(?:hline|hfil{1,3}|rowcolor\s*\{.*?\}))+/);
+                    if (prefix) {
+                        entry = entry.slice(prefix[0].length);
+                    }
                     parser.string = parser.string.slice(i);
                     parser.i = 0;
-                    return [entry, true];
+                    return [(prefix === null || prefix === void 0 ? void 0 : prefix[0]) || '', entry, match[2], true];
             }
         }
         return fail;
@@ -929,6 +963,7 @@ var ArrayItem = (function (_super) {
         }
         this.table.push(node);
         this.row = [];
+        this.atEnd = false;
     };
     ArrayItem.prototype.EndTable = function () {
         if (this.Size() || this.row.length) {

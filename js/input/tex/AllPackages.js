@@ -29,13 +29,14 @@ require("./noundefined/NoUndefinedConfiguration.js");
 require("./physics/PhysicsConfiguration.js");
 require("./setoptions/SetOptionsConfiguration.js");
 require("./tagformat/TagFormatConfiguration.js");
+require("./texhtml/TexHtmlConfiguration.js");
 require("./textcomp/TextcompConfiguration.js");
 require("./textmacros/TextMacrosConfiguration.js");
 require("./upgreek/UpgreekConfiguration.js");
 require("./unicode/UnicodeConfiguration.js");
 require("./verb/VerbConfiguration.js");
 if (typeof MathJax !== 'undefined' && MathJax.loader) {
-    MathJax.loader.preLoad('[tex]/action', '[tex]/ams', '[tex]/amscd', '[tex]/bbox', '[tex]/boldsymbol', '[tex]/braket', '[tex]/bussproofs', '[tex]/cancel', '[tex]/cases', '[tex]/centernot', '[tex]/colortbl', '[tex]/color', '[tex]/colorv2', '[tex]/empheq', '[tex]/enclose', '[tex]/extpfeil', '[tex]/gensymb', '[tex]/html', '[tex]/mathtools', '[tex]/mhchem', '[tex]/newcommand', '[tex]/noerrors', '[tex]/noundefined', '[tex]/physics', '[tex]/upgreek', '[tex]/unicode', '[tex]/verb', '[tex]/configmacros', '[tex]/tagformat', '[tex]/textcomp', '[tex]/textmacros', '[tex]/setoptions');
+    MathJax.loader.preLoad('[tex]/action', '[tex]/ams', '[tex]/amscd', '[tex]/bbox', '[tex]/boldsymbol', '[tex]/braket', '[tex]/bussproofs', '[tex]/cancel', '[tex]/cases', '[tex]/centernot', '[tex]/colortbl', '[tex]/color', '[tex]/colorv2', '[tex]/empheq', '[tex]/enclose', '[tex]/extpfeil', '[tex]/gensymb', '[tex]/html', '[tex]/mathtools', '[tex]/mhchem', '[tex]/newcommand', '[tex]/noerrors', '[tex]/noundefined', '[tex]/physics', '[tex]/upgreek', '[tex]/unicode', '[tex]/verb', '[tex]/configmacros', '[tex]/tagformat', '[tex]/texhtml', '[tex]/textcomp', '[tex]/textmacros', '[tex]/setoptions');
 }
 exports.AllPackages = [
     'base',
@@ -66,6 +67,7 @@ exports.AllPackages = [
     'verb',
     'configmacros',
     'tagformat',
+    'texhtml',
     'textcomp',
     'textmacros'
 ];

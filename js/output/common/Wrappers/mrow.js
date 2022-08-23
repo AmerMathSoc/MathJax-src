@@ -131,7 +131,8 @@ function CommonMrowMixin(Base) {
                 try {
                     for (var stretchy_1 = __values(stretchy), stretchy_1_1 = stretchy_1.next(); !stretchy_1_1.done; stretchy_1_1 = stretchy_1.next()) {
                         var child = stretchy_1_1.value;
-                        child.coreMO().getStretchedVariant([H, D]);
+                        var rscale = child.coreRScale();
+                        child.coreMO().getStretchedVariant([H / rscale, D / rscale]);
                     }
                 }
                 catch (e_4_1) { e_4 = { error: e_4_1 }; }

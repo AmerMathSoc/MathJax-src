@@ -5,12 +5,14 @@ import { DOMAdaptor } from '../../core/DOMAdaptor.js';
 export declare class MathMLCompile<N, T, D> {
     static OPTIONS: OptionList;
     adaptor: DOMAdaptor<N, T, D>;
-    protected factory: MmlFactory;
-    protected options: OptionList;
+    factory: MmlFactory;
+    options: OptionList;
     constructor(options?: OptionList);
     setMmlFactory(mmlFactory: MmlFactory): void;
     compile(node: N): MmlNode;
     makeNode(node: N): MmlNode;
+    protected createMml(type: string, node: N, texClass: string, limits: boolean): MmlNode;
+    protected unknownNode(type: string, node: N): MmlNode;
     protected addAttributes(mml: MmlNode, node: N): void;
     protected filterAttribute(_name: string, value: string): string;
     protected filterClassList(list: string[]): string[];
@@ -19,6 +21,7 @@ export declare class MathMLCompile<N, T, D> {
     protected checkClass(mml: MmlNode, node: N): void;
     protected fixCalligraphic(variant: string): string;
     protected markMrows(mml: MmlNode): void;
-    protected trimSpace(text: string): string;
+    protected normalizeSpace(text: string): string;
+    protected trimSpace(mml: MmlNode): void;
     protected error(message: string): void;
 }

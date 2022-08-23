@@ -11,6 +11,7 @@ export declare type PageBBox = {
 };
 export interface DOMAdaptor<N, T, D> {
     document: D;
+    canMeasureNodes: boolean;
     parse(text: string, format?: string): D;
     node(kind: string, def?: OptionList, children?: (N | T)[], ns?: string): N;
     text(text: string): T;
@@ -61,6 +62,7 @@ export interface DOMAdaptor<N, T, D> {
 }
 export declare abstract class AbstractDOMAdaptor<N, T, D> implements DOMAdaptor<N, T, D> {
     document: D;
+    canMeasureNodes: boolean;
     constructor(document?: D);
     abstract parse(text: string, format?: string): D;
     node(kind: string, def?: OptionList, children?: (N | T)[], ns?: string): N;

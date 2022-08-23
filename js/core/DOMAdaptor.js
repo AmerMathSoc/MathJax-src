@@ -15,6 +15,7 @@ exports.AbstractDOMAdaptor = void 0;
 var AbstractDOMAdaptor = (function () {
     function AbstractDOMAdaptor(document) {
         if (document === void 0) { document = null; }
+        this.canMeasureNodes = true;
         this.document = document;
     }
     AbstractDOMAdaptor.prototype.node = function (kind, def, children, ns) {

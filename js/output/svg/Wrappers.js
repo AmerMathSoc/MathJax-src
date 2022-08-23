@@ -30,6 +30,7 @@ var semantics_js_1 = require("./Wrappers/semantics.js");
 var mglyph_js_1 = require("./Wrappers/mglyph.js");
 var TeXAtom_js_1 = require("./Wrappers/TeXAtom.js");
 var TextNode_js_1 = require("./Wrappers/TextNode.js");
+var HtmlNode_js_1 = require("./Wrappers/HtmlNode.js");
 exports.SvgWrappers = (_a = {},
     _a[math_js_1.SvgMath.kind] = math_js_1.SvgMath,
     _a[mrow_js_1.SvgMrow.kind] = mrow_js_1.SvgMrow,
@@ -67,6 +68,7 @@ exports.SvgWrappers = (_a = {},
     _a[mglyph_js_1.SvgMglyph.kind] = mglyph_js_1.SvgMglyph,
     _a[TeXAtom_js_1.SvgTeXAtom.kind] = TeXAtom_js_1.SvgTeXAtom,
     _a[TextNode_js_1.SvgTextNode.kind] = TextNode_js_1.SvgTextNode,
+    _a[HtmlNode_js_1.SvgHtmlNode.kind] = HtmlNode_js_1.SvgHtmlNode,
     _a[Wrapper_js_1.SvgWrapper.kind] = Wrapper_js_1.SvgWrapper,
     _a);
 //# sourceMappingURL=Wrappers.js.map

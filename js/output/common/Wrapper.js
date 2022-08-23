@@ -64,8 +64,9 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CommonWrapper = void 0;
+exports.CommonWrapper = exports.SPACE = void 0;
 var Wrapper_js_1 = require("../../core/Tree/Wrapper.js");
 var MmlNode_js_1 = require("../../core/MmlTree/MmlNode.js");
 var string_js_1 = require("../../util/string.js");
@@ -78,6 +79,13 @@ var SMALLSIZE = 2 / 18;
 function MathMLSpace(script, size) {
     return (script ? size < SMALLSIZE ? 0 : SMALLSIZE : size);
 }
+exports.SPACE = (_a = {},
+    _a[LENGTHS.em(2 / 18)] = '1',
+    _a[LENGTHS.em(3 / 18)] = '2',
+    _a[LENGTHS.em(4 / 18)] = '3',
+    _a[LENGTHS.em(5 / 18)] = '4',
+    _a[LENGTHS.em(6 / 18)] = '5',
+    _a);
 var CommonWrapper = (function (_super) {
     __extends(CommonWrapper, _super);
     function CommonWrapper(factory, node, parent) {
@@ -588,6 +596,15 @@ var CommonWrapper = (function (_super) {
     CommonWrapper.prototype.coreMO = function () {
         return this.jax.nodeMap.get(this.node.coreMO());
     };
+    CommonWrapper.prototype.coreRScale = function () {
+        var rscale = 1;
+        var node = this.coreMO();
+        while (node !== this && node) {
+            rscale *= node.bbox.rscale;
+            node = node.parent;
+        }
+        return rscale;
+    };
     CommonWrapper.prototype.getText = function () {
         var e_5, _a;
         var text = '';
@@ -726,6 +743,11 @@ var CommonWrapper = (function (_super) {
             char[3] = {};
         }
         return char;
+    };
+    CommonWrapper.prototype.html = function (type, def, content) {
+        if (def === void 0) { def = {}; }
+        if (content === void 0) { content = []; }
+        return this.jax.html(type, def, content);
     };
     CommonWrapper.kind = 'unknown';
     CommonWrapper.styles = {};

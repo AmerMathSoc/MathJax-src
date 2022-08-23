@@ -148,10 +148,6 @@ exports.ChtmlMunderover = (function () {
                 this.adjustOverDepth(over, overbox);
                 this.adjustUnderDepth(under, underbox);
             };
-            ChtmlMunderover.prototype.markUsed = function () {
-                _super.prototype.markUsed.call(this);
-                this.jax.wrapperUsage.add(msubsup_js_1.ChtmlMsubsup.kind);
-            };
             return ChtmlMunderover;
         }(Base)),
         _a.kind = munderover_js_2.MmlMunderover.prototype.kind,

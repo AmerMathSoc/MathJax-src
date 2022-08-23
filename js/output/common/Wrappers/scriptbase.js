@@ -349,7 +349,7 @@ function CommonScriptbaseMixin(Base) {
                     try {
                         for (var stretchy_1 = __values(stretchy), stretchy_1_1 = stretchy_1.next(); !stretchy_1_1.done; stretchy_1_1 = stretchy_1.next()) {
                             var child = stretchy_1_1.value;
-                            child.coreMO().getStretchedVariant([W / child.bbox.rscale]);
+                            child.coreMO().getStretchedVariant([W / child.coreRScale()]);
                         }
                     }
                     catch (e_6_1) { e_6 = { error: e_6_1 }; }

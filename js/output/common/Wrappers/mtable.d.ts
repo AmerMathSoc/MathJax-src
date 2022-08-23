@@ -58,7 +58,8 @@ export interface CommonMtable<N, T, D, JX extends CommonOutputJax<N, T, D, WW, W
     getColumnWidthsFixed(swidths: string[], width: number): ColumnWidths;
     adjustColumnWidths(width: number): void;
     getVerticalPosition(i: number, align: string): number;
-    getEmHalfSpacing(fspace: number, space: number[], scale?: number): string[];
+    getFrameSpacing(): number[];
+    getEmHalfSpacing(fspace: number[], space: number[], scale?: number): string[];
     getRowHalfSpacing(): number[];
     getColumnHalfSpacing(): number[];
     getAlignmentRow(): [string, number | null];

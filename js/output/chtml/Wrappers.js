@@ -28,6 +28,7 @@ var mglyph_js_1 = require("./Wrappers/mglyph.js");
 var semantics_js_1 = require("./Wrappers/semantics.js");
 var TeXAtom_js_1 = require("./Wrappers/TeXAtom.js");
 var TextNode_js_1 = require("./Wrappers/TextNode.js");
+var HtmlNode_js_1 = require("./Wrappers/HtmlNode.js");
 exports.ChtmlWrappers = (_a = {},
     _a[math_js_1.ChtmlMath.kind] = math_js_1.ChtmlMath,
     _a[mrow_js_1.ChtmlMrow.kind] = mrow_js_1.ChtmlMrow,
@@ -63,6 +64,7 @@ exports.ChtmlWrappers = (_a = {},
     _a[semantics_js_1.ChtmlXmlNode.kind] = semantics_js_1.ChtmlXmlNode,
     _a[TeXAtom_js_1.ChtmlTeXAtom.kind] = TeXAtom_js_1.ChtmlTeXAtom,
     _a[TextNode_js_1.ChtmlTextNode.kind] = TextNode_js_1.ChtmlTextNode,
+    _a[HtmlNode_js_1.ChtmlHtmlNode.kind] = HtmlNode_js_1.ChtmlHtmlNode,
     _a[Wrapper_js_1.ChtmlWrapper.kind] = Wrapper_js_1.ChtmlWrapper,
     _a);
 //# sourceMappingURL=Wrappers.js.map

@@ -45,18 +45,15 @@ var ColumnParser = (function () {
             b: function (state) { return _this.getColumn(state, MmlNode_js_1.TEXCLASS.VBOX); },
             w: function (state) { return _this.getColumn(state, MmlNode_js_1.TEXCLASS.VTOP, ''); },
             W: function (state) { return _this.getColumn(state, MmlNode_js_1.TEXCLASS.VTOP, ''); },
-            '|': function (state) { return state.clines[state.j] = 'solid'; },
-            ':': function (state) { return state.clines[state.j] = 'dashed'; },
+            '|': function (state) { return _this.addRule(state, 'solid'); },
+            ':': function (state) { return _this.addRule(state, 'dashed'); },
             '>': function (state) { return state.cstart[state.j] = (state.cstart[state.j] || '') + _this.getBraces(state); },
             '<': function (state) { return state.cend[state.j - 1] = (state.cend[state.j - 1] || '') + _this.getBraces(state); },
-            '@': function (state) {
-                state.cstart[state.j] = '\\mathNONE{' + _this.getBraces(state) + '}';
-                state.cspace[state.j] = '0';
-            },
+            '@': function (state) { return _this.addAt(state, _this.getBraces(state)); },
+            '!': function (state) { return _this.addBang(state, _this.getBraces(state)); },
             P: function (state) { return _this.macroColumn(state, '>{$}p{#1}<{$}', 1); },
             M: function (state) { return _this.macroColumn(state, '>{$}m{#1}<{$}', 1); },
             B: function (state) { return _this.macroColumn(state, '>{$}b{#1}<{$}', 1); },
-            '!': function (state) { return _this.getBraces(state); },
             ' ': function (_state) { },
         };
         this.MAXCOLUMNS = 10000;
@@ -68,7 +65,7 @@ var ColumnParser = (function () {
             i: 0, j: 0, c: '',
             cwidth: [], calign: [], cspace: [], clines: [],
             cstart: array.cstart, cend: array.cend,
-            ralign: array.ralign
+            ralign: array.ralign, cextra: array.cextra
         };
         var n = 0;
         while (state.i < state.template.length) {
@@ -78,7 +75,7 @@ var ColumnParser = (function () {
             var c = state.c = String.fromCodePoint(state.template.codePointAt(state.i));
             state.i += c.length;
             if (!this.columnHandler.hasOwnProperty(c)) {
-                throw new TexError_js_1.default('BadColumnCharacter', 'Unknown column specifier: %1', c);
+                throw new TexError_js_1.default('BadPreamToken', 'Illegal pream-token (%1)', c);
             }
             this.columnHandler[c](state);
         }
@@ -108,6 +105,10 @@ var ColumnParser = (function () {
                 clines.push('none');
             }
             array.arraydef.columnlines = clines.slice(1).map(function (l) { return l || 'none'; }).join(' ');
+        }
+        if (state.cextra[0] || state.cextra[calign.length - 1]) {
+            var cspace = state.cspace;
+            array.arraydef['data-array-padding'] = [cspace[0] || '.5em', cspace[calign.length - 1] || '.5em'].join(' ');
         }
     };
     ColumnParser.prototype.getColumn = function (state, ralign, calign) {
@@ -162,6 +163,39 @@ var ColumnParser = (function () {
         }
         state.template = ParseUtil_js_1.default.substituteArgs(state.parser, args, macro) + state.template.slice(state.i);
         state.i = 0;
+    };
+    ColumnParser.prototype.addRule = function (state, rule) {
+        state.clines[state.j] && this.addAt(state, '\\,');
+        state.clines[state.j] = rule;
+        if (state.cspace[state.j] === '0') {
+            state.cstart[state.j] = '\\hspace{.5em}';
+        }
+    };
+    ColumnParser.prototype.addAt = function (state, macro) {
+        var cstart = state.cstart, cspace = state.cspace, j = state.j;
+        state.cextra[j] = true;
+        state.calign[j] = 'center';
+        if (state.clines[j]) {
+            if (cspace[j] === '.5em') {
+                cstart[j - 1] += '\\hspace{.25em}';
+            }
+            else if (!cspace[j]) {
+                state.cend[j - 1] = (state.cend[j - 1] || '') + '\\hspace{.5em}';
+            }
+        }
+        cstart[j] = macro;
+        cspace[j] = '0';
+        cspace[++state.j] = '0';
+    };
+    ColumnParser.prototype.addBang = function (state, macro) {
+        var cstart = state.cstart, cspace = state.cspace, j = state.j;
+        state.cextra[j] = true;
+        state.calign[j] = 'center';
+        cstart[j] = (cspace[j] === '0' && state.clines[j] ? '\\hspace{.25em}' : '') + macro;
+        if (!cspace[j]) {
+            cspace[j] = '.5em';
+        }
+        cspace[++state.j] = '.5em';
     };
     return ColumnParser;
 }());

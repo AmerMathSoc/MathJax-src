@@ -2,6 +2,7 @@ import { AbstractOutputJax } from '../core/OutputJax.js';
 import { MathDocument } from '../core/MathDocument.js';
 import { MathItem, Metrics } from '../core/MathItem.js';
 import { MmlNode } from '../core/MmlTree/MmlNode.js';
+import { DOMAdaptor } from '../core/DOMAdaptor.js';
 import { FontData, FontDataClass, CharOptions, VariantData, DelimiterData, CssFontData } from './common/FontData.js';
 import { OptionList } from '../util/Options.js';
 import { CommonWrapper, CommonWrapperClass } from './common/Wrapper.js';
@@ -40,6 +41,7 @@ export declare abstract class CommonOutputJax<N, T, D, WW extends CommonWrapper<
     testDisplay: N;
     protected unknownCache: UnknownVariantMap;
     constructor(options?: OptionList, defaultFactory?: typeof CommonWrapperFactory, defaultFont?: FC);
+    setAdaptor(adaptor: DOMAdaptor<N, T, D>): void;
     typeset(math: MathItem<N, T, D>, html: MathDocument<N, T, D>): N;
     protected createNode(): N;
     protected setScale(node: N, wrapper: WW): void;

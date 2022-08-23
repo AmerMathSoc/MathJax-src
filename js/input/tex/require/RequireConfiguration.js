@@ -142,7 +142,8 @@ exports.options = {
             autoload: false,
             configmacros: false,
             tagformat: false,
-            setoptions: false
+            setoptions: false,
+            texhtml: false
         }),
         defaultAllow: true,
         prefix: 'tex'

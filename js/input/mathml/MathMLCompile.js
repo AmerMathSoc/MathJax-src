@@ -94,7 +94,12 @@ var MathMLCompile = (function () {
             }
             finally { if (e_1) throw e_1.error; }
         }
-        this.factory.getNodeClass(type) || this.error('Unknown node type "' + type + '"');
+        if (!this.factory.getNodeClass(type)) {
+            return this.unknownNode(type, node);
+        }
+        return this.createMml(type, node, texClass, limits);
+    };
+    MathMLCompile.prototype.createMml = function (type, node, texClass, limits) {
         var mml = this.factory.create(type);
         if (type === 'TeXAtom' && texClass === 'OP' && !limits) {
             mml.setProperty('movesupsub', true);
@@ -108,6 +113,13 @@ var MathMLCompile = (function () {
         this.checkClass(mml, node);
         this.addChildren(mml, node);
         return mml;
+    };
+    MathMLCompile.prototype.unknownNode = function (type, node) {
+        if (this.factory.getNodeClass('html') && this.options.allowHtmlInTokenNodes) {
+            return this.factory.create('html').setHTML(node, this.adaptor);
+        }
+        this.error('Unknown node type "' + type + '"');
+        return null;
     };
     MathMLCompile.prototype.addAttributes = function (mml, node) {
         var e_2, _a;
@@ -190,7 +202,7 @@ var MathMLCompile = (function () {
                 }
                 else {
                     var childMml = mml.appendChild(this.makeNode(child));
-                    if (childMml.arity === 0 && adaptor.childNodes(child).length) {
+                    if (childMml.arity === 0 && adaptor.childNodes(child).length && !childMml.isKind('html')) {
                         if (this.options['fixMisplacedChildren']) {
                             this.addChildren(mml, child);
                         }
@@ -208,13 +220,14 @@ var MathMLCompile = (function () {
             }
             finally { if (e_3) throw e_3.error; }
         }
+        mml.isToken && this.trimSpace(mml);
     };
     MathMLCompile.prototype.addText = function (mml, child) {
         var text = this.adaptor.value(child);
         if ((mml.isToken || mml.getProperty('isChars')) && mml.arity) {
             if (mml.isToken) {
                 text = Entities.translate(text);
-                text = this.trimSpace(text);
+                text = this.normalizeSpace(text);
             }
             mml.appendChild(this.factory.create('text').setText(text));
         }
@@ -270,17 +283,24 @@ var MathMLCompile = (function () {
             }
         }
     };
-    MathMLCompile.prototype.trimSpace = function (text) {
+    MathMLCompile.prototype.normalizeSpace = function (text) {
         return text.replace(/[\t\n\r]/g, ' ')
-            .replace(/^ +/, '')
-            .replace(/ +$/, '')
             .replace(/  +/g, ' ');
+    };
+    MathMLCompile.prototype.trimSpace = function (mml) {
+        var child = mml.childNodes[0];
+        if (!child)
+            return;
+        child.isKind('text') && child.setText(child.getText().replace(/^ +/, ''));
+        child = mml.childNodes[mml.childNodes.length - 1];
+        child.isKind('text') && child.setText(child.getText().replace(/ +$/, ''));
     };
     MathMLCompile.prototype.error = function (message) {
         throw new Error(message);
     };
     MathMLCompile.OPTIONS = {
         MmlFactory: null,
+        allowHtmlInTokenNodes: false,
         fixMisplacedChildren: true,
         verify: __assign({}, MmlNode_js_1.AbstractMmlNode.verifyDefaults),
         translateEntities: true

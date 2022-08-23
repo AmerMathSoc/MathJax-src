@@ -114,6 +114,8 @@ export declare class ArrayItem extends BaseItem {
     };
     cstart: string[];
     cend: string[];
+    cextra: boolean[];
+    atEnd: boolean;
     ralign: [number, string, string][];
     dashed: boolean;
     parser: TexParser;
@@ -123,7 +125,7 @@ export declare class ArrayItem extends BaseItem {
     checkItem(item: StackItem): CheckType;
     createMml(): MmlNode;
     StartEntry(): void;
-    protected getEntry(): [string, boolean];
+    protected getEntry(): [string, string, string, boolean];
     EndEntry(): void;
     EndRow(): void;
     EndTable(): void;

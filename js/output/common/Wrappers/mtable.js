@@ -79,7 +79,7 @@ function CommonMtableMixin(Base) {
             var attributes = _this.node.attributes;
             _this.frame = attributes.get('frame') !== 'none';
             _this.fLine = (_this.frame && attributes.get('frame') ? .07 : 0);
-            _this.fSpace = (_this.frame ? _this.convertLengths(_this.getAttributeArray('framespacing')) : [0, 0]);
+            _this.fSpace = _this.getFrameSpacing();
             _this.cSpace = _this.convertLengths(_this.getColumnAttributes('columnspacing'));
             _this.rSpace = _this.convertLengths(_this.getRowAttributes('rowspacing'));
             _this.cLines = _this.getColumnAttributes('columnlines').map(function (x) { return (x === 'none' ? 0 : .07); });
@@ -191,7 +191,7 @@ function CommonMtableMixin(Base) {
                 try {
                     for (var stretchy_1 = __values(stretchy), stretchy_1_1 = stretchy_1.next(); !stretchy_1_1.done; stretchy_1_1 = stretchy_1.next()) {
                         var child = stretchy_1_1.value;
-                        child.coreMO().getStretchedVariant([W]);
+                        child.coreMO().getStretchedVariant([Math.max(W, child.getBBox().w) / child.coreRScale()]);
                     }
                 }
                 catch (e_3_1) { e_3 = { error: e_3_1 }; }
@@ -350,10 +350,11 @@ function CommonMtableMixin(Base) {
             }
         };
         CommonMtableMixin.prototype.getBBoxLR = function () {
+            var _a;
             if (this.hasLabels) {
                 var attributes = this.node.attributes;
                 var side = attributes.get('side');
-                var _a = __read(this.getPadAlignShift(side), 2), pad = _a[0], align = _a[1];
+                var _b = __read(this.getPadAlignShift(side), 2), pad = _b[0], align = _b[1];
                 var labels = this.hasLabels && !!attributes.get('data-width-includes-label');
                 if (labels && this.frame && this.fSpace[0]) {
                     pad -= this.fSpace[0];
@@ -361,7 +362,7 @@ function CommonMtableMixin(Base) {
                 return (align === 'center' && !labels ? [pad, pad] :
                     side === 'left' ? [pad, 0] : [0, pad]);
             }
-            return [0, 0];
+            return [((_a = this.bbox) === null || _a === void 0 ? void 0 : _a.L) || 0, 0];
         };
         CommonMtableMixin.prototype.getPadAlignShift = function (side) {
             var L = this.getTableData().L;
@@ -390,7 +391,7 @@ function CommonMtableMixin(Base) {
         };
         CommonMtableMixin.prototype.naturalWidth = function () {
             var CW = this.getComputedWidths();
-            return (0, numeric_js_1.sum)(CW.concat(this.cLines, this.cSpace)) + 2 * (this.fLine + this.fSpace[0]);
+            return (0, numeric_js_1.sum)(CW.concat(this.cLines, this.cSpace)) + 2 * this.fLine + this.fSpace[0] + this.fSpace[2];
         };
         CommonMtableMixin.prototype.getEqualRowHeight = function () {
             var _a = this.getTableData(), H = _a.H, D = _a.D;
@@ -433,7 +434,7 @@ function CommonMtableMixin(Base) {
                 cwidth = this.percent(1 / n);
             }
             else {
-                var w = (0, numeric_js_1.sum)([].concat(this.cLines, this.cSpace)) + 2 * this.fSpace[0];
+                var w = (0, numeric_js_1.sum)([].concat(this.cLines, this.cSpace)) + this.fSpace[0] + this.fSpace[2];
                 cwidth = Math.max(0, this.length2em(width) - w) / n;
             }
             return Array(this.numCols).fill(cwidth);
@@ -470,7 +471,7 @@ function CommonMtableMixin(Base) {
             var auto = indices.filter(function (i) { return swidths[i] === 'auto'; });
             var n = fit.length || auto.length;
             var W = (n ? this.getTableData() : { W: null }).W;
-            var cwidth = width - (0, numeric_js_1.sum)([].concat(this.cLines, this.cSpace)) - 2 * this.fSpace[0];
+            var cwidth = width - (0, numeric_js_1.sum)([].concat(this.cLines, this.cSpace)) - this.fSpace[0] - this.fSpace[2];
             var dw = cwidth;
             indices.forEach(function (i) {
                 var x = swidths[i];
@@ -500,7 +501,7 @@ function CommonMtableMixin(Base) {
             if (!columns.length)
                 return;
             this.cWidths = indices.map(function (i) { return (typeof _this.cWidths[i] === 'number' ? _this.cWidths[i] : W[i]); });
-            var cwidth = width - (0, numeric_js_1.sum)([].concat(this.cLines, this.cSpace)) - 2 * this.fSpace[0];
+            var cwidth = width - (0, numeric_js_1.sum)([].concat(this.cLines, this.cSpace)) - this.fSpace[0] - this.fSpace[2];
             var dw = (0, numeric_js_1.sum)(this.cWidths) - cwidth;
             var w = 0, n = 0;
             while (n < columns.length) {
@@ -531,12 +532,22 @@ function CommonMtableMixin(Base) {
             y += offset[align] || 0;
             return y;
         };
+        CommonMtableMixin.prototype.getFrameSpacing = function () {
+            var fspace = (this.frame ? this.convertLengths(this.getAttributeArray('framespacing')) : [0, 0]);
+            fspace[2] = fspace[0];
+            var padding = this.node.attributes.get('data-array-padding');
+            if (padding) {
+                var _a = __read(this.convertLengths((0, string_js_1.split)(padding)), 2), L = _a[0], R = _a[1];
+                fspace[0] = L;
+                fspace[2] = R;
+            }
+            return fspace;
+        };
         CommonMtableMixin.prototype.getEmHalfSpacing = function (fspace, space, scale) {
             if (scale === void 0) { scale = 1; }
-            var fspaceEm = this.em(fspace * scale);
             var spaceEm = this.addEm(space, 2 / scale);
-            spaceEm.unshift(fspaceEm);
-            spaceEm.push(fspaceEm);
+            spaceEm.unshift(this.em(fspace[0] * scale));
+            spaceEm.push(this.em(fspace[1] * scale));
             return spaceEm;
         };
         CommonMtableMixin.prototype.getRowHalfSpacing = function () {
@@ -548,7 +559,7 @@ function CommonMtableMixin(Base) {
         CommonMtableMixin.prototype.getColumnHalfSpacing = function () {
             var space = this.cSpace.map(function (x) { return x / 2; });
             space.unshift(this.fSpace[0]);
-            space.push(this.fSpace[0]);
+            space.push(this.fSpace[2]);
             return space;
         };
         CommonMtableMixin.prototype.getAlignmentRow = function () {

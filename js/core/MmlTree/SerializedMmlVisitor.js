@@ -63,6 +63,9 @@ var SerializedMmlVisitor = (function (_super) {
     SerializedMmlVisitor.prototype.visitXMLNode = function (node, space) {
         return space + node.getSerializedXML();
     };
+    SerializedMmlVisitor.prototype.visitHtmlNode = function (node, _space) {
+        return node.getSerializedHTML();
+    };
     SerializedMmlVisitor.prototype.visitInferredMrowNode = function (node, space) {
         var e_1, _a;
         var mml = [];

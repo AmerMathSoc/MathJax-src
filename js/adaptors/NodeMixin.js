@@ -44,6 +44,7 @@ function NodeMixin(Base, options) {
                     args[_i] = arguments[_i];
                 }
                 var _this = _super.call(this, args[0]) || this;
+                _this.canMeasureNodes = false;
                 var CLASS = _this.constructor;
                 _this.options = (0, Options_js_1.userOptions)((0, Options_js_1.defaultOptions)({}, CLASS.OPTIONS), args[1]);
                 return _this;

@@ -62,7 +62,12 @@ var HTMLDomStrings = (function () {
     HTMLDomStrings.prototype.handleTag = function (node, ignore) {
         if (!ignore) {
             var text = this.options['includeHtmlTags'][this.adaptor.kind(node)];
-            this.extendString(node, text);
+            if (text instanceof Function) {
+                this.extendString(node, text(node, this.adaptor));
+            }
+            else {
+                this.extendString(node, text);
+            }
         }
         return this.adaptor.next(node);
     };
@@ -121,7 +126,7 @@ var HTMLDomStrings = (function () {
     };
     HTMLDomStrings.OPTIONS = {
         skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'annotation', 'annotation-xml'],
-        includeHtmlTags: { br: '\n', wbr: '', '#comment': '' },
+        includeHtmlTags: (0, Options_js_1.expandable)({ br: '\n', wbr: '', '#comment': '' }),
         ignoreHtmlClass: 'mathjax_ignore',
         processHtmlClass: 'mathjax_process'
     };

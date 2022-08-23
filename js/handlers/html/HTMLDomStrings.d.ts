@@ -3,7 +3,7 @@ import { DOMAdaptor } from '../../core/DOMAdaptor.js';
 export declare type HTMLNodeList<N, T> = [N | T, number][];
 export declare class HTMLDomStrings<N, T, D> {
     static OPTIONS: OptionList;
-    protected options: OptionList;
+    options: OptionList;
     protected strings: string[];
     protected string: string;
     protected snodes: HTMLNodeList<N, T>;

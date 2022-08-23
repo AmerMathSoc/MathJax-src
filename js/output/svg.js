@@ -25,6 +25,29 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -59,6 +82,8 @@ var WrapperFactory_js_1 = require("./svg/WrapperFactory.js");
 var tex_js_1 = require("./svg/fonts/tex.js");
 var FontCache_js_1 = require("./svg/FontCache.js");
 var string_js_1 = require("../util/string.js");
+var LENGTHS = __importStar(require("../util/lengths.js"));
+var Wrapper_js_1 = require("./common/Wrapper.js");
 exports.SVGNS = 'http://www.w3.org/2000/svg';
 exports.XLINKNS = 'http://www.w3.org/1999/xlink';
 var SVG = (function (_super) {
@@ -227,8 +252,12 @@ var SVG = (function (_super) {
             var _f = __read(wrapper.childNodes[0].getBreakNode(line), 2), mml = _f[0], mo = _f[1];
             var forced = !!(mml && mml.node.getProperty('forcebreak'));
             if (i || forced) {
-                var space = (mml && !newline ? mml.getLineBBox(0).originalL : 0) * 400;
-                (space || !forced) && adaptor.insert(adaptor.node('mjx-break', forced ? { style: { 'font-size': space.toFixed(1) + '%' } } : { newline: true }), nsvg);
+                var dimen = (mml && !newline ? mml.getLineBBox(0).originalL : 0);
+                if (dimen || !forced) {
+                    var space = LENGTHS.em(dimen);
+                    adaptor.insert(adaptor.node('mjx-break', !forced ? { newline: true } :
+                        Wrapper_js_1.SPACE[space] ? { size: Wrapper_js_1.SPACE[space] } : { style: { 'font-size': dimen.toFixed(1) + '%' } }), nsvg);
+                }
             }
             newline = !!(mo && mo.node.attributes.get('linebreak') === 'newline');
         }

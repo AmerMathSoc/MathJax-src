@@ -112,10 +112,14 @@ function CommonMtrMixin(Base) {
                 HD = [H, D];
             }
             if (HD) {
+                var _loop_1 = function (child) {
+                    var rscale = child.coreRScale();
+                    child.coreMO().getStretchedVariant(HD.map(function (x) { return x * rscale; }));
+                };
                 try {
                     for (var stretchy_1 = __values(stretchy), stretchy_1_1 = stretchy_1.next(); !stretchy_1_1.done; stretchy_1_1 = stretchy_1.next()) {
                         var child = stretchy_1_1.value;
-                        child.coreMO().getStretchedVariant(HD);
+                        _loop_1(child);
                     }
                 }
                 catch (e_3_1) { e_3 = { error: e_3_1 }; }

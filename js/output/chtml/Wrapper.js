@@ -14,29 +14,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __values = (this && this.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
@@ -64,10 +41,8 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ChtmlWrapper = exports.SPACE = exports.FONTSIZE = void 0;
-var LENGTHS = __importStar(require("../../util/lengths.js"));
+exports.ChtmlWrapper = exports.FONTSIZE = void 0;
 var Wrapper_js_1 = require("../common/Wrapper.js");
 var BBox_js_1 = require("../../util/BBox.js");
 exports.FONTSIZE = {
@@ -82,13 +57,6 @@ exports.FONTSIZE = {
     '207%': 'hg',
     '249%': 'HG'
 };
-exports.SPACE = (_a = {},
-    _a[LENGTHS.em(2 / 18)] = '1',
-    _a[LENGTHS.em(3 / 18)] = '2',
-    _a[LENGTHS.em(4 / 18)] = '3',
-    _a[LENGTHS.em(5 / 18)] = '4',
-    _a[LENGTHS.em(6 / 18)] = '5',
-    _a);
 var ChtmlWrapper = (function (_super) {
     __extends(ChtmlWrapper, _super);
     function ChtmlWrapper() {
@@ -240,13 +208,13 @@ var ChtmlWrapper = (function (_super) {
                 if (dimen) {
                     var space = this.em(dimen);
                     if (breakable) {
-                        var node = adaptor.node('mjx-break', exports.SPACE[space] ? { size: exports.SPACE[space] } :
+                        var node = adaptor.node('mjx-break', Wrapper_js_1.SPACE[space] ? { size: Wrapper_js_1.SPACE[space] } :
                             { style: { 'font-size': (dimen * 400).toFixed(1) + '%' } });
                         adaptor.insert(node, this.dom[i]);
                     }
                     else {
-                        if (exports.SPACE[space]) {
-                            adaptor.setAttribute(this.dom[i], name_1, exports.SPACE[space]);
+                        if (Wrapper_js_1.SPACE[space]) {
+                            adaptor.setAttribute(this.dom[i], name_1, Wrapper_js_1.SPACE[space]);
                         }
                         else {
                             adaptor.setStyle(this.dom[i], margin, space);

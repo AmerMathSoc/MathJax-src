@@ -493,6 +493,20 @@ BaseMethods.Hsize = function (parser, name) {
     parser.GetNext() === '=' && parser.i++;
     parser.stack.env.hsize = parser.GetDimen(name);
 };
+BaseMethods.ParBox = function (parser, name) {
+    var align = parser.GetBrackets(name, 'c');
+    var width = parser.GetDimen(name);
+    var text = ParseUtil_js_1.default.internalMath(parser, parser.GetArgument(name));
+    var box = (0, Options_js_1.lookup)(align, {
+        t: MmlNode_js_1.TEXCLASS.VTOP,
+        b: MmlNode_js_1.TEXCLASS.VBOX,
+        c: MmlNode_js_1.TEXCLASS.VCENTER,
+        m: MmlNode_js_1.TEXCLASS.VCENTER
+    }, MmlNode_js_1.TEXCLASS.VCENTER);
+    parser.Push(parser.create('node', 'TeXAtom', [
+        parser.create('node', 'mpadded', text, { width: width, 'data-overflow': 'linebreak' })
+    ], { texClass: box }));
+};
 BaseMethods.MmlToken = function (parser, name) {
     var kind = parser.GetArgument(name);
     var attr = parser.GetBrackets(name, '').replace(/^\s+/, '');
@@ -728,6 +742,7 @@ BaseMethods.Matrix = function (parser, _name, open, close, align, spacing, vspac
         parser.i = 0;
     }
     var array = parser.itemFactory.create('array').setProperty('requireClose', true);
+    (open || !align) && array.setProperty('arrayPadding', '.2em .125em');
     array.arraydef = {
         rowspacing: (vspacing || '4pt'),
         columnspacing: (spacing || '1em')
@@ -900,6 +915,7 @@ BaseMethods.Array = function (parser, begin, open, close, align, spacing, vspaci
         align = parser.GetArgument('\\begin{' + begin.getName() + '}');
     }
     var array = parser.itemFactory.create('array');
+    begin.getName() === 'array' && array.setProperty('arrayPadding', '.5em .125em');
     array.parser = parser;
     array.arraydef = {
         columnspacing: (spacing || '1em'),

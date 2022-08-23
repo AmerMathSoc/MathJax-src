@@ -12,6 +12,7 @@ export declare type ColumnState = {
     clines: string[];
     cstart: string[];
     cend: string[];
+    cextra: boolean[];
     ralign: [number, string, string][];
 };
 export declare type ColumnHandler = (state: ColumnState) => void;
@@ -26,4 +27,7 @@ export declare class ColumnParser {
     getAlign(state: ColumnState): any;
     getBraces(state: ColumnState): string;
     macroColumn(state: ColumnState, macro: string, n: number): void;
+    addRule(state: ColumnState, rule: string): void;
+    addAt(state: ColumnState, macro: string): void;
+    addBang(state: ColumnState, macro: string): void;
 }
