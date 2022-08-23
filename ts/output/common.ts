@@ -25,6 +25,7 @@ import {AbstractOutputJax} from '../core/OutputJax.js';
 import {MathDocument} from '../core/MathDocument.js';
 import {MathItem, Metrics, STATE} from '../core/MathItem.js';
 import {MmlNode, TEXCLASS} from '../core/MmlTree/MmlNode.js';
+import {DOMAdaptor} from '../core/DOMAdaptor.js';
 import {FontData, FontDataClass, CharOptions, VariantData, DelimiterData, CssFontData} from './common/FontData.js';
 import {OptionList, separateOptions} from '../util/Options.js';
 import {CommonWrapper, CommonWrapperClass} from './common/Wrapper.js';
@@ -116,6 +117,7 @@ export abstract class CommonOutputJax<
       lineleading: .2,                // the default lineleading in em units
       LinebreakVisitor: null,         // The LinebreakVisitor to use
     },
+    htmlHDW: 'auto',               // 'use', 'force', or 'ignore' data-mjx-hdw attributes
     wrapperFactory: null,          // The wrapper factory to use
     font: null,                    // The FontData object to use
     cssStyles: null,               // The CssStyles object to use
