@@ -844,7 +844,7 @@ export abstract class AbstractMmlNode extends AbstractNode<MmlNode, MmlNodeClass
       let mtext = this.factory.create('mtext');
       let text = this.factory.create('text') as any as TextNode;
       text.setText(options['fullErrors'] ? message : this.kind);
-      mtext.appendChild(text as any);
+      mtext.appendChild(text);
       merror.appendChild(mtext);
       this.parent.replaceChild(merror, this);
     } else {
@@ -888,6 +888,8 @@ export abstract class AbstractMmlTokenNode extends AbstractMmlNode {
     for (const child of this.childNodes) {
       if (child instanceof TextNode) {
         text += child.getText();
+      } else if ('textContent' in child) {
+        text += (child as any).textContent();
       }
     }
     return text;

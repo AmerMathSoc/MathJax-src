@@ -234,6 +234,20 @@ export abstract class CommonOutputJax<
     this.linebreaks = new linebreaks(this.factory);
   }
 
+  /**
+   * @override
+   */
+  public setAdaptor(adaptor: DOMAdaptor<N, T, D>) {
+    super.setAdaptor(adaptor);
+    //
+    //  Set the htmlHDW option based on the adaptor's ability to measure nodes
+    //
+    if (this.options.htmlHDW === 'auto') {
+      this.options.htmlHDW = (adaptor.canMeasureNodes ? 'ignore' : 'force');
+    }
+  }
+
+
   /*****************************************************************/
 
   /**
