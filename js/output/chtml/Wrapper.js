@@ -221,7 +221,7 @@ var ChtmlWrapper = (function (_super) {
                         }
                     }
                 }
-                else if (breakable) {
+                else if (breakable && name_1 == 'space') {
                     adaptor.insert(adaptor.node('mjx-break', { style: { 'font-size': 0 } }), this.dom[i]);
                 }
             }

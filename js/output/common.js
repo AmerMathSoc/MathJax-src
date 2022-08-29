@@ -169,7 +169,7 @@ var CommonOutputJax = (function (_super) {
         var forcebreak = this.forceInlineBreaks;
         var marked = false;
         try {
-            for (var _b = __values(node.childNodes), _c = _b.next(); !_c.done; _c = _b.next()) {
+            for (var _b = __values(node.childNodes.slice(1)), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var child = _c.value;
                 if (child.isEmbellished) {
                     var mo = child.coreMO();
@@ -183,8 +183,8 @@ var CommonOutputJax = (function (_super) {
                             mo.setProperty('forcebreak', true);
                         }
                         if (!marked) {
-                            node.setProperty('breakable', true);
-                            node.parent.setProperty('breakable', true);
+                            node.setProperty('process-breaks', true);
+                            node.parent.setProperty('process-breaks', true);
                             marked = true;
                         }
                     }

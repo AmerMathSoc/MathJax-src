@@ -148,7 +148,7 @@ var SVG = (function (_super) {
         this.container = parent;
         var _a = __read(this.createRoot(wrapper), 2), svg = _a[0], g = _a[1];
         this.typesetSvg(wrapper, svg, g);
-        wrapper.node.getProperty('breakable') && this.handleInlineBreaks(wrapper, svg, g);
+        wrapper.node.getProperty('process-breaks') && this.handleInlineBreaks(wrapper, svg, g);
         this.container = container;
     };
     SVG.prototype.createRoot = function (wrapper) {
@@ -220,37 +220,36 @@ var SVG = (function (_super) {
     };
     SVG.prototype.handleInlineBreaks = function (wrapper, svg, g) {
         var e_1, _a;
+        var n = wrapper.childNodes[0].breakCount;
+        if (!n)
+            return;
         var adaptor = this.adaptor;
-        adaptor.setAttribute(svg, 'width', 0);
-        adaptor.setAttribute(svg, 'height', 0);
-        adaptor.setStyle(svg, 'vertical-align', '');
-        adaptor.remove(g);
         var math = adaptor.firstChild(g);
         var lines = adaptor.childNodes(adaptor.firstChild(math));
-        var n = lines.length;
         var lineBBox = wrapper.childNodes[0].lineBBox;
+        adaptor.remove(g);
         var newline = true;
-        for (var i = 0; i < n; i++) {
-            var _b = lineBBox[i], h = _b.h, d = _b.d, w = _b.w;
-            var _c = __read(this.createSVG(h, d, w), 2), nsvg = _c[0], ng = _c[1];
+        for (var i = 0; i <= n; i++) {
+            var line = lineBBox[i] || wrapper.childNodes[0].getLineBBox(i);
+            var h = line.h, d = line.d, w = line.w;
+            var _b = __read(this.createSVG(h, d, w), 2), nsvg = _b[0], ng = _b[1];
             var nmath = adaptor.append(ng, adaptor.clone(math, false));
             try {
-                for (var _d = (e_1 = void 0, __values(adaptor.childNodes(lines[i]))), _e = _d.next(); !_e.done; _e = _d.next()) {
-                    var child = _e.value;
+                for (var _c = (e_1 = void 0, __values(adaptor.childNodes(lines[i]))), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    var child = _d.value;
                     adaptor.append(nmath, child);
                 }
             }
             catch (e_1_1) { e_1 = { error: e_1_1 }; }
             finally {
                 try {
-                    if (_e && !_e.done && (_a = _d.return)) _a.call(_d);
+                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
                 }
                 finally { if (e_1) throw e_1.error; }
             }
             adaptor.insert(nsvg, svg);
-            var line = lineBBox[i];
-            var _f = __read(wrapper.childNodes[0].getBreakNode(line), 2), mml = _f[0], mo = _f[1];
-            var forced = !!(mml && mml.node.getProperty('forcebreak'));
+            var _e = __read(wrapper.childNodes[0].getBreakNode(line), 2), mml = _e[0], mo = _e[1];
+            var forced = !!(mo && mo.node.getProperty('forcebreak'));
             if (i || forced) {
                 var dimen = (mml && !newline ? mml.getLineBBox(0).originalL : 0);
                 if (dimen || !forced) {
@@ -261,7 +260,10 @@ var SVG = (function (_super) {
             }
             newline = !!(mo && mo.node.attributes.get('linebreak') === 'newline');
         }
-        adaptor.childNodes(svg).length === 0 && adaptor.remove(svg);
+        if (adaptor.childNodes(svg).length) {
+            adaptor.append(adaptor.firstChild(adaptor.parent(svg)), adaptor.firstChild(svg));
+        }
+        adaptor.remove(svg);
     };
     SVG.prototype.ex = function (m) {
         m /= this.font.params.x_height;
