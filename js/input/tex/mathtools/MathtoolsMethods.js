@@ -10,6 +10,17 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -25,17 +36,6 @@ var __read = (this && this.__read) || function (o, n) {
         finally { if (e) throw e.error; }
     }
     return ar;
-};
-var __values = (this && this.__values) || function(o) {
-    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-    if (m) return m.call(o);
-    if (o && typeof o.length === "number") return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -66,12 +66,20 @@ exports.MathtoolsMethods = {
         return exports.MathtoolsMethods.Array(parser, begin, open, close, align, ParseUtil_js_1.default.Em(1 / 3), '.2em', 'S', 1);
     },
     MtMultlined: function (parser, begin) {
-        var _a;
         var name = "\\begin{".concat(begin.getName(), "}");
-        var pos = parser.GetBrackets(name, parser.options.mathtools['multlined-pos'] || 'c');
-        var width = pos ? parser.GetBrackets(name, '') : '';
-        if (pos && !pos.match(/^[cbt]$/)) {
-            _a = __read([pos, width], 2), width = _a[0], pos = _a[1];
+        var pos = 'c', width = '';
+        if (!parser.nextIsSpace()) {
+            var arg = parser.GetBrackets(name, parser.options.mathtools['multlined-pos'] || 'c');
+            if (arg.match(/^[ctb]$/)) {
+                pos = arg;
+                width = !parser.nextIsSpace() ? parser.GetBrackets(name, '') : '';
+            }
+            else {
+                width = arg;
+            }
+            if (width && !ParseUtil_js_1.default.matchDimen(width)[0]) {
+                throw new TexError_js_1.default('BadWidth', 'Width for %1 must be a dimension', name);
+            }
         }
         parser.Push(begin);
         var item = parser.itemFactory.create('multlined', parser, begin);

@@ -845,22 +845,14 @@ var ArrayItem = (function (_super) {
         if (!start && !end && !ralign && !cextra[n] && !cextra[n + 1])
             return;
         var _a = __read(this.getEntry(), 4), prefix = _a[0], entry = _a[1], term = _a[2], found = _a[3];
-        if (cextra[n] && !this.atEnd) {
+        if (cextra[n] && (!this.atEnd || cextra[n + 1])) {
             start += '&';
         }
         if (term !== '&') {
-            if (cextra[n]) {
-                found = true;
-            }
-            else if (cextra[n + 1]) {
-                found = !!entry.trim();
-                if (found) {
-                    end = (end || '') + '&';
-                    this.atEnd = !cextra[n];
-                }
-            }
-            else if (!entry.trim()) {
-                found = false;
+            found = !!entry.trim() || !!(n || term.substr(0, 4) !== '\\end');
+            if (cextra[n + 1] && !cextra[n]) {
+                end = (end || '') + '&';
+                this.atEnd = true;
             }
         }
         if (!found && !prefix)
@@ -885,7 +877,7 @@ var ArrayItem = (function (_super) {
     };
     ArrayItem.prototype.getEntry = function () {
         var parser = this.parser;
-        var pattern = /^([^]*?)([&{}]|\\\\|\\(?:begin|end)\{array\}|\\cr)/;
+        var pattern = /^([^]*?)([&{}]|\\\\|\\(?:begin|end)\{array\}|\\cr|\\)/;
         var braces = 0, envs = 0;
         var i = parser.i;
         var match;
@@ -893,6 +885,9 @@ var ArrayItem = (function (_super) {
         while ((match = parser.string.slice(i).match(pattern)) !== null) {
             i += match[0].length;
             switch (match[2]) {
+                case '\\':
+                    i++;
+                    break;
                 case '{':
                     braces++;
                     break;
