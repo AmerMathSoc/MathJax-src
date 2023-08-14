@@ -3,6 +3,6 @@
 /components/mjs/**/lib
 /components/cjs
 /cjs
-/mjs
+# /mjs
 /bundle
 /bundle-cjs
