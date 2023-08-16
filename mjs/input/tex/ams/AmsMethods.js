@@ -41,6 +41,7 @@ AmsMethods.AlignAt = function (parser, begin, numbered, taggable) {
 AmsMethods.Multline = function (parser, begin, numbered) {
     ParseUtil.checkEqnEnv(parser);
     parser.Push(begin);
+    const padding = parser.options.ams['multlineIndent'];
     const item = parser.itemFactory.create('multline', numbered, parser.stack);
     item.arraydef = {
         displaystyle: true,
@@ -49,8 +50,7 @@ AmsMethods.Multline = function (parser, begin, numbered) {
         width: parser.options.ams['multlineWidth'],
         side: parser.options['tagSide'],
         minlabelspacing: parser.options['tagIndent'],
-        framespacing: parser.options.ams['multlineIndent'] + ' 0',
-        frame: '',
+        'data-array-padding': `${padding} ${padding}`,
         'data-width-includes-label': true
     };
     return item;
@@ -107,7 +107,7 @@ AmsMethods.HandleDeclareOp = function (parser, name) {
 AmsMethods.HandleOperatorName = function (parser, name) {
     const star = parser.GetStar();
     let op = ParseUtil.trimSpaces(parser.GetArgument(name));
-    let mml = new TexParser(op, Object.assign(Object.assign({}, parser.stack.env), { font: TexConstant.Variant.NORMAL, multiLetterIdentifiers: parser.options.ams.operatornamePattern, operatorLetters: true, noAutoOP: true }), parser.configuration).mml();
+    let mml = new TexParser(op, Object.assign(Object.assign({}, parser.stack.env), { font: TexConstant.Variant.NORMAL, multiLetterIdentifiers: parser.options.ams.operatornamePattern, operatorLetters: true }), parser.configuration).mml();
     if (!mml.isKind('mi')) {
         mml = parser.create('node', 'TeXAtom', [mml]);
     }
