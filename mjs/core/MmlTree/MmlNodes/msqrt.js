@@ -1,4 +1,4 @@
-import { AbstractMmlNode, TEXCLASS } from '../MmlNode.js';
+import { AbstractMmlNode, TEXCLASS, } from '../MmlNode.js';
 export class MmlMsqrt extends AbstractMmlNode {
     constructor() {
         super(...arguments);

@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMfracMixin } from '../../common/Wrappers/mfrac.js';
+import { CommonMfracMixin, } from '../../common/Wrappers/mfrac.js';
 import { MmlMfrac } from '../../../core/MmlTree/MmlNodes/mfrac.js';
 export const ChtmlMfrac = (function () {
     var _a;
@@ -15,7 +15,7 @@ export const ChtmlMfrac = (function () {
                     this.makeBevelled(display);
                 }
                 else {
-                    const thickness = this.length2em(String(linethickness), .06);
+                    const thickness = this.length2em(String(linethickness), 0.06);
                     if (thickness === 0) {
                         this.makeAtop(display);
                     }
@@ -33,13 +33,17 @@ export const ChtmlMfrac = (function () {
                 const dattr = (denomalign !== 'center' ? { align: denomalign } : {});
                 const dsattr = Object.assign({}, attr), nsattr = Object.assign({}, attr);
                 const tex = this.font.params;
-                if (t !== .06) {
+                if (t !== 0.06) {
                     const a = tex.axis_height;
                     const r = this.font.params.rule_factor;
                     const tEm = this.em(t);
                     const { T, u, v } = this.getTUV(display, t);
                     const m = (display ? this.em(3 * t) : tEm) + ' -.1em';
-                    attr.style = { height: tEm, 'border-top': this.em(t * r) + ' solid', margin: m };
+                    attr.style = {
+                        height: tEm,
+                        'border-top': this.em(t * r) + ' solid',
+                        margin: m,
+                    };
                     const nh = this.em(Math.max(0, u));
                     nsattr.style = { height: nh, 'vertical-align': '-' + nh };
                     dsattr.style = { height: this.em(Math.max(0, v)) };
@@ -47,15 +51,19 @@ export const ChtmlMfrac = (function () {
                 }
                 let num, den;
                 this.adaptor.append(this.dom[0], this.html('mjx-frac', fattr, [
-                    num = this.html('mjx-num', nattr, [this.html('mjx-nstrut', nsattr)]),
+                    (num = this.html('mjx-num', nattr, [
+                        this.html('mjx-nstrut', nsattr),
+                    ])),
                     this.html('mjx-dbox', {}, [
                         this.html('mjx-dtable', {}, [
                             this.html('mjx-line', attr),
                             this.html('mjx-row', {}, [
-                                den = this.html('mjx-den', dattr, [this.html('mjx-dstrut', dsattr)])
-                            ])
-                        ])
-                    ])
+                                (den = this.html('mjx-den', dattr, [
+                                    this.html('mjx-dstrut', dsattr),
+                                ])),
+                            ]),
+                        ]),
+                    ]),
                 ]));
                 this.childNodes[0].toCHTML([num]);
                 this.childNodes[1].toCHTML([den]);
@@ -72,8 +80,8 @@ export const ChtmlMfrac = (function () {
                 fattr.style = { 'vertical-align': this.em(-v) };
                 let num, den;
                 this.adaptor.append(this.dom[0], this.html('mjx-frac', fattr, [
-                    num = this.html('mjx-num', nattr),
-                    den = this.html('mjx-den', dattr)
+                    (num = this.html('mjx-num', nattr)),
+                    (den = this.html('mjx-den', dattr)),
                 ]));
                 this.childNodes[0].toCHTML([num]);
                 this.childNodes[1].toCHTML([den]);

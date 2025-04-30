@@ -7,8 +7,10 @@ export class FindTeX extends AbstractFindMath {
         this.getPatterns();
     }
     getPatterns() {
-        let options = this.options;
-        let starts = [], parts = [], subparts = [];
+        const options = this.options;
+        const starts = [];
+        const parts = [];
+        const subparts = [];
         this.end = {};
         this.env = this.sub = 0;
         let i = 1;
@@ -33,10 +35,10 @@ export class FindTeX extends AbstractFindMath {
             this.sub = i;
         }
         this.start = new RegExp(parts.join('|'), 'g');
-        this.hasPatterns = (parts.length > 0);
+        this.hasPatterns = parts.length > 0;
     }
     addPattern(starts, delims, display) {
-        let [open, close] = delims;
+        const [open, close] = delims;
         starts.push(quotePattern(open));
         this.end[open] = [close, display, this.endPattern(close)];
     }
@@ -44,12 +46,12 @@ export class FindTeX extends AbstractFindMath {
         return new RegExp((endp || quotePattern(end)) + '|\\\\(?:[a-zA-Z]|.)|[{}]', 'g');
     }
     findEnd(text, n, start, end) {
-        let [close, display, pattern] = end;
-        let i = pattern.lastIndex = start.index + start[0].length;
+        const [close, display, pattern] = end;
+        const i = (pattern.lastIndex = start.index + start[0].length);
         let match, braces = 0;
         while ((match = pattern.exec(text))) {
             if ((match[1] || match[0]) === close && braces === 0) {
-                return protoItem(start[0], text.substr(i, match.index - i), match[0], n, start.index, match.index + match[0].length, display);
+                return protoItem(start[0], text.substring(i, match.index), match[0], n, start.index, match.index + match[0].length, display);
             }
             else if (match[0] === '{') {
                 braces++;
@@ -65,18 +67,22 @@ export class FindTeX extends AbstractFindMath {
         this.start.lastIndex = 0;
         while ((start = this.start.exec(text))) {
             if (start[this.env] !== undefined && this.env) {
-                let end = '\\\\end\\s*(\\{' + quotePattern(start[this.env]) + '\\})';
-                match = this.findEnd(text, n, start, ['{' + start[this.env] + '}', true, this.endPattern(null, end)]);
+                const end = '\\\\end\\s*(\\{' + quotePattern(start[this.env]) + '\\})';
+                match = this.findEnd(text, n, start, [
+                    '{' + start[this.env] + '}',
+                    true,
+                    this.endPattern(null, end),
+                ]);
                 if (match) {
                     match.math = match.open + match.math + match.close;
                     match.open = match.close = '';
                 }
             }
             else if (start[this.sub] !== undefined && this.sub) {
-                let math = start[this.sub];
-                let end = start.index + start[this.sub].length;
+                const math = start[this.sub];
+                const end = start.index + start[this.sub].length;
                 if (math.length === 2) {
-                    match = protoItem('', math.substr(1), '', n, start.index, end);
+                    match = protoItem('\\', math.substring(1), '', n, start.index, end);
                 }
                 else {
                     match = protoItem('', math, '', n, start.index, end, false);
@@ -92,7 +98,7 @@ export class FindTeX extends AbstractFindMath {
         }
     }
     findMath(strings) {
-        let math = [];
+        const math = [];
         if (this.hasPatterns) {
             for (let i = 0, m = strings.length; i < m; i++) {
                 this.findMathInString(math, i, strings[i]);

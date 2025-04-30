@@ -1,6 +1,6 @@
-import { CommonMsubMixin, CommonMsupMixin, CommonMsubsupMixin } from '../../common/Wrappers/msubsup.js';
-import { SvgScriptbase } from './scriptbase.js';
-import { MmlMsubsup, MmlMsub, MmlMsup } from '../../../core/MmlTree/MmlNodes/msubsup.js';
+import { CommonMsubMixin, CommonMsupMixin, CommonMsubsupMixin, } from '../../common/Wrappers/msubsup.js';
+import { SvgScriptbase, } from './scriptbase.js';
+import { MmlMsubsup, MmlMsub, MmlMsup, } from '../../../core/MmlTree/MmlNodes/msubsup.js';
 export const SvgMsub = (function () {
     var _a;
     const Base = CommonMsubMixin(SvgScriptbase);

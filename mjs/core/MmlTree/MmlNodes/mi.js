@@ -1,4 +1,4 @@
-import { AbstractMmlTokenNode, TEXCLASS } from '../MmlNode.js';
+import { AbstractMmlTokenNode, TEXCLASS, } from '../MmlNode.js';
 export class MmlMi extends AbstractMmlTokenNode {
     constructor() {
         super(...arguments);
@@ -9,15 +9,16 @@ export class MmlMi extends AbstractMmlTokenNode {
     }
     setInheritedAttributes(attributes = {}, display = false, level = 0, prime = false) {
         super.setInheritedAttributes(attributes, display, level, prime);
-        let text = this.getText();
+        const text = this.getText();
         if (text.match(MmlMi.singleCharacter) && !attributes.mathvariant) {
             this.attributes.setInherited('mathvariant', 'italic');
         }
     }
     setTeXclass(prev) {
         this.getPrevClass(prev);
-        let name = this.getText();
-        if (name.length > 1 && name.match(MmlMi.operatorName) &&
+        const name = this.getText();
+        if (name.length > 1 &&
+            name.match(MmlMi.operatorName) &&
             this.attributes.get('mathvariant') === 'normal' &&
             this.getProperty('autoOP') === undefined &&
             this.getProperty('texClass') === undefined) {

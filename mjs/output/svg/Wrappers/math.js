@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMathMixin } from '../../common/Wrappers/math.js';
+import { CommonMathMixin, } from '../../common/Wrappers/math.js';
 import { MmlMath } from '../../../core/MmlTree/MmlNodes/math.js';
 import { BBox } from '../../../util/BBox.js';
 import { ZeroFontDataUrl } from './zero.js';
@@ -35,7 +35,8 @@ export const SvgMath = (function () {
             handleSpeech() {
                 const adaptor = this.adaptor;
                 const attributes = this.node.attributes;
-                const speech = (attributes.get('aria-label') || attributes.get('data-semantic-speech'));
+                const speech = (attributes.get('aria-label') ||
+                    attributes.get('data-semantic-speech'));
                 if (speech) {
                     const id = this.getTitleID();
                     const label = this.svg('title', { id }, [this.text(speech)]);
@@ -43,7 +44,7 @@ export const SvgMath = (function () {
                     adaptor.setAttribute(this.dom[0], 'aria-labeledby', id);
                     adaptor.removeAttribute(this.dom[0], 'aria-label');
                     for (const child of this.childNodes[0].childNodes) {
-                        child.dom.forEach(node => adaptor.setAttribute(node, 'aria-hidden', 'true'));
+                        child.dom.forEach((node) => adaptor.setAttribute(node, 'aria-hidden', 'true'));
                     }
                 }
             }
@@ -53,7 +54,7 @@ export const SvgMath = (function () {
             toSVG(parents) {
                 super.toSVG(parents);
                 const adaptor = this.adaptor;
-                const display = (this.node.attributes.get('display') === 'block');
+                const display = this.node.attributes.get('display') === 'block';
                 if (display) {
                     adaptor.setAttribute(this.jax.container, 'display', 'true');
                     this.handleDisplay();
@@ -68,61 +69,44 @@ export const SvgMath = (function () {
         },
         _a.kind = MmlMath.prototype.kind,
         _a.styles = {
-            'mjx-container[jax="SVG"][display="true"]': {
-                display: 'block',
-                'text-align': 'center',
-                'justify-content': 'center',
-                margin: '1em 0'
-            },
-            'mjx-container[jax="SVG"][display="true"][width="full"]': {
-                display: 'flex'
-            },
-            'mjx-container[jax="SVG"][justify="left"]': {
-                'text-align': 'left',
-                'justify-content': 'left'
-            },
-            'mjx-container[jax="SVG"][justify="right"]': {
-                'text-align': 'right',
-                'justify-content': 'right'
-            },
-            'mjx-container[jax="SVG"] mjx-break::after': {
-                content: '" "',
+            'mjx-container[jax="SVG"] mjx-break': {
                 'white-space': 'normal',
                 'line-height': '0',
-                'font-family': 'MJX-ZERO'
+                'clip-path': 'rect(0 0 0 0)',
+                'font-family': 'MJX-ZERO ! important',
             },
             'mjx-break[size="0"]': {
-                'letter-spacing': (.001 - 1) + 'em'
+                'letter-spacing': 0.001 - 1 + 'em',
             },
             'mjx-break[size="1"]': {
-                'letter-spacing': (.111 - 1) + 'em'
+                'letter-spacing': 0.111 - 1 + 'em',
             },
             'mjx-break[size="2"]': {
-                'letter-spacing': (.167 - 1) + 'em'
+                'letter-spacing': 0.167 - 1 + 'em',
             },
             'mjx-break[size="3"]': {
-                'letter-spacing': (.222 - 1) + 'em'
+                'letter-spacing': 0.222 - 1 + 'em',
             },
             'mjx-break[size="4"]': {
-                'letter-spacing': (.278 - 1) + 'em'
+                'letter-spacing': 0.278 - 1 + 'em',
             },
             'mjx-break[size="5"]': {
-                'letter-spacing': (.333 - 1) + 'em'
+                'letter-spacing': 0.333 - 1 + 'em',
             },
             'mjx-container[jax="SVG"] mjx-break[newline]::before': {
                 'white-space': 'pre',
-                content: '"\\A"'
+                content: '"\\A"',
             },
             'mjx-break[newline] + svg[width="0.054ex"]': {
-                'margin-right': '-1px'
+                'margin-right': '-1px',
             },
             'mjx-break[prebreak]': {
-                'letter-spacing': '-.999em'
+                'letter-spacing': '-.999em',
             },
             '@font-face /* zero */': {
                 'font-family': 'MJX-ZERO',
-                'src': ZeroFontDataUrl
-            }
+                src: ZeroFontDataUrl,
+            },
         },
         _a;
 })();

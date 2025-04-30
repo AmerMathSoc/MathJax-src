@@ -7,7 +7,11 @@ export class FontCache {
         this.jax = jax;
     }
     cachePath(variant, C, path) {
-        const id = 'MJX-' + this.localID + (this.jax.font.getVariant(variant).cacheID || '') + '-' + C;
+        const id = 'MJX-' +
+            this.localID +
+            (this.jax.font.getVariant(variant).cacheID || '') +
+            '-' +
+            C;
         if (!this.cache.has(id)) {
             this.cache.set(id, path);
             this.jax.adaptor.append(this.defs, this.jax.svg('path', { id: id, d: path }));

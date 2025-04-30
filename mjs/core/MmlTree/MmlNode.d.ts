@@ -133,7 +133,7 @@ export declare abstract class AbstractMmlBaseNode extends AbstractMmlNode {
     get isEmbellished(): boolean;
     core(): MmlNode;
     coreMO(): MmlNode;
-    setTeXclass(prev: MmlNode): MmlNode;
+    setTeXclass(prev: MmlNode): MmlNode | this;
 }
 export declare abstract class AbstractMmlEmptyNode extends AbstractEmptyNode<MmlNode, MmlNodeClass> implements MmlNode {
     parent: MmlNode;
@@ -172,10 +172,10 @@ export declare class TextNode extends AbstractMmlEmptyNode {
     toString(): string;
 }
 export declare class XMLNode extends AbstractMmlEmptyNode {
-    protected xml: Object;
+    protected xml: object;
     protected adaptor: DOMAdaptor<any, any, any>;
     get kind(): string;
-    getXML(): Object;
+    getXML(): object;
     setXML(xml: Object, adaptor?: DOMAdaptor<any, any, any>): XMLNode;
     getSerializedXML(): string;
     copy(): XMLNode;

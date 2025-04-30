@@ -1,27 +1,26 @@
 import * as Entities from '../../util/Entities.js';
 import { LiteElement } from './Element.js';
 import { LiteComment } from './Text.js';
-export var PATTERNS;
-(function (PATTERNS) {
-    PATTERNS.TAGNAME = '[a-z][^\\s\\n>]*';
-    PATTERNS.ATTNAME = '[a-z][^\\s\\n>=]*';
-    PATTERNS.VALUE = `(?:'[^']*'|"[^"]*"|[^\\s\\n]+)`;
-    PATTERNS.VALUESPLIT = `(?:'([^']*)'|"([^"]*)"|([^\\s\\n]+))`;
-    PATTERNS.SPACE = '(?:\\s|\\n)+';
-    PATTERNS.OPTIONALSPACE = '(?:\\s|\\n)*';
-    PATTERNS.ATTRIBUTE = PATTERNS.ATTNAME + '(?:' + PATTERNS.OPTIONALSPACE + '=' + PATTERNS.OPTIONALSPACE + PATTERNS.VALUE + ')?';
-    PATTERNS.ATTRIBUTESPLIT = '(' + PATTERNS.ATTNAME + ')(?:' + PATTERNS.OPTIONALSPACE + '=' + PATTERNS.OPTIONALSPACE + PATTERNS.VALUESPLIT + ')?';
-    PATTERNS.TAG = '(<(?:' + PATTERNS.TAGNAME + '(?:' + PATTERNS.SPACE + PATTERNS.ATTRIBUTE + ')*'
-        + PATTERNS.OPTIONALSPACE + '/?|/' + PATTERNS.TAGNAME + '|!--[^]*?--|![^]*?)(?:>|$))';
-    PATTERNS.tag = new RegExp(PATTERNS.TAG, 'i');
-    PATTERNS.attr = new RegExp(PATTERNS.ATTRIBUTE, 'i');
-    PATTERNS.attrsplit = new RegExp(PATTERNS.ATTRIBUTESPLIT, 'i');
-})(PATTERNS || (PATTERNS = {}));
+const TAGNAME = '[a-z][^\\s\\n>]*';
+const ATTNAME = '[a-z][^\\s\\n>=]*';
+const VALUE = `(?:'[^']*'|"[^"]*"|[^\\s\\n]+)`;
+const VALUESPLIT = `(?:'([^']*)'|"([^"]*)"|([^\\s\\n]+))`;
+const SPACE = '(?:\\s|\\n)+';
+const OPTIONALSPACE = '(?:\\s|\\n)*';
+const ATTRIBUTE = `${ATTNAME}(?:${OPTIONALSPACE}=${OPTIONALSPACE}${VALUE})?`;
+const ATTRIBUTESPLIT = `(${ATTNAME})(?:${OPTIONALSPACE}=${OPTIONALSPACE}${VALUESPLIT})?`;
+const TAG = `(<(?:${TAGNAME}(?:${SPACE}${ATTRIBUTE})*` +
+    `${OPTIONALSPACE}/?|/${TAGNAME}|!--[^]*?--|![^]*?)(?:>|$))`;
+export const PATTERNS = {
+    tag: new RegExp(TAG, 'i'),
+    attr: new RegExp(ATTRIBUTE, 'i'),
+    attrsplit: new RegExp(ATTRIBUTESPLIT, 'i'),
+};
 export class LiteParser {
     parseFromString(text, _format = 'text/html', adaptor = null) {
         const root = adaptor.createDocument();
         let node = adaptor.body(root);
-        let parts = text.replace(/<\?.*?\?>/g, '').split(PATTERNS.tag);
+        const parts = text.replace(/<\?.*?\?>/g, '').split(PATTERNS.tag);
         while (parts.length) {
             const text = parts.shift();
             const tag = parts.shift();
@@ -60,9 +59,11 @@ export class LiteParser {
     openTag(adaptor, node, tag, parts) {
         const PCDATA = this.constructor.PCDATA;
         const SELF_CLOSING = this.constructor.SELF_CLOSING;
-        const kind = tag.match(/<(.*?)[\s\n>\/]/)[1].toLowerCase();
+        const kind = tag.match(/<(.*?)[\s\n>/]/)[1].toLowerCase();
         const child = adaptor.node(kind);
-        const attributes = tag.replace(/^<.*?[\s\n>]/, '').split(PATTERNS.attrsplit);
+        const attributes = tag
+            .replace(/^<.*?[\s\n>]/, '')
+            .split(PATTERNS.attrsplit);
         if (attributes.pop().match(/>$/) || attributes.length < 5) {
             this.addAttributes(adaptor, child, attributes);
             adaptor.append(node, child);
@@ -79,8 +80,8 @@ export class LiteParser {
     }
     addAttributes(adaptor, node, attributes) {
         while (attributes.length) {
-            let [, name, v1, v2, v3] = attributes.splice(0, 5);
-            let value = Entities.translate(v1 || v2 || v3 || '');
+            const [, name, v1, v2, v3] = attributes.splice(0, 5);
+            const value = Entities.translate(v1 || v2 || v3 || '');
             adaptor.setAttribute(node, name, value);
         }
     }
@@ -96,7 +97,7 @@ export class LiteParser {
         adaptor.append(node, adaptor.text(pcdata.join('')));
     }
     checkDocument(adaptor, root) {
-        let node = this.getOnlyChild(adaptor, adaptor.body(root));
+        const node = this.getOnlyChild(adaptor, adaptor.body(root));
         if (!node)
             return;
         for (const child of adaptor.childNodes(adaptor.body(root))) {
@@ -150,32 +151,70 @@ export class LiteParser {
     serialize(adaptor, node, xml = false) {
         const SELF_CLOSING = this.constructor.SELF_CLOSING;
         const tag = adaptor.kind(node);
-        const attributes = adaptor.allAttributes(node).map((x) => x.name + '="' + this.protectAttribute(x.value) + '"').join(' ');
+        const attributes = this.allAttributes(adaptor, node, xml)
+            .map((x) => x.name + '="' + this.protectAttribute(x.value, xml) + '"')
+            .join(' ');
         const content = this.serializeInner(adaptor, node, xml);
-        const html = '<' + tag + (attributes ? ' ' + attributes : '')
-            + ((!xml || content) && !SELF_CLOSING[tag] ? `>${content}</${tag}>` : xml ? '/>' : '>');
+        const html = `<${tag}` +
+            (attributes ? ' ' + attributes : '') +
+            ((!xml || content) && !SELF_CLOSING[tag]
+                ? `>${content}</${tag}>`
+                : xml
+                    ? '/>'
+                    : '>');
         return html;
     }
     serializeInner(adaptor, node, xml = false) {
         const PCDATA = this.constructor.PCDATA;
-        if (PCDATA.hasOwnProperty(node.kind)) {
-            return adaptor.childNodes(node).map(x => adaptor.value(x)).join('');
+        if (Object.hasOwn(PCDATA, node.kind)) {
+            return adaptor
+                .childNodes(node)
+                .map((x) => adaptor.value(x))
+                .join('');
         }
-        return adaptor.childNodes(node).map(x => {
+        return adaptor
+            .childNodes(node)
+            .map((x) => {
             const kind = adaptor.kind(x);
-            return (kind === '#text' ? this.protectHTML(adaptor.value(x)) :
-                kind === '#comment' ? x.value :
-                    this.serialize(adaptor, x, xml));
-        }).join('');
+            return kind === '#text'
+                ? this.protectHTML(adaptor.value(x))
+                : kind === '#comment'
+                    ? x.value
+                    : this.serialize(adaptor, x, xml);
+        })
+            .join('');
     }
-    protectAttribute(text) {
+    allAttributes(adaptor, node, xml) {
+        const attributes = adaptor.allAttributes(node);
+        if (!xml) {
+            return attributes;
+        }
+        const kind = adaptor.kind(node);
+        const xmlns = this.constructor.XMLNS;
+        if (!Object.hasOwn(xmlns, kind)) {
+            return attributes;
+        }
+        for (const { name } of attributes) {
+            if (name === 'xmlns') {
+                return attributes;
+            }
+        }
+        attributes.push({ name: 'xmlns', value: xmlns[kind] });
+        return attributes;
+    }
+    protectAttribute(text, xml) {
         if (typeof text !== 'string') {
             text = String(text);
         }
-        return text.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        text = text.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        if (xml) {
+            text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+        return text;
     }
     protectHTML(text) {
-        return text.replace(/&/g, '&amp;')
+        return text
+            .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
     }
@@ -197,7 +236,7 @@ LiteParser.SELF_CLOSING = {
     param: true,
     source: true,
     track: true,
-    wbr: true
+    wbr: true,
 };
 LiteParser.PCDATA = {
     option: true,
@@ -205,6 +244,11 @@ LiteParser.PCDATA = {
     fieldset: true,
     title: true,
     style: true,
-    script: true
+    script: true,
+};
+LiteParser.XMLNS = {
+    svg: 'http://www.w3.org/2000/svg',
+    math: 'http://www.w3.org/1998/Math/MathML',
+    html: 'http://www.w3.org/1999/xhtml',
 };
 //# sourceMappingURL=Parser.js.map

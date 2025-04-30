@@ -1,16 +1,19 @@
+import { DOMAdaptor } from '../../core/DOMAdaptor.js';
+import { Metrics } from '../../core/MathItem.js';
 import { AbstractWrapper, WrapperClass } from '../../core/Tree/Wrapper.js';
 import { PropertyList } from '../../core/Tree/Node.js';
 import { MmlNode, MmlNodeClass, TextNode } from '../../core/MmlTree/MmlNode.js';
 import { Property } from '../../core/Tree/Node.js';
 import { Styles } from '../../util/Styles.js';
-import { StyleList, CssStyles } from '../../util/StyleList.js';
+import { StyleJson, StyleJsonSheet } from '../../util/StyleJson.js';
 import { OptionList } from '../../util/Options.js';
 import { CommonOutputJax } from '../common.js';
 import { CommonWrapperFactory } from './WrapperFactory.js';
 import { CommonMo } from './Wrappers/mo.js';
 import { BBox } from '../../util/BBox.js';
 import { LineBBox } from './LineBBox.js';
-import { FontData, FontDataClass, DelimiterData, VariantData, CharOptions, CharDataArray, DIRECTION } from './FontData.js';
+import { Linebreaks } from './LinebreakVisitor.js';
+import { FontData, FontDataClass, DelimiterData, VariantData, CharOptions, CharDataArray } from './FontData.js';
 export type StringMap = {
     [key: string]: string;
 };
@@ -27,7 +30,7 @@ export type Constructor<T> = new (...args: any[]) => T;
 export type CommonWrapperConstructor<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, CW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> = CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> = new (factory: WF, node: MmlNode, parent?: WW) => CW;
 export interface CommonWrapperClass<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends WrapperClass<MmlNode, MmlNodeClass, WW> {
     kind: string;
-    styles: StyleList;
+    styles: StyleJson;
     removeStyles: string[];
     skipAttributes: {
         [name: string]: boolean;
@@ -38,12 +41,12 @@ export interface CommonWrapperClass<N, T, D, JX extends CommonOutputJax<N, T, D,
     ITALICVARIANTS: {
         [name: string]: StringMap;
     };
-    addStyles<JX>(styles: CssStyles, jax: JX): void;
+    addStyles<JX>(styles: StyleJsonSheet, jax: JX): void;
     new (factory: WF, node: MmlNode, parent?: WW): WW;
 }
 export declare class CommonWrapper<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends AbstractWrapper<MmlNode, MmlNodeClass, WW> {
     static kind: string;
-    static styles: StyleList;
+    static styles: StyleJson;
     static removeStyles: string[];
     static skipAttributes: {
         [name: string]: boolean;
@@ -54,7 +57,7 @@ export declare class CommonWrapper<N, T, D, JX extends CommonOutputJax<N, T, D, 
     static ITALICVARIANTS: {
         [name: string]: StringMap;
     };
-    static addStyles<JX>(styles: CssStyles, _jax: JX): void;
+    static addStyles<JX>(styles: StyleJsonSheet, _jax: JX): void;
     factory: WF;
     parent: WW;
     childNodes: WW[];
@@ -70,11 +73,16 @@ export declare class CommonWrapper<N, T, D, JX extends CommonOutputJax<N, T, D, 
     stretch: DD;
     font: FD;
     get jax(): JX;
-    get adaptor(): import("../../core/DOMAdaptor.js").DOMAdaptor<N, T, D>;
-    get metrics(): import("../../core/MathItem.js").Metrics;
+    get adaptor(): DOMAdaptor<N, T, D>;
+    get metrics(): Metrics;
     get containerWidth(): number;
-    get linebreaks(): import("./LinebreakVisitor.js").Linebreaks<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW, WF, WC, CC, VV, DD, FD, FC>;
-    get linebreakOptions(): any;
+    get linebreaks(): Linebreaks<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW, WF, WC, CC, VV, DD, FD, FC>;
+    get linebreakOptions(): {
+        inline: boolean;
+        width: string;
+        lineleading: number;
+        LinebreakVisitor: null;
+    };
     get fixesPWidth(): boolean;
     get breakCount(): number;
     breakTop(mrow: WW, _child: WW): WW;
@@ -92,7 +100,7 @@ export declare class CommonWrapper<N, T, D, JX extends CommonOutputJax<N, T, D, 
     protected addLeftBorders(bbox: BBox): void;
     protected addMiddleBorders(bbox: BBox): void;
     protected addRightBorders(bbox: BBox): void;
-    setChildPWidths(recompute: boolean, w?: (number | null), clear?: boolean): boolean;
+    setChildPWidths(recompute: boolean, w?: number | null, clear?: boolean): boolean;
     breakToWidth(_W: number): void;
     invalidateBBox(bubble?: boolean): void;
     protected copySkewIC(bbox: BBox): void;
@@ -108,8 +116,9 @@ export declare class CommonWrapper<N, T, D, JX extends CommonOutputJax<N, T, D, 
     core(): WW;
     coreMO(): CommonMo<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>;
     coreRScale(): number;
+    getRScale(): number;
     getText(): string;
-    canStretch(direction: DIRECTION): boolean;
+    canStretch(direction: string): boolean;
     protected getAlignShift(): [string, number];
     processIndent(indentalign: string, indentshift: string, align?: string, shift?: string, width?: number): [string, number];
     protected getAlignX(W: number, bbox: BBox, align: string): number;

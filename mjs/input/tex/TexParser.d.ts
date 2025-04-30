@@ -1,4 +1,4 @@
-import { HandlerType } from './MapHandler.js';
+import { HandlerType } from './HandlerTypes.js';
 import Stack from './Stack.js';
 import StackItemFactory from './StackItemFactory.js';
 import { Tags } from './Tags.js';
@@ -14,6 +14,7 @@ export default class TexParser {
     stack: Stack;
     i: number;
     currentCS: string;
+    private saveI;
     constructor(_string: string, env: EnvList, configuration: ParseOptions);
     get options(): OptionList;
     get itemFactory(): StackItemFactory;
@@ -21,8 +22,8 @@ export default class TexParser {
     set string(str: string);
     get string(): string;
     parse(kind: HandlerType, input: ParseInput): ParseResult;
-    lookup(kind: HandlerType, symbol: string): any;
-    contains(kind: HandlerType, symbol: string): boolean;
+    lookup(kind: HandlerType, token: string): any;
+    contains(kind: HandlerType, token: string): boolean;
     toString(): string;
     Parse(): void;
     Push(arg: StackItem | MmlNode): void;
@@ -34,7 +35,7 @@ export default class TexParser {
     GetNext(): string;
     GetCS(): string;
     GetArgument(_name: string, noneOK?: boolean): string;
-    GetBrackets(_name: string, def?: string): string;
+    GetBrackets(_name: string, def?: string, matchBrackets?: boolean): string;
     GetDelimiter(name: string, braceOK?: boolean): string;
     GetDimen(name: string): string;
     GetUpTo(_name: string, token: string): string;
@@ -43,4 +44,8 @@ export default class TexParser {
     GetDelimiterArg(name: string): string;
     GetStar(): boolean;
     create(kind: string, ...rest: any[]): MmlNode;
+    private updateResult;
+    private composeLatex;
+    private composeBraces;
+    private composeBracedContent;
 }

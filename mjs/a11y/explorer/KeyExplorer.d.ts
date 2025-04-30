@@ -1,61 +1,62 @@
-import { A11yDocument, Region } from './Region.js';
+import { A11yDocument, HoverRegion, SpeechRegion, LiveRegion } from './Region.js';
+import type { ExplorerMathItem } from '../explorer.js';
 import { Explorer, AbstractExplorer } from './Explorer.js';
 import { ExplorerPool } from './ExplorerPool.js';
-import { Sre } from '../sre.js';
+import { MmlNode } from '../../core/MmlTree/MmlNode.js';
 export interface KeyExplorer extends Explorer {
     KeyDown(event: KeyboardEvent): void;
     FocusIn(event: FocusEvent): void;
     FocusOut(event: FocusEvent): void;
-    Move(key: number): void;
+    Move(event: KeyboardEvent): void;
     NoMove(): void;
 }
-export declare abstract class AbstractKeyExplorer<T> extends AbstractExplorer<T> implements KeyExplorer {
+export declare class SpeechExplorer extends AbstractExplorer<string> implements KeyExplorer {
+    document: A11yDocument;
+    pool: ExplorerPool;
+    region: SpeechRegion;
+    protected node: HTMLElement;
+    brailleRegion: LiveRegion;
+    magnifyRegion: HoverRegion;
+    item: ExplorerMathItem;
     attached: boolean;
     sound: boolean;
-    walker: Sre.walker;
-    private eventsAttached;
-    protected events: [string, (x: Event) => void][];
+    restarted: string;
+    private get generators();
     private oldIndex;
-    abstract KeyDown(event: KeyboardEvent): void;
-    FocusIn(_event: FocusEvent): void;
+    protected current: HTMLElement;
+    private eventsAttached;
+    private move;
+    private mousedown;
+    protected events: [string, (x: Event) => void][];
+    protected hasModifiers(event: MouseEvent): boolean;
+    private MouseDown;
+    Click(event: MouseEvent): void;
+    private focusin;
+    FocusIn(event: FocusEvent): void;
     FocusOut(_event: FocusEvent): void;
-    Update(force?: boolean): void;
     Attach(): void;
     AddEvents(): void;
     Detach(): void;
-    Stop(): void;
-    Move(key: number): void;
+    protected nextSibling(el: HTMLElement): HTMLElement;
+    protected prevSibling(el: HTMLElement): HTMLElement;
+    protected moves: Map<string, (node: HTMLElement) => HTMLElement | null>;
+    private actionable;
+    depth(node: HTMLElement): HTMLElement;
+    expand(node: HTMLElement): HTMLElement;
+    summary(node: HTMLElement): HTMLElement;
+    nextRules(node: HTMLElement): HTMLElement;
+    nextStyle(node: HTMLElement): HTMLElement;
+    private refocus;
+    Move(e: KeyboardEvent): boolean;
     NoMove(): void;
-}
-export declare class SpeechExplorer extends AbstractKeyExplorer<string> {
-    document: A11yDocument;
-    pool: ExplorerPool;
-    region: Region<string>;
-    protected node: HTMLElement;
-    private mml;
-    private static updatePromise;
-    speechGenerator: Sre.speechGenerator;
-    showRegion: string;
-    private init;
-    private restarted;
-    constructor(document: A11yDocument, pool: ExplorerPool, region: Region<string>, node: HTMLElement, mml: string);
+    constructor(document: A11yDocument, pool: ExplorerPool, region: SpeechRegion, node: HTMLElement, brailleRegion: LiveRegion, magnifyRegion: HoverRegion, _mml: MmlNode, item: ExplorerMathItem);
+    private Restart;
     Start(): void;
-    Update(force?: boolean): void;
-    Speech(walker: Sre.walker): void;
+    Update(): void;
     KeyDown(event: KeyboardEvent): void;
-    protected triggerLink(code: number): boolean;
-    private initWalker;
-    private getOptions;
-}
-export declare class Magnifier extends AbstractKeyExplorer<HTMLElement> {
-    document: A11yDocument;
-    pool: ExplorerPool;
-    region: Region<HTMLElement>;
-    protected node: HTMLElement;
-    private mml;
-    constructor(document: A11yDocument, pool: ExplorerPool, region: Region<HTMLElement>, node: HTMLElement, mml: string);
-    Update(force?: boolean): void;
-    Start(): void;
-    private showFocus;
-    KeyDown(event: KeyboardEvent): void;
+    protected triggerLinkKeyboard(event: KeyboardEvent): boolean;
+    protected triggerLink(node: HTMLElement): boolean;
+    protected triggerLinkMouse(): boolean;
+    Stop(): void;
+    semanticFocus(): string;
 }

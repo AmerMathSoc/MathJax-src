@@ -6,7 +6,7 @@ export class MathMLVisitor extends MmlVisitor {
     }
     visitTree(node, document) {
         this.document = document;
-        let root = document.createElement('top');
+        const root = document.createElement('top');
         this.visitNode(node, root);
         this.document = null;
         return root.firstChild;
@@ -26,7 +26,7 @@ export class MathMLVisitor extends MmlVisitor {
         }
     }
     visitDefault(node, parent) {
-        let mml = this.document.createElement(this.getKind(node));
+        const mml = this.document.createElement(this.getKind(node));
         this.addAttributes(node, mml);
         for (const child of node.childNodes) {
             this.visitNode(child, mml);
@@ -34,7 +34,7 @@ export class MathMLVisitor extends MmlVisitor {
         parent.appendChild(mml);
     }
     addAttributes(node, mml) {
-        let attributes = this.getAttributeList(node);
+        const attributes = this.getAttributeList(node);
         for (const name of Object.keys(attributes)) {
             mml.setAttribute(name, attributes[name].toString());
         }

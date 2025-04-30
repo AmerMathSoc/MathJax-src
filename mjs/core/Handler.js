@@ -1,4 +1,4 @@
-import { AbstractMathDocument } from './MathDocument.js';
+import { AbstractMathDocument, } from './MathDocument.js';
 class DefaultMathDocument extends AbstractMathDocument {
 }
 export class AbstractHandler {

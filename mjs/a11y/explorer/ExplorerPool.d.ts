@@ -1,7 +1,8 @@
 import { LiveRegion, SpeechRegion, ToolTip, HoverRegion } from './Region.js';
-import type { ExplorerMathDocument } from '../explorer.js';
+import type { ExplorerMathDocument, ExplorerMathItem } from '../explorer.js';
 import { Explorer } from './Explorer.js';
-import { Sre } from '../sre.js';
+import { SpeechExplorer } from './KeyExplorer.js';
+import * as Sre from '../sre.js';
 export declare class RegionPool {
     document: ExplorerMathDocument;
     speechRegion: SpeechRegion;
@@ -25,7 +26,8 @@ export declare class ExplorerPool {
     private _renderer;
     private _restart;
     get highlighter(): Sre.highlighter;
-    init(document: ExplorerMathDocument, node: HTMLElement, mml: string): void;
+    init(document: ExplorerMathDocument, node: HTMLElement, mml: string, item: ExplorerMathItem): void;
+    private speechExplorerKeys;
     attach(): void;
     reattach(): void;
     restart(): void;
@@ -33,5 +35,6 @@ export declare class ExplorerPool {
     protected setSecondaryHighlighter(): void;
     highlight(nodes: HTMLElement[]): void;
     unhighlight(): void;
+    get speech(): SpeechExplorer;
     private colorOptions;
 }

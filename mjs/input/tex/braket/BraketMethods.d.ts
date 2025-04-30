@@ -1,3 +1,5 @@
 import { ParseMethod } from '../Types.js';
-declare let BraketMethods: Record<string, ParseMethod>;
+declare const BraketMethods: {
+    [key: string]: ParseMethod;
+};
 export default BraketMethods;

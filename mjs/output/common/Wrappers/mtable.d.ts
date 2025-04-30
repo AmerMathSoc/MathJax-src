@@ -12,7 +12,7 @@ export type TableData = {
     L: number;
 };
 export type ColumnWidths = (string | number | null)[];
-export declare let BREAK_BELOW: number;
+export declare const BREAK_BELOW = 0.333;
 export interface CommonMtable<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, R extends CommonMtr<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
     numCols: number;
     numRows: number;
@@ -38,7 +38,7 @@ export interface CommonMtable<N, T, D, JX extends CommonOutputJax<N, T, D, WW, W
     stretchRows(): void;
     stretchColumns(): void;
     stretchColumn(i: number, W: number): void;
-    breakColumn(i: number, W: number): void;
+    breakColumn(i: number, W: number, type: string): void;
     getTableData(): TableData;
     updateHDW(cell: WW, i: number, j: number, align: string, H: number[], D: number[], W: number[], M: number): number;
     extendHD(i: number, H: number[], D: number[], M: number): void;

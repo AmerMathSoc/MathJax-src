@@ -2,7 +2,6 @@ import { MmlNode } from '../../core/MmlTree/MmlNode.js';
 import { MathItem } from '../../core/MathItem.js';
 import { EnvList } from './StackItem.js';
 import ParseOptions from './ParseOptions.js';
-import { OptionList } from '../../util/Options.js';
 export declare class Label {
     tag: string;
     id: string;
@@ -111,13 +110,20 @@ export declare class AllTags extends AbstractTags {
 export interface TagsClass {
     new (): Tags;
 }
-export declare namespace TagsFactory {
-    let OPTIONS: OptionList;
-    let add: (name: string, constr: TagsClass) => void;
-    let addTags: (tags: {
+export declare const TagsFactory: {
+    OPTIONS: {
+        tags: string;
+        tagSide: string;
+        tagIndent: string;
+        useLabelIds: boolean;
+        ignoreDuplicateLabels: boolean;
+        tagAlign: string;
+    };
+    add(name: string, constr: TagsClass): void;
+    addTags(tags: {
         [name: string]: TagsClass;
-    }) => void;
-    let create: (name: string) => Tags;
-    let setDefault: (name: string) => void;
-    let getDefault: () => Tags;
-}
+    }): void;
+    create(name: string): Tags;
+    setDefault(name: string): void;
+    getDefault(): Tags;
+};

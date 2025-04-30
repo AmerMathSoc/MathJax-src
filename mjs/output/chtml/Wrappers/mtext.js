@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMtextMixin } from '../../common/Wrappers/mtext.js';
+import { CommonMtextMixin, } from '../../common/Wrappers/mtext.js';
 import { MmlMtext } from '../../../core/MmlTree/MmlNodes/mtext.js';
 export const ChtmlMtext = (function () {
     var _a;
@@ -17,7 +17,7 @@ export const ChtmlMtext = (function () {
                     const DOM = [chtml[i]];
                     this.adaptor.append(chtml[i], this.html('mjx-linestrut'));
                     let [si, sj] = this.breakPoints[i - 1] || [0, 0];
-                    let [ei, ej] = this.breakPoints[i] || [childNodes.length, 0];
+                    const [ei, ej] = this.breakPoints[i] || [childNodes.length, 0];
                     let words = childNodes[si].node.getText().split(/ /);
                     if (si === ei) {
                         textNode.setText(words.slice(sj, ej).join(' '));

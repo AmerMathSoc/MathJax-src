@@ -1,1 +1,1 @@
-{"version":3,"file":"mathmaps.js","sourceRoot":"","sources":["../../ts/a11y/mathmaps.ts"],"names":[],"mappings":"AAwBA,MAAM,CAAC,MAAM,QAAQ,GAAuC,IAAI,GAAG,EAAE,CAAC;AAEtE,eAAe,QAAQ,CAAC"}
+{"version":3,"file":"mathmaps.js","sourceRoot":"","sources":["../../ts/a11y/mathmaps.ts"],"names":[],"mappings":"AAwBA,MAAM,CAAC,MAAM,QAAQ,GAAyC,IAAI,GAAG,EAAE,CAAC;AAExE,eAAe,QAAQ,CAAC"}

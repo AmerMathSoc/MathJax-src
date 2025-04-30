@@ -10,10 +10,10 @@ export class LiteList {
         let i = 0;
         return {
             next() {
-                return (i === this.nodes.length ?
-                    { value: null, done: true } :
-                    { value: this.nodes[i++], done: false });
-            }
+                return i === this.nodes.length
+                    ? { value: null, done: true }
+                    : { value: this.nodes[i++], done: false };
+            },
         };
     }
 }

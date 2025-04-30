@@ -22,8 +22,8 @@ export class Collapse {
             punctuated: {
                 endpunct: Collapse.NOCOLLAPSE,
                 startpunct: Collapse.NOCOLLAPSE,
-                value: 12
-            }
+                value: 12,
+            },
         };
         this.marker = {
             identifier: 'x',
@@ -31,7 +31,7 @@ export class Collapse {
             text: '...',
             appl: {
                 'limit function': 'lim',
-                value: 'f()'
+                value: 'f()',
             },
             fraction: '/',
             sqrt: '\u221A',
@@ -42,14 +42,14 @@ export class Collapse {
             vector: {
                 binomial: '(:)',
                 determinant: '|:|',
-                value: '\u27E8:\u27E9'
+                value: '\u27E8:\u27E9',
             },
             matrix: {
                 squarematrix: '[::]',
                 rowvector: '\u27E8\u22EF\u27E9',
                 columnvector: '\u27E8\u22EE\u27E9',
                 determinant: '|::|',
-                value: '(::)'
+                value: '(::)',
             },
             cases: '{:',
             infixop: {
@@ -57,15 +57,17 @@ export class Collapse {
                 subtraction: '\u2212',
                 multiplication: '\u22C5',
                 implicit: '\u22C5',
-                value: '+'
+                value: '+',
             },
             punctuated: {
                 text: '...',
-                value: ','
-            }
+                value: ',',
+            },
         };
         this.collapse = new Map([
-            ['fenced', (node, complexity) => {
+            [
+                'fenced',
+                (node, complexity) => {
                     complexity = this.uncollapseChild(complexity, node, 1);
                     if (complexity > this.cutoff.fenced &&
                         node.attributes.get('data-semantic-role') === 'leftright') {
@@ -73,31 +75,44 @@ export class Collapse {
                             this.getText(node.childNodes[node.childNodes.length - 1]));
                     }
                     return complexity;
-                }],
-            ['appl', (node, complexity) => {
+                },
+            ],
+            [
+                'appl',
+                (node, complexity) => {
                     if (this.canUncollapse(node, 2, 2)) {
                         complexity = this.complexity.visitNode(node, false);
                         const marker = this.marker.appl;
-                        const text = marker[node.attributes.get('data-semantic-role')] || marker.value;
+                        const text = marker[node.attributes.get('data-semantic-role')] ||
+                            marker.value;
                         complexity = this.recordCollapse(node, complexity, text);
                     }
                     return complexity;
-                }],
-            ['sqrt', (node, complexity) => {
+                },
+            ],
+            [
+                'sqrt',
+                (node, complexity) => {
                     complexity = this.uncollapseChild(complexity, node, 0);
                     if (complexity > this.cutoff.sqrt) {
                         complexity = this.recordCollapse(node, complexity, this.marker.sqrt);
                     }
                     return complexity;
-                }],
-            ['root', (node, complexity) => {
+                },
+            ],
+            [
+                'root',
+                (node, complexity) => {
                     complexity = this.uncollapseChild(complexity, node, 0, 2);
                     if (complexity > this.cutoff.sqrt) {
                         complexity = this.recordCollapse(node, complexity, this.marker.sqrt);
                     }
                     return complexity;
-                }],
-            ['enclose', (node, complexity) => {
+                },
+            ],
+            [
+                'enclose',
+                (node, complexity) => {
                     if (this.splitAttribute(node, 'children').length === 1) {
                         const child = this.canUncollapse(node, 1);
                         if (child) {
@@ -107,60 +122,83 @@ export class Collapse {
                         }
                     }
                     return complexity;
-                }],
-            ['bigop', (node, complexity) => {
+                },
+            ],
+            [
+                'bigop',
+                (node, complexity) => {
                     if (complexity > this.cutoff.bigop || !node.isKind('mo')) {
                         const id = this.splitAttribute(node, 'content').pop();
                         const op = this.findChildText(node, id);
                         complexity = this.recordCollapse(node, complexity, op);
                     }
                     return complexity;
-                }],
-            ['integral', (node, complexity) => {
-                    if (complexity > this.cutoff.integral || !node.isKind('mo')) {
+                },
+            ],
+            [
+                'integral',
+                (node, complexity) => {
+                    if (complexity > this.cutoff.integral ||
+                        !node.isKind('mo')) {
                         const id = this.splitAttribute(node, 'content').pop();
                         const op = this.findChildText(node, id);
                         complexity = this.recordCollapse(node, complexity, op);
                     }
                     return complexity;
-                }],
-            ['relseq', (node, complexity) => {
+                },
+            ],
+            [
+                'relseq',
+                (node, complexity) => {
                     if (complexity > this.cutoff.relseq) {
                         const id = this.splitAttribute(node, 'content')[0];
                         const text = this.findChildText(node, id);
                         complexity = this.recordCollapse(node, complexity, text);
                     }
                     return complexity;
-                }],
-            ['multirel', (node, complexity) => {
+                },
+            ],
+            [
+                'multirel',
+                (node, complexity) => {
                     if (complexity > this.cutoff.relseq) {
                         const id = this.splitAttribute(node, 'content')[0];
                         const text = this.findChildText(node, id) + '\u22EF';
                         complexity = this.recordCollapse(node, complexity, text);
                     }
                     return complexity;
-                }],
-            ['superscript', (node, complexity) => {
+                },
+            ],
+            [
+                'superscript',
+                (node, complexity) => {
                     complexity = this.uncollapseChild(complexity, node, 0, 2);
                     if (complexity > this.cutoff.superscript) {
                         complexity = this.recordCollapse(node, complexity, this.marker.superscript);
                     }
                     return complexity;
-                }],
-            ['subscript', (node, complexity) => {
+                },
+            ],
+            [
+                'subscript',
+                (node, complexity) => {
                     complexity = this.uncollapseChild(complexity, node, 0, 2);
                     if (complexity > this.cutoff.subscript) {
                         complexity = this.recordCollapse(node, complexity, this.marker.subscript);
                     }
                     return complexity;
-                }],
-            ['subsup', (node, complexity) => {
+                },
+            ],
+            [
+                'subsup',
+                (node, complexity) => {
                     complexity = this.uncollapseChild(complexity, node, 0, 3);
                     if (complexity > this.cutoff.subsup) {
                         complexity = this.recordCollapse(node, complexity, this.marker.subsup);
                     }
                     return complexity;
-                }]
+                },
+            ],
         ]);
         this.idCount = 0;
         this.complexity = visitor;
@@ -170,7 +208,7 @@ export class Collapse {
         if (this.collapse.has(type)) {
             return this.collapse.get(type).call(this, node, complexity);
         }
-        if (this.cutoff.hasOwnProperty(type)) {
+        if (Object.hasOwn(this.cutoff, type)) {
             return this.defaultCheck(node, complexity, type);
         }
         return complexity;
@@ -178,10 +216,10 @@ export class Collapse {
     defaultCheck(node, complexity, type) {
         const role = node.attributes.get('data-semantic-role');
         const check = this.cutoff[type];
-        const cutoff = (typeof check === 'number' ? check : check[role] || check.value);
+        const cutoff = typeof check === 'number' ? check : check[role] || check.value;
         if (complexity > cutoff) {
             const marker = this.marker[type] || '??';
-            const text = (typeof marker === 'string' ? marker : marker[role] || marker.value);
+            const text = typeof marker === 'string' ? marker : marker[role] || marker.value;
             complexity = this.recordCollapse(node, complexity, text);
         }
         return complexity;
@@ -202,8 +240,9 @@ export class Collapse {
     }
     canUncollapse(node, n, m = 1) {
         if (this.splitAttribute(node, 'children').length === m) {
-            const mml = (node.childNodes.length === 1 &&
-                node.childNodes[0].isInferred ? node.childNodes[0] : node);
+            const mml = node.childNodes.length === 1 && node.childNodes[0].isInferred
+                ? node.childNodes[0]
+                : node;
             if (mml && mml.childNodes[n]) {
                 const child = mml.childNodes[n];
                 if (child.getProperty('collapse-marker')) {
@@ -272,16 +311,16 @@ export class Collapse {
         const factory = this.complexity.factory;
         const marker = node.getProperty('collapse-marker');
         const parent = node.parent;
-        let maction = factory.create('maction', {
+        const maction = factory.create('maction', {
             actiontype: 'toggle',
             selection: 2,
             'data-collapsible': true,
             id: this.makeId(),
-            'data-semantic-complexity': node.attributes.get('data-semantic-complexity')
+            'data-semantic-complexity': node.attributes.get('data-semantic-complexity'),
         }, [
             factory.create('mtext', { mathcolor: 'blue' }, [
-                factory.create('text').setText(marker)
-            ])
+                factory.create('text').setText(marker),
+            ]),
         ]);
         maction.inheritAttributesFrom(node);
         node.attributes.set('data-semantic-complexity', node.getProperty('collapse-complexity'));
@@ -295,7 +334,9 @@ export class Collapse {
         node.childNodes[0].setChildren([mrow]);
         const attributes = node.attributes.getAllAttributes();
         for (const name of Object.keys(attributes)) {
-            if (name.substr(0, 14) === 'data-semantic-') {
+            if (name.substring(0, 14) === 'data-semantic-' ||
+                name.substring(0, 5) === 'aria-' ||
+                name === 'role') {
                 mrow.attributes.set(name, attributes[name]);
                 delete attributes[name];
             }

@@ -84,6 +84,6 @@ Entities.add({
     duhar: '\u296F',
     dwangle: '\u29A6',
     dzcy: '\u045F',
-    dzigrarr: '\u27FF'
+    dzigrarr: '\u27FF',
 }, 'd');
 //# sourceMappingURL=d.js.map

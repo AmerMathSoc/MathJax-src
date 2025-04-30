@@ -1,5 +1,6 @@
+import { HandlerType, ConfigurationType } from '../HandlerTypes.js';
 import { Configuration } from '../Configuration.js';
-import { CharacterMap } from '../SymbolMap.js';
+import { CharacterMap } from '../TokenMap.js';
 import { TexConstant } from '../TexConstants.js';
 function mathchar0miNormal(parser, mchar) {
     const def = mchar.attributes || {};
@@ -48,9 +49,9 @@ new CharacterMap('upgreek', mathchar0miNormal, {
     Upupsilon: '\u03A5',
     Upphi: '\u03A6',
     Uppsi: '\u03A8',
-    Upomega: '\u03A9'
+    Upomega: '\u03A9',
 });
 export const UpgreekConfiguration = Configuration.create('upgreek', {
-    handler: { macro: ['upgreek'] },
+    [ConfigurationType.HANDLER]: { [HandlerType.MACRO]: ['upgreek'] },
 });
 //# sourceMappingURL=UpgreekConfiguration.js.map

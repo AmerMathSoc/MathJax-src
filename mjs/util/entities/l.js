@@ -151,6 +151,6 @@ Entities.add({
     lurdshar: '\u294A',
     luruhar: '\u2966',
     lvertneqq: '\u2268\uFE00',
-    lvnE: '\u2268\uFE00'
+    lvnE: '\u2268\uFE00',
 }, 'l');
 //# sourceMappingURL=l.js.map

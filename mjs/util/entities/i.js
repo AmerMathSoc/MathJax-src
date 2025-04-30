@@ -58,6 +58,6 @@ Entities.add({
     it: '\u2062',
     itilde: '\u0129',
     iukcy: '\u0456',
-    iuml: '\u00EF'
+    iuml: '\u00EF',
 }, 'i');
 //# sourceMappingURL=i.js.map

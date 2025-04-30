@@ -16,10 +16,15 @@ export function CommonMmultiscriptsMixin(Base) {
             return bbox;
         }
         getScriptData() {
-            const data = this.scriptData = {
-                base: null, sub: BBox.empty(), sup: BBox.empty(), psub: BBox.empty(), psup: BBox.empty(),
-                numPrescripts: 0, numScripts: 0
-            };
+            const data = (this.scriptData = {
+                base: null,
+                sub: BBox.empty(),
+                sup: BBox.empty(),
+                psub: BBox.empty(),
+                psup: BBox.empty(),
+                numPrescripts: 0,
+                numScripts: 0,
+            });
             const lists = this.getScriptBBoxLists();
             this.combineBBoxLists(data.sub, data.sup, lists.subList, lists.supList);
             this.combineBBoxLists(data.psub, data.psup, lists.psubList, lists.psupList);
@@ -29,7 +34,11 @@ export function CommonMmultiscriptsMixin(Base) {
         }
         getScriptBBoxLists() {
             const lists = {
-                base: [], subList: [], supList: [], psubList: [], psupList: []
+                base: [],
+                subList: [],
+                supList: [],
+                psubList: [],
+                psupList: [],
             };
             let script = 'base';
             for (const child of this.childNodes) {

@@ -14,6 +14,6 @@ Entities.add({
     zeetrf: '\u2128',
     zhcy: '\u0436',
     zwj: '\u200D',
-    zwnj: '\u200C'
+    zwnj: '\u200C',
 }, 'z');
 //# sourceMappingURL=z.js.map

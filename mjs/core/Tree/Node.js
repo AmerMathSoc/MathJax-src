@@ -36,7 +36,7 @@ export class AbstractNode {
     }
     setChildren(children) {
         this.childNodes = [];
-        for (let child of children) {
+        for (const child of children) {
             this.appendChild(child);
         }
     }
@@ -46,7 +46,7 @@ export class AbstractNode {
         return child;
     }
     replaceChild(newChild, oldChild) {
-        let i = this.childIndex(oldChild);
+        const i = this.childIndex(oldChild);
         if (i !== null) {
             this.childNodes[i] = newChild;
             newChild.parent = this;
@@ -65,8 +65,8 @@ export class AbstractNode {
         return child;
     }
     childIndex(node) {
-        let i = this.childNodes.indexOf(node);
-        return (i === -1 ? null : i);
+        const i = this.childNodes.indexOf(node);
+        return i === -1 ? null : i;
     }
     copy() {
         const node = this.factory.create(this.kind);
@@ -79,7 +79,7 @@ export class AbstractNode {
         return node;
     }
     findNodes(kind) {
-        let nodes = [];
+        const nodes = [];
         this.walkTree((node) => {
             if (node.isKind(kind)) {
                 nodes.push(node);
@@ -101,8 +101,7 @@ export class AbstractNode {
     }
 }
 export class AbstractEmptyNode extends AbstractNode {
-    setChildren(_children) {
-    }
+    setChildren(_children) { }
     appendChild(child) {
         return child;
     }

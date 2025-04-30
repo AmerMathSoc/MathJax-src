@@ -1,1 +1,1 @@
-export declare function esRoot(): string;
+export declare function mjxRoot(): string;

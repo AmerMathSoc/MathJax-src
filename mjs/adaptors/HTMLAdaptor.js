@@ -1,4 +1,4 @@
-import { AbstractDOMAdaptor } from '../core/DOMAdaptor.js';
+import { AbstractDOMAdaptor, } from '../core/DOMAdaptor.js';
 export class HTMLAdaptor extends AbstractDOMAdaptor {
     constructor(window) {
         super(window.document);
@@ -10,39 +10,57 @@ export class HTMLAdaptor extends AbstractDOMAdaptor {
         return this.parser.parseFromString(text, format);
     }
     create(kind, ns) {
-        return (ns ?
-            this.document.createElementNS(ns, kind) :
-            this.document.createElement(kind));
+        return ns
+            ? this.document.createElementNS(ns, kind)
+            : this.document.createElement(kind);
     }
     text(text) {
         return this.document.createTextNode(text);
     }
-    head(doc) {
+    head(doc = this.document) {
         return doc.head || doc;
     }
-    body(doc) {
+    body(doc = this.document) {
         return doc.body || doc;
     }
-    root(doc) {
+    root(doc = this.document) {
         return doc.documentElement || doc;
     }
-    doctype(doc) {
-        return (doc.doctype ? `<!DOCTYPE ${doc.doctype.name}>` : '');
+    doctype(doc = this.document) {
+        return doc.doctype ? `<!DOCTYPE ${doc.doctype.name}>` : '';
+    }
+    domain(doc = this.document) {
+        if ('src' in doc) {
+            return doc.src.replace(/^(.*?:\/\/.*?)\/.*/, '$1');
+        }
+        if (!('location' in doc)) {
+            doc = this.document;
+        }
+        return doc.location.protocol + '//' + doc.location.host;
+    }
+    listener(listener, doc = this.document) {
+        return doc.defaultView.addEventListener('message', listener);
+    }
+    post(msg, domain, doc = this.document) {
+        return doc.defaultView.postMessage(msg, domain);
     }
     tags(node, name, ns = null) {
-        let nodes = (ns ? node.getElementsByTagNameNS(ns, name) : node.getElementsByTagName(name));
+        const nodes = ns
+            ? node.getElementsByTagNameNS(ns, name)
+            : node.getElementsByTagName(name);
         return Array.from(nodes);
     }
     getElements(nodes, _document) {
         let containers = [];
         for (const node of nodes) {
-            if (typeof (node) === 'string') {
+            if (typeof node === 'string') {
                 containers = containers.concat(Array.from(this.document.querySelectorAll(node)));
             }
             else if (Array.isArray(node)) {
                 containers = containers.concat(Array.from(node));
             }
-            else if (node instanceof this.window.NodeList || node instanceof this.window.HTMLCollection) {
+            else if (node instanceof this.window.NodeList ||
+                node instanceof this.window.HTMLCollection) {
                 containers = containers.concat(Array.from(node));
             }
             else {
@@ -50,6 +68,9 @@ export class HTMLAdaptor extends AbstractDOMAdaptor {
             }
         }
         return containers;
+    }
+    getElement(selector, node = this.document) {
+        return node.querySelector(selector);
     }
     contains(container, node) {
         return container.contains(node);
@@ -95,7 +116,7 @@ export class HTMLAdaptor extends AbstractDOMAdaptor {
     }
     kind(node) {
         const n = node.nodeType;
-        return (n === 1 || n === 3 || n === 8 ? node.nodeName.toLowerCase() : '');
+        return n === 1 || n === 3 || n === 8 ? node.nodeName.toLowerCase() : '';
     }
     value(node) {
         return node.nodeValue || '';
@@ -147,14 +168,17 @@ export class HTMLAdaptor extends AbstractDOMAdaptor {
             node.classList.remove(name);
         }
         else {
-            node.className = node.className.split(/ /).filter((c) => c !== name).join(' ');
+            node.className = node.className
+                .split(/ /)
+                .filter((c) => c !== name)
+                .join(' ');
         }
     }
     hasClass(node, name) {
         if (node.classList) {
             return node.classList.contains(name);
         }
-        return node.className.split(/ /).indexOf(name) >= 0;
+        return node.className.split(/ /).includes(name);
     }
     setStyle(node, name, value) {
         node.style[name] = value;
@@ -166,14 +190,22 @@ export class HTMLAdaptor extends AbstractDOMAdaptor {
         return node.style.cssText;
     }
     insertRules(node, rules) {
-        for (const rule of rules.reverse()) {
+        for (const rule of rules) {
             try {
-                node.sheet.insertRule(rule, 0);
+                node.sheet.insertRule(rule, node.sheet.cssRules.length);
             }
             catch (e) {
                 console.warn(`MathJax: can't insert css rule '${rule}': ${e.message}`);
             }
         }
+    }
+    cssText(node) {
+        if (this.kind(node) !== 'style') {
+            return '';
+        }
+        return Array.from(node.sheet.cssRules)
+            .map((rule) => rule.cssText)
+            .join('\n');
     }
     fontSize(node) {
         const style = this.window.getComputedStyle(node);
@@ -185,7 +217,7 @@ export class HTMLAdaptor extends AbstractDOMAdaptor {
     }
     nodeSize(node, em = 1, local = false) {
         if (local && node.getBBox) {
-            let { width, height } = node.getBBox();
+            const { width, height } = node.getBBox();
             return [width / em, height / em];
         }
         return [node.offsetWidth / em, node.offsetHeight / em];

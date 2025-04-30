@@ -1,11 +1,11 @@
 import { EqnArrayItem } from '../base/BaseItems.js';
-import ParseUtil from '../ParseUtil.js';
+import { UnitUtil } from '../UnitUtil.js';
 import TexParser from '../TexParser.js';
 import TexError from '../TexError.js';
-import { Macro } from '../Symbol.js';
 import { lookup } from '../../../util/Options.js';
+import { HandlerType } from '../HandlerTypes.js';
+import { NewcommandUtil } from '../newcommand/NewcommandUtil.js';
 import { MathtoolsMethods } from './MathtoolsMethods.js';
-import { PAIREDDELIMS } from './MathtoolsConfiguration.js';
 export const MathtoolsUtil = {
     setDisplayLevel(mml, style) {
         if (!style)
@@ -14,7 +14,7 @@ export const MathtoolsUtil = {
             '\\displaystyle': [true, 0],
             '\\textstyle': [false, 0],
             '\\scriptstyle': [false, 1],
-            '\\scriptscriptstyle': [false, 2]
+            '\\scriptscriptstyle': [false, 2],
         }, [null, null]);
         if (display !== null) {
             mml.attributes.set('displaystyle', display);
@@ -28,24 +28,21 @@ export const MathtoolsUtil = {
         }
         return top;
     },
-    addPairedDelims(config, cs, args) {
-        const delims = config.handlers.retrieve(PAIREDDELIMS);
-        delims.add(cs, new Macro(cs, MathtoolsMethods.PairedDelimiters, args));
+    addPairedDelims(parser, cs, args) {
+        if (parser.configuration.handlers.get(HandlerType.MACRO).contains(cs)) {
+            throw new TexError('CommadExists', 'Command %1 already defined', `\\${cs}`);
+        }
+        NewcommandUtil.addMacro(parser, cs, MathtoolsMethods.PairedDelimiters, args);
     },
     spreadLines(mtable, spread) {
         if (!mtable.isKind('mtable'))
             return;
         let rowspacing = mtable.attributes.get('rowspacing');
-        if (rowspacing) {
-            const add = ParseUtil.dimen2em(spread);
-            rowspacing = rowspacing
-                .split(/ /)
-                .map(s => ParseUtil.Em(Math.max(0, ParseUtil.dimen2em(s) + add)))
-                .join(' ');
-        }
-        else {
-            rowspacing = spread;
-        }
+        const add = UnitUtil.dimen2em(spread);
+        rowspacing = rowspacing
+            .split(/ /)
+            .map((s) => UnitUtil.em(Math.max(0, UnitUtil.dimen2em(s) + add)))
+            .join(' ');
         mtable.attributes.set('rowspacing', rowspacing);
     },
     plusOrMinus(name, n) {
@@ -53,16 +50,21 @@ export const MathtoolsUtil = {
         if (!n.match(/^[-+]?(?:\d+(?:\.\d*)?|\.\d+)$/)) {
             throw new TexError('NotANumber', 'Argument to %1 is not a number', name);
         }
-        return (n.match(/^[-+]/) ? n : '+' + n);
+        return n.match(/^[-+]/) ? n : '+' + n;
     },
     getScript(parser, name, pos) {
-        let arg = ParseUtil.trimSpaces(parser.GetArgument(name));
+        let arg = UnitUtil.trimSpaces(parser.GetArgument(name));
         if (arg === '') {
             return parser.create('node', 'none');
         }
         const format = parser.options.mathtools[`prescript-${pos}-format`];
-        format && (arg = `${format}{${arg}}`);
-        return new TexParser(arg, parser.stack.env, parser.configuration).mml();
-    }
+        if (format) {
+            arg = `${format}{${arg}}`;
+        }
+        const mml = new TexParser(arg, parser.stack.env, parser.configuration).mml();
+        return mml.isKind('TeXAtom') && mml.childNodes[0].childNodes.length === 0
+            ? parser.create('node', 'none')
+            : mml;
+    },
 };
 //# sourceMappingURL=MathtoolsUtil.js.map

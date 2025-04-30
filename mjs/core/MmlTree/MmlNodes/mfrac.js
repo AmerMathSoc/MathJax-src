@@ -26,14 +26,20 @@ export class MmlMfrac extends AbstractMmlBaseNode {
         const numalign = this.attributes.get('numalign');
         const denalign = this.attributes.get('denomalign');
         const numAttributes = this.addInheritedAttributes(Object.assign({}, attributes), {
-            numalign, indentshift: '0',
-            indentalignfirst: numalign, indentshiftfirst: '0',
-            indentalignlast: 'indentalign', indentshiftlast: 'indentshift'
+            numalign,
+            indentshift: '0',
+            indentalignfirst: numalign,
+            indentshiftfirst: '0',
+            indentalignlast: 'indentalign',
+            indentshiftlast: 'indentshift',
         });
         const denAttributes = this.addInheritedAttributes(Object.assign({}, attributes), {
-            denalign, indentshift: '0',
-            indentalignfirst: denalign, indentshiftfirst: '0',
-            indentalignlast: 'indentalign', indentshiftlast: 'indentshift'
+            denalign,
+            indentshift: '0',
+            indentalignfirst: denalign,
+            indentshiftfirst: '0',
+            indentalignlast: 'indentalign',
+            indentshiftlast: 'indentshift',
         });
         this.childNodes[0].setInheritedAttributes(numAttributes, false, level, prime);
         this.childNodes[1].setInheritedAttributes(denAttributes, false, level, true);

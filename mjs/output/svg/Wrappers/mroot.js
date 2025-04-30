@@ -1,4 +1,4 @@
-import { CommonMrootMixin } from '../../common/Wrappers/mroot.js';
+import { CommonMrootMixin, } from '../../common/Wrappers/mroot.js';
 import { MmlMroot } from '../../../core/MmlTree/MmlNodes/mroot.js';
 import { SvgMsqrt } from './msqrt.js';
 export const SvgMroot = (function () {

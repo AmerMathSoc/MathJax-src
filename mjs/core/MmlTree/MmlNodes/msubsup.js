@@ -16,7 +16,7 @@ export class MmlMsubsup extends AbstractMmlBaseNode {
         return 2;
     }
     setChildInheritedAttributes(attributes, display, level, prime) {
-        let nodes = this.childNodes;
+        const nodes = this.childNodes;
         nodes[0].setInheritedAttributes(attributes, display, level, prime);
         nodes[1].setInheritedAttributes(attributes, false, level + 1, prime || this.sub === 1);
         if (!nodes[2]) {

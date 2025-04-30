@@ -1,53 +1,59 @@
 import { AbstractOutputJax } from '../core/OutputJax.js';
 import { STATE } from '../core/MathItem.js';
 import { TEXCLASS } from '../core/MmlTree/MmlNode.js';
-import { FontData } from './common/FontData.js';
+import { FontData, } from './common/FontData.js';
 import { separateOptions } from '../util/Options.js';
 import { LinebreakVisitor } from './common/LinebreakVisitor.js';
 import { percent } from '../util/lengths.js';
 import { length2em } from '../util/lengths.js';
 import { Styles } from '../util/Styles.js';
-import { CssStyles } from '../util/StyleList.js';
+import { StyleJsonSheet } from '../util/StyleJson.js';
 export const FONTPATH = '@mathjax/%%FONT%%-font';
 export class CommonOutputJax extends AbstractOutputJax {
     get forceInlineBreaks() {
         return false;
     }
-    constructor(options = null, defaultFactory = null, defaultFont = null) {
-        const [fontClass, font] = (options.fontData instanceof FontData ?
-            [options.fontData.constructor, options.fontData] :
-            [options.fontData || defaultFont, null]);
+    constructor(options = {}, defaultFactory = null, defaultFont = null) {
+        const [fontClass, font] = options.fontData instanceof FontData
+            ? [options.fontData.constructor, options.fontData]
+            : [options.fontData || defaultFont, null];
         const [jaxOptions, fontOptions] = separateOptions(options, fontClass.OPTIONS);
         super(jaxOptions);
-        this.factory = this.options.wrapperFactory ||
-            new defaultFactory();
+        this.factory =
+            this.options.wrapperFactory ||
+                new defaultFactory();
         this.factory.jax = this;
-        this.cssStyles = this.options.cssStyles || new CssStyles();
+        this.styleJson = this.options.styleJson || new StyleJsonSheet();
         this.font = font || new fontClass(fontOptions);
         this.font.setOptions({ mathmlSpacing: this.options.mathmlSpacing });
         this.unknownCache = new Map();
-        const linebreaks = (this.options.linebreaks.LinebreakVisitor || LinebreakVisitor);
+        const linebreaks = (this.options.linebreaks.LinebreakVisitor ||
+            LinebreakVisitor);
         this.linebreaks = new linebreaks(this.factory);
     }
     setAdaptor(adaptor) {
         super.setAdaptor(adaptor);
         if (this.options.htmlHDW === 'auto') {
-            this.options.htmlHDW = (adaptor.canMeasureNodes ? 'ignore' : 'force');
+            this.options.htmlHDW = adaptor.canMeasureNodes ? 'ignore' : 'force';
         }
+    }
+    addExtension(font, prefix = '') {
+        return this.font.addExtension(font, prefix);
     }
     typeset(math, html) {
         this.setDocument(html);
-        let node = this.createNode();
+        const node = this.createNode();
         this.toDOM(math, node, html);
         return node;
     }
     createNode() {
         const jax = this.constructor.NAME;
-        return this.html('mjx-container', { 'class': 'MathJax', jax: jax });
+        return this.html('mjx-container', { class: 'MathJax', jax: jax });
     }
     setScale(node, wrapper) {
         let scale = this.getInitialScale() * this.options.scale;
-        if (wrapper.node.attributes.get('overflow') === 'scale' && this.math.display) {
+        if (wrapper.node.attributes.get('overflow') === 'scale' &&
+            this.math.display) {
             const w = wrapper.getOuterBBox().w;
             const W = this.math.metrics.containerWidth / this.pxPerEm;
             if (w > W && w) {
@@ -68,14 +74,22 @@ export class CommonOutputJax extends AbstractOutputJax {
         this.container = node;
         this.pxPerEm = math.metrics.ex / this.font.params.x_height;
         this.nodeMap = new Map();
-        math.root.attributes.getAllInherited().overflow = this.options.displayOverflow;
+        math.root.attributes.getAllInherited().overflow =
+            this.options.displayOverflow;
         const overflow = math.root.attributes.get('overflow');
         this.adaptor.setAttribute(node, 'overflow', overflow);
-        const linebreak = (overflow === 'linebreak');
-        linebreak && this.getLinebreakWidth();
-        if (this.options.linebreaks.inline && !math.display && !math.outputData.inlineMarked) {
+        const linebreak = overflow === 'linebreak';
+        if (linebreak) {
+            this.getLinebreakWidth();
+        }
+        const inlineMarked = !!math.root.getProperty('inlineMarked');
+        if (this.options.linebreaks.inline && !math.display && !inlineMarked) {
             this.markInlineBreaks((_a = math.root.childNodes) === null || _a === void 0 ? void 0 : _a[0]);
-            math.outputData.inlineMarked = true;
+            math.root.setProperty('inlineMarked', true);
+        }
+        else if (!this.options.linebreaks.inline && inlineMarked) {
+            this.unmarkInlineBreaks(math.root);
+            math.root.setProperty('inlineMarked', false);
         }
         math.root.setTeXclass(null);
         const wrapper = this.factory.wrap(math.root);
@@ -89,25 +103,28 @@ export class CommonOutputJax extends AbstractOutputJax {
         this.math = math;
         math.root.setTeXclass(null);
         this.nodeMap = new Map();
-        let bbox = this.factory.wrap(math.root).getOuterBBox();
+        const bbox = this.factory.wrap(math.root).getOuterBBox();
         this.nodeMap = null;
         return bbox;
     }
     getLinebreakWidth() {
         const W = this.math.metrics.containerWidth / this.pxPerEm;
-        const width = this.math.root.attributes.get('maxwidth') || this.options.linebreaks.width;
+        const width = this.math.root.attributes.get('maxwidth') ||
+            this.options.linebreaks.width;
         this.containerWidth = length2em(width, W, 1, this.pxPerEm);
     }
     markInlineBreaks(node) {
         if (!node)
             return;
         const forcebreak = this.forceInlineBreaks;
+        let postbreak = false;
         let marked = false;
         let markNext = '';
         for (const child of node.childNodes) {
             if (markNext) {
                 marked = this.markInlineBreak(marked, forcebreak, markNext, node, child);
                 markNext = '';
+                postbreak = false;
             }
             else if (child.isEmbellished) {
                 if (child === node.childNodes[0]) {
@@ -117,37 +134,49 @@ export class CommonOutputJax extends AbstractOutputJax {
                 const texClass = mo.texClass;
                 const linebreak = mo.attributes.get('linebreak');
                 const linebreakstyle = mo.attributes.get('linebreakstyle');
-                if ((texClass === TEXCLASS.BIN || texClass === TEXCLASS.REL ||
+                if ((texClass === TEXCLASS.BIN ||
+                    texClass === TEXCLASS.REL ||
                     (texClass === TEXCLASS.ORD && mo.hasSpacingAttributes()) ||
-                    linebreak !== 'auto') && linebreak !== 'nobreak') {
+                    linebreak !== 'auto') &&
+                    linebreak !== 'nobreak') {
                     if (linebreakstyle === 'before') {
-                        marked = this.markInlineBreak(marked, forcebreak, linebreak, node, child, mo);
+                        if (!postbreak || linebreak !== 'auto') {
+                            marked = this.markInlineBreak(marked, forcebreak, linebreak, node, child, mo);
+                        }
                     }
                     else {
                         markNext = linebreak;
                     }
                 }
+                postbreak = linebreak === 'newline' && linebreakstyle === 'after';
             }
             else if (child.isKind('mspace')) {
                 const linebreak = child.attributes.get('linebreak');
-                if (linebreak !== 'nobreak') {
+                if (linebreak !== 'nobreak' && child.canBreak) {
                     marked = this.markInlineBreak(marked, forcebreak, linebreak, node, child);
                 }
+                postbreak = linebreak === 'newline';
             }
-            else if ((child.isKind('mstyle') && !child.attributes.get('style') &&
-                !child.attributes.getExplicit('mathbackground')) || child.isKind('semantics')) {
-                this.markInlineBreaks(child.childNodes[0]);
-                if (child.getProperty('process-breaks')) {
-                    child.setProperty('inline-breaks', true);
-                    child.childNodes[0].setProperty('inline-breaks', true);
-                    node.parent.setProperty('process-breaks', 'true');
+            else {
+                postbreak = false;
+                if ((child.isKind('mstyle') &&
+                    !child.attributes.get('style') &&
+                    !child.attributes.hasExplicit('mathbackground')) ||
+                    child.isKind('semantics')) {
+                    this.markInlineBreaks(child.childNodes[0]);
+                    if (child.getProperty('process-breaks')) {
+                        child.setProperty('inline-breaks', true);
+                        child.childNodes[0].setProperty('inline-breaks', true);
+                        node.parent.setProperty('process-breaks', 'true');
+                    }
                 }
-            }
-            else if (child.isKind('mrow') && child.attributes.get('data-semantic-added')) {
-                this.markInlineBreaks(child);
-                if (child.getProperty('process-breaks')) {
-                    child.setProperty('inline-breaks', true);
-                    node.parent.setProperty('process-breaks', 'true');
+                else if (child.isKind('mrow') &&
+                    child.attributes.get('data-semantic-added')) {
+                    this.markInlineBreaks(child);
+                    if (child.getProperty('process-breaks')) {
+                        child.setProperty('inline-breaks', true);
+                        node.parent.setProperty('process-breaks', 'true');
+                    }
                 }
             }
         }
@@ -161,6 +190,9 @@ export class CommonOutputJax extends AbstractOutputJax {
         else {
             child.removeProperty('forcebreak');
             mo === null || mo === void 0 ? void 0 : mo.removeProperty('forcebreak');
+            if (linebreak === 'newline') {
+                child.setProperty('newline', true);
+            }
         }
         if (!marked) {
             node.setProperty('process-breaks', true);
@@ -168,6 +200,18 @@ export class CommonOutputJax extends AbstractOutputJax {
             marked = true;
         }
         return marked;
+    }
+    unmarkInlineBreaks(node) {
+        if (!node)
+            return;
+        node.removeProperty('forcebreak');
+        node.removeProperty('breakable');
+        if (node.getProperty('process-breaks')) {
+            node.removeProperty('process-breaks');
+            for (const child of node.childNodes) {
+                this.unmarkInlineBreaks(child);
+            }
+        }
     }
     getMetrics(html) {
         this.setDocument(html);
@@ -190,15 +234,18 @@ export class CommonOutputJax extends AbstractOutputJax {
         }
     }
     getMetricsFor(node, display) {
-        const getFamily = (this.options.mtextInheritFont || this.options.merrorInheritFont);
+        const getFamily = this.options.mtextInheritFont || this.options.merrorInheritFont;
         const test = this.getTestElement(node, display);
-        const metrics = this.measureMetrics(test, getFamily);
+        const metrics = Object.assign(Object.assign({}, this.measureMetrics(test, getFamily)), { display });
         this.adaptor.remove(test);
         return metrics;
     }
     getMetricMaps(html) {
         const adaptor = this.adaptor;
-        const domMaps = [new Map(), new Map()];
+        const domMaps = [
+            new Map(),
+            new Map(),
+        ];
         for (const math of html.math) {
             const node = adaptor.parent(math.start.node);
             if (node && math.state() < STATE.METRICS) {
@@ -225,7 +272,8 @@ export class CommonOutputJax extends AbstractOutputJax {
     getTestElement(node, display) {
         const adaptor = this.adaptor;
         if (!this.testInline) {
-            this.testInline = this.html('mjx-test', { style: {
+            this.testInline = this.html('mjx-test', {
+                style: {
                     display: 'inline-block',
                     width: '100%',
                     'font-style': 'normal',
@@ -238,23 +286,31 @@ export class CommonOutputJax extends AbstractOutputJax {
                     'word-spacing': 'normal',
                     overflow: 'hidden',
                     height: '1px',
-                    'margin-right': '-1px'
-                } }, [
-                this.html('mjx-left-box', { style: {
+                    'margin-right': '-1px',
+                },
+            }, [
+                this.html('mjx-left-box', {
+                    style: {
                         display: 'inline-block',
                         width: 0,
-                        'float': 'left'
-                    } }),
-                this.html('mjx-ex-box', { style: {
+                        float: 'left',
+                    },
+                }),
+                this.html('mjx-ex-box', {
+                    style: {
                         position: 'absolute',
                         overflow: 'hidden',
-                        width: '1px', height: '60ex'
-                    } }),
-                this.html('mjx-right-box', { style: {
+                        width: '1px',
+                        height: '60ex',
+                    },
+                }),
+                this.html('mjx-right-box', {
+                    style: {
                         display: 'inline-block',
                         width: 0,
-                        'float': 'right'
-                    } })
+                        float: 'right',
+                    },
+                }),
             ]);
             this.testDisplay = adaptor.clone(this.testInline);
             adaptor.setStyle(this.testDisplay, 'display', 'table');
@@ -269,29 +325,34 @@ export class CommonOutputJax extends AbstractOutputJax {
     }
     measureMetrics(node, getFamily) {
         const adaptor = this.adaptor;
-        const family = (getFamily ? adaptor.fontFamily(node) : '');
+        const family = getFamily ? adaptor.fontFamily(node) : '';
         const em = adaptor.fontSize(node);
         const [w, h] = adaptor.nodeSize(adaptor.childNode(node, 1));
-        const ex = (w ? h / 60 : em * this.options.exFactor);
-        const containerWidth = (!w ? 1000000 : adaptor.getStyle(node, 'display') === 'table' ?
-            adaptor.nodeSize(adaptor.lastChild(node))[0] - 1 :
-            adaptor.nodeBBox(adaptor.lastChild(node)).left -
-                adaptor.nodeBBox(adaptor.firstChild(node)).left - 2);
+        const ex = w ? h / 60 : em * this.options.exFactor;
+        const containerWidth = !w
+            ? 1000000
+            : adaptor.getStyle(node, 'display') === 'table'
+                ? adaptor.nodeSize(adaptor.lastChild(node))[0] - 1
+                : adaptor.nodeBBox(adaptor.lastChild(node)).left -
+                    adaptor.nodeBBox(adaptor.firstChild(node)).left -
+                    2;
         const scale = Math.max(this.options.minScale, this.options.matchFontHeight ? ex / this.font.params.x_height / em : 1);
         return { em, ex, containerWidth, scale, family };
     }
     styleSheet(html) {
         this.setDocument(html);
-        this.cssStyles.clear();
-        this.cssStyles.addStyles(this.constructor.commonStyles);
+        this.styleJson.clear();
+        this.styleJson.addStyles(this.constructor.commonStyles);
         if ('getStyles' in html) {
             for (const styles of html.getStyles()) {
-                this.cssStyles.addStyles(styles);
+                this.styleJson.addStyles(styles);
             }
         }
-        this.addWrapperStyles(this.cssStyles);
-        this.addFontStyles(this.cssStyles);
-        const sheet = this.html('style', { id: 'MJX-styles' }, [this.text('\n' + this.cssStyles.cssText + '\n')]);
+        this.addWrapperStyles(this.styleJson);
+        this.addFontStyles(this.styleJson);
+        const sheet = this.html('style', { id: 'MJX-styles' }, [
+            this.text('\n' + this.styleJson.cssText + '\n'),
+        ]);
         return sheet;
     }
     addFontStyles(styles) {
@@ -318,7 +379,7 @@ export class CommonOutputJax extends AbstractOutputJax {
         return this.adaptor.text(text);
     }
     fixed(m, n = 3) {
-        if (Math.abs(m) < .0006) {
+        if (Math.abs(m) < 0.0006) {
             return '0';
         }
         return m.toFixed(n).replace(/\.?0+$/, '');
@@ -346,28 +407,6 @@ export class CommonOutputJax extends AbstractOutputJax {
         map.set(chars, bbox);
         return bbox;
     }
-    measureXMLnode(xml) {
-        const adaptor = this.adaptor;
-        const content = this.html('mjx-xml-block', { style: { display: 'inline-block' } }, [adaptor.clone(xml)]);
-        const base = this.html('mjx-baseline', { style: { display: 'inline-block', width: 0, height: 0 } });
-        const style = {
-            position: 'absolute',
-            display: 'inline-block',
-            'font-family': 'initial',
-            'line-height': 'normal'
-        };
-        const node = this.html('mjx-measure-xml', { style }, [base, content]);
-        adaptor.append(adaptor.parent(this.math.start.node), this.container);
-        adaptor.append(this.container, node);
-        const em = this.math.metrics.em * this.math.metrics.scale;
-        const { left, right, bottom, top } = adaptor.nodeBBox(content);
-        const w = (right - left) / em;
-        const h = (adaptor.nodeBBox(base).top - top) / em;
-        const d = (bottom - top) / em - h;
-        adaptor.remove(this.container);
-        adaptor.remove(node);
-        return { w, h, d };
-    }
     cssFontStyles(font, styles = {}) {
         const [family, italic, bold] = font;
         styles['font-family'] = this.font.getFamily(family);
@@ -381,9 +420,11 @@ export class CommonOutputJax extends AbstractOutputJax {
         if (!styles) {
             styles = new Styles();
         }
-        return [this.font.getFamily(styles.get('font-family')),
+        return [
+            this.font.getFamily(styles.get('font-family')),
             styles.get('font-style') === 'italic',
-            styles.get('font-weight') === 'bold'];
+            styles.get('font-weight') === 'bold',
+        ];
     }
 }
 CommonOutputJax.NAME = 'Common';
@@ -392,15 +433,33 @@ CommonOutputJax.OPTIONS = Object.assign(Object.assign({}, AbstractOutputJax.OPTI
         width: '100%',
         lineleading: .2,
         LinebreakVisitor: null,
-    }, font: '', htmlHDW: 'auto', wrapperFactory: null, fontData: null, fontPath: FONTPATH, cssStyles: null });
+    }, font: '', htmlHDW: 'auto', wrapperFactory: null, fontData: null, fontPath: FONTPATH, styleJson: null });
 CommonOutputJax.commonStyles = {
     'mjx-container[overflow="scroll"][display]': {
-        'overflow-x': 'auto',
-        'min-width': 'initial !important'
+        overflow: 'auto clip',
+        'min-width': 'initial !important',
     },
     'mjx-container[overflow="truncate"][display]': {
-        'overflow-x': 'hidden',
-        'min-width': 'initial !important'
-    }
+        overflow: 'hidden clip',
+        'min-width': 'initial !important',
+    },
+    'mjx-container[display]': {
+        display: 'block',
+        'text-align': 'center',
+        'justify-content': 'center',
+        margin: 'calc(1em - 2px) 0',
+        padding: '2px 0',
+    },
+    'mjx-container[display][width="full"]': {
+        display: 'flex',
+    },
+    'mjx-container[justify="left"]': {
+        'text-align': 'left',
+        'justify-content': 'left',
+    },
+    'mjx-container[justify="right"]': {
+        'text-align': 'right',
+        'justify-content': 'right',
+    },
 };
 //# sourceMappingURL=common.js.map

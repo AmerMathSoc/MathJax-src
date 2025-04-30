@@ -1,3 +1,4 @@
+import { HandlerType, ConfigurationType } from './HandlerTypes.js';
 import { userOptions, defaultOptions } from '../../util/Options.js';
 import { SubHandlers } from './MapHandler.js';
 import { FunctionList } from '../../util/FunctionList.js';
@@ -8,16 +9,19 @@ export class Configuration {
         return Array.isArray(func) ? func : [func, priority];
     }
     static _create(name, config = {}) {
-        let priority = config.priority || PrioritizedList.DEFAULTPRIORITY;
-        let init = config.init ? this.makeProcessor(config.init, priority) : null;
-        let conf = config.config ? this.makeProcessor(config.config, priority) : null;
-        let preprocessors = (config.preprocessors || []).map(pre => this.makeProcessor(pre, priority));
-        let postprocessors = (config.postprocessors || []).map(post => this.makeProcessor(post, priority));
-        let parser = config.parser || 'tex';
-        return new Configuration(name, config.handler || {}, config.fallback || {}, config.items || {}, config.tags || {}, config.options || {}, config.nodes || {}, preprocessors, postprocessors, init, conf, priority, parser);
+        var _a;
+        const priority = (_a = config.priority) !== null && _a !== void 0 ? _a : PrioritizedList.DEFAULTPRIORITY;
+        const init = config.init ? this.makeProcessor(config.init, priority) : null;
+        const conf = config.config
+            ? this.makeProcessor(config.config, priority)
+            : null;
+        const preprocessors = (config.preprocessors || []).map((pre) => this.makeProcessor(pre, priority));
+        const postprocessors = (config.postprocessors || []).map((post) => this.makeProcessor(post, priority));
+        const parser = config.parser || 'tex';
+        return new Configuration(name, config[ConfigurationType.HANDLER] || {}, config[ConfigurationType.FALLBACK] || {}, config[ConfigurationType.ITEMS] || {}, config[ConfigurationType.TAGS] || {}, config[ConfigurationType.OPTIONS] || {}, config[ConfigurationType.NODES] || {}, preprocessors, postprocessors, init, conf, priority, parser);
     }
     static create(name, config = {}) {
-        let configuration = Configuration._create(name, config);
+        const configuration = Configuration._create(name, config);
         ConfigurationHandler.set(name, configuration);
         return configuration;
     }
@@ -38,7 +42,12 @@ export class Configuration {
         this.configMethod = configMethod;
         this.priority = priority;
         this.parser = parser;
-        this.handler = Object.assign({ character: [], delimiter: [], macro: [], environment: [] }, handler);
+        this.handler = Object.assign({
+            [HandlerType.CHARACTER]: [],
+            [HandlerType.DELIMITER]: [],
+            [HandlerType.MACRO]: [],
+            [HandlerType.ENVIRONMENT]: [],
+        }, handler);
     }
     get init() {
         return this.initMethod ? this.initMethod[0] : null;
@@ -47,19 +56,18 @@ export class Configuration {
         return this.configMethod ? this.configMethod[0] : null;
     }
 }
-export var ConfigurationHandler;
-(function (ConfigurationHandler) {
-    let maps = new Map();
-    ConfigurationHandler.set = function (name, map) {
+const maps = new Map();
+export const ConfigurationHandler = {
+    set(name, map) {
         maps.set(name, map);
-    };
-    ConfigurationHandler.get = function (name) {
+    },
+    get(name) {
         return maps.get(name);
-    };
-    ConfigurationHandler.keys = function () {
+    },
+    keys() {
         return maps.keys();
-    };
-})(ConfigurationHandler || (ConfigurationHandler = {}));
+    },
+};
 export class ParserConfiguration {
     constructor(packages, parsers = ['tex']) {
         this.initMethod = new FunctionList();
@@ -75,7 +83,7 @@ export class ParserConfiguration {
         for (const pkg of packages.slice().reverse()) {
             this.addPackage(pkg);
         }
-        for (let { item: config, priority: priority } of this.configurations) {
+        for (const { item: config, priority: priority } of this.configurations) {
             this.append(config, priority);
         }
     }
@@ -91,7 +99,9 @@ export class ParserConfiguration {
     addPackage(pkg) {
         const name = typeof pkg === 'string' ? pkg : pkg[0];
         const conf = this.getPackage(name);
-        conf && this.configurations.add(conf, typeof pkg === 'string' ? conf.priority : pkg[1]);
+        if (conf) {
+            this.configurations.add(conf, typeof pkg === 'string' ? conf.priority : pkg[1]);
+        }
     }
     add(name, jax, options = {}) {
         const config = this.getPackage(name);
@@ -113,8 +123,11 @@ export class ParserConfiguration {
     }
     getPackage(name) {
         const config = ConfigurationHandler.get(name);
-        if (config && this.parsers.indexOf(config.parser) < 0) {
-            throw Error(`Package ${name} doesn't target the proper parser`);
+        if (config && !this.parsers.includes(config.parser)) {
+            throw Error(`Package '${name}' doesn't target the proper parser`);
+        }
+        if (!config) {
+            this.warn(`Package '${name}' not found.  Omitted.`);
         }
         return config;
     }
@@ -139,6 +152,9 @@ export class ParserConfiguration {
         for (const [post, priority] of config.postprocessors) {
             jax.postFilters.add(post, priority);
         }
+    }
+    warn(message) {
+        console.warn('MathJax Warning: ' + message);
     }
 }
 //# sourceMappingURL=Configuration.js.map

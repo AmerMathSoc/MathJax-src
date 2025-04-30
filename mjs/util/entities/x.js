@@ -19,6 +19,6 @@ Entities.add({
     xuplus: '\u2A04',
     xutri: '\u25B3',
     xvee: '\u22C1',
-    xwedge: '\u22C0'
+    xwedge: '\u22C0',
 }, 'x');
 //# sourceMappingURL=x.js.map

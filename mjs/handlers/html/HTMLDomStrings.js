@@ -1,7 +1,7 @@
-import { userOptions, defaultOptions, makeArray, expandable } from '../../util/Options.js';
+import { userOptions, defaultOptions, makeArray, expandable, } from '../../util/Options.js';
 export class HTMLDomStrings {
     constructor(options = null) {
-        let CLASS = this.constructor;
+        const CLASS = this.constructor;
         this.options = userOptions(defaultOptions({}, CLASS.OPTIONS), options);
         this.init();
         this.getPatterns();
@@ -14,9 +14,9 @@ export class HTMLDomStrings {
         this.stack = [];
     }
     getPatterns() {
-        let skip = makeArray(this.options['skipHtmlTags']);
-        let ignore = makeArray(this.options['ignoreHtmlClass']);
-        let process = makeArray(this.options['processHtmlClass']);
+        const skip = makeArray(this.options['skipHtmlTags']);
+        const ignore = makeArray(this.options['ignoreHtmlClass']);
+        const process = makeArray(this.options['processHtmlClass']);
         this.skipHtmlTags = new RegExp('^(?:' + skip.join('|') + ')$', 'i');
         this.ignoreHtmlClass = new RegExp('(?:^| )(?:' + ignore.join('|') + ')(?: |$)');
         this.processHtmlClass = new RegExp('(?:^| )(?:' + process + ')(?: |$)');
@@ -41,7 +41,7 @@ export class HTMLDomStrings {
     }
     handleTag(node, ignore) {
         if (!ignore) {
-            let text = this.options['includeHtmlTags'][this.adaptor.kind(node)];
+            const text = this.options['includeHtmlTags'][this.adaptor.kind(node)];
             if (text instanceof Function) {
                 this.extendString(node, text(node, this.adaptor));
             }
@@ -57,7 +57,8 @@ export class HTMLDomStrings {
         const tname = this.adaptor.kind(node) || '';
         const process = this.processHtmlClass.exec(cname);
         let next = node;
-        if (this.adaptor.firstChild(node) && !this.adaptor.getAttribute(node, 'data-MJX') &&
+        if (this.adaptor.firstChild(node) &&
+            !this.adaptor.getAttribute(node, 'data-MJX') &&
             (process || !this.skipHtmlTags.exec(tname))) {
             if (this.adaptor.next(node)) {
                 this.stack.push([this.adaptor.next(node), ignore]);
@@ -76,15 +77,15 @@ export class HTMLDomStrings {
     }
     find(node) {
         this.init();
-        let stop = this.adaptor.next(node);
+        const stop = this.adaptor.next(node);
         let ignore = false;
-        let include = this.options['includeHtmlTags'];
+        const include = this.options['includeHtmlTags'];
         while (node && node !== stop) {
             const kind = this.adaptor.kind(node);
             if (kind === '#text') {
                 node = this.handleText(node, ignore);
             }
-            else if (include.hasOwnProperty(kind)) {
+            else if (Object.hasOwn(include, kind)) {
                 node = this.handleTag(node, ignore);
             }
             else if (kind) {
@@ -99,15 +100,14 @@ export class HTMLDomStrings {
             }
         }
         this.pushString();
-        let result = [this.strings, this.nodes];
+        const result = [this.strings, this.nodes];
         this.init();
         return result;
     }
 }
 HTMLDomStrings.OPTIONS = {
     skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code',
-        'annotation', 'annotation-xml', 'select', 'option',
-        'mjx-container'],
+        'math', 'select', 'option', 'mjx-container'],
     includeHtmlTags: expandable({ br: '\n', wbr: '', '#comment': '' }),
     ignoreHtmlClass: 'mathjax_ignore',
     processHtmlClass: 'mathjax_process'

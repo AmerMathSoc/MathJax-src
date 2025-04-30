@@ -1,6 +1,6 @@
-import { CommonMunderMixin, CommonMoverMixin, CommonMunderoverMixin } from '../../common/Wrappers/munderover.js';
-import { MmlMunderover, MmlMunder, MmlMover } from '../../../core/MmlTree/MmlNodes/munderover.js';
-import { ChtmlMsub, ChtmlMsup, ChtmlMsubsup } from './msubsup.js';
+import { CommonMunderMixin, CommonMoverMixin, CommonMunderoverMixin, } from '../../common/Wrappers/munderover.js';
+import { MmlMunderover, MmlMunder, MmlMover, } from '../../../core/MmlTree/MmlNodes/munderover.js';
+import { ChtmlMsub, ChtmlMsup, ChtmlMsubsup, } from './msubsup.js';
 export const ChtmlMunder = (function () {
     var _a;
     const Base = CommonMunderMixin(ChtmlMsub);
@@ -21,7 +21,9 @@ export const ChtmlMunder = (function () {
                 const basebox = this.baseChild.getOuterBBox();
                 const underbox = this.scriptChild.getOuterBBox();
                 const k = this.getUnderKV(basebox, underbox)[0];
-                const delta = (this.isLineBelow ? 0 : this.getDelta(this.scriptChild, true));
+                const delta = this.isLineBelow
+                    ? 0
+                    : this.getDelta(this.scriptChild, true);
                 this.adaptor.setStyle(under, 'paddingTop', this.em(k));
                 this.setDeltaW([base, under], this.getDeltaW([basebox, underbox], [0, -delta]));
                 this.adjustUnderDepth(under, underbox);
@@ -30,17 +32,17 @@ export const ChtmlMunder = (function () {
         _a.kind = MmlMunder.prototype.kind,
         _a.styles = {
             'mjx-over': {
-                'text-align': 'left'
+                'text-align': 'left',
             },
             'mjx-munder:not([limits="false"])': {
                 display: 'inline-table',
             },
             'mjx-munder > mjx-row': {
-                'text-align': 'left'
+                'text-align': 'left',
             },
             'mjx-under': {
-                'padding-bottom': '.1em'
-            }
+                'padding-bottom': '.1em',
+            },
         },
         _a;
 })();
@@ -65,7 +67,7 @@ export const ChtmlMover = (function () {
                 const basebox = this.baseChild.getOuterBBox();
                 this.adjustBaseHeight(base, basebox);
                 const k = this.getOverKU(basebox, overbox)[0];
-                const delta = (this.isLineAbove ? 0 : this.getDelta(this.scriptChild));
+                const delta = this.isLineAbove ? 0 : this.getDelta(this.scriptChild);
                 this.adaptor.setStyle(over, 'paddingBottom', this.em(k));
                 this.setDeltaW([base, over], this.getDeltaW([basebox, overbox], [0, delta]));
                 this.adjustOverDepth(over, overbox);
@@ -74,12 +76,12 @@ export const ChtmlMover = (function () {
         _a.kind = MmlMover.prototype.kind,
         _a.styles = {
             'mjx-mover:not([limits="false"])': {
-                'padding-top': '.1em'
+                'padding-top': '.1em',
             },
             'mjx-mover:not([limits="false"]) > *': {
                 display: 'block',
-                'text-align': 'left'
-            }
+                'text-align': 'left',
+            },
         },
         _a;
 })();
@@ -121,10 +123,10 @@ export const ChtmlMunderover = (function () {
         _a.kind = MmlMunderover.prototype.kind,
         _a.styles = {
             'mjx-munderover:not([limits="false"])': {
-                'padding-top': '.1em'
+                'padding-top': '.1em',
             },
             'mjx-munderover:not([limits="false"]) > *': {
-                display: 'block'
+                display: 'block',
             },
         },
         _a;

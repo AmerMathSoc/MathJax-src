@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMsMixin } from '../../common/Wrappers/ms.js';
+import { CommonMsMixin, } from '../../common/Wrappers/ms.js';
 import { MmlMs } from '../../../core/MmlTree/MmlNodes/ms.js';
 export const ChtmlMs = (function () {
     var _a;

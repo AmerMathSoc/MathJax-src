@@ -1,7 +1,7 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMrowMixin } from '../../common/Wrappers/mrow.js';
-import { CommonInferredMrowMixin } from '../../common/Wrappers/mrow.js';
-import { MmlMrow, MmlInferredMrow } from '../../../core/MmlTree/MmlNodes/mrow.js';
+import { CommonMrowMixin, } from '../../common/Wrappers/mrow.js';
+import { CommonInferredMrowMixin, } from '../../common/Wrappers/mrow.js';
+import { MmlMrow, MmlInferredMrow, } from '../../../core/MmlTree/MmlNodes/mrow.js';
 export const ChtmlMrow = (function () {
     var _a;
     const Base = CommonMrowMixin(ChtmlWrapper);
@@ -11,7 +11,7 @@ export const ChtmlMrow = (function () {
                 this.linebreakCount = 0;
             }
             toCHTML(parents) {
-                const n = this.linebreakCount = (this.isStack ? 0 : this.breakCount);
+                const n = (this.linebreakCount = this.isStack ? 0 : this.breakCount);
                 if (n || !this.node.isInferred) {
                     parents = this.standardChtmlNodes(parents);
                 }
@@ -28,16 +28,19 @@ export const ChtmlMrow = (function () {
                 }
             }
             placeLines(parents, n) {
-                var _a, _b;
+                var _b, _c;
                 this.getBBox();
                 const lines = this.lineBBox;
                 const adaptor = this.adaptor;
-                const [alignfirst, shiftfirst] = ((_a = lines[1].indentData) === null || _a === void 0 ? void 0 : _a[0]) || ['left', '0'];
+                const [alignfirst, shiftfirst] = ((_b = lines[1].indentData) === null || _b === void 0 ? void 0 : _b[0]) || [
+                    'left',
+                    '0',
+                ];
                 for (const i of parents.keys()) {
                     const bbox = lines[i];
-                    let [indentalign, indentshift] = (i === 0 ?
-                        [alignfirst, shiftfirst] :
-                        ((_b = bbox.indentData) === null || _b === void 0 ? void 0 : _b[i === n ? 2 : 1]) || ['left', '0']);
+                    const [indentalign, indentshift] = i === 0
+                        ? [alignfirst, shiftfirst]
+                        : ((_c = bbox.indentData) === null || _c === void 0 ? void 0 : _c[i === n ? 2 : 1]) || ['left', '0'];
                     const [align, shift] = this.processIndent(indentalign, indentshift, alignfirst, shiftfirst);
                     adaptor.setAttribute(parents[i], 'align', align);
                     if (shift) {
@@ -66,7 +69,9 @@ export const ChtmlMrow = (function () {
                 if (!n)
                     return super.createChtmlNodes(parents);
                 const adaptor = this.adaptor;
-                const kind = (this.node.isInferred ? 'mjx-linestack' : 'mjx-' + this.node.kind);
+                const kind = this.node.isInferred
+                    ? 'mjx-linestack'
+                    : 'mjx-' + this.node.kind;
                 this.dom = [adaptor.append(parents[0], this.html(kind))];
                 if (kind === 'mjx-mrow' && !this.isStack) {
                     adaptor.setAttribute(this.dom[0], 'break-top', 'true');
@@ -80,10 +85,12 @@ export const ChtmlMrow = (function () {
                         adaptor.setAttribute(this.dom[0], 'break-align', valign);
                     }
                 }
-                this.dom = [adaptor.append(this.handleHref(parents)[0], this.dom[0])];
+                this.dom = [
+                    adaptor.append(this.handleHref(parents)[0], this.dom[0]),
+                ];
                 const chtml = Array(n);
                 for (let i = 0; i <= n; i++) {
-                    chtml[i] = adaptor.append(this.dom[0], this.html('mjx-linebox', { 'lineno': i }));
+                    chtml[i] = adaptor.append(this.dom[0], this.html('mjx-linebox', { lineno: i }));
                 }
                 return chtml;
             }
@@ -100,56 +107,56 @@ export const ChtmlMrow = (function () {
         _a.styles = {
             'mjx-linestack, mjx-mrow[break-top]': {
                 display: 'inline-table',
-                width: '100%'
+                width: '100%',
             },
             'mjx-linestack[break-align="bottom"], mjx-mrow[break-top][break-align="bottom"]': {
-                display: 'inline-block'
+                display: 'inline-block',
             },
             'mjx-linestack[break-align="middle"], mjx-mrow[break-top][break-align="middle"]': {
-                'vertical-align': 'middle'
+                'vertical-align': 'middle',
             },
             'mjx-linestack[break-align="center"], mjx-mrow[break-top][break-align="center"]': {
-                'vertical-align': 'middle'
+                'vertical-align': 'middle',
             },
             'mjx-linestack[breakable]': {
-                display: 'inline'
+                display: 'inline',
             },
             'mjx-linestack[breakable] > mjx-linebox': {
-                display: 'inline'
+                display: 'inline',
             },
             'mjx-linestack[breakable] > mjx-linebox::before': {
                 'white-space': 'pre',
-                content: '"\\A"'
+                content: '"\\A"',
             },
             'mjx-linestack[breakable] > mjx-linebox::after': {
                 'white-space': 'normal',
                 content: '" "',
                 'letter-spacing': '-.999em',
-                'font-family': 'MJX-BRK'
+                'font-family': 'MJX-BRK',
             },
             'mjx-linestack[breakable] > mjx-linebox:first-of-type::before': {
-                display: 'none'
+                display: 'none',
             },
             'mjx-linestack[breakable] > mjx-linebox:last-of-type::after': {
-                display: 'none'
+                display: 'none',
             },
             'mjx-linebox': {
-                display: 'block'
+                display: 'block',
             },
             'mjx-linebox[align="left"]': {
-                'text-align': 'left'
+                'text-align': 'left',
             },
             'mjx-linebox[align="center"]': {
-                'text-align': 'center'
+                'text-align': 'center',
             },
             'mjx-linebox[align="right"]': {
-                'text-align': 'right'
+                'text-align': 'right',
             },
             'mjx-linestrut': {
                 display: 'inline-block',
                 height: '1em',
-                'vertical-align': '-.25em'
-            }
+                'vertical-align': '-.25em',
+            },
         },
         _a;
 })();

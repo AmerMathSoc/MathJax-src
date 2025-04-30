@@ -2,10 +2,11 @@ import NodeUtil from './NodeUtil.js';
 export class NodeFactory {
     constructor() {
         this.mmlFactory = null;
-        this.factory = { 'node': NodeFactory.createNode,
-            'token': NodeFactory.createToken,
-            'text': NodeFactory.createText,
-            'error': NodeFactory.createError
+        this.factory = {
+            node: NodeFactory.createNode,
+            token: NodeFactory.createToken,
+            text: NodeFactory.createText,
+            error: NodeFactory.createError,
         };
     }
     static createNode(factory, kind, children = [], def = {}, text) {
@@ -28,9 +29,11 @@ export class NodeFactory {
         return factory.mmlFactory.create('text').setText(text);
     }
     static createError(factory, message) {
-        let text = factory.create('text', message);
-        let mtext = factory.create('node', 'mtext', [], {}, text);
-        let error = factory.create('node', 'merror', [mtext], { 'data-mjx-error': message });
+        const text = factory.create('text', message);
+        const mtext = factory.create('node', 'mtext', [], {}, text);
+        const error = factory.create('node', 'merror', [mtext], {
+            'data-mjx-error': message,
+        });
         return error;
     }
     setMmlFactory(mmlFactory) {
@@ -40,7 +43,7 @@ export class NodeFactory {
         this.factory[kind] = func;
     }
     setCreators(maps) {
-        for (let kind in maps) {
+        for (const kind in maps) {
             this.set(kind, maps[kind]);
         }
     }

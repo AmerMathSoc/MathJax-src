@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMpaddedMixin } from '../../common/Wrappers/mpadded.js';
+import { CommonMpaddedMixin, } from '../../common/Wrappers/mpadded.js';
 import { MmlMpadded } from '../../../core/MmlTree/MmlNodes/mpadded.js';
 export const SvgMpadded = (function () {
     var _a;
@@ -11,7 +11,8 @@ export const SvgMpadded = (function () {
                 let svg = this.standardSvgNodes(parents);
                 const [, , , , , dw, x, y, dx] = this.getDimens();
                 const align = this.node.attributes.get('data-align') || 'left';
-                const X = x + dx - (dw < 0 && align !== 'left' ? align === 'center' ? dw / 2 : dw : 0);
+                const dW = dw < 0 && align !== 'left' ? (align === 'center' ? dw / 2 : dw) : 0;
+                const X = x + dx - dW;
                 if (X || y) {
                     svg = [this.adaptor.append(svg[0], this.svg('g'))];
                     this.place(X, y, svg[0]);

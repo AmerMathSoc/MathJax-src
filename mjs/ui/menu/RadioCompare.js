@@ -12,8 +12,9 @@ export class RadioCompare extends Radio {
         this.html.setAttribute('aria-checked', this.comparator(this.variable.getValue(), this.id) ? 'true' : 'false');
     }
     updateSpan() {
-        this.span.style.display =
-            this.comparator(this.variable.getValue(), this.id) ? '' : 'none';
+        this.span.style.display = this.comparator(this.variable.getValue(), this.id)
+            ? ''
+            : 'none';
     }
 }
 //# sourceMappingURL=RadioCompare.js.map

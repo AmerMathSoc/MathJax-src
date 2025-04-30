@@ -3,13 +3,14 @@ import { MathDocument } from '../core/MathDocument.js';
 import { MathItem, Metrics } from '../core/MathItem.js';
 import { MmlNode } from '../core/MmlTree/MmlNode.js';
 import { DOMAdaptor } from '../core/DOMAdaptor.js';
-import { FontData, FontDataClass, CharOptions, VariantData, DelimiterData, CssFontData } from './common/FontData.js';
+import { FontData, FontDataClass, CharOptions, VariantData, DelimiterData, CssFontData, FontExtensionData } from './common/FontData.js';
 import { OptionList } from '../util/Options.js';
 import { CommonWrapper, CommonWrapperClass } from './common/Wrapper.js';
 import { CommonWrapperFactory } from './common/WrapperFactory.js';
 import { Linebreaks } from './common/LinebreakVisitor.js';
 import { StyleList, Styles } from '../util/Styles.js';
-import { StyleList as CssStyleList, CssStyles } from '../util/StyleList.js';
+import { StyleJson, StyleJsonSheet } from '../util/StyleJson.js';
+import { BBox } from '../util/BBox.js';
 export interface ExtendedMetrics extends Metrics {
     family: string;
 }
@@ -25,8 +26,8 @@ export declare const FONTPATH = "@mathjax/%%FONT%%-font";
 export declare abstract class CommonOutputJax<N, T, D, WW extends CommonWrapper<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends AbstractOutputJax<N, T, D> {
     static NAME: string;
     static OPTIONS: OptionList;
-    static commonStyles: CssStyleList;
-    cssStyles: CssStyles;
+    static commonStyles: StyleJson;
+    styleJson: StyleJsonSheet;
     document: MathDocument<N, T, D>;
     math: MathItem<N, T, D>;
     container: N;
@@ -43,25 +44,27 @@ export declare abstract class CommonOutputJax<N, T, D, WW extends CommonWrapper<
     protected unknownCache: UnknownVariantMap;
     constructor(options?: OptionList, defaultFactory?: typeof CommonWrapperFactory, defaultFont?: FC);
     setAdaptor(adaptor: DOMAdaptor<N, T, D>): void;
+    addExtension(font: FontExtensionData<CC, DD>, prefix?: string): string[];
     typeset(math: MathItem<N, T, D>, html: MathDocument<N, T, D>): N;
     protected createNode(): N;
     protected setScale(node: N, wrapper: WW): void;
     protected getInitialScale(): number;
     toDOM(math: MathItem<N, T, D>, node: N, html?: MathDocument<N, T, D>): void;
     abstract processMath(wrapper: WW, node: N): void;
-    getBBox(math: MathItem<N, T, D>, html: MathDocument<N, T, D>): import("../util/BBox.js").BBox;
+    getBBox(math: MathItem<N, T, D>, html: MathDocument<N, T, D>): BBox;
     getLinebreakWidth(): void;
     markInlineBreaks(node: MmlNode): void;
     protected markInlineBreak(marked: boolean, forcebreak: boolean, linebreak: string, node: MmlNode, child: MmlNode, mo?: MmlNode): boolean;
+    unmarkInlineBreaks(node: MmlNode): void;
     getMetrics(html: MathDocument<N, T, D>): void;
     getMetricsFor(node: N, display: boolean): ExtendedMetrics;
     protected getMetricMaps(html: MathDocument<N, T, D>): MetricMap<N>[];
     protected getTestElement(node: N, display: boolean): N;
     protected measureMetrics(node: N, getFamily: boolean): ExtendedMetrics;
     styleSheet(html: MathDocument<N, T, D>): N;
-    protected addFontStyles(styles: CssStyles): void;
-    protected addWrapperStyles(styles: CssStyles): void;
-    protected addClassStyles(CLASS: typeof CommonWrapper, styles: CssStyles): void;
+    protected addFontStyles(styles: StyleJsonSheet): void;
+    protected addWrapperStyles(styles: StyleJsonSheet): void;
+    protected addClassStyles(CLASS: typeof CommonWrapper, styles: StyleJsonSheet): void;
     protected setDocument(html: MathDocument<N, T, D>): void;
     html(type: string, def?: OptionList, content?: (N | T)[], ns?: string): N;
     text(text: string): T;
@@ -70,7 +73,6 @@ export declare abstract class CommonOutputJax<N, T, D, WW extends CommonWrapper<
     measureText(text: string, variant: string, font?: CssFontData): UnknownBBox;
     measureTextNodeWithCache(text: N, chars: string, variant: string, font?: CssFontData): UnknownBBox;
     abstract measureTextNode(text: N): UnknownBBox;
-    measureXMLnode(xml: N): UnknownBBox;
     cssFontStyles(font: CssFontData, styles?: StyleList): StyleList;
     getFontData(styles: Styles): CssFontData;
 }

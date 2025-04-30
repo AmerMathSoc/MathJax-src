@@ -8,7 +8,7 @@ export class HandlerList extends PrioritizedList {
     }
     handlesDocument(document) {
         for (const item of this) {
-            let handler = item.item;
+            const handler = item.item;
             if (handler.handlesDocument(document)) {
                 return handler;
             }

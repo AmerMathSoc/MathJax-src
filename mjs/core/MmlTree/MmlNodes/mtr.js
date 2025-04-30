@@ -14,8 +14,7 @@ export class MmlMtr extends AbstractMmlNode {
     setChildInheritedAttributes(attributes, display, level, prime) {
         for (const child of this.childNodes) {
             if (!child.isKind('mtd')) {
-                this.replaceChild(this.factory.create('mtd'), child)
-                    .appendChild(child);
+                this.replaceChild(this.factory.create('mtd'), child).appendChild(child);
             }
         }
         const calign = split(this.attributes.get('columnalign'));
@@ -27,11 +26,14 @@ export class MmlMtr extends AbstractMmlNode {
         attributes = this.addInheritedAttributes(attributes, {
             rowalign: this.attributes.get('rowalign'),
             columnalign: 'center',
-            'data-break-align': 'top'
+            'data-break-align': 'top',
         });
         for (const child of this.childNodes) {
             attributes.columnalign[1] = calign.shift() || attributes.columnalign[1];
-            attributes['data-vertical-align'] = [this.kind, balign.shift() || attributes['data-break-align'][1]];
+            attributes['data-vertical-align'] = [
+                this.kind,
+                balign.shift() || attributes['data-break-align'][1],
+            ];
             child.setInheritedAttributes(attributes, display, level, prime);
         }
     }
@@ -42,7 +44,7 @@ export class MmlMtr extends AbstractMmlNode {
         }
         for (const child of this.childNodes) {
             if (!child.isKind('mtd')) {
-                let mtd = this.replaceChild(this.factory.create('mtd'), child);
+                const mtd = this.replaceChild(this.factory.create('mtd'), child);
                 mtd.appendChild(child);
                 if (!options['fixMtables']) {
                     child.mError('Children of ' + this.kind + ' must be mtd', options);

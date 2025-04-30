@@ -13,6 +13,9 @@ export class Attributes {
     setList(list) {
         Object.assign(this.attributes, list);
     }
+    unset(name) {
+        delete this.attributes[name];
+    }
     get(name) {
         let value = this.attributes[name];
         if (value === INHERIT) {
@@ -21,13 +24,21 @@ export class Attributes {
         return value;
     }
     getExplicit(name) {
-        if (!this.attributes.hasOwnProperty(name)) {
-            return undefined;
+        return this.hasExplicit(name) ? this.attributes[name] : undefined;
+    }
+    hasExplicit(name) {
+        return Object.hasOwn(this.attributes, name);
+    }
+    hasOneOf(names) {
+        for (const name of names) {
+            if (this.hasExplicit(name)) {
+                return true;
+            }
         }
-        return this.attributes[name];
+        return false;
     }
     getList(...names) {
-        let values = {};
+        const values = {};
         for (const name of names) {
             values[name] = this.get(name);
         }
@@ -43,10 +54,11 @@ export class Attributes {
         return this.defaults[name];
     }
     isSet(name) {
-        return this.attributes.hasOwnProperty(name) || this.inherited.hasOwnProperty(name);
+        return (Object.hasOwn(this.attributes, name) ||
+            Object.hasOwn(this.inherited, name));
     }
     hasDefault(name) {
-        return (name in this.defaults);
+        return name in this.defaults;
     }
     getExplicitNames() {
         return Object.keys(this.attributes);

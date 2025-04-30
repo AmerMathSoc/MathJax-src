@@ -1,4 +1,4 @@
-import { CommonMrootMixin } from '../../common/Wrappers/mroot.js';
+import { CommonMrootMixin, } from '../../common/Wrappers/mroot.js';
 import { ChtmlMsqrt } from './msqrt.js';
 import { MmlMroot } from '../../../core/MmlTree/MmlNodes/mroot.js';
 export const ChtmlMroot = (function () {

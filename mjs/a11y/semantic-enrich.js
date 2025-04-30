@@ -1,42 +1,51 @@
-import { mathjax } from '../mathjax.js';
-import { STATE, newState } from '../core/MathItem.js';
+import { STATE, newState, } from '../core/MathItem.js';
 import { SerializedMmlVisitor } from '../core/MmlTree/SerializedMmlVisitor.js';
 import { expandable } from '../util/Options.js';
-import { Sre } from './sre.js';
-let currentSpeech = 'none';
-newState('ENRICHED', 30);
-newState('ATTACHSPEECH', 155);
+import * as Sre from './sre.js';
+newState('ENRICHED', STATE.COMPILED + 10);
 export class enrichVisitor extends SerializedMmlVisitor {
     visitTree(node, math) {
-        this.mactionId = 1;
+        this.mactionId = 0;
         const mml = super.visitTree(node);
         if (this.mactionId) {
             math.inputData.hasMaction = true;
         }
         return mml;
     }
+    visitHtmlNode(node, _space) {
+        return node.getSerializedXML();
+    }
     visitMactionNode(node, space) {
-        let [nl, endspace] = (node.childNodes.length === 0 ? ['', ''] : ['\n', space]);
+        const [nl, endspace] = node.childNodes.length === 0 ? ['', ''] : ['\n', space];
         const children = this.childNodeMml(node, space + '  ', nl);
         let attributes = this.getAttributes(node);
         if (node.attributes.get('actiontype') === 'toggle') {
-            const id = this.mactionId++;
+            const id = ++this.mactionId;
             node.setProperty('mactionId', id);
-            attributes = ` data-maction-id="${id}" selection="${node.attributes.get('selection')}"`
-                + attributes.replace(/ selection="\d+"/, '');
+            attributes =
+                ` data-maction-id="${id}" selection="${node.attributes.get('selection')}"` +
+                    attributes
+                        .replace(/ selection="\d+"/, '')
+                        .replace(/ data-maction-id="\d+"/, '');
         }
-        return space + '<maction' + attributes + '>'
-            + (children.match(/\S/) ? nl + children + endspace : '')
-            + '</maction>';
+        return (`${space}<maction${attributes}>` +
+            (children.match(/\S/) ? nl + children + endspace : '') +
+            '</maction>');
     }
 }
 export function EnrichedMathItemMixin(BaseMathItem, MmlJax, toMathML) {
     return class extends BaseMathItem {
+        constructor() {
+            super(...arguments);
+            this.toMathML = toMathML;
+        }
         serializeMml(node) {
             if ('outerHTML' in node) {
                 return node.outerHTML;
             }
-            if (typeof Element !== 'undefined' && typeof window !== 'undefined' && node instanceof Element) {
+            if (typeof Element !== 'undefined' &&
+                typeof window !== 'undefined' &&
+                node instanceof Element) {
                 const div = window.document.createElement('div');
                 div.appendChild(node);
                 return div.innerHTML;
@@ -47,20 +56,17 @@ export function EnrichedMathItemMixin(BaseMathItem, MmlJax, toMathML) {
             if (this.state() >= STATE.ENRICHED)
                 return;
             if (!this.isEscaped && (document.options.enableEnrichment || force)) {
-                if (document.options.sre.speech !== currentSpeech) {
-                    currentSpeech = document.options.sre.speech;
-                    mathjax.retryAfter(Sre.setupEngine(document.options.sre).then(() => Sre.sreReady()));
-                }
                 const math = new document.options.MathItem('', MmlJax);
                 try {
                     let mml;
                     if (!this.inputData.originalMml) {
-                        mml = this.inputData.originalMml = toMathML(this.root, this);
+                        mml = this.inputData.originalMml = this.toMathML(this.root, this);
                     }
                     else {
                         mml = this.adjustSelections();
                     }
-                    this.inputData.enrichedMml = math.math = this.serializeMml(Sre.toEnriched(mml));
+                    const enriched = Sre.toEnriched(mml);
+                    this.inputData.enrichedMml = math.math = this.serializeMml(enriched);
                     math.display = this.display;
                     math.compile(document);
                     this.root = math.root;
@@ -71,8 +77,18 @@ export function EnrichedMathItemMixin(BaseMathItem, MmlJax, toMathML) {
             }
             this.state(STATE.ENRICHED);
         }
+        unEnrich(document) {
+            const mml = this.inputData.originalMml;
+            if (!mml)
+                return;
+            const math = new document.options.MathItem('', MmlJax);
+            math.math = mml;
+            math.display = this.display;
+            math.compile(document);
+            this.root = math.root;
+        }
         adjustSelections() {
-            let mml = this.inputData.originalMml;
+            const mml = this.inputData.originalMml;
             if (!this.inputData.hasMaction)
                 return mml;
             const maction = [];
@@ -83,39 +99,6 @@ export function EnrichedMathItemMixin(BaseMathItem, MmlJax, toMathML) {
             });
             return mml.replace(/(data-maction-id="(\d+)" selection=)"\d+"/g, (_match, prefix, id) => `${prefix}"${maction[id].attributes.get('selection')}"`);
         }
-        attachSpeech(document) {
-            if (this.state() >= STATE.ATTACHSPEECH)
-                return;
-            const attributes = this.root.attributes;
-            const speech = (attributes.get('aria-label') ||
-                this.getSpeech(this.root));
-            if (speech) {
-                const adaptor = document.adaptor;
-                const node = this.typesetRoot;
-                adaptor.setAttribute(node, 'aria-label', speech);
-                for (const child of adaptor.childNodes(node)) {
-                    adaptor.setAttribute(child, 'aria-hidden', 'true');
-                }
-                this.outputData.speech = speech;
-            }
-            this.state(STATE.ATTACHSPEECH);
-        }
-        getSpeech(node) {
-            const attributes = node.attributes;
-            if (!attributes)
-                return '';
-            const speech = attributes.getExplicit('data-semantic-speech');
-            if (!attributes.getExplicit('data-semantic-parent') && speech) {
-                return speech;
-            }
-            for (let child of node.childNodes) {
-                let value = this.getSpeech(child);
-                if (value) {
-                    return value;
-                }
-            }
-            return '';
-        }
     };
 }
 export function EnrichedMathDocumentMixin(BaseDocument, MmlJax) {
@@ -124,28 +107,19 @@ export function EnrichedMathDocumentMixin(BaseDocument, MmlJax) {
             constructor(...args) {
                 super(...args);
                 MmlJax.setMmlFactory(this.mmlFactory);
-                const ProcessBits = this.constructor.ProcessBits;
+                const ProcessBits = this.constructor
+                    .ProcessBits;
                 if (!ProcessBits.has('enriched')) {
                     ProcessBits.allocate('enriched');
-                    ProcessBits.allocate('attach-speech');
                 }
                 const visitor = new enrichVisitor(this.mmlFactory);
-                const toMathML = ((node, math) => visitor.visitTree(node, math));
-                this.options.MathItem =
-                    EnrichedMathItemMixin(this.options.MathItem, MmlJax, toMathML);
-            }
-            attachSpeech() {
-                if (!this.processed.isSet('attach-speech')) {
-                    for (const math of this.math) {
-                        math.attachSpeech(this);
-                    }
-                    this.processed.set('attach-speech');
-                }
-                return this;
+                const toMathML = (node, math) => visitor.visitTree(node, math);
+                this.options.MathItem = EnrichedMathItemMixin(this.options.MathItem, MmlJax, toMathML);
             }
             enrich() {
                 if (!this.processed.isSet('enriched')) {
                     if (this.options.enableEnrichment) {
+                        Sre.setupEngine(this.options.sre);
                         for (const math of this.math) {
                             math.enrich(this);
                         }
@@ -161,23 +135,29 @@ export function EnrichedMathDocumentMixin(BaseDocument, MmlJax) {
                 super.state(state, restore);
                 if (state < STATE.ENRICHED) {
                     this.processed.clear('enriched');
+                    if (state >= STATE.COMPILED) {
+                        for (const item of this.math) {
+                            item.unEnrich(this);
+                        }
+                    }
                 }
                 return this;
             }
         },
-        _a.OPTIONS = Object.assign(Object.assign({}, BaseDocument.OPTIONS), { enableEnrichment: true, enrichError: (doc, math, err) => doc.enrichError(doc, math, err), renderActions: expandable(Object.assign(Object.assign({}, BaseDocument.OPTIONS.renderActions), { enrich: [STATE.ENRICHED], attachSpeech: [STATE.ATTACHSPEECH] })), sre: expandable({
-                structure: true,
+        _a.OPTIONS = Object.assign(Object.assign({}, BaseDocument.OPTIONS), { enableEnrichment: true, enrichError: (doc, math, err) => doc.enrichError(doc, math, err), renderActions: expandable(Object.assign(Object.assign({}, BaseDocument.OPTIONS.renderActions), { enrich: [STATE.ENRICHED] })), sre: expandable({
                 speech: 'none',
-                domain: 'mathspeak',
+                locale: 'en',
+                domain: 'clearspeak',
                 style: 'default',
-                locale: 'en'
+                braille: 'nemeth',
+                structure: true,
+                aria: true,
             }) }),
         _a;
 }
 export function EnrichHandler(handler, MmlJax) {
     MmlJax.setAdaptor(handler.adaptor);
-    handler.documentClass =
-        EnrichedMathDocumentMixin(handler.documentClass, MmlJax);
+    handler.documentClass = EnrichedMathDocumentMixin(handler.documentClass, MmlJax);
     return handler;
 }
 //# sourceMappingURL=semantic-enrich.js.map

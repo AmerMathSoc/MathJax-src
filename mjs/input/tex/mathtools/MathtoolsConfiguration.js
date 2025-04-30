@@ -1,21 +1,24 @@
+import { HandlerType, ConfigurationType } from '../HandlerTypes.js';
 import { Configuration } from '../Configuration.js';
-import { CommandMap } from '../SymbolMap.js';
+import { Macro } from '../Token.js';
 import NodeUtil from '../NodeUtil.js';
 import { expandable } from '../../../util/Options.js';
+import { NewcommandConfig } from '../newcommand/NewcommandConfiguration.js';
+import { NewcommandTables } from '../newcommand/NewcommandUtil.js';
 import './MathtoolsMappings.js';
-import { MathtoolsUtil } from './MathtoolsUtil.js';
+import { MathtoolsMethods, LEGACYCONFIG, LEGACYPRIORITY, } from './MathtoolsMethods.js';
 import { MathtoolsTagFormat } from './MathtoolsTags.js';
 import { MultlinedItem } from './MathtoolsItems.js';
-export const PAIREDDELIMS = 'mathtools-paired-delims';
-function initMathtools(config) {
-    new CommandMap(PAIREDDELIMS, {}, {});
-    config.append(Configuration.local({ handler: { macro: [PAIREDDELIMS] }, priority: -5 }));
-}
 function configMathtools(config, jax) {
+    NewcommandConfig(config, jax);
     const parser = jax.parseOptions;
     const pairedDelims = parser.options.mathtools.pairedDelimiters;
-    for (const cs of Object.keys(pairedDelims)) {
-        MathtoolsUtil.addPairedDelims(parser, cs, pairedDelims[cs]);
+    const handler = config.handlers.retrieve(NewcommandTables.NEW_COMMAND);
+    for (const [cs, args] of Object.entries(pairedDelims)) {
+        handler.add(cs, new Macro(cs, MathtoolsMethods.PairedDelimiters, args));
+    }
+    if (parser.options.mathtools.legacycolonsymbols) {
+        config.handlers.add(LEGACYCONFIG, {}, LEGACYPRIORITY);
     }
     MathtoolsTagFormat(config, jax);
 }
@@ -31,33 +34,28 @@ export function fixPrescripts({ data }) {
                 n++;
             }
         }
-        for (const i of [4, 5]) {
-            if (NodeUtil.isType(childNodes[i], 'mrow') && NodeUtil.getChildren(childNodes[i]).length === 0) {
-                NodeUtil.setChild(node, i, data.nodeFactory.create('node', 'none'));
-            }
-        }
         if (n === 2) {
             childNodes.splice(1, 2);
         }
     }
 }
 export const MathtoolsConfiguration = Configuration.create('mathtools', {
-    handler: {
+    [ConfigurationType.HANDLER]: {
         macro: ['mathtools-macros', 'mathtools-delimiters'],
-        environment: ['mathtools-environments'],
-        delimiter: ['mathtools-delimiters'],
-        character: ['mathtools-characters']
+        [HandlerType.ENVIRONMENT]: ['mathtools-environments'],
+        [HandlerType.DELIMITER]: ['mathtools-delimiters'],
+        [HandlerType.CHARACTER]: ['mathtools-characters'],
     },
-    items: {
-        [MultlinedItem.prototype.kind]: MultlinedItem
+    [ConfigurationType.ITEMS]: {
+        [MultlinedItem.prototype.kind]: MultlinedItem,
     },
-    init: initMathtools,
-    config: configMathtools,
-    postprocessors: [[fixPrescripts, -6]],
-    options: {
+    [ConfigurationType.CONFIG]: configMathtools,
+    [ConfigurationType.POSTPROCESSORS]: [[fixPrescripts, -6]],
+    [ConfigurationType.OPTIONS]: {
         mathtools: {
-            'multlinegap': '1em',
+            'multlined-gap': '1em',
             'multlined-pos': 'c',
+            'multlined-width': '',
             'firstline-afterskip': '',
             'lastline-preskip': '',
             'smallmatrix-align': 'c',
@@ -68,6 +66,7 @@ export const MathtoolsConfiguration = Configuration.create('mathtools', {
             'thincolon-dx': '-.04em',
             'thincolon-dw': '-.08em',
             'use-unicode': false,
+            'legacycolonsymbols': false,
             'prescript-sub-format': '',
             'prescript-sup-format': '',
             'prescript-arg-format': '',
@@ -75,6 +74,6 @@ export const MathtoolsConfiguration = Configuration.create('mathtools', {
             pairedDelimiters: expandable({}),
             tagforms: expandable({}),
         }
-    }
+    },
 });
 //# sourceMappingURL=MathtoolsConfiguration.js.map

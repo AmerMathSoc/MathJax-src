@@ -1,6 +1,6 @@
-import { SvgMsub, SvgMsup, SvgMsubsup } from './msubsup.js';
-import { CommonMunderMixin, CommonMoverMixin, CommonMunderoverMixin } from '../../common/Wrappers/munderover.js';
-import { MmlMunderover, MmlMunder, MmlMover } from '../../../core/MmlTree/MmlNodes/munderover.js';
+import { SvgMsub, SvgMsup, SvgMsubsup, } from './msubsup.js';
+import { CommonMunderMixin, CommonMoverMixin, CommonMunderoverMixin, } from '../../common/Wrappers/munderover.js';
+import { MmlMunderover, MmlMunder, MmlMover, } from '../../../core/MmlTree/MmlNodes/munderover.js';
 export const SvgMunder = (function () {
     var _a;
     const Base = CommonMunderMixin(SvgMsub);
@@ -17,7 +17,9 @@ export const SvgMunder = (function () {
                 const [bbox, sbox] = [base.getOuterBBox(), script.getOuterBBox()];
                 base.toSVG(svg);
                 script.toSVG(svg);
-                const delta = (this.isLineBelow ? 0 : this.getDelta(this.scriptChild, true));
+                const delta = this.isLineBelow
+                    ? 0
+                    : this.getDelta(this.scriptChild, true);
                 const v = this.getUnderKV(bbox, sbox)[1];
                 const [bx, sx] = this.getDeltaW([bbox, sbox], [0, -delta]);
                 base.place(bx, 0);
@@ -43,7 +45,7 @@ export const SvgMover = (function () {
                 const [bbox, sbox] = [base.getOuterBBox(), script.getOuterBBox()];
                 base.toSVG(svg);
                 script.toSVG(svg);
-                const delta = (this.isLineAbove ? 0 : this.getDelta(this.scriptChild));
+                const delta = this.isLineAbove ? 0 : this.getDelta(this.scriptChild);
                 const u = this.getOverKU(bbox, sbox)[1];
                 const [bx, sx] = this.getDeltaW([bbox, sbox], [0, delta]);
                 base.place(bx, 0);
@@ -65,8 +67,16 @@ export const SvgMunderover = (function () {
                     return;
                 }
                 const svg = this.standardSvgNodes(parents);
-                const [base, over, under] = [this.baseChild, this.overChild, this.underChild];
-                const [bbox, obox, ubox] = [base.getOuterBBox(), over.getOuterBBox(), under.getOuterBBox()];
+                const [base, over, under] = [
+                    this.baseChild,
+                    this.overChild,
+                    this.underChild,
+                ];
+                const [bbox, obox, ubox] = [
+                    base.getOuterBBox(),
+                    over.getOuterBBox(),
+                    under.getOuterBBox(),
+                ];
                 base.toSVG(svg);
                 under.toSVG(svg);
                 over.toSVG(svg);

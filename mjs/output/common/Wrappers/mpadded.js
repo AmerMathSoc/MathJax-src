@@ -4,7 +4,12 @@ export function CommonMpaddedMixin(Base) {
             const values = this.node.attributes.getList('width', 'height', 'depth', 'lspace', 'voffset');
             const bbox = this.childNodes[0].getOuterBBox();
             let { w, h, d } = bbox;
-            let W = w, H = h, D = d, x = 0, y = 0, dx = 0;
+            const W = w;
+            const H = h;
+            const D = d;
+            let x = 0;
+            let y = 0;
+            let dx = 0;
             if (values.width !== '')
                 w = this.dimen(values.width, bbox, 'w', 0);
             if (values.height !== '')
@@ -24,9 +29,12 @@ export function CommonMpaddedMixin(Base) {
         dimen(length, bbox, d = '', m = null) {
             length = String(length);
             const match = length.match(/width|height|depth/);
-            const size = (match ? bbox[match[0].charAt(0)] :
-                (d ? bbox[d] : 0));
-            let dimen = (this.length2em(length, size) || 0);
+            const size = (match
+                ? bbox[match[0].charAt(0)]
+                : d
+                    ? bbox[d]
+                    : 0);
+            let dimen = this.length2em(length, size) || 0;
             if (length.match(/^[-+]/) && d) {
                 dimen += size;
             }
@@ -47,7 +55,8 @@ export function CommonMpaddedMixin(Base) {
             if (w > bbox.w) {
                 const overflow = this.node.attributes.get('data-overflow');
                 if (overflow === 'linebreak' ||
-                    (overflow === 'auto' && this.jax.math.root.attributes.get('overflow') === 'linebreak')) {
+                    (overflow === 'auto' &&
+                        this.jax.math.root.attributes.get('overflow') === 'linebreak')) {
                     this.childNodes[0].breakToWidth(bbox.w);
                     this.setBBoxDimens(bbox);
                 }

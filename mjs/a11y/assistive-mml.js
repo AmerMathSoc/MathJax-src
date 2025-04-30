@@ -1,4 +1,4 @@
-import { STATE, newState } from '../core/MathItem.js';
+import { STATE, newState, } from '../core/MathItem.js';
 import { SerializedMmlVisitor } from '../core/MmlTree/SerializedMmlVisitor.js';
 import { expandable } from '../util/Options.js';
 export class LimitedMmlVisitor extends SerializedMmlVisitor {
@@ -14,10 +14,14 @@ export function AssistiveMmlMathItemMixin(BaseMathItem) {
                 return;
             if (!this.isEscaped && (document.options.enableAssistiveMml || force)) {
                 const adaptor = document.adaptor;
-                const mml = document.toMML(this.root).replace(/\n */g, '').replace(/<!--.*?-->/g, '');
+                const mml = document
+                    .toMML(this.root)
+                    .replace(/\n */g, '')
+                    .replace(/<!--.*?-->/g, '');
                 const mmlNodes = adaptor.firstChild(adaptor.body(adaptor.parse(mml, 'text/html')));
                 const node = adaptor.node('mjx-assistive-mml', {
-                    unselectable: 'on', display: (this.display ? 'block' : 'inline')
+                    unselectable: 'on',
+                    display: this.display ? 'block' : 'inline',
                 }, [mmlNodes]);
                 adaptor.setAttribute(adaptor.firstChild(this.typesetRoot), 'aria-hidden', 'true');
                 adaptor.setStyle(this.typesetRoot, 'position', 'relative');
@@ -38,8 +42,7 @@ export function AssistiveMmlMathDocumentMixin(BaseDocument) {
                     ProcessBits.allocate('assistive-mml');
                 }
                 this.visitor = new LimitedMmlVisitor(this.mmlFactory);
-                this.options.MathItem =
-                    AssistiveMmlMathItemMixin(this.options.MathItem);
+                this.options.MathItem = AssistiveMmlMathItemMixin(this.options.MathItem);
                 if ('addStyles' in this) {
                     this.addStyles(CLASS.assistiveStyles);
                 }
@@ -68,8 +71,10 @@ export function AssistiveMmlMathDocumentMixin(BaseDocument) {
         _a.assistiveStyles = {
             'mjx-assistive-mml': {
                 position: 'absolute !important',
-                top: '0px', left: '0px',
-                bottom: '0px', right: '0px',
+                top: '0px',
+                left: '0px',
+                bottom: '0px',
+                right: '0px',
                 clip: 'rect(1px, 1px, 1px, 1px)',
                 'clip-path': 'polygon(0 0, 0 1px, 1px 1px, 1px 0)',
                 padding: '1px 0px 0px 0px !important',
@@ -82,17 +87,16 @@ export function AssistiveMmlMathDocumentMixin(BaseDocument) {
                 '-khtml-user-select': 'none',
                 '-moz-user-select': 'none',
                 '-ms-user-select': 'none',
-                'user-select': 'none'
+                'user-select': 'none',
             },
             'mjx-assistive-mml[display="block"]': {
-                width: '100% !important'
-            }
+                width: '100% !important',
+            },
         },
         _a;
 }
 export function AssistiveMmlHandler(handler) {
-    handler.documentClass =
-        AssistiveMmlMathDocumentMixin(handler.documentClass);
+    handler.documentClass = AssistiveMmlMathDocumentMixin(handler.documentClass);
     return handler;
 }
 //# sourceMappingURL=assistive-mml.js.map

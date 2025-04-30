@@ -45,6 +45,6 @@ Entities.add({
     vsubne: '\u228A\uFE00',
     vsupnE: '\u2ACC\uFE00',
     vsupne: '\u228B\uFE00',
-    vzigzag: '\u299A'
+    vzigzag: '\u299A',
 }, 'v');
 //# sourceMappingURL=v.js.map

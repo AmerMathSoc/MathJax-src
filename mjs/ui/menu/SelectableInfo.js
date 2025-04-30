@@ -1,12 +1,12 @@
 import { Info, HtmlClasses } from './mj-context-menu.js';
 export class SelectableInfo extends Info {
-    addEvents(element) {
-        element.addEventListener('keypress', (event) => {
-            if (event.key === 'a' && (event.ctrlKey || event.metaKey)) {
-                this.selectAll();
-                this.stop(event);
-            }
-        });
+    keydown(event) {
+        if (event.key === 'a' && (event.ctrlKey || event.metaKey)) {
+            this.selectAll();
+            this.stop(event);
+            return;
+        }
+        super.keydown(event);
     }
     selectAll() {
         const selection = document.getSelection();
@@ -18,7 +18,7 @@ export class SelectableInfo extends Info {
             document.execCommand('copy');
         }
         catch (err) {
-            alert('Can\'t copy to clipboard: ' + err.message);
+            alert(`Can't copy to clipboard: ${err.message}`);
         }
         document.getSelection().removeAllRanges();
     }

@@ -1,10 +1,11 @@
-import { MathJax as MJGlobal, combineWithMathJax, combineDefaults } from './global.js';
-import { Package } from './package.js';
+import { MathJax as MJGlobal, combineWithMathJax, combineDefaults, } from './global.js';
+import { Package, } from './package.js';
 import { FunctionList } from '../util/FunctionList.js';
-import { esRoot } from '#root/root.js';
+import { mjxRoot } from '#root/root.js';
+import { context } from '../util/context.js';
 export const PathFilters = {
     source: (data) => {
-        if (CONFIG.source.hasOwnProperty(data.name)) {
+        if (Object.hasOwn(CONFIG.source, data.name)) {
             data.name = CONFIG.source[data.name];
         }
         return true;
@@ -14,26 +15,28 @@ export const PathFilters = {
         if (!name.match(/^(?:[a-z]+:\/)?\/|[a-z]:\\|\[/i)) {
             data.name = '[mathjax]/' + name.replace(/^\.\//, '');
         }
-        if (data.addExtension && !name.match(/\.[^\/]+$/)) {
-            data.name += '.js';
-        }
         return true;
     },
     prefix: (data) => {
         let match;
         while ((match = data.name.match(/^\[([^\]]*)\]/))) {
-            if (!CONFIG.paths.hasOwnProperty(match[1]))
+            if (!Object.hasOwn(CONFIG.paths, match[1]))
                 break;
-            data.name = CONFIG.paths[match[1]] + data.name.substr(match[0].length);
+            data.name = CONFIG.paths[match[1]] + data.name.substring(match[0].length);
         }
         return true;
-    }
+    },
+    addExtension: (data) => {
+        if (data.addExtension && !data.name.match(/\.[^/]+$/)) {
+            data.name += '.js';
+        }
+        return true;
+    },
 };
-export var Loader;
-(function (Loader) {
-    const VERSION = MJGlobal.version;
-    Loader.versions = new Map();
-    function ready(...names) {
+const VERSION = MJGlobal.version;
+export const Loader = {
+    versions: new Map(),
+    ready(...names) {
         if (names.length === 0) {
             names = Array.from(Package.packages.keys());
         }
@@ -43,11 +46,10 @@ export var Loader;
             promises.push(extension.promise);
         }
         return Promise.all(promises);
-    }
-    Loader.ready = ready;
-    function load(...names) {
+    },
+    load(...names) {
         if (names.length === 0) {
-            return Promise.resolve();
+            return Promise.resolve([]);
         }
         const promises = [];
         for (const name of names) {
@@ -58,18 +60,18 @@ export var Loader;
             }
             extension.checkNoLoad();
             promises.push(extension.promise.then(() => {
-                if (!CONFIG.versionWarnings)
-                    return;
-                if (extension.isLoaded && !Loader.versions.has(Package.resolvePath(name))) {
+                if (CONFIG.versionWarnings &&
+                    extension.isLoaded &&
+                    !Loader.versions.has(Package.resolvePath(name))) {
                     console.warn(`No version information available for component ${name}`);
                 }
+                return extension.result;
             }));
         }
         Package.loadAll();
         return Promise.all(promises);
-    }
-    Loader.load = load;
-    function preLoad(...names) {
+    },
+    preLoaded(...names) {
         for (const name of names) {
             let extension = Package.packages.get(name);
             if (!extension) {
@@ -78,47 +80,62 @@ export var Loader;
             }
             extension.loaded();
         }
-    }
-    Loader.preLoad = preLoad;
-    function defaultReady() {
+    },
+    addPackageData(name, data) {
+        let config = CONFIG[name];
+        if (!config) {
+            config = CONFIG[name] = {};
+        }
+        for (const [key, value] of Object.entries(data)) {
+            if (Array.isArray(value)) {
+                if (!config[key]) {
+                    config[key] = [];
+                }
+                const set = new Set([...config[key], ...value]);
+                config[key] = [...set];
+            }
+            else {
+                config[key] = value;
+            }
+        }
+    },
+    defaultReady() {
         if (typeof MathJax.startup !== 'undefined') {
             MathJax.config.startup.ready();
         }
-    }
-    Loader.defaultReady = defaultReady;
-    function getRoot() {
-        if (typeof document !== 'undefined') {
-            const script = document.currentScript || document.getElementById('MathJax-script');
-            if (script) {
-                return script.src.replace(/\/[^\/]*$/, '');
+    },
+    getRoot() {
+        if (context.document) {
+            const script = context.document.currentScript ||
+                context.document.getElementById('MathJax-script');
+            if (script && script instanceof HTMLScriptElement) {
+                return script.src.replace(/\/[^/]*$/, '');
             }
         }
-        return esRoot();
-    }
-    Loader.getRoot = getRoot;
-    function checkVersion(name, version, _type) {
-        saveVersion(name);
+        return mjxRoot();
+    },
+    checkVersion(name, version, _type) {
+        this.saveVersion(name);
         if (CONFIG.versionWarnings && version !== VERSION) {
             console.warn(`Component ${name} uses ${version} of MathJax; version in use is ${VERSION}`);
             return true;
         }
         return false;
-    }
-    Loader.checkVersion = checkVersion;
-    function saveVersion(name) {
+    },
+    saveVersion(name) {
         Loader.versions.set(Package.resolvePath(name), VERSION);
-    }
-    Loader.saveVersion = saveVersion;
-    Loader.pathFilters = new FunctionList();
-    Loader.pathFilters.add(PathFilters.source, 0);
-    Loader.pathFilters.add(PathFilters.normalize, 10);
-    Loader.pathFilters.add(PathFilters.prefix, 20);
-})(Loader || (Loader = {}));
+    },
+    pathFilters: new FunctionList(),
+};
+Loader.pathFilters.add(PathFilters.source, 0);
+Loader.pathFilters.add(PathFilters.normalize, 10);
+Loader.pathFilters.add(PathFilters.prefix, 20);
+Loader.pathFilters.add(PathFilters.addExtension, 30);
 export const MathJax = MJGlobal;
 if (typeof MathJax.loader === 'undefined') {
     combineDefaults(MathJax.config, 'loader', {
         paths: {
-            mathjax: Loader.getRoot()
+            mathjax: Loader.getRoot(),
         },
         source: {},
         dependencies: {},
@@ -128,10 +145,10 @@ if (typeof MathJax.loader === 'undefined') {
         failed: (error) => console.log(`MathJax(${error.package || '?'}): ${error.message}`),
         require: null,
         pathFilters: [],
-        versionWarnings: true
+        versionWarnings: true,
     });
     combineWithMathJax({
-        loader: Loader
+        loader: Loader,
     });
     for (const filter of MathJax.config.loader.pathFilters) {
         if (Array.isArray(filter)) {

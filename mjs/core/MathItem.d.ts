@@ -36,6 +36,7 @@ export interface MathItem<N, T, D> {
     setMetrics(em: number, ex: number, cwidth: number, scale: number): void;
     state(state?: number, restore?: boolean): number;
     reset(restore?: boolean): void;
+    clear(): void;
 }
 export type ProtoItem<N, T> = {
     math: string;
@@ -71,6 +72,7 @@ export declare abstract class AbstractMathItem<N, T, D> implements MathItem<N, T
     setMetrics(em: number, ex: number, cwidth: number, scale: number): void;
     state(state?: number, restore?: boolean): number;
     reset(restore?: boolean): void;
+    clear(): void;
 }
 export declare const STATE: {
     [state: string]: number;

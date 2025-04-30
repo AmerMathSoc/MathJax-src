@@ -1,3 +1,5 @@
 import { ParseMethod } from '../Types.js';
-declare let HtmlMethods: Record<string, ParseMethod>;
+declare const HtmlMethods: {
+    [key: string]: ParseMethod;
+};
 export default HtmlMethods;

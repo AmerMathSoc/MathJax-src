@@ -2,33 +2,31 @@ import { TEXCLASS } from '../../../core/MmlTree/MmlNode.js';
 import { BBox } from '../../../util/BBox.js';
 import { LineBBox } from '../LineBBox.js';
 import { unicodeChars } from '../../../util/string.js';
-import { NOSTRETCH } from '../FontData.js';
-export const DirectionVH = {
-    [1]: 'v',
-    [2]: 'h'
-};
+import { DIRECTION, NOSTRETCH } from '../FontData.js';
 export function CommonMoMixin(Base) {
     return class CommonMoMixin extends Base {
         get breakCount() {
-            return (this.breakStyle ? 1 : 0);
+            return this.breakStyle ? 1 : 0;
         }
         get embellishedBreakCount() {
-            return (this.embellishedBreakStyle ? 1 : 0);
+            return this.embellishedBreakStyle ? 1 : 0;
         }
         get embellishedBreakStyle() {
-            return (this.breakStyle || this.getBreakStyle());
+            return this.breakStyle || this.getBreakStyle();
         }
         protoBBox(bbox) {
-            const stretchy = (this.stretch.dir !== 0);
+            const stretchy = this.stretch.dir !== DIRECTION.None;
             if (stretchy && this.size === null) {
                 this.getStretchedVariant([0]);
             }
             if (stretchy && this.size < 0)
                 return;
             super.computeBBox(bbox);
-            if (bbox.w === 0 && this.node.attributes.getExplicit('fence') &&
+            if (bbox.w === 0 &&
+                this.node.attributes.hasExplicit('fence') &&
                 this.node.getText() === '' &&
-                (this.node.texClass === TEXCLASS.OPEN || this.node.texClass === TEXCLASS.CLOSE) &&
+                (this.node.texClass === TEXCLASS.OPEN ||
+                    this.node.texClass === TEXCLASS.CLOSE) &&
                 !this.jax.options.mathmlSpacing) {
                 bbox.R = this.font.params.nulldelimiterspace;
             }
@@ -44,10 +42,10 @@ export function CommonMoMixin(Base) {
                 bbox = BBox.empty();
                 super.computeBBox(bbox);
             }
-            return ((bbox.h + bbox.d) / 2 + this.font.params.axis_height) - bbox.h;
+            return (bbox.h + bbox.d) / 2 + this.font.params.axis_height - bbox.h;
         }
         getStretchedVariant(WH, exact = false) {
-            if (this.stretch.dir !== 0) {
+            if (this.stretch.dir !== DIRECTION.None) {
                 let D = this.getWH(WH);
                 const min = this.getSize('minsize', 0);
                 const max = this.getSize('maxsize', Infinity);
@@ -55,7 +53,11 @@ export function CommonMoMixin(Base) {
                 D = Math.max(min, Math.min(max, D));
                 const df = this.font.params.delimiterfactor / 1000;
                 const ds = this.font.params.delimitershortfall;
-                const m = (min || exact ? D : mathaccent ? Math.min(D / df, D + ds) : Math.max(D * df, D - ds));
+                const m = min || exact
+                    ? D
+                    : mathaccent
+                        ? Math.min(D / df, D + ds)
+                        : Math.max(D * df, D - ds);
                 const delim = this.stretch;
                 const c = delim.c || this.getText().codePointAt(0);
                 let i = 0;
@@ -85,12 +87,14 @@ export function CommonMoMixin(Base) {
             const delim = this.stretch;
             this.variant = this.font.getSizeVariant(c, i);
             this.size = i;
-            const schar = (delim.schar ? delim.schar[Math.min(i, delim.schar.length - 1)] || c : c);
+            const schar = delim.schar
+                ? delim.schar[Math.min(i, delim.schar.length - 1)] || c
+                : c;
             this.stretch = Object.assign(Object.assign({}, delim), { c: schar });
             this.childNodes[0].invalidateBBox();
         }
         getSize(name, value) {
-            let attributes = this.node.attributes;
+            const attributes = this.node.attributes;
             if (attributes.isSet(name)) {
                 value = this.length2em(attributes.get(name), 1, 1);
             }
@@ -101,16 +105,18 @@ export function CommonMoMixin(Base) {
                 return 0;
             if (WH.length === 1)
                 return WH[0];
-            let [H, D] = WH;
+            const [H, D] = WH;
             const a = this.font.params.axis_height;
-            return (this.node.attributes.get('symmetric') ? 2 * Math.max(H - a, D + a) : H + D);
+            return this.node.attributes.get('symmetric')
+                ? 2 * Math.max(H - a, D + a)
+                : H + D;
         }
         getStretchBBox(WHD, D, C) {
-            if (C.hasOwnProperty('min') && C.min > D) {
+            if (Object.hasOwn(C, 'min') && C.min > D) {
                 D = C.min;
             }
             let [h, d, w] = C.HDW;
-            if (this.stretch.dir === 1) {
+            if (this.stretch.dir === DIRECTION.Vertical) {
                 [h, d] = this.getBaseline(WHD, D, C);
             }
             else {
@@ -126,9 +132,9 @@ export function CommonMoMixin(Base) {
             this.bbox.w = w;
         }
         getBaseline(WHD, HD, C) {
-            const hasWHD = (WHD.length === 2 && WHD[0] + WHD[1] === HD);
+            const hasWHD = WHD.length === 2 && WHD[0] + WHD[1] === HD;
             const symmetric = this.node.attributes.get('symmetric');
-            const [H, D] = (hasWHD ? WHD : [HD, 0]);
+            const [H, D] = hasWHD ? WHD : [HD, 0];
             let [h, d] = [H + D, 0];
             if (symmetric) {
                 const a = this.font.params.axis_height;
@@ -141,7 +147,7 @@ export function CommonMoMixin(Base) {
                 d = D;
             }
             else {
-                let [ch, cd] = (C.HDW || [.75, .25]);
+                const [ch, cd] = C.HDW || [0.75, 0.25];
                 d = cd * (h / (ch + cd));
             }
             return [h - d, d];
@@ -155,19 +161,27 @@ export function CommonMoMixin(Base) {
             return D;
         }
         setBreakStyle(linebreak = '') {
-            this.breakStyle = (this.node.parent.isEmbellished && !linebreak ? '' : this.getBreakStyle(linebreak));
+            this.breakStyle =
+                this.node.parent.isEmbellished && !linebreak
+                    ? ''
+                    : this.getBreakStyle(linebreak);
             if (!this.breakCount)
                 return;
             if (this.multChar) {
                 const i = this.parent.node.childIndex(this.node);
                 const next = this.parent.node.childNodes[i + 1];
-                next && next.setTeXclass(this.multChar.node);
+                if (next) {
+                    next.setTeXclass(this.multChar.node);
+                }
             }
         }
         getBreakStyle(linebreak = '') {
             const attributes = this.node.attributes;
-            let style = (linebreak || (attributes.get('linebreak') === 'newline' || this.node.getProperty('forcebreak') ?
-                attributes.get('linebreakstyle') : ''));
+            let style = linebreak ||
+                (attributes.get('linebreak') === 'newline' ||
+                    this.node.getProperty('forcebreak')
+                    ? attributes.get('linebreakstyle')
+                    : '');
             if (style === 'infixlinebreakstyle') {
                 style = attributes.get(style);
             }
@@ -189,13 +203,13 @@ export function CommonMoMixin(Base) {
         computeBBox(bbox, _recompute = false) {
             this.protoBBox(bbox);
             if (this.node.attributes.get('symmetric') &&
-                this.stretch.dir !== 2) {
+                this.stretch.dir !== DIRECTION.Horizontal) {
                 const d = this.getCenterOffset(bbox);
                 bbox.h += d;
                 bbox.d -= d;
             }
             if (this.node.getProperty('mathaccent') &&
-                (this.stretch.dir === 0 || this.size >= 0)) {
+                (this.stretch.dir === DIRECTION.None || this.size >= 0)) {
                 bbox.w = 0;
             }
         }
@@ -229,7 +243,7 @@ export function CommonMoMixin(Base) {
             return bbox;
         }
         canStretch(direction) {
-            if (this.stretch.dir !== 0) {
+            if (this.stretch.dir !== DIRECTION.None) {
                 return this.stretch.dir === direction;
             }
             const attributes = this.node.attributes;
@@ -240,14 +254,16 @@ export function CommonMoMixin(Base) {
                 return false;
             const delim = this.font.getDelimiter(c.codePointAt(0));
             this.stretch = (delim && delim.dir === direction ? delim : NOSTRETCH);
-            return this.stretch.dir !== 0;
+            return this.stretch.dir !== DIRECTION.None;
         }
         getVariant() {
             if (this.node.attributes.get('largeop')) {
-                this.variant = (this.node.attributes.get('displaystyle') ? '-largeop' : '-smallop');
+                this.variant = this.node.attributes.get('displaystyle')
+                    ? '-largeop'
+                    : '-smallop';
                 return;
             }
-            if (!this.node.attributes.getExplicit('mathvariant') &&
+            if (!this.node.attributes.hasExplicit('mathvariant') &&
                 this.node.getProperty('pseudoscript') === false) {
                 this.variant = '-tex-variant';
                 return;
@@ -262,7 +278,7 @@ export function CommonMoMixin(Base) {
             if (chars.length === 1) {
                 const parent = this.node.coreParent().parent;
                 const isAccent = this.isAccent && !parent.isKind('mrow');
-                const map = (isAccent ? 'accent' : 'mo');
+                const map = isAccent ? 'accent' : 'mo';
                 const text = this.font.getRemappedChar(map, chars[0]);
                 if (text) {
                     chars = this.unicodeChars(text, this.variant);

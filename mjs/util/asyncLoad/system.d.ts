@@ -1,1 +1,1 @@
-export declare function setBaseURL(URL: string): void;
+export declare function setBaseURL(url: string): void;

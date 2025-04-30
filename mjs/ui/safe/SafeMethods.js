@@ -1,22 +1,36 @@
 import { length2em } from '../../util/lengths.js';
 export const SafeMethods = {
     filterURL(safe, url) {
-        const protocol = (url.match(/^\s*([a-z\n\r]+):/i) || [null, ''])[1].replace(/[\n\r]/g, '').toLowerCase();
+        const protocol = (url.match(/^\s*([a-z\n\r]+):/i) || [null, ''])[1]
+            .replace(/[\n\r]/g, '')
+            .toLowerCase();
         const allow = safe.allow.URLs;
-        return (allow === 'all' || (allow === 'safe' &&
-            (safe.options.safeProtocols[protocol] || !protocol))) ? url : null;
+        return allow === 'all' ||
+            (allow === 'safe' && (safe.options.safeProtocols[protocol] || !protocol))
+            ? url
+            : null;
     },
     filterClassList(safe, list) {
         const classes = list.trim().replace(/\s\s+/g, ' ').split(/ /);
-        return classes.map((name) => this.filterClass(safe, name) || '').join(' ').trim().replace(/\s\s+/g, '');
+        return classes
+            .map((name) => this.filterClass(safe, name) || '')
+            .join(' ')
+            .trim()
+            .replace(/\s\s+/g, '');
     },
     filterClass(safe, CLASS) {
         const allow = safe.allow.classes;
-        return (allow === 'all' || (allow === 'safe' && CLASS.match(safe.options.classPattern))) ? CLASS : null;
+        return allow === 'all' ||
+            (allow === 'safe' && CLASS.match(safe.options.classPattern))
+            ? CLASS
+            : null;
     },
     filterID(safe, id) {
         const allow = safe.allow.cssIDs;
-        return (allow === 'all' || (allow === 'safe' && id.match(safe.options.idPattern))) ? id : null;
+        return allow === 'all' ||
+            (allow === 'safe' && id.match(safe.options.idPattern))
+            ? id
+            : null;
     },
     filterStyles(safe, styles) {
         if (safe.allow.styles === 'all')
@@ -47,14 +61,16 @@ export const SafeMethods = {
             }
             styles = adaptor.allStyles(div2);
         }
-        catch (err) {
+        catch (_err) {
             styles = '';
         }
         return styles;
     },
     filterStyle(safe, style, div) {
         const value = safe.adaptor.getStyle(div, style);
-        if (typeof value !== 'string' || value === '' || value.match(/^\s*calc/) ||
+        if (typeof value !== 'string' ||
+            value === '' ||
+            value.match(/^\s*calc/) ||
             (value.match(/javascript:/) && !safe.options.safeProtocols.javascript) ||
             (value.match(/data:/) && !safe.options.safeProtocols.data)) {
             return null;
@@ -85,14 +101,21 @@ export const SafeMethods = {
             return null;
         const em = length2em(value, 1);
         const lengths = safe.options.styleLengths[style];
-        const [m, M] = (Array.isArray(lengths) ? lengths : [-safe.options.lengthMax, safe.options.lengthMax]);
-        return (m <= em && em <= M ? value : (em < m ? m : M).toFixed(3).replace(/\.?0+$/, '') + 'em');
+        const [m, M] = Array.isArray(lengths)
+            ? lengths
+            : [-safe.options.lengthMax, safe.options.lengthMax];
+        return m <= em && em <= M
+            ? value
+            : (em < m ? m : M).toFixed(3).replace(/\.?0+$/, '') + 'em';
     },
     filterFontSize(safe, size) {
         return this.filterStyleLength(safe, 'fontSize', size);
     },
     filterSizeMultiplier(safe, size) {
-        const [m, M] = safe.options.scriptsizemultiplierRange || [-Infinity, Infinity];
+        const [m, M] = safe.options.scriptsizemultiplierRange || [
+            -Infinity,
+            Infinity,
+        ];
         return Math.min(M, Math.max(m, parseFloat(size))).toString();
     },
     filterScriptLevel(safe, level) {
@@ -100,7 +123,7 @@ export const SafeMethods = {
         return Math.min(M, Math.max(m, parseInt(level))).toString();
     },
     filterData(safe, value, id) {
-        return (id.match(safe.options.dataPattern) ? value : null);
-    }
+        return id.match(safe.options.dataPattern) ? value : null;
+    },
 };
 //# sourceMappingURL=SafeMethods.js.map

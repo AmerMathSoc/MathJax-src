@@ -1,5 +1,5 @@
 import { A11yDocument, Region } from './Region.js';
-import { Sre } from '../sre.js';
+import * as Sre from '../sre.js';
 import type { ExplorerPool } from './ExplorerPool.js';
 export interface Explorer {
     active: boolean;
@@ -34,6 +34,6 @@ export declare class AbstractExplorer<T> implements Explorer {
     Stop(): void;
     AddEvents(): void;
     RemoveEvents(): void;
-    Update(force?: boolean): void;
+    Update(_force?: boolean): void;
     protected stopEvent(event: Event): void;
 }

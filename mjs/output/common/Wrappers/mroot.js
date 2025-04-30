@@ -11,7 +11,7 @@ export function CommonMrootMixin(Base) {
         getRootDimens(sbox, H) {
             const surd = this.surd;
             const bbox = this.childNodes[this.root].getOuterBBox();
-            const offset = (surd.size < 0 ? .5 : .6) * sbox.w;
+            const offset = (surd.size < 0 ? 0.5 : 0.6) * sbox.w;
             const { w, rscale } = bbox;
             const W = Math.max(w, offset / rscale);
             const dx = Math.max(0, W - w);
@@ -21,12 +21,12 @@ export function CommonMrootMixin(Base) {
         }
         rootHeight(rbox, sbox, size, H) {
             const h = sbox.h + sbox.d;
-            const b = (size < 0 ? 1.9 : .55 * h) - (h - H);
+            const b = (size < 0 ? 1.9 : 0.55 * h) - (h - H);
             return b + Math.max(0, rbox.d * rbox.rscale);
         }
         rootWidth() {
             const bbox = this.childNodes[this.root].getOuterBBox();
-            return .4 + bbox.w * bbox.rscale;
+            return 0.4 + bbox.w * bbox.rscale;
         }
     };
 }

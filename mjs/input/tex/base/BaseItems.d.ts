@@ -24,6 +24,9 @@ export declare class CloseItem extends BaseItem {
     get kind(): string;
     get isClose(): boolean;
 }
+export declare class NullItem extends BaseItem {
+    get kind(): string;
+}
 export declare class PrimeItem extends BaseItem {
     get kind(): string;
     checkItem(item: StackItem): CheckType;
@@ -122,6 +125,7 @@ export declare class ArrayItem extends BaseItem {
         row: string;
         table: string;
     };
+    templateSubs: number;
     parser: TexParser;
     get kind(): string;
     get isOpen(): boolean;
@@ -139,7 +143,7 @@ export declare class ArrayItem extends BaseItem {
 }
 export declare class EqnArrayItem extends ArrayItem {
     maxrow: number;
-    constructor(factory: any, ...args: any[]);
+    constructor(factory: StackItemFactory, ...args: any[]);
     get kind(): string;
     EndEntry(): void;
     EndRow(): void;
@@ -150,11 +154,11 @@ export declare class EqnArrayItem extends ArrayItem {
 export declare class MstyleItem extends BeginItem {
     get kind(): string;
     attrList: PropertyList;
-    constructor(factory: any, attr: PropertyList, name: string);
+    constructor(factory: StackItemFactory, attr: PropertyList, name: string);
     checkItem(item: StackItem): CheckType;
 }
 export declare class EquationItem extends BaseItem {
-    constructor(factory: any, ...args: any[]);
+    constructor(factory: StackItemFactory, ...args: any[]);
     get kind(): string;
     get isOpen(): boolean;
     checkItem(item: StackItem): CheckType;

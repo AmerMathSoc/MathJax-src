@@ -9,7 +9,9 @@ export function CommonSemanticsMixin(Base) {
             }
         }
         get breakCount() {
-            return (this.node.isEmbellished ? this.coreMO().embellishedBreakCount : this.childNodes[0].breakCount);
+            return this.node.isEmbellished
+                ? this.coreMO().embellishedBreakCount
+                : this.childNodes[0].breakCount;
         }
     };
 }

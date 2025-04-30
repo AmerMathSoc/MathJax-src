@@ -13,7 +13,7 @@ export class Mml3 {
                 const div = adaptor.node('div', {}, [adaptor.clone(node)]);
                 const dom = adaptor.parse(adaptor.serializeXML(div), 'text/xml');
                 const mml = processor.transformToDocument(dom);
-                return (mml ? adaptor.tags(mml, 'math')[0] : node);
+                return mml ? adaptor.tags(mml, 'math')[0] : node;
             };
         }
     }
@@ -582,12 +582,12 @@ Mml3.XSLT = `
       <xsl:copy-of select="*[2]"/>
      </m:msrow>
     </xsl:when>
-    <xsl:when test="@longdivstyle='left/\right'">
+    <xsl:when test="@longdivstyle='left/\\right'">
      <m:msrow>
       <m:mrow><xsl:copy-of select="*[1]"/></m:mrow>
       <m:mo>/</m:mo>
       <xsl:copy-of select="*[3]"/>
-      <m:mo>\</m:mo>
+      <m:mo>\\</m:mo>
       <xsl:copy-of select="*[2]"/>
      </m:msrow>
     </xsl:when>

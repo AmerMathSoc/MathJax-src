@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMencloseMixin } from '../../common/Wrappers/menclose.js';
+import { CommonMencloseMixin, } from '../../common/Wrappers/menclose.js';
 import { MmlMenclose } from '../../../core/MmlTree/MmlNodes/menclose.js';
 import * as Notation from '../Notation.js';
 export const SvgMenclose = (function () {
@@ -9,17 +9,22 @@ export const SvgMenclose = (function () {
             line(pq) {
                 const [x1, y1, x2, y2] = pq;
                 return this.svg('line', {
-                    x1: this.fixed(x1), y1: this.fixed(y1),
-                    x2: this.fixed(x2), y2: this.fixed(y2),
-                    'stroke-width': this.fixed(this.thickness)
+                    x1: this.fixed(x1),
+                    y1: this.fixed(y1),
+                    x2: this.fixed(x2),
+                    y2: this.fixed(y2),
+                    'stroke-width': this.fixed(this.thickness),
                 });
             }
             box(w, h, d, r = 0) {
                 const t = this.thickness;
                 const def = {
-                    x: this.fixed(t / 2), y: this.fixed(t / 2 - d),
-                    width: this.fixed(w - t), height: this.fixed(h + d - t),
-                    fill: 'none', 'stroke-width': this.fixed(t)
+                    x: this.fixed(t / 2),
+                    y: this.fixed(t / 2 - d),
+                    width: this.fixed(w - t),
+                    height: this.fixed(h + d - t),
+                    fill: 'none',
+                    'stroke-width': this.fixed(t),
                 };
                 if (r) {
                     def.rx = this.fixed(r);
@@ -29,22 +34,26 @@ export const SvgMenclose = (function () {
             ellipse(w, h, d) {
                 const t = this.thickness;
                 return this.svg('ellipse', {
-                    rx: this.fixed((w - t) / 2), ry: this.fixed((h + d - t) / 2),
-                    cx: this.fixed(w / 2), cy: this.fixed((h - d) / 2),
-                    'fill': 'none', 'stroke-width': this.fixed(t)
+                    rx: this.fixed((w - t) / 2),
+                    ry: this.fixed((h + d - t) / 2),
+                    cx: this.fixed(w / 2),
+                    cy: this.fixed((h - d) / 2),
+                    fill: 'none',
+                    'stroke-width': this.fixed(t),
                 });
             }
             path(join, ...P) {
                 return this.svg('path', {
-                    d: P.map(x => (typeof x === 'string' ? x : this.fixed(x))).join(' '),
+                    d: P.map((x) => (typeof x === 'string' ? x : this.fixed(x))).join(' '),
                     style: { 'stroke-width': this.fixed(this.thickness) },
-                    'stroke-linecap': 'round', 'stroke-linejoin': join,
-                    fill: 'none'
+                    'stroke-linecap': 'round',
+                    'stroke-linejoin': join,
+                    fill: 'none',
                 });
             }
             fill(...P) {
                 return this.svg('path', {
-                    d: P.map(x => (typeof x === 'string' ? x : this.fixed(x))).join(' ')
+                    d: P.map((x) => (typeof x === 'string' ? x : this.fixed(x))).join(' '),
                 });
             }
             arrow(W, a, double, offset = '', dist = 0) {
@@ -87,7 +96,9 @@ export const SvgMenclose = (function () {
                 }
                 for (const name of Object.keys(this.notations)) {
                     const notation = this.notations[name];
-                    !notation.renderChild && notation.renderer(this, svg[0]);
+                    if (!notation.renderChild) {
+                        notation.renderer(this, svg[0]);
+                    }
                 }
             }
         },
@@ -101,39 +112,56 @@ export const SvgMenclose = (function () {
             Notation.Border2('madruwb', 'bottom', 'right'),
             Notation.DiagonalStrike('up'),
             Notation.DiagonalStrike('down'),
-            ['horizontalstrike', {
+            [
+                'horizontalstrike',
+                {
                     renderer: Notation.RenderLine('horizontal', 'Y'),
-                    bbox: (node) => [0, node.padding, 0, node.padding]
-                }],
-            ['verticalstrike', {
+                    bbox: (node) => [0, node.padding, 0, node.padding],
+                },
+            ],
+            [
+                'verticalstrike',
+                {
                     renderer: Notation.RenderLine('vertical', 'X'),
-                    bbox: (node) => [node.padding, 0, node.padding, 0]
-                }],
-            ['box', {
+                    bbox: (node) => [node.padding, 0, node.padding, 0],
+                },
+            ],
+            [
+                'box',
+                {
                     renderer: (node, _child) => {
                         const { w, h, d } = node.getBBox();
                         node.adaptor.append(node.dom[0], node.box(w, h, d));
                     },
                     bbox: Notation.fullBBox,
                     border: Notation.fullBorder,
-                    remove: 'left right top bottom'
-                }],
-            ['roundedbox', {
+                    remove: 'left right top bottom',
+                },
+            ],
+            [
+                'roundedbox',
+                {
                     renderer: (node, _child) => {
                         const { w, h, d } = node.getBBox();
                         const r = node.thickness + node.padding;
                         node.adaptor.append(node.dom[0], node.box(w, h, d, r));
                     },
-                    bbox: Notation.fullBBox
-                }],
-            ['circle', {
+                    bbox: Notation.fullBBox,
+                },
+            ],
+            [
+                'circle',
+                {
                     renderer: (node, _child) => {
                         const { w, h, d } = node.getBBox();
                         node.adaptor.append(node.dom[0], node.ellipse(w, h, d));
                     },
-                    bbox: Notation.fullBBox
-                }],
-            ['phasorangle', {
+                    bbox: Notation.fullBBox,
+                },
+            ],
+            [
+                'phasorangle',
+                {
                     renderer: (node, _child) => {
                         const { w, h, d } = node.getBBox();
                         const a = node.getArgMod(1.75 * node.padding, h + d)[0];
@@ -148,8 +176,9 @@ export const SvgMenclose = (function () {
                         return [2 * p, p, p + t, 3 * p + t];
                     },
                     border: (node) => [0, 0, node.thickness, 0],
-                    remove: 'bottom'
-                }],
+                    remove: 'bottom',
+                },
+            ],
             Notation.Arrow('up'),
             Notation.Arrow('down'),
             Notation.Arrow('left'),
@@ -163,7 +192,9 @@ export const SvgMenclose = (function () {
             Notation.DiagonalArrow('southwest'),
             Notation.DiagonalArrow('northeastsouthwest'),
             Notation.DiagonalArrow('northwestsoutheast'),
-            ['longdiv', {
+            [
+                'longdiv',
+                {
                     renderer: (node, _child) => {
                         const { w, h, d } = node.getBBox();
                         const t = node.thickness / 2;
@@ -174,9 +205,12 @@ export const SvgMenclose = (function () {
                         const p = node.padding;
                         const t = node.thickness;
                         return [p + t, p, p, 2 * p + t / 2];
-                    }
-                }],
-            ['radical', {
+                    },
+                },
+            ],
+            [
+                'radical',
+                {
                     renderer: (node, child) => {
                         node.msqrt.toSVG([child]);
                         const left = node.sqrtTRBL()[3];
@@ -186,8 +220,9 @@ export const SvgMenclose = (function () {
                         node.msqrt = node.createMsqrt(node.childNodes[0]);
                     },
                     bbox: (node) => node.sqrtTRBL(),
-                    renderChild: true
-                }]
+                    renderChild: true,
+                },
+            ],
         ]),
         _a;
 })();

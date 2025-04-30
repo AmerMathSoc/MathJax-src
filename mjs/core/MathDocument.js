@@ -1,4 +1,13 @@
-import { userOptions, defaultOptions, expandable } from '../util/Options.js';
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import { userOptions, defaultOptions, expandable, } from '../util/Options.js';
 import { AbstractInputJax } from './InputJax.js';
 import { AbstractOutputJax } from './OutputJax.js';
 import { AbstractMathList } from './MathList.js';
@@ -6,6 +15,7 @@ import { AbstractMathItem, STATE } from './MathItem.js';
 import { MmlFactory } from '../core/MmlTree/MmlFactory.js';
 import { BitFieldClass } from '../util/BitField.js';
 import { PrioritizedList } from '../util/PrioritizedList.js';
+import { handleRetriesFor } from '../util/Retries.js';
 export class RenderList extends PrioritizedList {
     static create(actions) {
         const list = new this();
@@ -20,32 +30,53 @@ export class RenderList extends PrioritizedList {
     static action(id, action) {
         let renderDoc, renderMath;
         let convert = true;
-        let priority = action[0];
+        const priority = action[0];
         if (action.length === 1 || typeof action[1] === 'boolean') {
-            action.length === 2 && (convert = action[1]);
+            if (action.length === 2) {
+                convert = action[1];
+            }
             [renderDoc, renderMath] = this.methodActions(id);
         }
         else if (typeof action[1] === 'string') {
             if (typeof action[2] === 'string') {
-                action.length === 4 && (convert = action[3]);
+                if (action.length === 4) {
+                    convert = action[3];
+                }
                 const [method1, method2] = action.slice(1);
                 [renderDoc, renderMath] = this.methodActions(method1, method2);
             }
             else {
-                action.length === 3 && (convert = action[2]);
+                if (action.length === 3) {
+                    convert = action[2];
+                }
                 [renderDoc, renderMath] = this.methodActions(action[1]);
             }
         }
         else {
-            action.length === 4 && (convert = action[3]);
+            if (action.length === 4) {
+                convert = action[3];
+            }
             [renderDoc, renderMath] = action.slice(1);
         }
-        return [{ id, renderDoc, renderMath, convert }, priority];
+        return [
+            { id, renderDoc, renderMath, convert },
+            priority,
+        ];
     }
     static methodActions(method1, method2 = method1) {
         return [
-            (document) => { method1 && document[method1](); return false; },
-            (math, document) => { method2 && math[method2](document); return false; }
+            (document) => {
+                if (method1) {
+                    document[method1]();
+                }
+                return false;
+            },
+            (math, document) => {
+                if (method2) {
+                    math[method2](document);
+                }
+                return false;
+            },
         ];
     }
     renderDoc(document, start = STATE.UNPROCESSED) {
@@ -87,13 +118,13 @@ export const resetOptions = {
     all: false,
     processed: false,
     inputJax: null,
-    outputJax: null
+    outputJax: null,
 };
 export const resetAllOptions = {
     all: true,
     processed: true,
     inputJax: [],
-    outputJax: []
+    outputJax: [],
 };
 class DefaultInputJax extends AbstractInputJax {
     compile(_math) {
@@ -114,13 +145,16 @@ class DefaultMathItem extends AbstractMathItem {
 }
 export class AbstractMathDocument {
     constructor(document, adaptor, options) {
-        let CLASS = this.constructor;
+        const CLASS = this.constructor;
         this.document = document;
         this.options = userOptions(defaultOptions({}, CLASS.OPTIONS), options);
         this.math = new (this.options['MathList'] || DefaultMathList)();
         this.renderActions = RenderList.create(this.options['renderActions']);
+        this._actionPromises = [];
+        this._readyPromise = Promise.resolve();
         this.processed = new AbstractMathDocument.ProcessBits();
-        this.outputJax = this.options['OutputJax'] || new DefaultOutputJax();
+        this.outputJax =
+            this.options['OutputJax'] || new DefaultOutputJax();
         let inputJax = this.options['InputJax'] || [new DefaultInputJax()];
         if (!Array.isArray(inputJax)) {
             inputJax = [inputJax];
@@ -128,11 +162,11 @@ export class AbstractMathDocument {
         this.inputJax = inputJax;
         this.adaptor = adaptor;
         this.outputJax.setAdaptor(adaptor);
-        this.inputJax.map(jax => jax.setAdaptor(adaptor));
+        this.inputJax.map((jax) => jax.setAdaptor(adaptor));
         this.mmlFactory = this.options['MmlFactory'] || new MmlFactory();
-        this.inputJax.map(jax => jax.setMmlFactory(this.mmlFactory));
+        this.inputJax.map((jax) => jax.setMmlFactory(this.mmlFactory));
         this.outputJax.initialize();
-        this.inputJax.map(jax => jax.initialize());
+        this.inputJax.map((jax) => jax.initialize());
     }
     get kind() {
         return this.constructor.KIND;
@@ -148,18 +182,41 @@ export class AbstractMathDocument {
         }
     }
     render() {
+        this.clearPromises();
         this.renderActions.renderDoc(this);
         return this;
+    }
+    renderPromise() {
+        return this.whenReady(() => handleRetriesFor(() => __awaiter(this, void 0, void 0, function* () {
+            this.render();
+            yield this.actionPromises();
+            this.clearPromises();
+            return this;
+        })));
     }
     rerender(start = STATE.RERENDER) {
         this.state(start - 1);
         this.render();
         return this;
     }
+    rerenderPromise(start = STATE.RERENDER) {
+        return this.whenReady(() => handleRetriesFor(() => __awaiter(this, void 0, void 0, function* () {
+            this.rerender(start);
+            yield this.actionPromises();
+            this.clearPromises();
+            return this;
+        })));
+    }
     convert(math, options = {}) {
         let { format, display, end, ex, em, containerWidth, scale, family } = userOptions({
-            format: this.inputJax[0].name, display: true, end: STATE.LAST,
-            em: 16, ex: 8, containerWidth: null, scale: 1, family: ''
+            format: this.inputJax[0].name,
+            display: true,
+            end: STATE.LAST,
+            em: 16,
+            ex: 8,
+            containerWidth: null,
+            scale: 1,
+            family: '',
         }, options);
         if (containerWidth === null) {
             containerWidth = 80 * ex;
@@ -168,14 +225,42 @@ export class AbstractMathDocument {
         const mitem = new this.options.MathItem(math, jax, display);
         mitem.start.node = this.adaptor.body(this.document);
         mitem.setMetrics(em, ex, containerWidth, scale);
-        if (this.outputJax.options.mtextInheritFont) {
+        if (family && this.outputJax.options.mtextInheritFont) {
             mitem.outputData.mtextFamily = family;
         }
-        if (this.outputJax.options.merrorInheritFont) {
+        if (family && this.outputJax.options.merrorInheritFont) {
             mitem.outputData.merrorFamily = family;
         }
+        this.clearPromises();
         mitem.convert(this, end);
-        return (mitem.typesetRoot || mitem.root);
+        return mitem.typesetRoot || mitem.root;
+    }
+    convertPromise(math, options = {}) {
+        return this.whenReady(() => handleRetriesFor(() => __awaiter(this, void 0, void 0, function* () {
+            const node = this.convert(math, options);
+            yield this.actionPromises();
+            this.clearPromises();
+            return node;
+        })));
+    }
+    whenReady(action) {
+        return (this._readyPromise = this._readyPromise.then(() => {
+            const ready = this._readyPromise;
+            this._readyPromise = Promise.resolve();
+            const result = action();
+            const promise = this._readyPromise.then(() => result);
+            this._readyPromise = ready;
+            return promise;
+        }));
+    }
+    actionPromises() {
+        return Promise.all(this._actionPromises);
+    }
+    clearPromises() {
+        this._actionPromises = [];
+    }
+    savePromise(promise) {
+        this._actionPromises.push(promise);
     }
     findMath(_options = null) {
         this.processed.set('findMath');
@@ -216,9 +301,9 @@ export class AbstractMathDocument {
         math.root = this.mmlFactory.create('math', null, [
             this.mmlFactory.create('merror', { 'data-mjx-error': err.message, title: err.message }, [
                 this.mmlFactory.create('mtext', null, [
-                    this.mmlFactory.create('text').setText('Math input error')
-                ])
-            ])
+                    this.mmlFactory.create('text').setText('Math input error'),
+                ]),
+            ]),
         ]);
         if (math.display) {
             math.root.attributes.set('display', 'block');
@@ -254,19 +339,17 @@ export class AbstractMathDocument {
                 style: {
                     color: 'red',
                     'background-color': 'yellow',
-                    'line-height': 'normal'
-                }
-            }, [
-                this.adaptor.text('Math output error')
-            ])
+                    'line-height': 'normal',
+                },
+            }, [this.adaptor.text('Math output error')]),
         ]);
         if (math.display) {
             this.adaptor.setAttributes(math.typesetRoot, {
                 style: {
                     display: 'block',
                     margin: '1em 0',
-                    'text-align': 'center'
-                }
+                    'text-align': 'center',
+                },
             });
         }
         math.outputData.error = err.message;
@@ -304,14 +387,25 @@ export class AbstractMathDocument {
         if (state < STATE.COMPILED) {
             this.processed.clear('compile');
         }
+        if (state < STATE.FINDMATH) {
+            this.processed.clear('findMath');
+        }
         return this;
     }
     reset(options = { processed: true }) {
         options = userOptions(Object.assign({}, resetOptions), options);
-        options.all && Object.assign(options, resetAllOptions);
-        options.processed && this.processed.reset();
-        options.inputJax && this.inputJax.forEach(jax => jax.reset(...options.inputJax));
-        options.outputJax && this.outputJax.reset(...options.outputJax);
+        if (options.all) {
+            Object.assign(options, resetAllOptions);
+        }
+        if (options.processed) {
+            this.processed.reset();
+        }
+        if (options.inputJax) {
+            this.inputJax.forEach((jax) => jax.reset(...options.inputJax));
+        }
+        if (options.outputJax) {
+            this.outputJax.reset(...options.outputJax);
+        }
         return this;
     }
     clear() {
@@ -319,12 +413,18 @@ export class AbstractMathDocument {
         this.math.clear();
         return this;
     }
+    done() {
+        return Promise.resolve();
+    }
     concat(list) {
         this.math.merge(list);
         return this;
     }
     clearMathItemsWithin(containers) {
         const items = this.getMathItemsWithin(containers);
+        for (const item of items.slice(0).reverse()) {
+            item.clear();
+        }
         this.math.remove(...items);
         return items;
     }
@@ -364,8 +464,8 @@ AbstractMathDocument.OPTIONS = {
         compile: [STATE.COMPILED],
         metrics: [STATE.METRICS, 'getMetrics', '', false],
         typeset: [STATE.TYPESET],
-        update: [STATE.INSERTED, 'updateDocument', false]
-    })
+        update: [STATE.INSERTED, 'updateDocument', false],
+    }),
 };
 AbstractMathDocument.ProcessBits = BitFieldClass('findMath', 'compile', 'getMetrics', 'typeset', 'updateDocument');
 //# sourceMappingURL=MathDocument.js.map

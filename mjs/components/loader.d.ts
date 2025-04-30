@@ -1,5 +1,5 @@
 import { MathJaxObject as MJObject, MathJaxLibrary, MathJaxConfig as MJConfig } from './global.js';
-import { PackageReady, PackageFailed } from './package.js';
+import { PackageReady, PackageFailed, PackageConfig } from './package.js';
 import { FunctionList } from '../util/FunctionList.js';
 export type PathFilterFunction = (data: {
     name: string;
@@ -36,29 +36,31 @@ export interface MathJaxObject extends MJObject {
     loader: {
         ready: (...names: string[]) => Promise<string[]>;
         load: (...names: string[]) => Promise<string>;
-        preLoad: (...names: string[]) => void;
+        preLoaded: (...names: string[]) => void;
         defaultReady: () => void;
         getRoot: () => string;
         checkVersion: (name: string, version: string) => boolean;
         saveVersion: (name: string) => void;
         pathFilters: FunctionList;
+        addPackageData: (name: string, data: PackageConfig) => void;
     };
     startup?: any;
 }
 export declare const PathFilters: {
     [name: string]: PathFilterFunction;
 };
-export declare namespace Loader {
-    const versions: Map<string, string>;
-    function ready(...names: string[]): Promise<string[]>;
-    function load(...names: string[]): Promise<void | string[]>;
-    function preLoad(...names: string[]): void;
-    function defaultReady(): void;
-    function getRoot(): string;
-    function checkVersion(name: string, version: string, _type?: string): boolean;
-    function saveVersion(name: string): void;
-    const pathFilters: FunctionList;
-}
+export declare const Loader: {
+    versions: Map<string, string>;
+    ready(...names: string[]): Promise<string[]>;
+    load(...names: string[]): Promise<any[]>;
+    preLoaded(...names: string[]): void;
+    addPackageData(name: string, data: PackageConfig): void;
+    defaultReady(): void;
+    getRoot(): string;
+    checkVersion(name: string, version: string, _type?: string): boolean;
+    saveVersion(name: string): void;
+    pathFilters: FunctionList;
+};
 export declare const MathJax: MathJaxObject;
 export declare const CONFIG: {
     [name: string]: any;

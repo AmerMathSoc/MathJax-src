@@ -39,7 +39,7 @@ function getAnnotation(node, types, annotations) {
 function annotationMatch(child, types) {
     const encoding = child.attributes.get('encoding');
     for (const type of Object.keys(types)) {
-        if (types[type].indexOf(encoding) >= 0) {
+        if (types[type].includes(encoding)) {
             return type;
         }
     }
@@ -56,10 +56,10 @@ function createAnnotationMenu(menu, submenu, annotations, action) {
                 action: () => {
                     annotation = value;
                     action();
-                }
+                },
             };
         }),
-        id: 'annotations'
+        id: 'annotations',
     }, submenu);
 }
 //# sourceMappingURL=AnnotationMenu.js.map

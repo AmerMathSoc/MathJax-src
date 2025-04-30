@@ -6,9 +6,18 @@ export type ActionData = {
     [name: string]: any;
 };
 export type ActionHandler<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, MA extends CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> = (node: MA, data?: ActionData) => void;
-export type ActionPair<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, MA extends CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> = [ActionHandler<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC, MA>, ActionData];
+export type ActionPair<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, MA extends CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> = [
+    ActionHandler<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC, MA>,
+    ActionData
+];
 export type ActionMap<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, MA extends CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> = Map<string, ActionPair<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC, MA>>;
-export type ActionDef<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, MA extends CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> = [string, [ActionHandler<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC, MA>, ActionData]];
+export type ActionDef<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>, MA extends CommonMaction<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>> = [
+    string,
+    [
+        ActionHandler<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC, MA>,
+        ActionData
+    ]
+];
 export type EventHandler = (event: Event) => void;
 export declare const TooltipData: {
     dx: string;

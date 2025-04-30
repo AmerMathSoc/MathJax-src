@@ -6,6 +6,6 @@ Entities.add({
     quaternions: '\u210D',
     quatint: '\u2A16',
     quest: '\u003F',
-    questeq: '\u225F'
+    questeq: '\u225F',
 }, 'q');
 //# sourceMappingURL=q.js.map

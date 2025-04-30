@@ -67,7 +67,7 @@ export class MmlMrow extends AbstractMmlNode {
     lastNonSpace() {
         let i = this.childNodes.length;
         while (--i >= 0) {
-            let child = this.childNodes[i];
+            const child = this.childNodes[i];
             if (child && !child.isSpacelike) {
                 return child;
             }

@@ -20,7 +20,7 @@ export class LineBBox extends BBox {
     }
     append(cbox) {
         if (this.isFirst) {
-            cbox.originalL = cbox.L;
+            cbox.originalL += cbox.L;
             cbox.L = 0;
         }
         if (cbox.indentData) {
@@ -37,7 +37,7 @@ export class LineBBox extends BBox {
         return bbox;
     }
     getIndentData(node) {
-        let { indentalign, indentshift, indentalignfirst, indentshiftfirst, indentalignlast, indentshiftlast } = node.attributes.getAllAttributes();
+        let { indentalign, indentshift, indentalignfirst, indentshiftfirst, indentalignlast, indentshiftlast, } = node.attributes.getAllAttributes();
         if (indentalignfirst === 'indentalign') {
             indentalignfirst = node.attributes.getInherited('indentalign');
         }
@@ -50,9 +50,11 @@ export class LineBBox extends BBox {
         if (indentshiftlast === 'indentshift') {
             indentshiftlast = indentshift;
         }
-        this.indentData = [[indentalignfirst, indentshiftfirst],
+        this.indentData = [
+            [indentalignfirst, indentshiftfirst],
             [indentalign, indentshift],
-            [indentalignlast, indentshiftlast]];
+            [indentalignlast, indentshiftlast],
+        ];
     }
     copyIndentData(bbox) {
         return bbox.indentData.map(([align, indent]) => [align, indent]);

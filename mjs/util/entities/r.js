@@ -110,6 +110,6 @@ Entities.add({
     rtrif: '\u25B8',
     rtriltri: '\u29CE',
     ruluhar: '\u2968',
-    rx: '\u211E'
+    rx: '\u211E',
 }, 'r');
 //# sourceMappingURL=r.js.map

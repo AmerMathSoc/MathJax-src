@@ -8,8 +8,8 @@ export declare class TextParser extends TexParser {
     envStack: EnvList[];
     level: number | string | undefined;
     protected nodes: MmlNode[];
-    get texParser(): any;
-    get tags(): any;
+    get texParser(): TexParser;
+    get tags(): import("../Tags.js").Tags;
     constructor(text: string, env: EnvList, configuration: ParseOptions, level?: number | string);
     mml(): MmlNode;
     protected copyLists(): void;

@@ -4,7 +4,7 @@ import { ComplexityMathDocument, ComplexityMathItem } from '../../a11y/complexit
 import { ExplorerMathDocument, ExplorerMathItem } from '../../a11y/explorer.js';
 import { AssistiveMmlMathDocument, AssistiveMmlMathItem } from '../../a11y/assistive-mml.js';
 import { Menu } from './Menu.js';
-import '../../a11y/SpeechMenu.js';
+import '../../a11y/speech/SpeechMenu.js';
 export type Constructor<T> = new (...args: any[]) => T;
 export type A11yMathItemConstructor = {
     new (...args: any[]): ComplexityMathItem<HTMLElement, Text, Document> & ExplorerMathItem & AssistiveMmlMathItem<HTMLElement, Text, Document>;

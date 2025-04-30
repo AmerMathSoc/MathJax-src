@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMtextMixin } from '../../common/Wrappers/mtext.js';
+import { CommonMtextMixin, } from '../../common/Wrappers/mtext.js';
 import { MmlMtext } from '../../../core/MmlTree/MmlNodes/mtext.js';
 export const SvgMtext = (function () {
     var _a;
@@ -16,7 +16,7 @@ export const SvgMtext = (function () {
                 for (const i of svg.keys()) {
                     const DOM = [svg[i]];
                     let [si, sj] = this.breakPoints[i - 1] || [0, 0];
-                    let [ei, ej] = this.breakPoints[i] || [childNodes.length, 0];
+                    const [ei, ej] = this.breakPoints[i] || [childNodes.length, 0];
                     let words = childNodes[si].node.getText().split(/ /);
                     if (si === ei) {
                         textNode.setText(words.slice(sj, ej).join(' '));
@@ -29,7 +29,9 @@ export const SvgMtext = (function () {
                     while (++si < ei && si < childNodes.length) {
                         const child = childNodes[si];
                         child.toSVG(DOM);
-                        child.dom && child.place(x, 0);
+                        if (child.dom) {
+                            child.place(x, 0);
+                        }
                         x += child.getBBox().w;
                     }
                     if (si < childNodes.length) {

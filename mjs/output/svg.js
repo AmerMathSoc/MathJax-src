@@ -11,12 +11,13 @@ export class SVG extends CommonOutputJax {
     get forceInlineBreaks() {
         return true;
     }
-    constructor(options = null) {
+    constructor(options = {}) {
         super(options, SvgWrapperFactory, DefaultFont);
         this.minwidth = 0;
         this.shift = 0;
         this.svgStyles = null;
         this.fontCache = new FontCache(this);
+        this.options.matchFontHeight = true;
     }
     initialize() {
         if (this.options.fontCache === 'global') {
@@ -37,13 +38,17 @@ export class SVG extends CommonOutputJax {
         if (this.svgStyles) {
             return this.svgStyles;
         }
-        const sheet = this.svgStyles = super.styleSheet(html);
+        const sheet = (this.svgStyles = super.styleSheet(html));
         this.adaptor.setAttribute(sheet, 'id', SVG.STYLESHEETID);
         return sheet;
     }
     pageElements(html) {
         if (this.options.fontCache === 'global' && !this.findCache(html)) {
-            return this.svg('svg', { id: SVG.FONTCACHEID, style: { display: 'none' } }, [this.fontCache.getCache()]);
+            return this.svg('svg', {
+                xmlns: SVGNS,
+                id: SVG.FONTCACHEID,
+                style: { display: 'none' },
+            }, [this.fontCache.getCache()]);
         }
         return null;
     }
@@ -57,12 +62,17 @@ export class SVG extends CommonOutputJax {
         }
         return false;
     }
+    getInitialScale() {
+        return 1;
+    }
     processMath(wrapper, parent) {
         const container = this.container;
         this.container = parent;
         const [svg, g] = this.createRoot(wrapper);
         this.typesetSvg(wrapper, svg, g);
-        wrapper.node.getProperty('process-breaks') && this.handleInlineBreaks(wrapper, svg, g);
+        if (wrapper.node.getProperty('process-breaks')) {
+            this.handleInlineBreaks(wrapper, svg, g);
+        }
         this.container = container;
     }
     createRoot(wrapper) {
@@ -83,18 +93,27 @@ export class SVG extends CommonOutputJax {
         const W = Math.max(w, px);
         const H = Math.max(h + d, px);
         const g = this.svg('g', {
-            stroke: 'currentColor', fill: 'currentColor',
-            'stroke-width': 0, transform: 'scale(1,-1)'
+            stroke: 'currentColor',
+            fill: 'currentColor',
+            'stroke-width': 0,
+            transform: 'scale(1,-1)',
         });
         const adaptor = this.adaptor;
         const svg = adaptor.append(this.container, this.svg('svg', {
             xmlns: SVGNS,
-            width: this.ex(W), height: this.ex(H),
-            role: 'img', focusable: false,
+            width: this.ex(W),
+            height: this.ex(H),
+            role: 'img',
+            focusable: false,
             style: { 'vertical-align': this.ex(-d) },
-            viewBox: [0, this.fixed(-h * 1000, 1), this.fixed(W * 1000, 1), this.fixed(H * 1000, 1)].join(' ')
+            viewBox: [
+                0,
+                this.fixed(-h * 1000, 1),
+                this.fixed(W * 1000, 1),
+                this.fixed(H * 1000, 1),
+            ].join(' '),
         }, [g]));
-        if (W === .001) {
+        if (W === 0.001) {
             adaptor.setAttribute(svg, 'preserveAspectRatio', 'xMidYMid slice');
             if (w < 0) {
                 adaptor.setStyle(this.container, 'margin-right', this.ex(w));
@@ -156,13 +175,13 @@ export class SVG extends CommonOutputJax {
             if (forced && mo.node.attributes.get('linebreakstyle') === 'after') {
                 const k = mml.parent.node.childIndex(mml.node) + 1;
                 const next = mml.parent.childNodes[k];
-                const dimen = (next ? next.getLineBBox(0).originalL : 0) * scale;
+                const dimen = next ? next.getLineBBox(0).originalL * scale : 0;
                 if (dimen) {
                     this.addInlineBreak(nsvg, dimen, forced);
                 }
             }
             else if (forced || i) {
-                const dimen = (mml && i ? mml.getLineBBox(0).originalL : 0) * scale;
+                const dimen = mml && i ? mml.getLineBBox(0).originalL * scale : 0;
                 if (dimen || !forced) {
                     this.addInlineBreak(nsvg, dimen, forced || !!mml.node.getProperty('forcebreak'));
                 }
@@ -177,29 +196,35 @@ export class SVG extends CommonOutputJax {
         const adaptor = this.adaptor;
         const space = LENGTHS.em(dimen);
         if (!forced) {
-            adaptor.insert(adaptor.node('mjx-break', { prebreak: true }), nsvg);
+            adaptor.insert(adaptor.node('mjx-break', { prebreak: true }, [adaptor.text(' ')]), nsvg);
         }
-        adaptor.insert(adaptor.node('mjx-break', !forced ? { newline: true } :
-            SPACE[space] ? { size: SPACE[space] } : { style: `letter-spacing: ${LENGTHS.em(dimen - 1)}` }), nsvg);
+        adaptor.insert(adaptor.node('mjx-break', !forced
+            ? { newline: true }
+            : SPACE[space]
+                ? { size: SPACE[space] }
+                : { style: `letter-spacing: ${LENGTHS.em(dimen - 1)}` }, [adaptor.text(' ')]), nsvg);
     }
     ex(m) {
         m /= this.font.params.x_height;
-        return (Math.abs(m) < .001 ? '0' : m.toFixed(3).replace(/\.?0+$/, '') + 'ex');
+        return Math.abs(m) < 0.001
+            ? '0'
+            : m.toFixed(3).replace(/\.?0+$/, '') + 'ex';
     }
     svg(kind, properties = {}, children = []) {
         return this.html(kind, properties, children, SVGNS);
     }
     unknownText(text, variant) {
         const metrics = this.math.metrics;
-        const scale = this.font.params.x_height / metrics.ex * metrics.em * 1000;
+        const scale = (this.font.params.x_height / metrics.ex) * metrics.em * 1000;
         const svg = this.svg('text', {
             'data-variant': variant,
-            transform: 'scale(1,-1)', 'font-size': this.fixed(scale, 1) + 'px'
+            transform: 'scale(1,-1)',
+            'font-size': this.fixed(scale, 1) + 'px',
         }, [this.text(text)]);
         const adaptor = this.adaptor;
         if (variant !== '-explicitFont') {
             const c = unicodeChars(text);
-            if (c.length !== 1 || c[0] < 0x1D400 || c[0] > 0x1D7FF) {
+            if (c.length !== 1 || c[0] < 0x1d400 || c[0] > 0x1d7ff) {
                 const [family, italic, bold] = this.font.getCssFont(variant);
                 adaptor.setAttribute(svg, 'font-family', family);
                 if (italic) {
@@ -218,27 +243,35 @@ export class SVG extends CommonOutputJax {
         adaptor.removeAttribute(text, 'transform');
         const ex = this.fixed(this.font.params.x_height * 1000, 1);
         const svg = this.svg('svg', {
-            position: 'absolute', visibility: 'hidden',
-            width: '1ex', height: '1ex',
-            viewBox: [0, 0, ex, ex].join(' ')
+            position: 'absolute',
+            visibility: 'hidden',
+            width: '1ex',
+            height: '1ex',
+            top: 0,
+            left: 0,
+            viewBox: [0, 0, ex, ex].join(' '),
         }, [text]);
         adaptor.append(adaptor.body(adaptor.document), svg);
-        let w = adaptor.nodeSize(text, 1000, true)[0];
+        const w = adaptor.nodeSize(text, 1000, true)[0];
         adaptor.remove(svg);
-        return { w: w, h: .75, d: .2 };
+        return { w: w, h: 0.75, d: 0.2 };
     }
 }
 SVG.NAME = 'SVG';
 SVG.OPTIONS = Object.assign(Object.assign({}, CommonOutputJax.OPTIONS), { blacker: 3, internalSpeechTitles: true, titleID: 0, fontCache: 'local', localID: null, useXlink: true });
 SVG.commonStyles = Object.assign(Object.assign({}, CommonOutputJax.commonStyles), { 'mjx-container[jax="SVG"]': {
         direction: 'ltr',
-        'white-space': 'nowrap'
+        'white-space': 'nowrap',
     }, 'mjx-container[jax="SVG"] > svg': {
         overflow: 'visible',
         'min-height': '1px',
-        'min-width': '1px'
+        'min-width': '1px',
     }, 'mjx-container[jax="SVG"] > svg a': {
-        fill: 'blue', stroke: 'blue'
+        fill: 'blue',
+        stroke: 'blue',
+    }, 'rect[sre-highlighter-added]': {
+        stroke: 'black',
+        'stroke-width': '80px',
     } });
 SVG.FONTCACHEID = 'MJX-SVG-global-cache';
 SVG.STYLESHEETID = 'MJX-SVG-styles';

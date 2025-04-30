@@ -2,7 +2,7 @@ import { AbstractFindMath } from '../../core/FindMath.js';
 const NAMESPACE = 'http://www.w3.org/1998/Math/MathML';
 export class FindMathML extends AbstractFindMath {
     findMath(node) {
-        let set = new Set();
+        const set = new Set();
         this.findMathNodes(node, set);
         this.findMathPrefixed(node, set);
         const html = this.adaptor.root(this.adaptor.document);
@@ -17,10 +17,10 @@ export class FindMathML extends AbstractFindMath {
         }
     }
     findMathPrefixed(node, set) {
-        let html = this.adaptor.root(this.adaptor.document);
+        const html = this.adaptor.root(this.adaptor.document);
         for (const attr of this.adaptor.allAttributes(html)) {
-            if (attr.name.substr(0, 6) === 'xmlns:' && attr.value === NAMESPACE) {
-                let prefix = attr.name.substr(6);
+            if (attr.name.substring(0, 6) === 'xmlns:' && attr.value === NAMESPACE) {
+                const prefix = attr.name.substring(6);
                 for (const math of this.adaptor.tags(node, prefix + ':math')) {
                     set.add(math);
                 }
@@ -38,8 +38,8 @@ export class FindMathML extends AbstractFindMath {
         for (const mml of set.values()) {
             if (adaptor.kind(adaptor.parent(mml)) === 'mjx-assistive-mml')
                 continue;
-            const display = (adaptor.getAttribute(mml, 'display') === 'block' ||
-                adaptor.getAttribute(mml, 'mode') === 'display');
+            const display = adaptor.getAttribute(mml, 'display') === 'block' ||
+                adaptor.getAttribute(mml, 'mode') === 'display';
             const start = { node: mml, n: 0, delim: '' };
             const end = { node: mml, n: 0, delim: '' };
             math.push({ math: adaptor.outerHTML(mml), start, end, display });

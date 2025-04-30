@@ -1,49 +1,42 @@
-import { AbstractMmlNode, AbstractMmlEmptyNode } from '../../core/MmlTree/MmlNode.js';
+import { AbstractMmlNode, AbstractMmlEmptyNode, } from '../../core/MmlTree/MmlNode.js';
 import { MmlMo } from '../../core/MmlTree/MmlNodes/mo.js';
-var NodeUtil;
-(function (NodeUtil) {
-    const attrs = new Map([
-        ['autoOP', true],
-        ['fnOP', true],
-        ['movesupsub', true],
-        ['subsupOK', true],
-        ['texprimestyle', true],
-        ['useHeight', true],
-        ['variantForm', true],
-        ['withDelims', true],
-        ['mathaccent', true],
-        ['open', true],
-        ['close', true]
-    ]);
-    function createEntity(code) {
+const NodeUtil = {
+    attrs: new Set([
+        'autoOP',
+        'fnOP',
+        'movesupsub',
+        'subsupOK',
+        'texprimestyle',
+        'useHeight',
+        'variantForm',
+        'withDelims',
+        'mathaccent',
+        'open',
+        'close',
+    ]),
+    createEntity(code) {
         return String.fromCodePoint(parseInt(code, 16));
-    }
-    NodeUtil.createEntity = createEntity;
-    function getChildren(node) {
+    },
+    getChildren(node) {
         return node.childNodes;
-    }
-    NodeUtil.getChildren = getChildren;
-    function getText(node) {
+    },
+    getText(node) {
         return node.getText();
-    }
-    NodeUtil.getText = getText;
-    function appendChildren(node, children) {
-        for (let child of children) {
+    },
+    appendChildren(node, children) {
+        for (const child of children) {
             node.appendChild(child);
         }
-    }
-    NodeUtil.appendChildren = appendChildren;
-    function setAttribute(node, attribute, value) {
+    },
+    setAttribute(node, attribute, value) {
         node.attributes.set(attribute, value);
-    }
-    NodeUtil.setAttribute = setAttribute;
-    function setProperty(node, property, value) {
+    },
+    setProperty(node, property, value) {
         node.setProperty(property, value);
-    }
-    NodeUtil.setProperty = setProperty;
-    function setProperties(node, properties) {
+    },
+    setProperties(node, properties) {
         for (const name of Object.keys(properties)) {
-            let value = properties[name];
+            const value = properties[name];
             if (name === 'texClass') {
                 node.texClass = value;
                 node.setProperty(name, value);
@@ -56,98 +49,93 @@ var NodeUtil;
             }
             else if (name === 'inferred') {
             }
-            else if (attrs.has(name)) {
+            else if (NodeUtil.attrs.has(name)) {
                 node.setProperty(name, value);
             }
             else {
                 node.attributes.set(name, value);
             }
         }
-    }
-    NodeUtil.setProperties = setProperties;
-    function getProperty(node, property) {
+    },
+    getProperty(node, property) {
         return node.getProperty(property);
-    }
-    NodeUtil.getProperty = getProperty;
-    function getAttribute(node, attr) {
+    },
+    getAttribute(node, attr) {
         return node.attributes.get(attr);
-    }
-    NodeUtil.getAttribute = getAttribute;
-    function removeAttribute(node, attr) {
-        delete (node.attributes.getAllAttributes())[attr];
-    }
-    NodeUtil.removeAttribute = removeAttribute;
-    function removeProperties(node, ...properties) {
+    },
+    removeAttribute(node, attr) {
+        node.attributes.unset(attr);
+    },
+    removeProperties(node, ...properties) {
         node.removeProperty(...properties);
-    }
-    NodeUtil.removeProperties = removeProperties;
-    function getChildAt(node, position) {
+    },
+    getChildAt(node, position) {
         return node.childNodes[position];
-    }
-    NodeUtil.getChildAt = getChildAt;
-    function setChild(node, position, child) {
-        let children = node.childNodes;
+    },
+    setChild(node, position, child) {
+        const children = node.childNodes;
         children[position] = child;
         if (child) {
             child.parent = node;
         }
-    }
-    NodeUtil.setChild = setChild;
-    function copyChildren(oldNode, newNode) {
-        let children = oldNode.childNodes;
+    },
+    copyChildren(oldNode, newNode) {
+        const children = oldNode.childNodes;
         for (let i = 0; i < children.length; i++) {
-            setChild(newNode, i, children[i]);
+            this.setChild(newNode, i, children[i]);
         }
-    }
-    NodeUtil.copyChildren = copyChildren;
-    function copyAttributes(oldNode, newNode) {
+    },
+    copyAttributes(oldNode, newNode) {
         newNode.attributes = oldNode.attributes;
-        setProperties(newNode, oldNode.getAllProperties());
-    }
-    NodeUtil.copyAttributes = copyAttributes;
-    function isType(node, kind) {
+        this.setProperties(newNode, oldNode.getAllProperties());
+    },
+    isType(node, kind) {
         return node.isKind(kind);
-    }
-    NodeUtil.isType = isType;
-    function isEmbellished(node) {
+    },
+    isEmbellished(node) {
         return node.isEmbellished;
-    }
-    NodeUtil.isEmbellished = isEmbellished;
-    function getTexClass(node) {
+    },
+    getTexClass(node) {
         return node.texClass;
-    }
-    NodeUtil.getTexClass = getTexClass;
-    function getCoreMO(node) {
+    },
+    getCoreMO(node) {
         return node.coreMO();
-    }
-    NodeUtil.getCoreMO = getCoreMO;
-    function isNode(item) {
-        return item instanceof AbstractMmlNode || item instanceof AbstractMmlEmptyNode;
-    }
-    NodeUtil.isNode = isNode;
-    function isInferred(node) {
+    },
+    isNode(item) {
+        return (item instanceof AbstractMmlNode || item instanceof AbstractMmlEmptyNode);
+    },
+    isInferred(node) {
         return node.isInferred;
-    }
-    NodeUtil.isInferred = isInferred;
-    function getForm(node) {
-        if (!isType(node, 'mo')) {
+    },
+    getForm(node) {
+        if (!node.isKind('mo')) {
             return null;
         }
-        let mo = node;
-        let forms = mo.getForms();
-        for (let form of forms) {
-            let symbol = this.getOp(mo, form);
+        const mo = node;
+        const forms = mo.getForms();
+        for (const form of forms) {
+            const symbol = this.getOp(mo, form);
             if (symbol) {
                 return symbol;
             }
         }
         return null;
-    }
-    NodeUtil.getForm = getForm;
-    function getOp(mo, form = 'infix') {
+    },
+    getOp(mo, form = 'infix') {
         return MmlMo.OPTABLE[form][mo.getText()] || null;
-    }
-    NodeUtil.getOp = getOp;
-})(NodeUtil || (NodeUtil = {}));
+    },
+    getMoAttribute(mo, attr) {
+        var _a, _b;
+        if (!mo.attributes.isSet(attr)) {
+            for (const form of ['infix', 'postfix', 'prefix']) {
+                const value = (_b = (_a = this.getOp(mo, form)) === null || _a === void 0 ? void 0 : _a[3]) === null || _b === void 0 ? void 0 : _b[attr];
+                if (value !== undefined) {
+                    return value;
+                }
+            }
+        }
+        return mo.attributes.get(attr);
+    },
+};
 export default NodeUtil;
 //# sourceMappingURL=NodeUtil.js.map

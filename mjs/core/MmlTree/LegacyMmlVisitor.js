@@ -1,5 +1,5 @@
 import { MmlVisitor } from './MmlVisitor.js';
-let MML = MathJax.ElementJax.mml;
+const MML = MathJax.ElementJax.mml;
 export class LegacyMmlVisitor extends MmlVisitor {
     visitTree(node) {
         let root = MML.mrow();
@@ -20,7 +20,7 @@ export class LegacyMmlVisitor extends MmlVisitor {
         }
     }
     visitDefault(node, parent) {
-        let mml = MML[node.kind]();
+        const mml = MML[node.kind]();
         this.addAttributes(node, mml);
         this.addProperties(node, mml);
         for (const child of node.childNodes) {
@@ -29,14 +29,14 @@ export class LegacyMmlVisitor extends MmlVisitor {
         parent.Append(mml);
     }
     addAttributes(node, mml) {
-        let attributes = node.attributes;
-        let names = attributes.getExplicitNames();
+        const attributes = node.attributes;
+        const names = attributes.getExplicitNames();
         for (const name of names) {
             mml[name] = attributes.getExplicit(name);
         }
     }
     addProperties(node, mml) {
-        let names = node.getPropertyNames();
+        const names = node.getPropertyNames();
         for (const name of names) {
             mml[name] = node.getProperty(name);
         }

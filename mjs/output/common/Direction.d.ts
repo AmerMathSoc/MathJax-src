@@ -1,7 +1,7 @@
-export declare const enum DIRECTION {
-    None = 0,
-    Vertical = 1,
-    Horizontal = 2
-}
-export declare const V = DIRECTION.Vertical;
-export declare const H = DIRECTION.Horizontal;
+export declare const DIRECTION: {
+    None: string;
+    Vertical: string;
+    Horizontal: string;
+};
+export declare const V: string;
+export declare const H: string;

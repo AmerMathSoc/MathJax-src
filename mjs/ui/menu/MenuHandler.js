@@ -2,7 +2,7 @@ import { mathjax } from '../../mathjax.js';
 import { STATE, newState } from '../../core/MathItem.js';
 import { expandable } from '../../util/Options.js';
 import { Menu } from './Menu.js';
-import '../../a11y/SpeechMenu.js';
+import '../../a11y/speech/SpeechMenu.js';
 newState('CONTEXT_MENU', 170);
 export function MenuMathItemMixin(BaseMathItem) {
     return class extends BaseMathItem {
@@ -30,6 +30,13 @@ export function MenuMathDocumentMixin(BaseDocument) {
                     ProcessBits.allocate('context-menu');
                 }
                 this.options.MathItem = MenuMathItemMixin(this.options.MathItem);
+                const settings = this.menu.settings;
+                const options = this.options;
+                const enrich = (options.enableEnrichment = settings.enrich);
+                options.enableSpeech = settings.speech && enrich;
+                options.enableBraille = settings.braille && enrich;
+                options.enableComplexity = settings.collapsible && enrich;
+                options.enableExplorer = enrich;
             }
             addMenu() {
                 if (!this.processed.isSet('context-menu')) {
@@ -44,14 +51,10 @@ export function MenuMathDocumentMixin(BaseDocument) {
                 if (this.menu.isLoading) {
                     mathjax.retryAfter(this.menu.loadingPromise.catch((err) => console.log(err)));
                 }
-                const settings = this.menu.settings;
-                if (settings.collapsible) {
-                    this.options.enableComplexity = true;
+                if (this.options.enableComplexity) {
                     this.menu.checkComponent('a11y/complexity');
                 }
-                if (settings.explorer) {
-                    this.options.enableEnrichment = true;
-                    this.options.enableExplorer = true;
+                if (this.options.enableExplorer) {
                     this.menu.checkComponent('a11y/explorer');
                 }
                 return this;
@@ -69,7 +72,7 @@ export function MenuMathDocumentMixin(BaseDocument) {
                 return this;
             }
         },
-        _a.OPTIONS = Object.assign(Object.assign({ enableEnrichment: true, enableComplexity: true, enableExplorer: true, enrichSpeech: 'none', enrichError: (_doc, _math, err) => console.warn('Enrichment Error:', err) }, BaseDocument.OPTIONS), { MenuClass: Menu, menuOptions: Menu.OPTIONS, enableMenu: true, sre: (BaseDocument.OPTIONS.sre || expandable({})), a11y: (BaseDocument.OPTIONS.a11y || expandable({})), renderActions: expandable(Object.assign(Object.assign({}, BaseDocument.OPTIONS.renderActions), { addMenu: [STATE.CONTEXT_MENU], checkLoading: [STATE.UNPROCESSED + 1] })) }),
+        _a.OPTIONS = Object.assign(Object.assign({ enableEnrichment: true, enableComplexity: true, enableSpeech: true, enableBraille: true, enableExplorer: true, enrichSpeech: 'none', enrichError: (_doc, _math, err) => console.warn('Enrichment Error:', err) }, BaseDocument.OPTIONS), { MenuClass: Menu, menuOptions: Menu.OPTIONS, enableMenu: true, sre: BaseDocument.OPTIONS.sre || expandable({}), a11y: BaseDocument.OPTIONS.a11y || expandable({}), renderActions: expandable(Object.assign(Object.assign({}, BaseDocument.OPTIONS.renderActions), { addMenu: [STATE.CONTEXT_MENU], checkLoading: [STATE.UNPROCESSED + 1] })) }),
         _a;
 }
 export function MenuHandler(handler) {

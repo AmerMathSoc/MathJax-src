@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMtdMixin } from '../../common/Wrappers/mtd.js';
+import { CommonMtdMixin, } from '../../common/Wrappers/mtd.js';
 import { MmlMtd } from '../../../core/MmlTree/MmlNodes/mtd.js';
 export const ChtmlMtd = (function () {
     var _a;
@@ -14,7 +14,8 @@ export const ChtmlMtd = (function () {
                     this.adaptor.setAttribute(this.dom[0], 'rowalign', ralign);
                 }
                 if (calign !== 'center' &&
-                    (this.parent.kind !== 'mlabeledtr' || this !== this.parent.childNodes[0] ||
+                    (this.parent.kind !== 'mlabeledtr' ||
+                        this !== this.parent.childNodes[0] ||
                         calign !== this.parent.parent.node.attributes.get('side'))) {
                     this.adaptor.setStyle(this.dom[0], 'textAlign', calign);
                 }
@@ -28,49 +29,49 @@ export const ChtmlMtd = (function () {
             'mjx-mtd': {
                 display: 'table-cell',
                 'text-align': 'center',
-                'padding': '.215em .4em'
+                padding: '.215em .4em',
             },
             'mjx-mtd:first-child': {
-                'padding-left': 0
+                'padding-left': 0,
             },
             'mjx-mtd:last-child': {
-                'padding-right': 0
+                'padding-right': 0,
             },
             'mjx-mtable > * > mjx-itable > *:first-child > mjx-mtd': {
-                'padding-top': 0
+                'padding-top': 0,
             },
             'mjx-mtable > * > mjx-itable > *:last-child > mjx-mtd': {
-                'padding-bottom': 0
+                'padding-bottom': 0,
             },
             'mjx-tstrut': {
                 display: 'inline-block',
                 height: '1em',
-                'vertical-align': '-.25em'
+                'vertical-align': '-.25em',
             },
             'mjx-labels[align="left"] > mjx-mtr > mjx-mtd': {
-                'text-align': 'left'
+                'text-align': 'left',
             },
             'mjx-labels[align="right"] > mjx-mtr > mjx-mtd': {
-                'text-align': 'right'
+                'text-align': 'right',
             },
             'mjx-mtd[extra]': {
-                padding: 0
+                padding: 0,
             },
             'mjx-mtd[rowalign="top"]': {
-                'vertical-align': 'top'
+                'vertical-align': 'top',
             },
             'mjx-mtd[rowalign="center"]': {
-                'vertical-align': 'middle'
+                'vertical-align': 'middle',
             },
             'mjx-mtd[rowalign="bottom"]': {
-                'vertical-align': 'bottom'
+                'vertical-align': 'bottom',
             },
             'mjx-mtd[rowalign="baseline"]': {
-                'vertical-align': 'baseline'
+                'vertical-align': 'baseline',
             },
             'mjx-mtd[rowalign="axis"]': {
-                'vertical-align': '.25em'
-            }
+                'vertical-align': '.25em',
+            },
         },
         _a;
 })();

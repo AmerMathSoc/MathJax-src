@@ -18,6 +18,7 @@ export declare class Styles {
     static connect: connections;
     protected styles: StyleList;
     constructor(cssText?: string);
+    protected sanitizeValue(text: string): string;
     get cssText(): string;
     get styleList(): StyleList;
     set(name: string, value: string | number | boolean): void;

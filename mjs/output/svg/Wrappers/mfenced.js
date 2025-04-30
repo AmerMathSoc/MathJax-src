@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMfencedMixin } from '../../common/Wrappers/mfenced.js';
+import { CommonMfencedMixin, } from '../../common/Wrappers/mfenced.js';
 import { MmlMfenced } from '../../../core/MmlTree/MmlNodes/mfenced.js';
 export const SvgMfenced = (function () {
     var _a;

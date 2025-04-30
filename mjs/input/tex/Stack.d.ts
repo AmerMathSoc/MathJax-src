@@ -13,5 +13,6 @@ export default class Stack {
     Pop(): StackItem;
     Top(n?: number): StackItem;
     Prev(noPop?: boolean): MmlNode | void;
+    get height(): number;
     toString(): string;
 }

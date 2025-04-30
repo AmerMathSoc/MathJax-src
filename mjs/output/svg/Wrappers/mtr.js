@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMtrMixin, CommonMlabeledtrMixin } from '../../common/Wrappers/mtr.js';
+import { CommonMtrMixin, CommonMlabeledtrMixin, } from '../../common/Wrappers/mtr.js';
 import { MmlMtr, MmlMlabeledtr } from '../../../core/MmlTree/MmlNodes/mtr.js';
 export const SvgMtr = (function () {
     var _a;
@@ -26,8 +26,13 @@ export const SvgMtr = (function () {
                     const child = this.getChild(i);
                     child.toSVG(svg);
                     x += this.placeCell(child, {
-                        x: x, y: 0, lSpace: cSpace[i] * scale, rSpace: cSpace[i + 1] * scale, w: cWidth[i] * scale,
-                        lLine: cLines[i] * scale, rLine: cLines[i + 1] * scale
+                        x: x,
+                        y: 0,
+                        lSpace: cSpace[i] * scale,
+                        rSpace: cSpace[i + 1] * scale,
+                        w: cWidth[i] * scale,
+                        lLine: cLines[i] * scale,
+                        rLine: cLines[i + 1] * scale,
                     });
                 }
             }
@@ -35,7 +40,9 @@ export const SvgMtr = (function () {
                 const scale = 1 / this.getBBox().rscale;
                 const adaptor = this.adaptor;
                 const child = this.firstChild();
-                if (child && adaptor.kind(child) === 'rect' && adaptor.getAttribute(child, 'data-bgcolor')) {
+                if (child &&
+                    adaptor.kind(child) === 'rect' &&
+                    adaptor.getAttribute(child, 'data-bgcolor')) {
                     const [TL, BL] = [(this.tLine / 2) * scale, (this.bLine / 2) * scale];
                     const [TS, BS] = [this.tSpace * scale, this.bSpace * scale];
                     const [H, D] = [this.H * scale, this.D * scale];

@@ -64,6 +64,6 @@ Entities.add({
     utrif: '\u25B4',
     uuarr: '\u21C8',
     uuml: '\u00FC',
-    uwangle: '\u29A7'
+    uwangle: '\u29A7',
 }, 'u');
 //# sourceMappingURL=u.js.map

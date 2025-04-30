@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMathMixin } from '../../common/Wrappers/math.js';
+import { CommonMathMixin, } from '../../common/Wrappers/math.js';
 import { MmlMath } from '../../../core/MmlTree/MmlNodes/math.js';
 import { BBox } from '../../../util/BBox.js';
 export const ChtmlMath = (function () {
@@ -46,7 +46,7 @@ export const ChtmlMath = (function () {
             toCHTML(parents) {
                 super.toCHTML(parents);
                 const adaptor = this.adaptor;
-                const display = (this.node.attributes.get('display') === 'block');
+                const display = this.node.attributes.get('display') === 'block';
                 if (display) {
                     adaptor.setAttribute(this.dom[0], 'display', 'true');
                     adaptor.setAttribute(parents[0], 'display', 'true');
@@ -58,13 +58,13 @@ export const ChtmlMath = (function () {
                 adaptor.addClass(this.dom[0], `${this.font.cssFontPrefix}-N`);
             }
             setChildPWidths(recompute, w = null, clear = true) {
-                return (this.parent ? super.setChildPWidths(recompute, w, clear) : false);
+                return this.parent ? super.setChildPWidths(recompute, w, clear) : false;
             }
             handleAttributes() {
                 super.handleAttributes();
                 const adaptor = this.adaptor;
                 if (this.node.getProperty('process-breaks')) {
-                    this.dom.forEach(dom => adaptor.setAttribute(dom, 'breakable', 'true'));
+                    this.dom.forEach((dom) => adaptor.setAttribute(dom, 'breakable', 'true'));
                 }
             }
         },
@@ -81,55 +81,40 @@ export const ChtmlMath = (function () {
                 'letter-spacing': 'normal',
                 'word-wrap': 'normal',
                 'word-spacing': 'normal',
-                'direction': 'ltr',
-                'padding': '1px 0'
-            },
-            'mjx-container[jax="CHTML"][display="true"]': {
-                display: 'block',
-                'text-align': 'center',
-                'justify-content': 'center',
-                margin: '1em 0'
-            },
-            'mjx-container[jax="CHTML"][display="true"][width="full"]': {
-                display: 'flex'
+                direction: 'ltr',
+                padding: '1px 0',
             },
             'mjx-container[jax="CHTML"][display="true"] mjx-math': {
-                padding: 0
-            },
-            'mjx-container[jax="CHTML"][justify="left"]': {
-                'text-align': 'left',
-                'justify-content': 'left'
-            },
-            'mjx-container[jax="CHTML"][justify="right"]': {
-                'text-align': 'right',
-                'justify-content': 'right'
-            },
-            'mjx-container[jax="CHTML"] mjx-break::after': {
-                content: '" "',
-                'white-space': 'normal',
-                'font-family': 'MJX-BRK'
-            },
-            'mjx-break[size="0"]': {
-                'letter-spacing': (.001 - 1) + 'em'
-            },
-            'mjx-break[size="1"]': {
-                'letter-spacing': (.111 - 1) + 'em'
-            },
-            'mjx-break[size="2"]': {
-                'letter-spacing': (.167 - 1) + 'em'
-            },
-            'mjx-break[size="3"]': {
-                'letter-spacing': (.222 - 1) + 'em'
-            },
-            'mjx-break[size="4"]': {
-                'letter-spacing': (.278 - 1) + 'em'
-            },
-            'mjx-break[size="5"]': {
-                'letter-spacing': (.333 - 1) + 'em'
+                padding: 0,
             },
             'mjx-math[breakable]': {
-                display: 'inline'
-            }
+                display: 'inline',
+                'font-family': 'inherit',
+            },
+            'mjx-container[jax="CHTML"] mjx-break': {
+                'white-space': 'normal',
+                'line-height': '0',
+                'clip-path': 'rect(0 0 0 0)',
+                'font-family': 'MJX-BRK !important',
+            },
+            'mjx-break[size="0"]': {
+                'letter-spacing': 0.001 - 1 + 'em',
+            },
+            'mjx-break[size="1"]': {
+                'letter-spacing': 0.111 - 1 + 'em',
+            },
+            'mjx-break[size="2"]': {
+                'letter-spacing': 0.167 - 1 + 'em',
+            },
+            'mjx-break[size="3"]': {
+                'letter-spacing': 0.222 - 1 + 'em',
+            },
+            'mjx-break[size="4"]': {
+                'letter-spacing': 0.278 - 1 + 'em',
+            },
+            'mjx-break[size="5"]': {
+                'letter-spacing': 0.333 - 1 + 'em',
+            },
         },
         _a;
 })();

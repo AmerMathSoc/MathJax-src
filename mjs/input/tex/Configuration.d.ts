@@ -1,3 +1,4 @@
+import { ConfigurationType } from './HandlerTypes.js';
 import { HandlerConfig, FallbackConfig } from './MapHandler.js';
 import { StackItemClass } from './StackItem.js';
 import { TagsClass } from './Tags.js';
@@ -14,7 +15,8 @@ export type TagsConfig = {
 };
 export type Processor<T> = [T, number];
 export type ProtoProcessor<T> = Processor<T> | T;
-export type ProcessorList = Processor<Function>[];
+type ProcessorMethod = (data: any) => void;
+export type ProcessorList = Processor<ProcessorMethod>[];
 export type ConfigMethod = (c: ParserConfiguration, j: TeX<any, any, any>) => void;
 export type InitMethod = (c: ParserConfiguration) => void;
 export declare class Configuration {
@@ -36,46 +38,46 @@ export declare class Configuration {
     private static makeProcessor;
     private static _create;
     static create(name: string, config?: {
-        handler?: HandlerConfig;
-        fallback?: FallbackConfig;
-        items?: StackItemConfig;
-        tags?: TagsConfig;
-        options?: OptionList;
-        nodes?: {
+        [ConfigurationType.HANDLER]?: HandlerConfig;
+        [ConfigurationType.FALLBACK]?: FallbackConfig;
+        [ConfigurationType.ITEMS]?: StackItemConfig;
+        [ConfigurationType.TAGS]?: TagsConfig;
+        [ConfigurationType.OPTIONS]?: OptionList;
+        [ConfigurationType.NODES]?: {
             [key: string]: any;
         };
-        preprocessors?: ProtoProcessor<Function>[];
-        postprocessors?: ProtoProcessor<Function>[];
-        init?: ProtoProcessor<InitMethod>;
-        config?: ProtoProcessor<ConfigMethod>;
-        priority?: number;
-        parser?: string;
+        [ConfigurationType.PREPROCESSORS]?: ProtoProcessor<ProcessorMethod>[];
+        [ConfigurationType.POSTPROCESSORS]?: ProtoProcessor<ProcessorMethod>[];
+        [ConfigurationType.INIT]?: ProtoProcessor<InitMethod>;
+        [ConfigurationType.CONFIG]?: ProtoProcessor<ConfigMethod>;
+        [ConfigurationType.PRIORITY]?: number;
+        [ConfigurationType.PARSER]?: string;
     }): Configuration;
     static local(config?: {
-        handler?: HandlerConfig;
-        fallback?: FallbackConfig;
-        items?: StackItemConfig;
-        tags?: TagsConfig;
-        options?: OptionList;
-        nodes?: {
+        [ConfigurationType.HANDLER]?: HandlerConfig;
+        [ConfigurationType.FALLBACK]?: FallbackConfig;
+        [ConfigurationType.ITEMS]?: StackItemConfig;
+        [ConfigurationType.TAGS]?: TagsConfig;
+        [ConfigurationType.OPTIONS]?: OptionList;
+        [ConfigurationType.NODES]?: {
             [key: string]: any;
         };
-        preprocessors?: ProtoProcessor<Function>[];
-        postprocessors?: ProtoProcessor<Function>[];
-        init?: ProtoProcessor<InitMethod>;
-        config?: ProtoProcessor<ConfigMethod>;
-        priority?: number;
-        parser?: string;
+        [ConfigurationType.PREPROCESSORS]?: ProtoProcessor<ProcessorMethod>[];
+        [ConfigurationType.POSTPROCESSORS]?: ProtoProcessor<ProcessorMethod>[];
+        [ConfigurationType.INIT]?: ProtoProcessor<InitMethod>;
+        [ConfigurationType.CONFIG]?: ProtoProcessor<ConfigMethod>;
+        [ConfigurationType.PRIORITY]?: number;
+        [ConfigurationType.PARSER]?: string;
     }): Configuration;
     private constructor();
     get init(): InitMethod;
     get config(): ConfigMethod;
 }
-export declare namespace ConfigurationHandler {
-    let set: (name: string, map: Configuration) => void;
-    let get: (name: string) => Configuration;
-    let keys: () => IterableIterator<string>;
-}
+export declare const ConfigurationHandler: {
+    set(name: string, map: Configuration): void;
+    get(name: string): Configuration;
+    keys(): IterableIterator<string>;
+};
 export declare class ParserConfiguration {
     protected initMethod: FunctionList;
     protected configMethod: FunctionList;
@@ -91,9 +93,11 @@ export declare class ParserConfiguration {
     constructor(packages: (string | [string, number])[], parsers?: string[]);
     init(): void;
     config(jax: TeX<any, any, any>): void;
-    addPackage(pkg: (string | [string, number])): void;
+    addPackage(pkg: string | [string, number]): void;
     add(name: string, jax: TeX<any, any, any>, options?: OptionList): void;
     protected getPackage(name: string): Configuration;
     append(config: Configuration, priority?: number): void;
     private addFilters;
+    private warn;
 }
+export {};

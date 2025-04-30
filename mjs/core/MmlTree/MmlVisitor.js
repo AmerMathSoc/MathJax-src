@@ -1,4 +1,4 @@
-import { TEXCLASS, TEXCLASSNAMES } from './MmlNode.js';
+import { TEXCLASS, TEXCLASSNAMES, } from './MmlNode.js';
 import { MmlMi } from './MmlNodes/mi.js';
 import { MmlFactory } from './MmlFactory.js';
 import { AbstractVisitor } from '../Tree/Visitor.js';
@@ -23,8 +23,13 @@ export class MmlVisitor extends AbstractVisitor {
         const defaults = lookup(node.kind, CLASS.defaultAttributes, {});
         const attributes = Object.assign({}, defaults, this.getDataAttributes(node), node.attributes.getAllAttributes());
         const variants = CLASS.variants;
-        if (attributes.hasOwnProperty('mathvariant') && variants.hasOwnProperty(attributes.mathvariant)) {
-            attributes.mathvariant = variants[attributes.mathvariant];
+        if (Object.hasOwn(attributes, 'mathvariant')) {
+            if (Object.hasOwn(variants, attributes.mathvariant)) {
+                attributes.mathvariant = variants[attributes.mathvariant];
+            }
+            else if (node.getProperty('ignore-variant')) {
+                delete attributes.mathvariant;
+            }
         }
         return attributes;
     }
@@ -32,14 +37,34 @@ export class MmlVisitor extends AbstractVisitor {
         const data = {};
         const variant = node.attributes.getExplicit('mathvariant');
         const variants = this.constructor.variants;
-        variant && variants.hasOwnProperty(variant) && this.setDataAttribute(data, 'variant', variant);
-        node.getProperty('variantForm') && this.setDataAttribute(data, 'alternate', '1');
-        node.getProperty('pseudoscript') && this.setDataAttribute(data, 'pseudoscript', 'true');
-        node.getProperty('autoOP') === false && this.setDataAttribute(data, 'auto-op', 'false');
+        if (variant &&
+            (node.getProperty('ignore-variant') || Object.hasOwn(variants, variant))) {
+            this.setDataAttribute(data, 'variant', variant);
+        }
+        if (node.getProperty('variantForm')) {
+            this.setDataAttribute(data, 'alternate', '1');
+        }
+        if (node.getProperty('pseudoscript')) {
+            this.setDataAttribute(data, 'pseudoscript', 'true');
+        }
+        if (node.getProperty('autoOP') === false) {
+            this.setDataAttribute(data, 'auto-op', 'false');
+        }
         const vbox = node.getProperty('vbox');
-        vbox && this.setDataAttribute(data, 'vbox', vbox);
+        if (vbox) {
+            this.setDataAttribute(data, 'vbox', vbox);
+        }
         const scriptalign = node.getProperty('scriptalign');
-        scriptalign && this.setDataAttribute(data, 'script-align', scriptalign);
+        if (scriptalign) {
+            this.setDataAttribute(data, 'script-align', scriptalign);
+        }
+        const accent = node.getProperty('mathaccent');
+        if (accent !== undefined) {
+            if ((accent && !node.isMathAccent()) ||
+                (!accent && !node.isMathAccentWithWidth())) {
+                this.setDataAttribute(data, 'mathaccent', accent.toString());
+            }
+        }
         const texclass = node.getProperty('texClass');
         if (texclass !== undefined) {
             let setclass = true;
@@ -47,10 +72,13 @@ export class MmlVisitor extends AbstractVisitor {
                 const name = node.getText();
                 setclass = !(name.length > 1 && name.match(MmlMi.operatorName));
             }
-            setclass && this.setDataAttribute(data, 'texclass', texclass < 0 ? 'NONE' : TEXCLASSNAMES[texclass]);
+            if (setclass) {
+                this.setDataAttribute(data, 'texclass', texclass < 0 ? 'NONE' : TEXCLASSNAMES[texclass]);
+            }
         }
-        node.getProperty('scriptlevel') && node.getProperty('useHeight') === false &&
+        if (node.getProperty('smallmatrix')) {
             this.setDataAttribute(data, 'smallmatrix', 'true');
+        }
         return data;
     }
     setDataAttribute(data, name, value) {
@@ -58,18 +86,18 @@ export class MmlVisitor extends AbstractVisitor {
     }
 }
 MmlVisitor.rename = {
-    TeXAtom: 'mrow'
+    TeXAtom: 'mrow',
 };
 MmlVisitor.variants = {
     '-tex-calligraphic': 'script',
     '-tex-bold-calligraphic': 'bold-script',
     '-tex-oldstyle': 'normal',
     '-tex-bold-oldstyle': 'bold',
-    '-tex-mathit': 'italic'
+    '-tex-mathit': 'italic',
 };
 MmlVisitor.defaultAttributes = {
     math: {
-        xmlns: 'http://www.w3.org/1998/Math/MathML'
-    }
+        xmlns: 'http://www.w3.org/1998/Math/MathML',
+    },
 };
 //# sourceMappingURL=MmlVisitor.js.map

@@ -1,4 +1,5 @@
 import { CONFIG, Loader } from './loader.js';
+import { context } from '../util/context.js';
 export class PackageError extends Error {
     constructor(message, name) {
         super(message);
@@ -7,7 +8,16 @@ export class PackageError extends Error {
 }
 export class Package {
     get canLoad() {
-        return this.dependencyCount === 0 && !this.noLoad && !this.isLoading && !this.hasFailed;
+        return (this.dependencyCount === 0 &&
+            !this.noLoad &&
+            !this.isLoading &&
+            !this.hasFailed);
+    }
+    static loadPromise(name) {
+        const config = (CONFIG[name] || {});
+        const promise = Promise.all((config.extraLoads || []).map((name) => Loader.load(name)));
+        const checkReady = config.checkReady || (() => Promise.resolve());
+        return promise.then(() => checkReady());
     }
     static resolvePath(name, addExtension = true) {
         const data = { name, original: name, addExtension };
@@ -23,6 +33,7 @@ export class Package {
     }
     constructor(name, noLoad = false) {
         this.isLoaded = false;
+        this.result = {};
         this.isLoading = false;
         this.hasFailed = false;
         this.dependents = [];
@@ -40,7 +51,7 @@ export class Package {
         const noLoad = this.noLoad;
         const name = this.name;
         const dependencies = [];
-        if (CONFIG.dependencies.hasOwnProperty(name)) {
+        if (Object.hasOwn(CONFIG.dependencies, name)) {
             dependencies.push(...CONFIG.dependencies[name]);
         }
         else if (name !== 'core') {
@@ -48,7 +59,7 @@ export class Package {
         }
         for (const dependent of dependencies) {
             const extension = map.get(dependent) || new Package(dependent, noLoad);
-            if (this.dependencies.indexOf(extension) < 0) {
+            if (!this.dependencies.includes(extension)) {
                 extension.addDependent(this, noLoad);
                 this.dependencies.push(extension);
                 if (!extension.isLoaded) {
@@ -93,7 +104,9 @@ export class Package {
         try {
             const result = CONFIG.require(url);
             if (result instanceof Promise) {
-                result.then(() => this.checkLoad())
+                result
+                    .then((result) => (this.result = result))
+                    .then(() => this.checkLoad())
                     .catch((err) => this.failed('Can\'t load "' + url + '"\n' + err.message.trim()));
             }
             else {
@@ -105,12 +118,12 @@ export class Package {
         }
     }
     loadScript(url) {
-        const script = document.createElement('script');
+        const script = context.document.createElement('script');
         script.src = url;
         script.charset = 'UTF-8';
         script.onload = (_event) => this.checkLoad();
         script.onerror = (_event) => this.failed('Can\'t load "' + url + '"');
-        document.head.appendChild(script);
+        context.document.head.appendChild(script);
     }
     loaded() {
         this.isLoaded = true;
@@ -129,9 +142,8 @@ export class Package {
         this.reject(new PackageError(message, this.name));
     }
     checkLoad() {
-        const config = (CONFIG[this.name] || {});
-        const checkReady = config.checkReady || (() => Promise.resolve());
-        checkReady().then(() => this.loaded())
+        Package.loadPromise(this.name)
+            .then(() => this.loaded())
             .catch((message) => this.failed(message));
     }
     requirementSatisfied() {

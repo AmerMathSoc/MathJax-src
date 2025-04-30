@@ -1,4 +1,4 @@
-import { AbstractMmlNode, TEXCLASS } from '../../core/MmlTree/MmlNode.js';
+import { AbstractMmlNode, TEXCLASS, } from '../../core/MmlTree/MmlNode.js';
 import { userOptions, defaultOptions } from '../../util/Options.js';
 import * as Entities from '../../util/Entities.js';
 export class MathMLCompile {
@@ -10,7 +10,7 @@ export class MathMLCompile {
         this.factory = mmlFactory;
     }
     compile(node) {
-        let mml = this.makeNode(node);
+        const mml = this.makeNode(node);
         mml.verifyTree(this.options['verify']);
         mml.setInheritedAttributes({}, false, 0, false);
         mml.walkTree(this.markMrows);
@@ -19,7 +19,7 @@ export class MathMLCompile {
     makeNode(node) {
         const adaptor = this.adaptor;
         let limits = false;
-        let kind = adaptor.kind(node).replace(/^.*:/, '');
+        const kind = adaptor.kind(node).replace(/^.*:/, '');
         let texClass = adaptor.getAttribute(node, 'data-mjx-texclass') || '';
         if (texClass) {
             texClass = this.filterAttribute('data-mjx-texclass', texClass) || '';
@@ -27,7 +27,7 @@ export class MathMLCompile {
         let type = texClass && kind === 'mrow' ? 'TeXAtom' : kind;
         for (const name of this.filterClassList(adaptor.allClasses(node))) {
             if (name.match(/^MJX-TeXAtom-/) && kind === 'mrow') {
-                texClass = name.substr(12);
+                texClass = name.substring(12);
                 type = 'TeXAtom';
             }
             else if (name === 'MJX-fixedlimits') {
@@ -40,7 +40,7 @@ export class MathMLCompile {
         return this.createMml(type, node, texClass, limits);
     }
     createMml(type, node, texClass, limits) {
-        let mml = this.factory.create(type);
+        const mml = this.factory.create(type);
         if (type === 'TeXAtom' && texClass === 'OP' && !limits) {
             mml.setProperty('movesupsub', true);
             mml.attributes.setInherited('movablelimits', true);
@@ -55,7 +55,8 @@ export class MathMLCompile {
         return mml;
     }
     unknownNode(type, node) {
-        if (this.factory.getNodeClass('html') && this.options.allowHtmlInTokenNodes) {
+        if (this.factory.getNodeClass('html') &&
+            this.options.allowHtmlInTokenNodes) {
             return this.factory.create('html').setHTML(node, this.adaptor);
         }
         this.error('Unknown node type "' + type + '"');
@@ -64,13 +65,13 @@ export class MathMLCompile {
     addAttributes(mml, node) {
         let ignoreVariant = false;
         for (const attr of this.adaptor.allAttributes(node)) {
-            let name = attr.name;
-            let value = this.filterAttribute(name, attr.value);
+            const name = attr.name;
+            const value = this.filterAttribute(name, attr.value);
             if (value === null || name === 'xmlns') {
                 continue;
             }
-            if (name.substr(0, 9) === 'data-mjx-') {
-                switch (name.substr(9)) {
+            if (name.substring(0, 9) === 'data-mjx-') {
+                switch (name.substring(9)) {
                     case 'alternate':
                         mml.setProperty('variantForm', true);
                         break;
@@ -80,10 +81,10 @@ export class MathMLCompile {
                         ignoreVariant = true;
                         break;
                     case 'smallmatrix':
-                        mml.setProperty('scriptlevel', 1);
+                        mml.setProperty('smallmatrix', true);
                         mml.setProperty('useHeight', false);
                         break;
-                    case 'accent':
+                    case 'mathaccent':
                         mml.setProperty('mathaccent', value === 'true');
                         break;
                     case 'auto-op':
@@ -95,10 +96,13 @@ export class MathMLCompile {
                     case 'vbox':
                         mml.setProperty('vbox', value);
                         break;
+                    default:
+                        mml.attributes.set(name, value);
+                        break;
                 }
             }
             else if (name !== 'class') {
-                let val = value.toLowerCase();
+                const val = value.toLowerCase();
                 if (val === 'true' || val === 'false') {
                     mml.attributes.set(name, val === 'true');
                 }
@@ -131,8 +135,10 @@ export class MathMLCompile {
                 mml.appendChild(this.factory.create('XML').setXML(child, adaptor));
             }
             else {
-                let childMml = mml.appendChild(this.makeNode(child));
-                if (childMml.arity === 0 && adaptor.childNodes(child).length && !childMml.isKind('html')) {
+                const childMml = mml.appendChild(this.makeNode(child));
+                if (childMml.arity === 0 &&
+                    adaptor.childNodes(child).length &&
+                    !childMml.isKind('html')) {
                     if (this.options['fixMisplacedChildren']) {
                         this.addChildren(mml, child);
                     }
@@ -142,7 +148,9 @@ export class MathMLCompile {
                 }
             }
         }
-        mml.isToken && this.trimSpace(mml);
+        if (mml.isToken) {
+            this.trimSpace(mml);
+        }
     }
     addText(mml, child) {
         let text = this.adaptor.value(child);
@@ -158,14 +166,14 @@ export class MathMLCompile {
         }
     }
     checkClass(mml, node) {
-        let classList = [];
+        const classList = [];
         for (const name of this.filterClassList(this.adaptor.allClasses(node))) {
-            if (name.substr(0, 4) === 'MJX-') {
+            if (name.substring(0, 4) === 'MJX-') {
                 if (name === 'MJX-variant') {
                     mml.setProperty('variantForm', true);
                 }
-                else if (name.substr(0, 11) !== 'MJX-TeXAtom') {
-                    mml.attributes.set('mathvariant', this.fixCalligraphic(name.substr(3)));
+                else if (name.substring(0, 11) !== 'MJX-TeXAtom') {
+                    mml.attributes.set('mathvariant', this.fixCalligraphic(name.substring(3)));
                 }
             }
             else {
@@ -181,10 +189,14 @@ export class MathMLCompile {
     }
     markMrows(mml) {
         if (mml.isKind('mrow') && !mml.isInferred && mml.childNodes.length >= 2) {
-            let first = mml.childNodes[0];
-            let last = mml.childNodes[mml.childNodes.length - 1];
-            if (first.isKind('mo') && first.attributes.get('fence') && first.attributes.get('stretchy') &&
-                last.isKind('mo') && last.attributes.get('fence') && last.attributes.get('stretchy')) {
+            const first = mml.childNodes[0];
+            const last = mml.childNodes[mml.childNodes.length - 1];
+            if (first.isKind('mo') &&
+                first.attributes.get('fence') &&
+                first.attributes.get('stretchy') &&
+                last.isKind('mo') &&
+                last.attributes.get('fence') &&
+                last.attributes.get('stretchy')) {
                 if (first.childNodes.length) {
                     mml.setProperty('open', first.getText());
                 }
@@ -195,16 +207,21 @@ export class MathMLCompile {
         }
     }
     normalizeSpace(text) {
-        return text.replace(/[\t\n\r]/g, ' ')
+        return text
+            .replace(/[\t\n\r]/g, ' ')
             .replace(/  +/g, ' ');
     }
     trimSpace(mml) {
         let child = mml.childNodes[0];
         if (!child)
             return;
-        child.isKind('text') && child.setText(child.getText().replace(/^ +/, ''));
+        if (child.isKind('text')) {
+            child.setText(child.getText().replace(/^ +/, ''));
+        }
         child = mml.childNodes[mml.childNodes.length - 1];
-        child.isKind('text') && child.setText(child.getText().replace(/ +$/, ''));
+        if (child.isKind('text')) {
+            child.setText(child.getText().replace(/ +$/, ''));
+        }
     }
     error(message) {
         throw new Error(message);

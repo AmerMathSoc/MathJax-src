@@ -11,7 +11,8 @@ export class HTMLMathItem extends AbstractMathItem {
             if (this.inputJax.processStrings) {
                 let node = this.start.node;
                 if (node === this.end.node) {
-                    if (this.end.n && this.end.n < this.adaptor.value(this.end.node).length) {
+                    if (this.end.n &&
+                        this.end.n < this.adaptor.value(this.end.node).length) {
                         this.adaptor.split(this.end.node, this.end.n);
                     }
                     if (this.start.n) {
@@ -24,7 +25,7 @@ export class HTMLMathItem extends AbstractMathItem {
                         node = this.adaptor.split(node, this.start.n);
                     }
                     while (node !== this.end.node) {
-                        let next = this.adaptor.next(node);
+                        const next = this.adaptor.next(node);
                         this.adaptor.remove(node);
                         node = next;
                     }
@@ -47,12 +48,13 @@ export class HTMLMathItem extends AbstractMathItem {
         document.addStyleSheet();
     }
     removeFromDocument(restore = false) {
+        super.removeFromDocument(restore);
         if (this.state() >= STATE.TYPESET) {
             const adaptor = this.adaptor;
-            let node = this.start.node;
+            const node = this.start.node;
             let math = adaptor.text('');
             if (restore) {
-                let text = this.start.delim + this.math + this.end.delim;
+                const text = this.start.delim + this.math + this.end.delim;
                 if (this.inputJax.processStrings) {
                     math = adaptor.text(text);
                 }

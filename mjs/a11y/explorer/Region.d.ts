@@ -1,6 +1,7 @@
 import { MathDocument } from '../../core/MathDocument.js';
-import { CssStyles } from '../../util/StyleList.js';
-import { Sre } from '../sre.js';
+import { StyleJsonSheet } from '../../util/StyleJson.js';
+import * as Sre from '../sre.js';
+import { SsmlElement } from '../speech/SpeechUtil.js';
 export type A11yDocument = MathDocument<HTMLElement, Text, Document>;
 export interface Region<T> {
     AddStyles(): void;
@@ -14,8 +15,8 @@ export declare abstract class AbstractRegion<T> implements Region<T> {
     document: A11yDocument;
     protected static className: string;
     protected static styleAdded: boolean;
-    protected static style: CssStyles;
-    protected div: HTMLElement;
+    protected static style: StyleJsonSheet;
+    div: HTMLElement;
     protected inner: HTMLElement;
     protected CLASS: typeof AbstractRegion;
     constructor(document: A11yDocument);
@@ -47,13 +48,11 @@ export declare class StringRegion extends AbstractRegion<string> {
 }
 export declare class ToolTip extends StringRegion {
     protected static className: string;
-    protected static style: CssStyles;
+    protected static style: StyleJsonSheet;
 }
 export declare class LiveRegion extends StringRegion {
-    document: A11yDocument;
     protected static className: string;
-    protected static style: CssStyles;
-    constructor(document: A11yDocument);
+    protected static style: StyleJsonSheet;
 }
 export declare class SpeechRegion extends LiveRegion {
     active: boolean;
@@ -61,21 +60,15 @@ export declare class SpeechRegion extends LiveRegion {
     private clear;
     highlighter: Sre.highlighter;
     Show(node: HTMLElement, highlighter: Sre.highlighter): void;
+    private voiceRequest;
     Update(speech: string): void;
-    private makeUtterances;
+    private makeVoice;
+    protected makeUtterances(ssml: SsmlElement[], locale: string): void;
     private highlightNode;
-    private ssmlParsing;
-    private recurseSsml;
-    private static combinePros;
-    private getProsody;
-    private static prosodyRegexp;
-    private static extractProsody;
 }
 export declare class HoverRegion extends AbstractRegion<HTMLElement> {
-    document: A11yDocument;
     protected static className: string;
-    protected static style: CssStyles;
-    constructor(document: A11yDocument);
+    protected static style: StyleJsonSheet;
     protected position(node: HTMLElement): void;
     protected highlight(highlighter: Sre.highlighter): void;
     Show(node: HTMLElement, highlighter: Sre.highlighter): void;

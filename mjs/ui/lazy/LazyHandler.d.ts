@@ -1,8 +1,8 @@
 import { MathDocumentConstructor } from '../../core/MathDocument.js';
 import { MathItem } from '../../core/MathItem.js';
-import { HTMLMathItem } from '../../handlers/html/HTMLMathItem.js';
 import { HTMLDocument } from '../../handlers/html/HTMLDocument.js';
 import { HTMLHandler } from '../../handlers/html/HTMLHandler.js';
+import { SpeechMathItem } from '../../a11y/speech.js';
 export type Constructor<T> = new (...args: any[]) => T;
 export type LazySet = Set<string>;
 export declare class LazyList<N, T, D> {
@@ -19,7 +19,7 @@ export interface LazyMathItem<N, T, D> extends MathItem<N, T, D> {
     lazyMarker: N;
     lazyTex: boolean;
 }
-export declare function LazyMathItemMixin<N, T, D, B extends Constructor<HTMLMathItem<N, T, D>>>(BaseMathItem: B): Constructor<LazyMathItem<N, T, D>> & B;
+export declare function LazyMathItemMixin<N, T, D, B extends Constructor<SpeechMathItem<N, T, D>>>(BaseMathItem: B): Constructor<LazyMathItem<N, T, D>> & B;
 export interface LazyMathDocument<N, T, D> extends HTMLDocument<N, T, D> {
     lazyObserver: IntersectionObserver;
     lazyList: LazyList<N, T, D>;

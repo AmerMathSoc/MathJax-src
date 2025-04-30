@@ -3,9 +3,8 @@ import { EnvList } from '../StackItem.js';
 import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
 import { MmlMtable } from '../../../core/MmlTree/MmlNodes/mtable.js';
 import { MmlMtd } from '../../../core/MmlTree/MmlNodes/mtd.js';
-import { EmpheqBeginItem } from './EmpheqConfiguration.js';
+import { BeginItem } from '../base/BaseItems.js';
 export declare const EmpheqUtil: {
-    environment(parser: TexParser, env: string, func: Function, args: any[]): void;
     splitOptions(text: string, allowed?: {
         [key: string]: number;
     }): EnvList;
@@ -15,7 +14,7 @@ export declare const EmpheqUtil: {
     rowspanCell(mtd: MmlMtd, tex: string, table: MmlMtable, parser: TexParser, env: string): void;
     left(table: MmlMtable, original: MmlMtable, left: string, parser: TexParser, env?: string): void;
     right(table: MmlMtable, original: MmlMtable, right: string, parser: TexParser, env?: string): void;
-    adjustTable(empheq: EmpheqBeginItem, parser: TexParser): void;
+    adjustTable(empheq: BeginItem, parser: TexParser): void;
     allowEnv: {
         equation: boolean;
         align: boolean;

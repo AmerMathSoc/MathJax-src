@@ -8,10 +8,16 @@ export interface MinDocument<N, T> {
     doctype: {
         name: string;
     };
+    defaultView: MinWindow<N, MinDocument<N, T>>;
+    location: {
+        protocol: string;
+        host: string;
+    };
     createElement(kind: string): N;
     createElementNS(ns: string, kind: string): N;
     createTextNode(text: string): T;
     querySelectorAll(selector: string): ArrayLike<N>;
+    querySelector(selector: string): N | null;
 }
 export interface MinHTMLElement<N, T> {
     nodeType: number;
@@ -31,6 +37,9 @@ export interface MinHTMLElement<N, T> {
     style: OptionList;
     sheet?: {
         insertRule: (rule: string, index?: number) => void;
+        cssRules: Array<{
+            cssText: string;
+        }>;
     };
     childNodes: (N | T)[] | NodeList;
     firstChild: N | T | Node;
@@ -48,13 +57,15 @@ export interface MinHTMLElement<N, T> {
     getAttribute(name: string): string;
     removeAttribute(name: string): void;
     hasAttribute(name: string): boolean;
-    getBoundingClientRect(): Object;
+    getBoundingClientRect(): object;
     getBBox?(): {
         x: number;
         y: number;
         width: number;
         height: number;
     };
+    querySelector(selector: string): N | null;
+    src?: string;
 }
 export interface MinText<N, T> {
     nodeType: number;
@@ -85,6 +96,8 @@ export interface MinWindow<N, D> {
     DocumentFragment: any;
     Document: any;
     getComputedStyle(node: N): any;
+    addEventListener(kind: string, listener: (event: any) => void): void;
+    postMessage(msg: any, domain: string): void;
 }
 export interface MinHTMLAdaptor<N, T, D> extends DOMAdaptor<N, T, D> {
     window: MinWindow<N, D>;
@@ -97,12 +110,16 @@ export declare class HTMLAdaptor<N extends MinHTMLElement<N, T>, T extends MinTe
     parse(text: string, format?: string): D;
     protected create(kind: string, ns?: string): N;
     text(text: string): T;
-    head(doc: D): N;
-    body(doc: D): N;
-    root(doc: D): N;
-    doctype(doc: D): string;
+    head(doc?: D): N;
+    body(doc?: D): N;
+    root(doc?: D): N;
+    doctype(doc?: D): string;
+    domain(doc?: D | N): string;
+    listener(listener: (event: any) => void, doc?: D): void;
+    post(msg: any, domain: string, doc?: D): void;
     tags(node: N, name: string, ns?: string): N[];
     getElements(nodes: (string | N | N[])[], _document: D): N[];
+    getElement(selector: string, node?: D | N): N;
     contains(container: N, node: N | T): boolean;
     parent(node: N | T): N;
     append(node: N, child: N | T): N | T;
@@ -135,6 +152,7 @@ export declare class HTMLAdaptor<N extends MinHTMLElement<N, T>, T extends MinTe
     getStyle(node: N, name: string): any;
     allStyles(node: N): any;
     insertRules(node: N, rules: string[]): void;
+    cssText(node: N): string;
     fontSize(node: N): number;
     fontFamily(node: N): any;
     nodeSize(node: N, em?: number, local?: boolean): [number, number];

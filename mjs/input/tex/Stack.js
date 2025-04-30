@@ -23,10 +23,13 @@ export default class Stack {
             if (!node) {
                 continue;
             }
-            const item = NodeUtil.isNode(node) ?
-                this._factory.create('mml', node) : node;
+            const item = NodeUtil.isNode(node)
+                ? this._factory.create('mml', node)
+                : node;
             item.global = this.global;
-            const [top, success] = this.stack.length ? this.Top().checkItem(item) : [null, true];
+            const [top, success] = this.stack.length
+                ? this.Top().checkItem(item)
+                : [null, true];
             if (!success) {
                 continue;
             }
@@ -35,7 +38,9 @@ export default class Stack {
                 this.Push(...top);
                 continue;
             }
-            this.stack.push(item);
+            if (!item.isKind('null')) {
+                this.stack.push(item);
+            }
             if (item.env) {
                 if (item.copyEnv) {
                     Object.assign(item.env, this.env);
@@ -52,7 +57,7 @@ export default class Stack {
         if (!item.isOpen) {
             delete item.env;
         }
-        this.env = (this.stack.length ? this.Top().env : {});
+        this.env = this.stack.length ? this.Top().env : {};
         return item;
     }
     Top(n = 1) {
@@ -61,6 +66,9 @@ export default class Stack {
     Prev(noPop) {
         const top = this.Top();
         return noPop ? top.First : top.Pop();
+    }
+    get height() {
+        return this.stack.length;
     }
     toString() {
         return 'stack[\n  ' + this.stack.join('\n  ') + '\n]';

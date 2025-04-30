@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMactionMixin } from '../../common/Wrappers/maction.js';
+import { CommonMactionMixin, } from '../../common/Wrappers/maction.js';
 import { TooltipData } from '../../common/Wrappers/maction.js';
 import { MmlMaction } from '../../../core/MmlTree/MmlNodes/maction.js';
 import { STATE } from '../../../core/MathItem.js';
@@ -8,7 +8,7 @@ export const SvgMaction = (function () {
     const Base = CommonMactionMixin(SvgWrapper);
     return _a = class SvgMaction extends Base {
             setEventHandler(type, handler, dom = null) {
-                (dom ? [dom] : this.dom).forEach(node => node.addEventListener(type, handler));
+                (dom ? [dom] : this.dom).forEach((node) => node.addEventListener(type, handler));
             }
             Px(m) {
                 return this.px(m);
@@ -19,12 +19,15 @@ export const SvgMaction = (function () {
                 const svg = this.standardSvgNodes(parents);
                 const child = this.selected;
                 let i = 0;
-                this.dom.forEach(node => {
+                this.dom.forEach((node) => {
                     const { h, d, w } = child.getLineBBox(i++);
                     this.adaptor.append(node, this.svg('rect', {
-                        width: this.fixed(w), height: this.fixed(h + d),
-                        x: (i === 1 ? this.fixed(-this.dx) : 0), y: this.fixed(-d),
-                        fill: 'none', 'pointer-events': 'all'
+                        width: this.fixed(w),
+                        height: this.fixed(h + d),
+                        x: i === 1 ? this.fixed(-this.dx) : 0,
+                        y: this.fixed(-d),
+                        fill: 'none',
+                        'pointer-events': 'all',
                     }));
                 });
                 child.toSVG(svg);
@@ -40,11 +43,13 @@ export const SvgMaction = (function () {
             '[jax="SVG"] mjx-tool': {
                 display: 'inline-block',
                 position: 'relative',
-                width: 0, height: 0
+                width: 0,
+                height: 0,
             },
             '[jax="SVG"] mjx-tool > mjx-tip': {
                 position: 'absolute',
-                top: 0, left: 0
+                top: 0,
+                left: 0,
             },
             'mjx-tool > mjx-tip': {
                 display: 'inline-block',
@@ -53,10 +58,10 @@ export const SvgMaction = (function () {
                 border: '1px solid #888',
                 'background-color': '#F8F8F8',
                 color: 'black',
-                'box-shadow': '2px 2px 5px #AAAAAA'
+                'box-shadow': '2px 2px 5px #AAAAAA',
             },
             'g[data-mml-node="maction"][data-toggle]': {
-                cursor: 'pointer'
+                cursor: 'pointer',
             },
             'mjx-status': {
                 display: 'block',
@@ -68,12 +73,15 @@ export const SvgMaction = (function () {
                 border: '1px solid #888',
                 'font-size': '90%',
                 'background-color': '#F8F8F8',
-                color: 'black'
-            }
+                color: 'black',
+            },
         },
         _a.actions = new Map([
-            ['toggle', [(node, _data) => {
-                        node.dom.forEach(dom => {
+            [
+                'toggle',
+                [
+                    (node, _data) => {
+                        node.dom.forEach((dom) => {
                             node.adaptor.setAttribute(dom, 'data-toggle', node.node.attributes.get('selection'));
                         });
                         const math = node.factory.jax.math;
@@ -85,12 +93,19 @@ export const SvgMaction = (function () {
                                 math.start.n = math.end.n = 0;
                             }
                             mml.nextToggleSelection();
-                            math.rerender(document, mml.attributes.get('data-maction-id') ?
-                                STATE.ENRICHED : STATE.RERENDER);
+                            math.rerender(document, mml.attributes.get('data-maction-id')
+                                ? STATE.ENRICHED
+                                : STATE.RERENDER);
                             event.stopPropagation();
                         });
-                    }, {}]],
-            ['tooltip', [(node, data) => {
+                    },
+                    {},
+                ],
+            ],
+            [
+                'tooltip',
+                [
+                    (node, data) => {
                         const tip = node.childNodes[1];
                         if (!tip)
                             return;
@@ -105,7 +120,9 @@ export const SvgMaction = (function () {
                                 const container = node.jax.container;
                                 const math = node.node.factory.create('math', {}, [node.childNodes[1].node]);
                                 const tool = node.html('mjx-tool', {}, [node.html('mjx-tip')]);
-                                const hidden = adaptor.append(rect, node.svg('foreignObject', { style: { display: 'none' } }, [tool]));
+                                const hidden = adaptor.append(rect, node.svg('foreignObject', { style: { display: 'none' } }, [
+                                    tool,
+                                ]));
                                 node.jax.processMath(node.jax.factory.wrap(math), adaptor.firstChild(tool));
                                 node.childNodes[1].node.parent = node.node;
                                 node.setEventHandler('mouseover', (event) => {
@@ -116,8 +133,10 @@ export const SvgMaction = (function () {
                                         adaptor.append(container, tool);
                                         const tbox = adaptor.nodeBBox(tool);
                                         const nbox = adaptor.nodeBBox(dom);
-                                        const dx = (nbox.right - tbox.left) / node.metrics.em + node.tipDx;
-                                        const dy = (nbox.bottom - tbox.bottom) / node.metrics.em + node.tipDy;
+                                        const dx = (nbox.right - tbox.left) / node.metrics.em +
+                                            node.tipDx;
+                                        const dy = (nbox.bottom - tbox.bottom) / node.metrics.em +
+                                            node.tipDy;
                                         adaptor.setStyle(tool, 'left', node.Px(dx));
                                         adaptor.setStyle(tool, 'top', node.Px(dy));
                                     }, data.postDelay));
@@ -131,15 +150,21 @@ export const SvgMaction = (function () {
                                 }, dom);
                             }
                         }
-                    }, TooltipData]],
-            ['statusline', [(node, data) => {
+                    },
+                    TooltipData,
+                ],
+            ],
+            [
+                'statusline',
+                [
+                    (node, data) => {
                         const tip = node.childNodes[1];
                         if (!tip)
                             return;
                         if (tip.node.isKind('mtext')) {
                             const adaptor = node.adaptor;
                             const text = tip.node.getText();
-                            node.dom.forEach(dom => adaptor.setAttribute(dom, 'data-statusline', text));
+                            node.dom.forEach((dom) => adaptor.setAttribute(dom, 'data-statusline', text));
                             node.setEventHandler('mouseover', (event) => {
                                 if (data.status === null) {
                                     const body = adaptor.body(adaptor.document);
@@ -155,9 +180,12 @@ export const SvgMaction = (function () {
                                 event.stopPropagation();
                             });
                         }
-                    }, {
-                        status: null
-                    }]]
+                    },
+                    {
+                        status: null,
+                    },
+                ],
+            ],
         ]),
         _a;
 })();

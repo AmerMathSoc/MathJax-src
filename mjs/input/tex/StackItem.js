@@ -2,6 +2,9 @@ import TexError from './TexError.js';
 export class MmlStack {
     constructor(_nodes) {
         this._nodes = _nodes;
+        this.startStr = '';
+        this.startI = 0;
+        this.stopI = 0;
     }
     get nodes() {
         return this._nodes;
@@ -125,7 +128,7 @@ export class BaseItem extends MmlStack {
     }
     getErrors(kind) {
         const CLASS = this.constructor;
-        return (CLASS.errors || {})[kind] || BaseItem.errors[kind];
+        return CLASS.errors[kind] || BaseItem.errors[kind];
     }
 }
 BaseItem.fail = [null, false];
@@ -134,6 +137,6 @@ BaseItem.errors = {
     end: ['MissingBeginExtraEnd', 'Missing \\begin{%1} or extra \\end{%1}'],
     close: ['ExtraCloseMissingOpen', 'Extra close brace or missing open brace'],
     right: ['MissingLeftExtraRight', 'Missing \\left or extra \\right'],
-    middle: ['ExtraMiddle', 'Extra \\middle']
+    middle: ['ExtraMiddle', 'Extra \\middle'],
 };
 //# sourceMappingURL=StackItem.js.map

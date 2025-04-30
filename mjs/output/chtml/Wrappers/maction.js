@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMactionMixin } from '../../common/Wrappers/maction.js';
+import { CommonMactionMixin, } from '../../common/Wrappers/maction.js';
 import { MmlMaction } from '../../../core/MmlTree/MmlNodes/maction.js';
 import { TooltipData } from '../../common/Wrappers/maction.js';
 import { STATE } from '../../../core/MathItem.js';
@@ -8,7 +8,7 @@ export const ChtmlMaction = (function () {
     const Base = CommonMactionMixin(ChtmlWrapper);
     return _a = class ChtmlMaction extends Base {
             setEventHandler(type, handler, dom = null) {
-                (dom ? [dom] : this.dom).forEach(node => node.addEventListener(type, handler));
+                (dom ? [dom] : this.dom).forEach((node) => node.addEventListener(type, handler));
             }
             Em(m) {
                 return this.em(m);
@@ -25,14 +25,16 @@ export const ChtmlMaction = (function () {
         _a.kind = MmlMaction.prototype.kind,
         _a.styles = {
             'mjx-maction': {
-                position: 'relative'
+                position: 'relative',
             },
             'mjx-maction > mjx-tool': {
                 display: 'none',
                 position: 'absolute',
-                bottom: 0, right: 0,
-                width: 0, height: 0,
-                'z-index': 500
+                bottom: 0,
+                right: 0,
+                width: 0,
+                height: 0,
+                'z-index': 500,
             },
             'mjx-tool > mjx-tip': {
                 display: 'inline-block',
@@ -41,10 +43,10 @@ export const ChtmlMaction = (function () {
                 border: '1px solid #888',
                 'background-color': '#F8F8F8',
                 color: 'black',
-                'box-shadow': '2px 2px 5px #AAAAAA'
+                'box-shadow': '2px 2px 5px #AAAAAA',
             },
             'mjx-maction[toggle]': {
-                cursor: 'pointer'
+                cursor: 'pointer',
             },
             'mjx-status': {
                 display: 'block',
@@ -56,12 +58,15 @@ export const ChtmlMaction = (function () {
                 border: '1px solid #888',
                 'font-size': '90%',
                 'background-color': '#F8F8F8',
-                color: 'black'
-            }
+                color: 'black',
+            },
         },
         _a.actions = new Map([
-            ['toggle', [(node, _data) => {
-                        node.dom.forEach(dom => {
+            [
+                'toggle',
+                [
+                    (node, _data) => {
+                        node.dom.forEach((dom) => {
                             node.adaptor.setAttribute(dom, 'toggle', node.node.attributes.get('selection'));
                         });
                         const math = node.factory.jax.math;
@@ -73,24 +78,34 @@ export const ChtmlMaction = (function () {
                                 math.start.n = math.end.n = 0;
                             }
                             mml.nextToggleSelection();
-                            math.rerender(document, mml.attributes.get('data-maction-id') ?
-                                STATE.ENRICHED : STATE.RERENDER);
+                            math.rerender(document, mml.attributes.get('data-maction-id')
+                                ? STATE.ENRICHED
+                                : STATE.RERENDER);
                             event.stopPropagation();
                         });
-                    }, {}]],
-            ['tooltip', [(node, data) => {
+                    },
+                    {},
+                ],
+            ],
+            [
+                'tooltip',
+                [
+                    (node, data) => {
                         const tip = node.childNodes[1];
                         if (!tip)
                             return;
                         if (tip.node.isKind('mtext')) {
                             const text = tip.node.getText();
-                            node.dom.forEach(dom => node.adaptor.setAttribute(dom, 'title', text));
+                            node.dom.forEach((dom) => node.adaptor.setAttribute(dom, 'title', text));
                         }
                         else {
                             const adaptor = node.adaptor;
                             for (const dom of node.dom) {
                                 const tool = adaptor.append(dom, node.html('mjx-tool', {
-                                    style: { bottom: node.Em(-node.tipDy), right: node.Em(-node.tipDx) }
+                                    style: {
+                                        bottom: node.Em(-node.tipDy),
+                                        right: node.Em(-node.tipDx),
+                                    },
                                 }, [node.html('mjx-tip')]));
                                 tip.toCHTML([adaptor.firstChild(tool)]);
                                 node.setEventHandler('mouseover', (event) => {
@@ -107,15 +122,21 @@ export const ChtmlMaction = (function () {
                                 }, dom);
                             }
                         }
-                    }, TooltipData]],
-            ['statusline', [(node, data) => {
+                    },
+                    TooltipData,
+                ],
+            ],
+            [
+                'statusline',
+                [
+                    (node, data) => {
                         const tip = node.childNodes[1];
                         if (!tip)
                             return;
                         if (tip.node.isKind('mtext')) {
                             const adaptor = node.adaptor;
                             const text = tip.node.getText();
-                            node.dom.forEach(dom => adaptor.setAttribute(dom, 'statusline', text));
+                            node.dom.forEach((dom) => adaptor.setAttribute(dom, 'statusline', text));
                             node.setEventHandler('mouseover', (event) => {
                                 if (data.status === null) {
                                     const body = adaptor.body(adaptor.document);
@@ -131,9 +152,12 @@ export const ChtmlMaction = (function () {
                                 event.stopPropagation();
                             });
                         }
-                    }, {
-                        status: null
-                    }]]
+                    },
+                    {
+                        status: null,
+                    },
+                ],
+            ],
         ]),
         _a;
 })();

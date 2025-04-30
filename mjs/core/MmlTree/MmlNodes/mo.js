@@ -1,5 +1,5 @@
-import { AbstractMmlTokenNode, TEXCLASS } from '../MmlNode.js';
-import { OPTABLE, getRange, MMLSPACING } from '../OperatorDictionary.js';
+import { AbstractMmlTokenNode, TEXCLASS, } from '../MmlNode.js';
+import { OPTABLE, OPDEF, getRange, MMLSPACING, } from '../OperatorDictionary.js';
 import { unicodeChars, unicodeString } from '../../../util/string.js';
 export class MmlMo extends AbstractMmlTokenNode {
     constructor() {
@@ -10,11 +10,7 @@ export class MmlMo extends AbstractMmlTokenNode {
     }
     get texClass() {
         if (this._texClass === null) {
-            let mo = this.getText();
-            let [form1, form2, form3] = this.handleExplicitForm(this.getForms());
-            let OPTABLE = this.constructor.OPTABLE;
-            let def = OPTABLE[form1][mo] || OPTABLE[form2][mo] || OPTABLE[form3][mo];
-            return def ? def[2] : TEXCLASS.REL;
+            return this.getOperatorDef(this.getText())[2];
         }
         return this._texClass;
     }
@@ -28,14 +24,17 @@ export class MmlMo extends AbstractMmlTokenNode {
         return true;
     }
     coreParent() {
-        let embellished = this;
+        let embellished = null;
         let parent = this;
-        let math = this.factory.getNodeClass('math');
-        while (parent && parent.isEmbellished && parent.coreMO() === this && !(parent instanceof math)) {
+        const math = this.factory.getNodeClass('math');
+        while (parent &&
+            parent.isEmbellished &&
+            parent.coreMO() === this &&
+            !(parent instanceof math)) {
             embellished = parent;
             parent = parent.parent;
         }
-        return embellished;
+        return embellished || this;
     }
     coreText(parent) {
         if (!parent) {
@@ -47,11 +46,13 @@ export class MmlMo extends AbstractMmlTokenNode {
         while ((((parent.isKind('mrow') ||
             parent.isKind('TeXAtom') ||
             parent.isKind('mstyle') ||
-            parent.isKind('mphantom')) && parent.childNodes.length === 1) ||
-            parent.isKind('munderover')) && parent.childNodes[0]) {
+            parent.isKind('mphantom')) &&
+            parent.childNodes.length === 1) ||
+            parent.isKind('munderover')) &&
+            parent.childNodes[0]) {
             parent = parent.childNodes[0];
         }
-        return (parent.isToken ? parent.getText() : '');
+        return parent.isToken ? parent.getText() : '';
     }
     hasSpacingAttributes() {
         return this.attributes.isSet('lspace') || this.attributes.isSet('rspace');
@@ -60,18 +61,21 @@ export class MmlMo extends AbstractMmlTokenNode {
         let accent = false;
         const node = this.coreParent().parent;
         if (node) {
-            const key = (node.isKind('mover') ?
-                (node.childNodes[node.over].coreMO() ?
-                    'accent' : '') :
-                node.isKind('munder') ?
-                    (node.childNodes[node.under].coreMO() ?
-                        'accentunder' : '') :
-                    node.isKind('munderover') ?
-                        (this === node.childNodes[node.over].coreMO() ?
-                            'accent' :
-                            this === node.childNodes[node.under].coreMO() ?
-                                'accentunder' : '') :
-                        '');
+            const key = node.isKind('mover')
+                ? node.childNodes[node.over].coreMO()
+                    ? 'accent'
+                    : ''
+                : node.isKind('munder')
+                    ? node.childNodes[node.under].coreMO()
+                        ? 'accentunder'
+                        : ''
+                    : node.isKind('munderover')
+                        ? this === node.childNodes[node.over].coreMO()
+                            ? 'accent'
+                            : this === node.childNodes[node.under].coreMO()
+                                ? 'accentunder'
+                                : ''
+                        : '';
             if (key) {
                 const value = node.attributes.getExplicit(key);
                 accent = (value !== undefined ? accent : this.attributes.get('accent'));
@@ -80,8 +84,9 @@ export class MmlMo extends AbstractMmlTokenNode {
         return accent;
     }
     setTeXclass(prev) {
-        let { form, fence } = this.attributes.getList('form', 'fence');
-        if (this.getProperty('texClass') === undefined && this.hasSpacingAttributes()) {
+        const { form, fence } = this.attributes.getList('form', 'fence');
+        if (this.getProperty('texClass') === undefined &&
+            this.hasSpacingAttributes()) {
             return null;
         }
         if (fence && this.texClass === TEXCLASS.REL) {
@@ -95,39 +100,49 @@ export class MmlMo extends AbstractMmlTokenNode {
         return this.adjustTeXclass(prev);
     }
     adjustTeXclass(prev) {
-        let texClass = this.texClass;
+        const texClass = this.texClass;
         let prevClass = this.prevClass;
         if (texClass === TEXCLASS.NONE) {
             return prev;
         }
         if (prev) {
-            if (prev.getProperty('autoOP') && (texClass === TEXCLASS.BIN || texClass === TEXCLASS.REL)) {
+            if (prev.getProperty('autoOP') &&
+                (texClass === TEXCLASS.BIN || texClass === TEXCLASS.REL)) {
                 prevClass = prev.texClass = TEXCLASS.ORD;
             }
-            prevClass = this.prevClass = (prev.texClass || TEXCLASS.ORD);
+            prevClass = this.prevClass = prev.texClass || TEXCLASS.ORD;
             this.prevLevel = this.attributes.getInherited('scriptlevel');
         }
         else {
             prevClass = this.prevClass = TEXCLASS.NONE;
         }
         if (texClass === TEXCLASS.BIN &&
-            (prevClass === TEXCLASS.NONE || prevClass === TEXCLASS.BIN || prevClass === TEXCLASS.OP ||
-                prevClass === TEXCLASS.REL || prevClass === TEXCLASS.OPEN || prevClass === TEXCLASS.PUNCT)) {
+            (prevClass === TEXCLASS.NONE ||
+                prevClass === TEXCLASS.BIN ||
+                prevClass === TEXCLASS.OP ||
+                prevClass === TEXCLASS.REL ||
+                prevClass === TEXCLASS.OPEN ||
+                prevClass === TEXCLASS.PUNCT)) {
             this.texClass = TEXCLASS.ORD;
         }
         else if (prevClass === TEXCLASS.BIN &&
-            (texClass === TEXCLASS.REL || texClass === TEXCLASS.CLOSE || texClass === TEXCLASS.PUNCT)) {
+            (texClass === TEXCLASS.REL ||
+                texClass === TEXCLASS.CLOSE ||
+                texClass === TEXCLASS.PUNCT)) {
             prev.texClass = this.prevClass = TEXCLASS.ORD;
         }
         else if (texClass === TEXCLASS.BIN) {
-            let child = this;
+            let child = null;
             let parent = this.parent;
-            while (parent && parent.parent && parent.isEmbellished &&
+            while (parent &&
+                parent.parent &&
+                parent.isEmbellished &&
                 (parent.childNodes.length === 1 ||
                     (!parent.isKind('mrow') && parent.core() === child))) {
                 child = parent;
                 parent = parent.parent;
             }
+            child = child || this;
             if (parent.childNodes[parent.childNodes.length - 1] === child) {
                 this.texClass = TEXCLASS.ORD;
             }
@@ -136,41 +151,44 @@ export class MmlMo extends AbstractMmlTokenNode {
     }
     setInheritedAttributes(attributes = {}, display = false, level = 0, prime = false) {
         super.setInheritedAttributes(attributes, display, level, prime);
-        let mo = this.getText();
+        const mo = this.getText();
         this.checkOperatorTable(mo);
         this.checkPseudoScripts(mo);
         this.checkPrimes(mo);
         this.checkMathAccent(mo);
     }
-    checkOperatorTable(mo) {
-        let [form1, form2, form3] = this.handleExplicitForm(this.getForms());
+    getOperatorDef(mo) {
+        const [form1, form2, form3] = this.handleExplicitForm(this.getForms());
         this.attributes.setInherited('form', form1);
-        let OPTABLE = this.constructor.OPTABLE;
-        let def = OPTABLE[form1][mo] || OPTABLE[form2][mo] || OPTABLE[form3][mo];
+        const CLASS = this.constructor;
+        const OPTABLE = CLASS.OPTABLE;
+        const def = OPTABLE[form1][mo] || OPTABLE[form2][mo] || OPTABLE[form3][mo];
         if (def) {
-            if (this.getProperty('texClass') === undefined) {
-                this.texClass = def[2];
-            }
-            for (const name of Object.keys(def[3] || {})) {
-                this.attributes.setInherited(name, def[3][name]);
-            }
-            this.lspace = (def[0] + 1) / 18;
-            this.rspace = (def[1] + 1) / 18;
+            return def;
         }
-        else {
-            let range = getRange(mo);
-            if (range) {
-                if (this.getProperty('texClass') === undefined) {
-                    this.texClass = range[2];
-                }
-                const spacing = this.constructor.MMLSPACING[range[2]];
-                this.lspace = (spacing[0] + 1) / 18;
-                this.rspace = (spacing[1] + 1) / 18;
-            }
+        this.setProperty('noDictDef', true);
+        const limits = this.attributes.get('movablelimits');
+        const isOP = !!mo.match(CLASS.opPattern);
+        if ((isOP || limits) && this.getProperty('texClass') === undefined) {
+            return OPDEF(1, 2, TEXCLASS.OP);
         }
+        const range = getRange(mo);
+        const [l, r] = CLASS.MMLSPACING[range[2]];
+        return OPDEF(l, r, range[2]);
+    }
+    checkOperatorTable(mo) {
+        const def = this.getOperatorDef(mo);
+        if (this.getProperty('texClass') === undefined) {
+            this.texClass = def[2];
+        }
+        for (const name of Object.keys(def[3] || {})) {
+            this.attributes.setInherited(name, def[3][name]);
+        }
+        this.lspace = (def[0] + 1) / 18;
+        this.rspace = (def[1] + 1) / 18;
     }
     getForms() {
-        let core = this;
+        let core = null;
         let parent = this.parent;
         let Parent = this.Parent;
         while (Parent && Parent.isEmbellished) {
@@ -178,7 +196,10 @@ export class MmlMo extends AbstractMmlTokenNode {
             parent = Parent.parent;
             Parent = Parent.Parent;
         }
-        if (parent && parent.isKind('mrow') && parent.nonSpaceLength() !== 1) {
+        core = core || this;
+        if (parent &&
+            parent.isKind('mrow') &&
+            parent.nonSpaceLength() !== 1) {
             if (parent.firstNonSpace() === core) {
                 return ['prefix', 'infix', 'postfix'];
             }
@@ -191,7 +212,7 @@ export class MmlMo extends AbstractMmlTokenNode {
     handleExplicitForm(forms) {
         if (this.attributes.isSet('form')) {
             const form = this.attributes.get('form');
-            forms = [form].concat(forms.filter(name => (name !== form)));
+            forms = [form].concat(forms.filter((name) => name !== form));
         }
         return forms;
     }
@@ -212,12 +233,14 @@ export class MmlMo extends AbstractMmlTokenNode {
         if (!mo.match(PRIMES))
             return;
         const REMAP = this.constructor.remapPrimes;
-        const primes = unicodeString(unicodeChars(mo).map(c => REMAP[c]));
+        const primes = unicodeString(unicodeChars(mo).map((c) => REMAP[c]));
         this.setProperty('primes', primes);
     }
     checkMathAccent(mo) {
         const parent = this.Parent;
-        if (this.getProperty('mathaccent') !== undefined || !parent || !parent.isKind('munderover'))
+        if (this.getProperty('mathaccent') !== undefined ||
+            !parent ||
+            !parent.isKind('munderover'))
             return;
         const [base, under, over] = parent.childNodes;
         if (base.isEmbellished && base.coreMO() === this)
@@ -226,10 +249,20 @@ export class MmlMo extends AbstractMmlTokenNode {
         const isOver = !!(over && over.isEmbellished && under.coreMO() === this);
         if (!isUnder && !isOver)
             return;
-        const MATHACCENT = this.constructor.mathaccents;
-        if (mo.match(MATHACCENT)) {
+        if (this.isMathAccent(mo)) {
             this.setProperty('mathaccent', true);
         }
+        else if (this.isMathAccentWithWidth(mo)) {
+            this.setProperty('mathaccent', false);
+        }
+    }
+    isMathAccent(mo = this.getText()) {
+        const MATHACCENT = this.constructor.mathaccents;
+        return !!mo.match(MATHACCENT);
+    }
+    isMathAccentWithWidth(mo = this.getText()) {
+        const MATHACCENT = this.constructor.mathaccentsWithWidth;
+        return !!mo.match(MATHACCENT);
     }
 }
 MmlMo.defaults = Object.assign(Object.assign({}, AbstractMmlTokenNode.defaults), { form: 'infix', fence: false, separator: false, lspace: 'thickmathspace', rspace: 'thickmathspace', stretchy: false, symmetric: false, maxsize: 'infinity', minsize: '0em', largeop: false, movablelimits: false, accent: false, linebreak: 'auto', lineleading: '100%', linebreakstyle: 'before', indentalign: 'auto', indentshift: '0', indenttarget: '', indentalignfirst: 'indentalign', indentshiftfirst: 'indentshift', indentalignlast: 'indentalign', indentshiftlast: 'indentshift' });
@@ -252,19 +285,20 @@ MmlMo.pseudoScripts = new RegExp([
 MmlMo.primes = new RegExp([
     '^["\'',
     '\u2018-\u201F',
-    ']+$'
+    ']+$',
 ].join(''));
+MmlMo.opPattern = /^[a-zA-Z]{2,}$/;
 MmlMo.remapPrimes = {
     0x0022: 0x2033,
     0x0027: 0x2032,
     0x2018: 0x2035,
     0x2019: 0x2032,
-    0x201A: 0x2032,
-    0x201B: 0x2035,
-    0x201C: 0x2036,
-    0x201D: 0x2033,
-    0x201E: 0x2033,
-    0x201F: 0x2036,
+    0x201a: 0x2032,
+    0x201b: 0x2035,
+    0x201c: 0x2036,
+    0x201d: 0x2033,
+    0x201e: 0x2033,
+    0x201f: 0x2036,
 };
 MmlMo.mathaccents = new RegExp([
     '^[',
@@ -276,11 +310,19 @@ MmlMo.mathaccents = new RegExp([
     '\u02D8\u0306',
     '\u02C7\u030C',
     '\u005E\u0302\u02C6',
-    '\u2192\u20D7',
+    '\u20D0\u20D1',
+    '\u20D6\u20D7\u20E1',
     '\u02D9\u0307',
     '\u02DA\u030A',
     '\u20DB',
     '\u20DC',
+    ']$'
+].join(''));
+MmlMo.mathaccentsWithWidth = new RegExp([
+    '^[',
+    '\u2190\u2192\u2194',
+    '\u23DC\u23DD',
+    '\u23DE\u23DF',
     ']$'
 ].join(''));
 //# sourceMappingURL=mo.js.map

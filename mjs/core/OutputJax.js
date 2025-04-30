@@ -3,7 +3,7 @@ import { FunctionList } from '../util/FunctionList.js';
 export class AbstractOutputJax {
     constructor(options = {}) {
         this.adaptor = null;
-        let CLASS = this.constructor;
+        const CLASS = this.constructor;
         this.options = userOptions(defaultOptions({}, CLASS.OPTIONS), options);
         this.postFilters = new FunctionList();
     }
@@ -13,12 +13,9 @@ export class AbstractOutputJax {
     setAdaptor(adaptor) {
         this.adaptor = adaptor;
     }
-    initialize() {
-    }
-    reset(..._args) {
-    }
-    getMetrics(_document) {
-    }
+    initialize() { }
+    reset(..._args) { }
+    getMetrics(_document) { }
     styleSheet(_document) {
         return null;
     }
@@ -26,7 +23,7 @@ export class AbstractOutputJax {
         return null;
     }
     executeFilters(filters, math, document, data) {
-        let args = { math, document, data };
+        const args = { math, document, data };
         filters.execute(args);
         return args.data;
     }

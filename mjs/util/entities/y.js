@@ -13,6 +13,6 @@ Entities.add({
     ycy: '\u044B',
     yicy: '\u0457',
     yucy: '\u044E',
-    yuml: '\u00FF'
+    yuml: '\u00FF',
 }, 'y');
 //# sourceMappingURL=y.js.map

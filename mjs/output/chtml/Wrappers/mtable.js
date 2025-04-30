@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMtableMixin } from '../../common/Wrappers/mtable.js';
+import { CommonMtableMixin, } from '../../common/Wrappers/mtable.js';
 import { MmlMtable } from '../../../core/MmlTree/MmlNodes/mtable.js';
 import { isPercent } from '../../../util/string.js';
 export const ChtmlMtable = (function () {
@@ -50,23 +50,28 @@ export const ChtmlMtable = (function () {
                 const adaptor = this.adaptor;
                 for (const row of adaptor.childNodes(this.itable)) {
                     while (adaptor.childNodes(row).length < this.numCols) {
-                        adaptor.append(row, this.html('mjx-mtd', { 'extra': true }));
+                        adaptor.append(row, this.html('mjx-mtd', { extra: true }));
                     }
                 }
             }
             handleColumnSpacing() {
-                const scale = (this.childNodes[0] ? 1 / this.childNodes[0].getBBox().rscale : 1);
+                const scale = this.childNodes[0]
+                    ? 1 / this.childNodes[0].getBBox().rscale
+                    : 1;
                 const spacing = this.getEmHalfSpacing([this.fSpace[0], this.fSpace[2]], this.cSpace, scale);
                 for (const row of this.tableRows) {
                     let i = 0;
                     for (const cell of row.tableCells) {
                         const lspace = spacing[i++];
                         const rspace = spacing[i];
-                        const styleNode = (cell ? cell.dom[0] : this.adaptor.childNodes(row.dom[0])[i]);
+                        const styleNode = cell
+                            ? cell.dom[0]
+                            : this.adaptor.childNodes(row.dom[0])[i];
                         if ((i > 1 && lspace !== '0.4em') || (lspace !== '0' && i === 1)) {
                             this.adaptor.setStyle(styleNode, 'paddingLeft', lspace);
                         }
-                        if ((i < this.numCols && rspace !== '0.4em') || (rspace !== '0' && i === this.numCols)) {
+                        if ((i < this.numCols && rspace !== '0.4em') ||
+                            (rspace !== '0' && i === this.numCols)) {
                             this.adaptor.setStyle(styleNode, 'paddingRight', rspace);
                         }
                     }
@@ -78,7 +83,8 @@ export const ChtmlMtable = (function () {
                 const lines = this.getColumnAttributes('columnlines');
                 for (const row of this.childNodes) {
                     let i = 0;
-                    for (const cell of this.adaptor.childNodes(row.dom[0]).slice(1)) {
+                    const cells = this.adaptor.childNodes(row.dom[0]).slice(1);
+                    for (const cell of cells) {
                         const line = lines[i++];
                         if (line === 'none')
                             continue;
@@ -92,7 +98,7 @@ export const ChtmlMtable = (function () {
                     for (const cell of this.adaptor.childNodes(row.dom[0])) {
                         const w = this.cWidths[i++];
                         if (w !== null) {
-                            const width = (typeof w === 'number' ? this.em(w) : w);
+                            const width = typeof w === 'number' ? this.em(w) : w;
                             this.adaptor.setStyle(cell, 'width', width);
                             this.adaptor.setStyle(cell, 'maxWidth', width);
                             this.adaptor.setStyle(cell, 'minWidth', width);
@@ -101,7 +107,9 @@ export const ChtmlMtable = (function () {
                 }
             }
             handleRowSpacing() {
-                const scale = (this.childNodes[0] ? 1 / this.childNodes[0].getBBox().rscale : 1);
+                const scale = this.childNodes[0]
+                    ? 1 / this.childNodes[0].getBBox().rscale
+                    : 1;
                 const spacing = this.getEmHalfSpacing([this.fSpace[1], this.fSpace[1]], this.rSpace, scale);
                 const frame = this.fframe;
                 let i = 0;
@@ -112,7 +120,8 @@ export const ChtmlMtable = (function () {
                         if ((i > 1 && tspace !== '0.215em') || (frame && i === 1)) {
                             this.adaptor.setStyle(cell.dom[0], 'paddingTop', tspace);
                         }
-                        if ((i < this.numRows && bspace !== '0.215em') || (frame && i === this.numRows)) {
+                        if ((i < this.numRows && bspace !== '0.215em') ||
+                            (frame && i === this.numRows)) {
                             this.adaptor.setStyle(cell.dom[0], 'paddingBottom', bspace);
                         }
                     }
@@ -200,7 +209,9 @@ export const ChtmlMtable = (function () {
                 adaptor.setStyle(table, 'minWidth', this.em(w));
                 if (L || R) {
                     adaptor.setStyle(dom, 'margin', '');
-                    const style = (this.node.attributes.get('data-width-includes-label') ? 'padding' : 'margin');
+                    const style = this.node.attributes.get('data-width-includes-label')
+                        ? 'padding'
+                        : 'margin';
                     if (L === R) {
                         adaptor.setStyle(table, style, '0 ' + this.em(R));
                     }
@@ -251,18 +262,21 @@ export const ChtmlMtable = (function () {
             addLabelPadding(side) {
                 const [, align, shift] = this.getPadAlignShift(side);
                 const styles = {};
-                if (side === 'right' && !this.node.attributes.get('data-width-includes-label')) {
+                if (side === 'right' &&
+                    !this.node.attributes.get('data-width-includes-label')) {
                     const W = this.node.attributes.get('width');
                     const { w, L, R } = this.getBBox();
                     styles.style = {
-                        width: (isPercent(W) ? 'calc(' + W + ' + ' + this.em(L + R) + ')' : this.em(L + w + R))
+                        width: isPercent(W)
+                            ? 'calc(' + W + ' + ' + this.em(L + R) + ')'
+                            : this.em(L + w + R),
                     };
                 }
                 this.adaptor.append(this.dom[0], this.html('mjx-labels', styles, [this.labels]));
                 return [align, shift];
             }
             updateRowHeights() {
-                let { H, D, NH, ND } = this.getTableData();
+                const { H, D, NH, ND } = this.getTableData();
                 const space = this.getRowHalfSpacing();
                 for (let i = 0; i < this.numRows; i++) {
                     const row = this.childNodes[i];
@@ -279,20 +293,26 @@ export const ChtmlMtable = (function () {
                 const adaptor = this.adaptor;
                 const equal = this.node.attributes.get('equalrows');
                 const { H, D } = this.getTableData();
-                const HD = (equal ? this.getEqualRowHeight() : 0);
+                const HD = equal ? this.getEqualRowHeight() : 0;
                 const space = this.getRowHalfSpacing();
                 let h = this.fLine;
                 let current = adaptor.firstChild(this.labels);
                 for (let i = 0; i < this.numRows; i++) {
                     const row = this.childNodes[i];
                     if (row.node.isKind('mlabeledtr')) {
-                        h && adaptor.insert(this.html('mjx-mtr', { style: { height: this.em(h) } }), current);
+                        if (h) {
+                            adaptor.insert(this.html('mjx-mtr', { style: { height: this.em(h) } }), current);
+                        }
                         adaptor.setStyle(current, 'height', this.em((equal ? HD : H[i] + D[i]) + space[i] + space[i + 1]));
                         current = adaptor.next(current);
                         h = this.rLines[i];
                     }
                     else {
-                        h += space[i] + (equal ? HD : H[i] + D[i]) + space[i + 1] + this.rLines[i];
+                        h +=
+                            space[i] +
+                                (equal ? HD : H[i] + D[i]) +
+                                space[i + 1] +
+                                this.rLines[i];
                     }
                 }
             }
@@ -302,63 +322,63 @@ export const ChtmlMtable = (function () {
             'mjx-mtable': {
                 'vertical-align': '.25em',
                 'text-align': 'center',
-                'position': 'relative',
+                position: 'relative',
                 'box-sizing': 'border-box',
                 'border-spacing': 0,
-                'border-collapse': 'collapse'
+                'border-collapse': 'collapse',
             },
             'mjx-mstyle[size="s"] mjx-mtable': {
-                'vertical-align': '.354em'
+                'vertical-align': '.354em',
             },
             'mjx-labels': {
                 position: 'absolute',
                 left: 0,
-                top: 0
+                top: 0,
             },
             'mjx-table': {
-                'display': 'inline-block',
+                display: 'inline-block',
                 'vertical-align': '-.5ex',
-                'box-sizing': 'border-box'
+                'box-sizing': 'border-box',
             },
             'mjx-table > mjx-itable': {
                 'vertical-align': 'middle',
                 'text-align': 'left',
-                'box-sizing': 'border-box'
+                'box-sizing': 'border-box',
             },
             'mjx-labels > mjx-itable': {
                 position: 'absolute',
-                top: 0
+                top: 0,
             },
             'mjx-mtable[justify="left"]': {
-                'text-align': 'left'
+                'text-align': 'left',
             },
             'mjx-mtable[justify="right"]': {
-                'text-align': 'right'
+                'text-align': 'right',
             },
             'mjx-mtable[justify="left"][side="left"]': {
-                'padding-right': '0 ! important'
+                'padding-right': '0 ! important',
             },
             'mjx-mtable[justify="left"][side="right"]': {
-                'padding-left': '0 ! important'
+                'padding-left': '0 ! important',
             },
             'mjx-mtable[justify="right"][side="left"]': {
-                'padding-right': '0 ! important'
+                'padding-right': '0 ! important',
             },
             'mjx-mtable[justify="right"][side="right"]': {
-                'padding-left': '0 ! important'
+                'padding-left': '0 ! important',
             },
             'mjx-mtable[align]': {
-                'vertical-align': 'baseline'
+                'vertical-align': 'baseline',
             },
             'mjx-mtable[align="top"] > mjx-table': {
-                'vertical-align': 'top'
+                'vertical-align': 'top',
             },
             'mjx-mtable[align="bottom"] > mjx-table': {
-                'vertical-align': 'bottom'
+                'vertical-align': 'bottom',
             },
             'mjx-mtable[side="right"] mjx-labels': {
-                'min-width': '100%'
-            }
+                'min-width': '100%',
+            },
         },
         _a;
 })();

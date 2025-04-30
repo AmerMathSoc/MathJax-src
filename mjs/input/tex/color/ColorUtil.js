@@ -7,13 +7,16 @@ export class ColorModel {
     }
     normalizeColor(model, def) {
         if (!model || model === 'named') {
+            if (def.match(/;/)) {
+                throw new TexError('BadColorValue', 'Invalid color value');
+            }
             return def;
         }
         if (ColorModelProcessors.has(model)) {
             const modelProcessor = ColorModelProcessors.get(model);
             return modelProcessor(def);
         }
-        throw new TexError('UndefinedColorModel', 'Color model \'%1\' not defined', model);
+        throw new TexError('UndefinedColorModel', "Color model '%1' not defined", model);
     }
     getColor(model, def) {
         if (!model || model === 'named') {
@@ -27,6 +30,9 @@ export class ColorModel {
         }
         if (COLORS.has(name)) {
             return COLORS.get(name);
+        }
+        if (name.match(/;/)) {
+            throw new TexError('BadColorValue', 'Invalid color value');
         }
         return name;
     }

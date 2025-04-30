@@ -1,6 +1,6 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMrowMixin, CommonInferredMrowMixin } from '../../common/Wrappers/mrow.js';
-import { MmlMrow, MmlInferredMrow } from '../../../core/MmlTree/MmlNodes/mrow.js';
+import { CommonMrowMixin, CommonInferredMrowMixin, } from '../../common/Wrappers/mrow.js';
+import { MmlMrow, MmlInferredMrow, } from '../../../core/MmlTree/MmlNodes/mrow.js';
 export const SvgMrow = (function () {
     var _a;
     const Base = CommonMrowMixin(SvgWrapper);
@@ -11,10 +11,11 @@ export const SvgMrow = (function () {
             }
             toSVG(parents) {
                 this.getBBox();
-                const n = this.linebreakCount = (this.isStack ? 0 : this.breakCount);
-                parents = ((n || !this.node.isInferred) ?
-                    this.standardSvgNodes(parents) :
-                    this.getSvgNodes(parents));
+                const n = (this.linebreakCount = this.isStack ? 0 : this.breakCount);
+                parents =
+                    n || !this.node.isInferred
+                        ? this.standardSvgNodes(parents)
+                        : this.getSvgNodes(parents);
                 this.addChildren(parents);
                 if (n) {
                     this.placeLines(parents);
@@ -22,21 +23,26 @@ export const SvgMrow = (function () {
             }
             getSvgNodes(parents) {
                 if (this.dh) {
-                    const g = this.svg('g', { transform: `translate(0 ${this.fixed(this.dh)})` });
+                    const g = this.svg('g', {
+                        transform: `translate(0 ${this.fixed(this.dh)})`,
+                    });
                     parents = [this.adaptor.append(parents[0], g)];
                 }
                 this.dom = parents;
                 return parents;
             }
             placeLines(parents) {
-                var _a;
+                var _b;
                 const lines = this.lineBBox;
                 const display = this.jax.math.display;
                 let y = this.dh;
                 for (const k of parents.keys()) {
                     const lbox = lines[k];
                     this.place(lbox.L || 0, y, parents[k]);
-                    y -= Math.max(.25, lbox.d) + (display ? lbox.lineLeading : 0) + Math.max(.75, ((_a = lines[k + 1]) === null || _a === void 0 ? void 0 : _a.h) || 0);
+                    y -=
+                        Math.max(0.25, lbox.d) +
+                            (display ? lbox.lineLeading : 0) +
+                            Math.max(0.75, ((_b = lines[k + 1]) === null || _b === void 0 ? void 0 : _b.h) || 0);
                 }
             }
             createSvgNodes(parents) {
@@ -44,9 +50,13 @@ export const SvgMrow = (function () {
                 if (!n)
                     return super.createSvgNodes(parents);
                 const adaptor = this.adaptor;
-                const def = (this.node.isInferred ? { 'data-mjx-linestack': true } : { 'data-mml-node': this.node.kind });
+                const def = this.node.isInferred
+                    ? { 'data-mjx-linestack': true }
+                    : { 'data-mml-node': this.node.kind };
                 this.dom = [adaptor.append(parents[0], this.svg('g', def))];
-                this.dom = [adaptor.append(this.handleHref(parents)[0], this.dom[0])];
+                this.dom = [
+                    adaptor.append(this.handleHref(parents)[0], this.dom[0]),
+                ];
                 const svg = Array(n);
                 for (let i = 0; i <= n; i++) {
                     svg[i] = adaptor.append(this.dom[0], this.svg('g', { 'data-mjx-linebox': true, 'data-mjx-lineno': i }));
@@ -63,7 +73,7 @@ export const SvgMrow = (function () {
                         let k = 0;
                         for (const dom of child.dom) {
                             if (dom) {
-                                const dx = (k ? 0 : child.dx);
+                                const dx = k ? 0 : child.dx;
                                 const cbox = child.getLineBBox(k++);
                                 x += (cbox.L + dx) * cbox.rscale;
                                 this.place(x, 0, dom);

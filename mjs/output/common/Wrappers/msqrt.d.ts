@@ -11,7 +11,7 @@ export interface CommonMsqrt<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF
     surdH: number;
     combineRootBBox(bbox: BBox, sbox: BBox, H: number): void;
     getPQ(sbox: BBox): number[];
-    getRootDimens(sbox: BBox, H: Number): number[];
+    getRootDimens(sbox: BBox, H: number): number[];
     rootWidth(): number;
     getStretchedSurd(): void;
 }

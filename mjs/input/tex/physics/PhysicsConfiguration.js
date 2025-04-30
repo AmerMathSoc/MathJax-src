@@ -1,8 +1,9 @@
+import { HandlerType, ConfigurationType } from '../HandlerTypes.js';
 import { Configuration } from '../Configuration.js';
 import { AutoOpen } from './PhysicsItems.js';
 import './PhysicsMappings.js';
 export const PhysicsConfiguration = Configuration.create('physics', {
-    handler: {
+    [ConfigurationType.HANDLER]: {
         macro: [
             'Physics-automatic-bracing-macros',
             'Physics-vector-macros',
@@ -12,19 +13,19 @@ export const PhysicsConfiguration = Configuration.create('physics', {
             'Physics-expressions-macros',
             'Physics-quick-quad-macros',
             'Physics-bra-ket-macros',
-            'Physics-matrix-macros'
+            'Physics-matrix-macros',
         ],
-        character: ['Physics-characters'],
-        environment: ['Physics-aux-envs']
+        [HandlerType.CHARACTER]: ['Physics-characters'],
+        [HandlerType.ENVIRONMENT]: ['Physics-aux-envs'],
     },
-    items: {
-        [AutoOpen.prototype.kind]: AutoOpen
+    [ConfigurationType.ITEMS]: {
+        [AutoOpen.prototype.kind]: AutoOpen,
     },
-    options: {
+    [ConfigurationType.OPTIONS]: {
         physics: {
             italicdiff: false,
-            arrowdel: false
-        }
-    }
+            arrowdel: false,
+        },
+    },
 });
 //# sourceMappingURL=PhysicsConfiguration.js.map

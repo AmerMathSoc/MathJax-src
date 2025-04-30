@@ -1,5 +1,5 @@
 import { Attributes, INHERIT } from './Attributes.js';
-import { AbstractNode, AbstractEmptyNode } from '../Tree/Node.js';
+import { AbstractNode, AbstractEmptyNode, } from '../Tree/Node.js';
 export const TEXCLASS = {
     ORD: 0,
     OP: 1,
@@ -9,10 +9,24 @@ export const TEXCLASS = {
     CLOSE: 5,
     PUNCT: 6,
     INNER: 7,
-    NONE: -1
+    NONE: -1,
 };
-export const TEXCLASSNAMES = ['ORD', 'OP', 'BIN', 'REL', 'OPEN', 'CLOSE', 'PUNCT', 'INNER'];
-const TEXSPACELENGTH = ['', 'thinmathspace', 'mediummathspace', 'thickmathspace'];
+export const TEXCLASSNAMES = [
+    'ORD',
+    'OP',
+    'BIN',
+    'REL',
+    'OPEN',
+    'CLOSE',
+    'PUNCT',
+    'INNER',
+];
+const TEXSPACELENGTH = [
+    '',
+    'thinmathspace',
+    'mediummathspace',
+    'thickmathspace',
+];
 const TEXSPACE = [
     [0, -1, 2, 3, 0, 0, 0, 1],
     [-1, -1, 0, 3, 0, 0, 0, 1],
@@ -24,15 +38,30 @@ const TEXSPACE = [
     [1, -1, 2, 3, 1, 0, 1, 1]
 ];
 export const MATHVARIANTS = new Set([
-    'normal', 'bold', 'italic', 'bold-italic',
-    'double-struck', 'fraktur', 'bold-fraktur', 'script', 'bold-script',
-    'sans-serif', 'bold-sans-serif', 'sans-serif-italic', 'sans-serif-bold-italic',
+    'normal',
+    'bold',
+    'italic',
+    'bold-italic',
+    'double-struck',
+    'fraktur',
+    'bold-fraktur',
+    'script',
+    'bold-script',
+    'sans-serif',
+    'bold-sans-serif',
+    'sans-serif-italic',
+    'sans-serif-bold-italic',
     'monospace',
-    'inital', 'tailed', 'looped', 'stretched'
+    'inital',
+    'tailed',
+    'looped',
+    'stretched',
 ]);
 export const indentAttributes = [
-    'indentalign', 'indentalignfirst',
-    'indentshift', 'indentshiftfirst'
+    'indentalign',
+    'indentalignfirst',
+    'indentshift',
+    'indentshiftfirst',
 ];
 export class AbstractMmlNode extends AbstractNode {
     constructor(factory, attributes = {}, children = []) {
@@ -155,12 +184,13 @@ export class AbstractMmlNode extends AbstractNode {
         return 0;
     }
     childPosition() {
-        let child = this;
-        let parent = child.parent;
+        let child = null;
+        let parent = this.parent;
         while (parent && parent.notParent) {
             child = parent;
             parent = parent.parent;
         }
+        child = child || this;
         if (parent) {
             let i = 0;
             for (const node of parent.childNodes) {
@@ -174,7 +204,7 @@ export class AbstractMmlNode extends AbstractNode {
     }
     setTeXclass(prev) {
         this.getPrevClass(prev);
-        return (this.texClass != null ? this : prev);
+        return this.texClass != null ? this : prev;
     }
     updateTeXclass(core) {
         if (core) {
@@ -191,13 +221,15 @@ export class AbstractMmlNode extends AbstractNode {
         }
     }
     texSpacing() {
-        let prevClass = (this.prevClass != null ? this.prevClass : TEXCLASS.NONE);
-        let texClass = this.texClass || TEXCLASS.ORD;
+        const prevClass = this.prevClass != null ? this.prevClass : TEXCLASS.NONE;
+        const texClass = this.texClass || TEXCLASS.ORD;
         if (prevClass === TEXCLASS.NONE || texClass === TEXCLASS.NONE) {
             return '';
         }
-        let space = TEXSPACE[prevClass][texClass];
-        if ((this.prevLevel > 0 || this.attributes.get('scriptlevel') > 0) && space >= 0) {
+        const space = TEXSPACE[prevClass][texClass];
+        if ((this.prevLevel > 0 ||
+            this.attributes.get('scriptlevel') > 0) &&
+            space >= 0) {
             return '';
         }
         return TEXSPACELENGTH[Math.abs(space)];
@@ -207,31 +239,36 @@ export class AbstractMmlNode extends AbstractNode {
     }
     setInheritedAttributes(attributes = {}, display = false, level = 0, prime = false) {
         var _a, _b, _c;
-        let defaults = this.attributes.getAllDefaults();
+        const defaults = this.attributes.getAllDefaults();
         for (const key of Object.keys(attributes)) {
-            if (defaults.hasOwnProperty(key) || AbstractMmlNode.alwaysInherit.hasOwnProperty(key)) {
-                let [node, value] = attributes[key];
-                !((_b = (_a = AbstractMmlNode.noInherit[node]) === null || _a === void 0 ? void 0 : _a[this.kind]) === null || _b === void 0 ? void 0 : _b[key]) && this.attributes.setInherited(key, value);
+            if (Object.hasOwn(defaults, key) ||
+                Object.hasOwn(AbstractMmlNode.alwaysInherit, key)) {
+                const [node, value] = attributes[key];
+                if (!((_b = (_a = AbstractMmlNode.noInherit[node]) === null || _a === void 0 ? void 0 : _a[this.kind]) === null || _b === void 0 ? void 0 : _b[key])) {
+                    this.attributes.setInherited(key, value);
+                }
             }
             if ((_c = AbstractMmlNode.stopInherit[this.kind]) === null || _c === void 0 ? void 0 : _c[key]) {
                 attributes = Object.assign({}, attributes);
                 delete attributes[key];
             }
         }
-        let displaystyle = this.attributes.getExplicit('displaystyle');
+        const displaystyle = this.attributes.getExplicit('displaystyle');
         if (displaystyle === undefined) {
             this.attributes.setInherited('displaystyle', display);
         }
-        let scriptlevel = this.attributes.getExplicit('scriptlevel');
+        const scriptlevel = this.attributes.getExplicit('scriptlevel');
         if (scriptlevel === undefined) {
             this.attributes.setInherited('scriptlevel', level);
         }
         if (prime) {
             this.setProperty('texprimestyle', prime);
         }
-        let arity = this.arity;
-        if (arity >= 0 && arity !== Infinity && ((arity === 1 && this.childNodes.length === 0) ||
-            (arity !== 1 && this.childNodes.length !== arity))) {
+        const arity = this.arity;
+        if (arity >= 0 &&
+            arity !== Infinity &&
+            ((arity === 1 && this.childNodes.length === 0) ||
+                (arity !== 1 && this.childNodes.length !== arity))) {
             if (arity < this.childNodes.length) {
                 this.childNodes = this.childNodes.slice(0, arity);
             }
@@ -246,9 +283,12 @@ export class AbstractMmlNode extends AbstractNode {
             if (align) {
                 const indentalign = this.attributes.get(align) || 'left';
                 attributes = this.addInheritedAttributes(attributes, {
-                    indentalign, indentshift: '0',
-                    indentalignfirst: indentalign, indentshiftfirst: '0',
-                    indentalignlast: 'indentalign', indentshiftlast: 'indentshift'
+                    indentalign,
+                    indentshift: '0',
+                    indentalignfirst: indentalign,
+                    indentshiftfirst: '0',
+                    indentalignlast: 'indentalign',
+                    indentshiftlast: 'indentshift',
                 });
             }
         }
@@ -260,9 +300,11 @@ export class AbstractMmlNode extends AbstractNode {
         }
     }
     addInheritedAttributes(current, attributes) {
-        let updated = Object.assign({}, current);
+        const updated = Object.assign({}, current);
         for (const name of Object.keys(attributes)) {
-            if (name !== 'displaystyle' && name !== 'scriptlevel' && name !== 'style') {
+            if (name !== 'displaystyle' &&
+                name !== 'scriptlevel' &&
+                name !== 'style') {
                 updated[name] = [this.kind, attributes[name]];
             }
         }
@@ -272,9 +314,9 @@ export class AbstractMmlNode extends AbstractNode {
         const attributes = node.attributes;
         const display = attributes.get('displaystyle');
         const scriptlevel = attributes.get('scriptlevel');
-        const defaults = (!attributes.isSet('mathsize') ? {} : {
-            mathsize: ['math', attributes.get('mathsize')]
-        });
+        const defaults = !attributes.isSet('mathsize')
+            ? {}
+            : { mathsize: ['math', attributes.get('mathsize')] };
         const prime = node.getProperty('texprimestyle') || false;
         this.setInheritedAttributes(defaults, display, scriptlevel, prime);
     }
@@ -283,9 +325,10 @@ export class AbstractMmlNode extends AbstractNode {
             return;
         }
         this.verifyAttributes(options);
-        let arity = this.arity;
+        const arity = this.arity;
         if (options['checkArity']) {
-            if (arity >= 0 && arity !== Infinity &&
+            if (arity >= 0 &&
+                arity !== Infinity &&
                 ((arity === 1 && this.childNodes.length === 0) ||
                     (arity !== 1 && this.childNodes.length !== arity))) {
                 this.mError('Wrong number of children for "' + this.kind + '" node', options, true);
@@ -298,7 +341,8 @@ export class AbstractMmlNode extends AbstractNode {
             const attributes = this.attributes;
             const bad = [];
             for (const name of attributes.getExplicitNames()) {
-                if (name.substr(0, 5) !== 'data-' && attributes.getDefault(name) === undefined &&
+                if (name.substring(0, 5) !== 'data-' &&
+                    attributes.getDefault(name) === undefined &&
                     !name.match(/^(?:class|style|id|(?:xlink:)?href)$/)) {
                     bad.push(name);
                 }
@@ -309,7 +353,9 @@ export class AbstractMmlNode extends AbstractNode {
         }
         if (options.checkMathvariants) {
             const variant = this.attributes.getExplicit('mathvariant');
-            if (variant && !MATHVARIANTS.has(variant) && !this.getProperty('ignore-variant')) {
+            if (variant &&
+                !MATHVARIANTS.has(variant) &&
+                !this.getProperty('ignore-variant')) {
                 this.mError(`Invalid mathvariant: ${variant}`, options, true);
             }
         }
@@ -323,11 +369,11 @@ export class AbstractMmlNode extends AbstractNode {
         if (this.parent && this.parent.isKind('merror')) {
             return null;
         }
-        let merror = this.factory.create('merror');
+        const merror = this.factory.create('merror');
         merror.attributes.set('data-mjx-message', message);
         if (options.fullErrors || short) {
-            let mtext = this.factory.create('mtext');
-            let text = this.factory.create('text');
+            const mtext = this.factory.create('mtext');
+            const text = this.factory.create('text');
             text.setText(options.fullErrors ? message : this.kind);
             mtext.appendChild(text);
             merror.appendChild(mtext);
@@ -347,33 +393,39 @@ AbstractMmlNode.defaults = {
     mathbackground: INHERIT,
     mathcolor: INHERIT,
     mathsize: INHERIT,
-    dir: INHERIT
+    dir: INHERIT,
 };
 AbstractMmlNode.noInherit = {
     mstyle: {
-        mpadded: { width: true, height: true, depth: true, lspace: true, voffset: true },
-        mtable: { width: true, height: true, depth: true, align: true }
+        mpadded: {
+            width: true,
+            height: true,
+            depth: true,
+            lspace: true,
+            voffset: true,
+        },
+        mtable: { width: true, height: true, depth: true, align: true },
     },
     maligngroup: {
         mrow: { groupalign: true },
-        mtable: { groupalign: true }
+        mtable: { groupalign: true },
     },
     mtr: {
         msqrt: { 'data-vertical-align': true },
-        mroot: { 'data-vertical-align': true }
+        mroot: { 'data-vertical-align': true },
     },
     mlabeledtr: {
         msqrt: { 'data-vertical-align': true },
-        mroot: { 'data-vertical-align': true }
-    }
+        mroot: { 'data-vertical-align': true },
+    },
 };
 AbstractMmlNode.stopInherit = {
-    mtd: { columnalign: true, rowalign: true, groupalign: true }
+    mtd: { columnalign: true, rowalign: true, groupalign: true },
 };
 AbstractMmlNode.alwaysInherit = {
     scriptminsize: true,
     scriptsizemultiplier: true,
-    infixlinebreakstyle: true
+    infixlinebreakstyle: true,
 };
 AbstractMmlNode.verifyDefaults = {
     checkArity: true,
@@ -381,7 +433,7 @@ AbstractMmlNode.verifyDefaults = {
     checkMathvariants: true,
     fullErrors: false,
     fixMmultiscripts: true,
-    fixMtables: true
+    fixMtables: true,
 };
 export class AbstractMmlTokenNode extends AbstractMmlNode {
     get isToken() {
@@ -453,26 +505,23 @@ export class AbstractMmlBaseNode extends AbstractMmlNode {
     setTeXclass(prev) {
         this.getPrevClass(prev);
         this.texClass = TEXCLASS.ORD;
-        let base = this.childNodes[0];
+        const base = this.childNodes[0];
+        let result = null;
         if (base) {
             if (this.isEmbellished || base.isKind('mi')) {
-                prev = base.setTeXclass(prev);
+                result = base.setTeXclass(prev);
                 this.updateTeXclass(this.core());
             }
             else {
                 base.setTeXclass(null);
-                prev = this;
             }
-        }
-        else {
-            prev = this;
         }
         for (const child of this.childNodes.slice(1)) {
             if (child) {
                 child.setTeXclass(null);
             }
         }
-        return prev;
+        return result || this;
     }
 }
 AbstractMmlBaseNode.defaults = AbstractMmlNode.defaults;

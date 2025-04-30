@@ -1,6 +1,5 @@
-export var TexConstant;
-(function (TexConstant) {
-    TexConstant.Variant = {
+export const TexConstant = {
+    Variant: {
         NORMAL: 'normal',
         BOLD: 'bold',
         ITALIC: 'italic',
@@ -23,43 +22,43 @@ export var TexConstant;
         BOLDCALLIGRAPHIC: '-tex-bold-calligraphic',
         OLDSTYLE: '-tex-oldstyle',
         BOLDOLDSTYLE: '-tex-bold-oldstyle',
-        MATHITALIC: '-tex-mathit'
-    };
-    TexConstant.Form = {
+        MATHITALIC: '-tex-mathit',
+    },
+    Form: {
         PREFIX: 'prefix',
         INFIX: 'infix',
-        POSTFIX: 'postfix'
-    };
-    TexConstant.LineBreak = {
+        POSTFIX: 'postfix',
+    },
+    LineBreak: {
         AUTO: 'auto',
         NEWLINE: 'newline',
         NOBREAK: 'nobreak',
         GOODBREAK: 'goodbreak',
-        BADBREAK: 'badbreak'
-    };
-    TexConstant.LineBreakStyle = {
+        BADBREAK: 'badbreak',
+    },
+    LineBreakStyle: {
         BEFORE: 'before',
         AFTER: 'after',
         DUPLICATE: 'duplicate',
-        INFIXLINBREAKSTYLE: 'infixlinebreakstyle'
-    };
-    TexConstant.IndentAlign = {
+        INFIXLINBREAKSTYLE: 'infixlinebreakstyle',
+    },
+    IndentAlign: {
         LEFT: 'left',
         CENTER: 'center',
         RIGHT: 'right',
         AUTO: 'auto',
         ID: 'id',
-        INDENTALIGN: 'indentalign'
-    };
-    TexConstant.IndentShift = {
-        INDENTSHIFT: 'indentshift'
-    };
-    TexConstant.LineThickness = {
+        INDENTALIGN: 'indentalign',
+    },
+    IndentShift: {
+        INDENTSHIFT: 'indentshift',
+    },
+    LineThickness: {
         THIN: 'thin',
         MEDIUM: 'medium',
-        THICK: 'thick'
-    };
-    TexConstant.Notation = {
+        THICK: 'thick',
+    },
+    Notation: {
         LONGDIV: 'longdiv',
         ACTUARIAL: 'actuarial',
         PHASORANGLE: 'phasorangle',
@@ -77,46 +76,46 @@ export var TexConstant;
         HORIZONTALSTRIKE: 'horizontalstrike',
         NORTHEASTARROW: 'northeastarrow',
         MADRUWB: 'madruwb',
-        UPDIAGONALARROW: 'updiagonalarrow'
-    };
-    TexConstant.Align = {
+        UPDIAGONALARROW: 'updiagonalarrow',
+    },
+    Align: {
         TOP: 'top',
         BOTTOM: 'bottom',
         CENTER: 'center',
         BASELINE: 'baseline',
         AXIS: 'axis',
         LEFT: 'left',
-        RIGHT: 'right'
-    };
-    TexConstant.Lines = {
+        RIGHT: 'right',
+    },
+    Lines: {
         NONE: 'none',
         SOLID: 'solid',
-        DASHED: 'dashed'
-    };
-    TexConstant.Side = {
+        DASHED: 'dashed',
+    },
+    Side: {
         LEFT: 'left',
         RIGHT: 'right',
         LEFTOVERLAP: 'leftoverlap',
-        RIGHTOVERLAP: 'rightoverlap'
-    };
-    TexConstant.Width = {
+        RIGHTOVERLAP: 'rightoverlap',
+    },
+    Width: {
         AUTO: 'auto',
-        FIT: 'fit'
-    };
-    TexConstant.Actiontype = {
+        FIT: 'fit',
+    },
+    Actiontype: {
         TOGGLE: 'toggle',
         STATUSLINE: 'statusline',
         TOOLTIP: 'tooltip',
-        INPUT: 'input'
-    };
-    TexConstant.Overflow = {
+        INPUT: 'input',
+    },
+    Overflow: {
         LINBREAK: 'linebreak',
         SCROLL: 'scroll',
         ELIDE: 'elide',
         TRUNCATE: 'truncate',
-        SCALE: 'scale'
-    };
-    TexConstant.Unit = {
+        SCALE: 'scale',
+    },
+    Unit: {
         EM: 'em',
         EX: 'ex',
         PX: 'px',
@@ -124,7 +123,11 @@ export var TexConstant;
         CM: 'cm',
         MM: 'mm',
         PT: 'pt',
-        PC: 'pc'
-    };
-})(TexConstant || (TexConstant = {}));
+        PC: 'pc',
+    },
+    Attr: {
+        LATEX: 'data-latex',
+        LATEXITEM: 'data-latex-item',
+    },
+};
 //# sourceMappingURL=TexConstants.js.map

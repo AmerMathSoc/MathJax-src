@@ -1,4 +1,4 @@
-import { AbstractMmlNode, TEXCLASS } from '../MmlNode.js';
+import { AbstractMmlNode, TEXCLASS, } from '../MmlNode.js';
 export class MmlMfenced extends AbstractMmlNode {
     constructor() {
         super(...arguments);
@@ -65,8 +65,8 @@ export class MmlMfenced extends AbstractMmlNode {
         }
     }
     fakeNode(c, properties = {}, texClass = null) {
-        let text = this.factory.create('text').setText(c);
-        let node = this.factory.create('mo', properties, [text]);
+        const text = this.factory.create('text').setText(c);
+        const node = this.factory.create('mo', properties, [text]);
         node.texClass = texClass;
         node.parent = this;
         return node;

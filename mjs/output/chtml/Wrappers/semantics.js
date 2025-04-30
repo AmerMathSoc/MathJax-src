@@ -1,6 +1,7 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonSemanticsMixin } from '../../common/Wrappers/semantics.js';
-import { MmlSemantics, MmlAnnotation, MmlAnnotationXML } from '../../../core/MmlTree/MmlNodes/semantics.js';
+import { CommonSemanticsMixin, } from '../../common/Wrappers/semantics.js';
+import { CommonXmlNodeMixin, } from '../../common/Wrappers/XmlNode.js';
+import { MmlSemantics, MmlAnnotation, MmlAnnotationXML, } from '../../../core/MmlTree/MmlNodes/semantics.js';
 import { XMLNode } from '../../../core/MmlTree/MmlNode.js';
 export const ChtmlSemantics = (function () {
     var _a;
@@ -39,29 +40,36 @@ export const ChtmlAnnotationXML = (function () {
         _a.styles = {
             'mjx-annotation-xml': {
                 'font-family': 'initial',
-                'line-height': 'normal'
-            }
+                'line-height': 'normal',
+            },
         },
         _a;
 })();
 export const ChtmlXmlNode = (function () {
     var _a;
-    return _a = class ChtmlXmlNode extends ChtmlWrapper {
+    const Base = CommonXmlNodeMixin(ChtmlWrapper);
+    return _a = class ChtmlXmlNode extends Base {
             toCHTML(parents) {
-                this.dom = [this.adaptor.append(parents[0], this.adaptor.clone(this.node.getXML()))];
+                this.markUsed();
+                this.dom = [this.adaptor.append(parents[0], this.getHTML())];
             }
-            computeBBox(bbox, _recompute = false) {
-                const { w, h, d } = this.jax.measureXMLnode(this.node.getXML());
-                bbox.w = w;
-                bbox.h = h;
-                bbox.d = d;
+            addHDW(html, styles) {
+                const scale = this.jax.options.scale;
+                const { h, d, w } = this.bbox;
+                const rscale = scale * this.metrics.scale;
+                styles.width = this.em(w * rscale);
+                styles.height = this.em((h + d) * rscale);
+                styles['vertical-align'] = this.em(-d * rscale);
+                styles.position = 'relative';
+                return this.html('mjx-html-holder', {
+                    style: {
+                        transform: `scale(${this.jax.fixed(scale)})`,
+                        'transform-origin': 'top left',
+                    },
+                }, [html]);
             }
-            getStyles() { }
-            getScale() { }
-            getVariant() { }
         },
         _a.kind = XMLNode.prototype.kind,
-        _a.autoStyle = false,
         _a;
 })();
 //# sourceMappingURL=semantics.js.map

@@ -8,7 +8,7 @@ export const computeLineData = {
     vertical: (h, d, w, _t) => [w / 2, h, w / 2, -d],
     horizontal: (h, d, w, _t) => [0, (h - d) / 2, w, (h - d) / 2],
     up: (h, d, w, t) => [t, t - d, w - t, h - t],
-    down: (h, d, w, t) => [t, h - t, w - t, t - d]
+    down: (h, d, w, t) => [t, h - t, w - t, t - d],
 };
 export const lineData = function (node, kind, offset = '') {
     const { h, d, w } = node.getBBox();
@@ -32,10 +32,10 @@ export const lineOffset = function (data, node, offset) {
     return data;
 };
 export const RenderLine = function (line, offset = '') {
-    return ((node, _child) => {
+    return (node, _child) => {
         const L = node.line(lineData(node, line, offset));
         node.adaptor.append(node.dom[0], L);
-    });
+    };
 };
 export const Border = function (side) {
     return Notation.CommonBorder((node, _child) => {

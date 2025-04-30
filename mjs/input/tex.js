@@ -8,10 +8,11 @@ import TexError from './tex/TexError.js';
 import ParseOptions from './tex/ParseOptions.js';
 import { TagsFactory } from './tex/Tags.js';
 import { ParserConfiguration } from './tex/Configuration.js';
+import { TexConstant } from './tex/TexConstants.js';
 import './tex/base/BaseConfiguration.js';
 export class TeX extends AbstractInputJax {
     static configure(packages) {
-        let configuration = new ParserConfiguration(packages, ['tex']);
+        const configuration = new ParserConfiguration(packages, ['tex']);
         configuration.init();
         return configuration;
     }
@@ -26,14 +27,17 @@ export class TeX extends AbstractInputJax {
         super(tex);
         this.findTeX = this.options['FindTeX'] || new FindTeX(find);
         const packages = this.options.packages;
-        const configuration = this.configuration = TeX.configure(packages);
-        const parseOptions = this._parseOptions =
-            new ParseOptions(configuration, [this.options, TagsFactory.OPTIONS]);
+        const configuration = (this.configuration = TeX.configure(packages));
+        const parseOptions = (this._parseOptions = new ParseOptions(configuration, [
+            this.options,
+            TagsFactory.OPTIONS,
+        ]));
         userOptions(parseOptions.options, rest);
         configuration.config(this);
         TeX.tags(parseOptions, configuration);
-        this.postFilters.add(FilterUtil.cleanSubSup, -6);
-        this.postFilters.add(FilterUtil.setInherited, -5);
+        this.postFilters.add(FilterUtil.cleanSubSup, -7);
+        this.postFilters.add(FilterUtil.setInherited, -6);
+        this.postFilters.add(FilterUtil.checkScriptlevel, -5);
         this.postFilters.add(FilterUtil.moveLimits, -4);
         this.postFilters.add(FilterUtil.cleanStretchy, -3);
         this.postFilters.add(FilterUtil.cleanAttributes, -2);
@@ -56,12 +60,10 @@ export class TeX extends AbstractInputJax {
         this.latex = math.math;
         let node;
         this.parseOptions.tags.startEquation(math);
-        let globalEnv;
         let parser;
         try {
             parser = new TexParser(this.latex, { display: math.display, isInner: false }, this.parseOptions);
             node = parser.mml();
-            globalEnv = parser.stack.global;
         }
         catch (err) {
             if (!(err instanceof TexError)) {
@@ -71,9 +73,7 @@ export class TeX extends AbstractInputJax {
             node = this.options.formatError(this, err);
         }
         node = this.parseOptions.nodeFactory.create('node', 'math', [node]);
-        if (globalEnv === null || globalEnv === void 0 ? void 0 : globalEnv.indentalign) {
-            NodeUtil.setAttribute(node, 'indentalign', globalEnv.indentalign);
-        }
+        node.attributes.set(TexConstant.Attr.LATEX, this.latex);
         if (math.display) {
             NodeUtil.setAttribute(node, 'display', 'block');
         }
@@ -91,10 +91,10 @@ export class TeX extends AbstractInputJax {
         return this.findTeX.findMath(strings);
     }
     formatError(err) {
-        let message = err.message.replace(/\n.*/, '');
+        const message = err.message.replace(/\n.*/, '');
         return this.parseOptions.nodeFactory.create('error', message, err.id, this.latex);
     }
 }
 TeX.NAME = 'TeX';
-TeX.OPTIONS = Object.assign(Object.assign({}, AbstractInputJax.OPTIONS), { FindTeX: null, packages: ['base'], digits: /^(?:[0-9]+(?:\{,\}[0-9]{3})*(?:\.[0-9]*)?|\.[0-9]+)/, maxBuffer: 5 * 1024, mathStyle: 'TeX', formatError: (jax, err) => jax.formatError(err) });
+TeX.OPTIONS = Object.assign(Object.assign({}, AbstractInputJax.OPTIONS), { FindTeX: null, packages: ['base'], maxBuffer: 5 * 1024, maxTemplateSubtitutions: 10000, mathStyle: 'TeX', formatError: (jax, err) => jax.formatError(err) });
 //# sourceMappingURL=tex.js.map

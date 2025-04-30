@@ -1,29 +1,32 @@
+import { HandlerType } from '../HandlerTypes.js';
 import TexParser from '../TexParser.js';
 import { retryAfter } from '../../../util/Retries.js';
 import BaseMethods from '../base/BaseMethods.js';
 export const TextMacrosMethods = {
     Comment(parser, _c) {
-        while (parser.i < parser.string.length && parser.string.charAt(parser.i) !== '\n') {
+        while (parser.i < parser.string.length &&
+            parser.string.charAt(parser.i) !== '\n') {
             parser.i++;
         }
         parser.i++;
     },
     Math(parser, open) {
         parser.saveText();
-        let i = parser.i;
+        const i = parser.i;
         let j, c;
         let braces = 0;
         while ((c = parser.GetNext())) {
             j = parser.i++;
             switch (c) {
-                case '\\':
+                case '\\': {
                     const cs = parser.GetCS();
                     if (cs === ')')
                         c = '\\(';
+                }
                 case '$':
                     if (braces === 0 && open === c) {
                         const config = parser.texParser.configuration;
-                        const mml = (new TexParser(parser.string.substr(i, j - i), parser.stack.env, config)).mml();
+                        const mml = new TexParser(parser.string.substring(i, j), parser.stack.env, config).mml();
                         parser.PushMath(mml);
                         return;
                     }
@@ -39,13 +42,13 @@ export const TextMacrosMethods = {
                     break;
             }
         }
-        parser.Error('MathNotTerminated', 'Math-mode is not properly terminated');
+        parser.Error('MathNotTerminated', 'Math mode is not properly terminated');
     },
     MathModeOnly(parser, c) {
-        parser.Error('MathModeOnly', '\'%1\' allowed only in math mode', c);
+        parser.Error('MathModeOnly', "'%1' allowed only in math mode", c);
     },
     Misplaced(parser, c) {
-        parser.Error('Misplaced', '\'%1\' can not be used here', c);
+        parser.Error('Misplaced', "Misplaced '%1'", c);
     },
     OpenBrace(parser, _c) {
         const env = parser.stack.env;
@@ -84,11 +87,10 @@ export const TextMacrosMethods = {
     },
     Space(parser, _c) {
         parser.text += ' ';
-        while (parser.GetNext().match(/\s/))
-            parser.i++;
+        parser.GetNext();
     },
     SelfQuote(parser, name) {
-        parser.text += name.substr(1);
+        parser.text += name.substring(1);
     },
     Insert(parser, _name, c) {
         parser.text += c;
@@ -100,7 +102,7 @@ export const TextMacrosMethods = {
         parser.Push(parser.create('node', 'mover', [base, accent]));
     },
     Emph(parser, name) {
-        const variant = (parser.stack.env.mathvariant === '-tex-mathit' ? 'normal' : '-tex-mathit');
+        const variant = parser.stack.env.mathvariant === '-tex-mathit' ? 'normal' : '-tex-mathit';
         parser.Push(parser.ParseTextArg(name, { mathvariant: variant }));
     },
     TextFont(parser, name, variant) {
@@ -119,14 +121,14 @@ export const TextMacrosMethods = {
         const autoload = parser.configuration.packageData.get('autoload');
         const texParser = parser.texParser;
         name = name.slice(1);
-        const macro = texParser.lookup('macro', name);
+        const macro = texParser.lookup(HandlerType.MACRO, name);
         if (!macro || (autoload && macro._func === autoload.Autoload)) {
-            texParser.parse('macro', [texParser, name]);
+            texParser.parse(HandlerType.MACRO, [texParser, name]);
             if (!macro)
                 return;
             retryAfter(Promise.resolve());
         }
-        texParser.parse('macro', [parser, name]);
+        texParser.parse(HandlerType.MACRO, [parser, name]);
     },
     Macro: BaseMethods.Macro,
     Spacer: BaseMethods.Spacer,
@@ -138,6 +140,6 @@ export const TextMacrosMethods = {
     Lap: BaseMethods.Lap,
     Phantom: BaseMethods.Phantom,
     Smash: BaseMethods.Smash,
-    MmlToken: BaseMethods.MmlToken
+    MmlToken: BaseMethods.MmlToken,
 };
 //# sourceMappingURL=TextMacrosMethods.js.map

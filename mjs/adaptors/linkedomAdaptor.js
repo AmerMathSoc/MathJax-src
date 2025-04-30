@@ -14,6 +14,16 @@ export function linkedomAdaptor(parseHTML, options = null) {
     const window = parseHTML('<html></html>');
     window.HTMLCollection = class {
     };
+    window.Text.prototype.splitText = function (offset) {
+        const text = this.data;
+        if (offset > text.length) {
+            throw Error('Index Size Error');
+        }
+        const newNode = window.document.createTextNode(text.substring(offset));
+        this.parentNode.insertBefore(newNode, this.nextSibling);
+        this.data = text.substring(0, offset);
+        return newNode;
+    };
     return new LinkedomAdaptor(window, options);
 }
 //# sourceMappingURL=linkedomAdaptor.js.map

@@ -4,9 +4,6 @@ import { CharOptions, VariantData, DelimiterData, FontData, FontDataClass } from
 import { CommonOutputJax } from '../../common.js';
 import { BBox } from '../../../util/BBox.js';
 import { LineBBox } from '../LineBBox.js';
-export declare const DirectionVH: {
-    [n: number]: string;
-};
 export interface CommonMo<N, T, D, JX extends CommonOutputJax<N, T, D, WW, WF, WC, CC, VV, DD, FD, FC>, WW extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WF extends CommonWrapperFactory<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, WC extends CommonWrapperClass<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC>, CC extends CharOptions, VV extends VariantData<CC>, DD extends DelimiterData, FD extends FontData<CC, VV, DD>, FC extends FontDataClass<CC, VV, DD>> extends CommonWrapper<N, T, D, JX, WW, WF, WC, CC, VV, DD, FD, FC> {
     size: number;
     isAccent: boolean;

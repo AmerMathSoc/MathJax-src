@@ -1,8 +1,8 @@
 import { LiveRegion, SpeechRegion, ToolTip, HoverRegion } from './Region.js';
-import * as ke from './KeyExplorer.js';
+import { SpeechExplorer } from './KeyExplorer.js';
 import * as me from './MouseExplorer.js';
 import { TreeColorer, FlameColorer } from './TreeExplorer.js';
-import { Sre } from '../sre.js';
+import * as Sre from '../sre.js';
 export class RegionPool {
     constructor(document) {
         this.document = document;
@@ -14,45 +14,26 @@ export class RegionPool {
         this.tooltip3 = new ToolTip(this.document);
     }
 }
-let allExplorers = {
+const allExplorers = {
     speech: (doc, pool, node, ...rest) => {
-        let explorer = ke.SpeechExplorer.create(doc, pool, doc.explorerRegions.speechRegion, node, ...rest);
-        explorer.speechGenerator.setOptions({
-            automark: true, markup: 'ssml',
-            locale: doc.options.sre.locale, domain: doc.options.sre.domain,
-            style: doc.options.sre.style, modality: 'speech'
-        });
-        let locale = explorer.speechGenerator.getOptions().locale;
-        if (locale !== Sre.engineSetup().locale) {
-            doc.options.sre.locale = Sre.engineSetup().locale;
-            explorer.speechGenerator.setOptions({ locale: doc.options.sre.locale });
-        }
+        const explorer = SpeechExplorer.create(doc, pool, doc.explorerRegions.speechRegion, node, doc.explorerRegions.brailleRegion, doc.explorerRegions.magnifier, rest[0], rest[1]);
         explorer.sound = true;
-        explorer.showRegion = 'subtitles';
         return explorer;
     },
-    braille: (doc, pool, node, ...rest) => {
-        let explorer = ke.SpeechExplorer.create(doc, pool, doc.explorerRegions.brailleRegion, node, ...rest);
-        explorer.speechGenerator.setOptions({ automark: false, markup: 'none',
-            locale: 'nemeth', domain: 'default',
-            style: 'default', modality: 'braille' });
-        explorer.showRegion = 'viewBraille';
-        return explorer;
-    },
-    keyMagnifier: (doc, pool, node, ...rest) => ke.Magnifier.create(doc, pool, doc.explorerRegions.magnifier, node, ...rest),
     mouseMagnifier: (doc, pool, node, ..._rest) => me.ContentHoverer.create(doc, pool, doc.explorerRegions.magnifier, node, (x) => x.hasAttribute('data-semantic-type'), (x) => x),
     hover: (doc, pool, node, ..._rest) => me.FlameHoverer.create(doc, pool, null, node),
     infoType: (doc, pool, node, ..._rest) => me.ValueHoverer.create(doc, pool, doc.explorerRegions.tooltip1, node, (x) => x.hasAttribute('data-semantic-type'), (x) => x.getAttribute('data-semantic-type')),
     infoRole: (doc, pool, node, ..._rest) => me.ValueHoverer.create(doc, pool, doc.explorerRegions.tooltip2, node, (x) => x.hasAttribute('data-semantic-role'), (x) => x.getAttribute('data-semantic-role')),
     infoPrefix: (doc, pool, node, ..._rest) => me.ValueHoverer.create(doc, pool, doc.explorerRegions.tooltip3, node, (x) => x.hasAttribute('data-semantic-prefix'), (x) => x.getAttribute('data-semantic-prefix')),
     flame: (doc, pool, node, ..._rest) => FlameColorer.create(doc, pool, null, node),
-    treeColoring: (doc, pool, node, ...rest) => TreeColorer.create(doc, pool, null, node, ...rest)
+    treeColoring: (doc, pool, node, ...rest) => TreeColorer.create(doc, pool, null, node, ...rest),
 };
 export class ExplorerPool {
     constructor() {
         this.explorers = {};
         this.attached = [];
         this._restart = [];
+        this.speechExplorerKeys = ['speech', 'braille', 'keyMagnifier'];
     }
     get highlighter() {
         if (this._renderer !== this.document.outputJax.name) {
@@ -60,32 +41,41 @@ export class ExplorerPool {
             this.setPrimaryHighlighter();
             return this._highlighter;
         }
-        let [foreground, background] = this.colorOptions();
+        const [foreground, background] = this.colorOptions();
         Sre.updateHighlighter(background, foreground, this._highlighter);
         return this._highlighter;
     }
-    init(document, node, mml) {
+    init(document, node, mml, item) {
         this.document = document;
         this.mml = mml;
         this.node = node;
         this.setPrimaryHighlighter();
-        for (let key of Object.keys(allExplorers)) {
-            this.explorers[key] = allExplorers[key](this.document, this, this.node, this.mml);
+        for (const key of Object.keys(allExplorers)) {
+            this.explorers[key] = allExplorers[key](this.document, this, this.node, this.mml, item);
         }
         this.setSecondaryHighlighter();
         this.attach();
     }
     attach() {
         this.attached = [];
-        let keyExplorers = [];
-        for (let key of Object.keys(this.explorers)) {
-            let explorer = this.explorers[key];
-            if (explorer instanceof ke.AbstractKeyExplorer) {
+        const keyExplorers = [];
+        const a11y = this.document.options.a11y;
+        for (const [key, explorer] of Object.entries(this.explorers)) {
+            if (explorer instanceof SpeechExplorer) {
                 explorer.AddEvents();
                 explorer.stoppable = false;
                 keyExplorers.unshift(explorer);
+                if (this.speechExplorerKeys.some((exKey) => this.document.options.a11y[exKey])) {
+                    explorer.Attach();
+                    this.attached.push(key);
+                }
+                else {
+                    explorer.Detach();
+                }
+                continue;
             }
-            if (this.document.options.a11y[key]) {
+            if (a11y[key] ||
+                (key === 'speech' && (a11y.braille || a11y.keyMagnifier))) {
                 explorer.Attach();
                 this.attached.push(key);
             }
@@ -93,7 +83,7 @@ export class ExplorerPool {
                 explorer.Detach();
             }
         }
-        for (let explorer of keyExplorers) {
+        for (const explorer of keyExplorers) {
             if (explorer.attached) {
                 explorer.stoppable = true;
                 break;
@@ -101,8 +91,8 @@ export class ExplorerPool {
         }
     }
     reattach() {
-        for (let key of this.attached) {
-            let explorer = this.explorers[key];
+        for (const key of this.attached) {
+            const explorer = this.explorers[key];
             if (explorer.active) {
                 this._restart.push(key);
                 explorer.Stop();
@@ -110,16 +100,21 @@ export class ExplorerPool {
         }
     }
     restart() {
-        this._restart.forEach(x => this.explorers[x].Start());
+        this._restart.forEach((x) => {
+            this.explorers[x].Start();
+        });
         this._restart = [];
     }
     setPrimaryHighlighter() {
-        let [foreground, background] = this.colorOptions();
-        this._highlighter = Sre.getHighlighter(background, foreground, { renderer: this.document.outputJax.name, browser: 'v3' });
+        const [foreground, background] = this.colorOptions();
+        this._highlighter = Sre.getHighlighter(background, foreground, {
+            renderer: this.document.outputJax.name,
+            browser: 'v3',
+        });
     }
     setSecondaryHighlighter() {
         this.secondaryHighlighter = Sre.getHighlighter({ color: 'red' }, { color: 'black' }, { renderer: this.document.outputJax.name, browser: 'v3' });
-        this.explorers['speech'].region.highlighter =
+        this.speech.region.highlighter =
             this.secondaryHighlighter;
     }
     highlight(nodes) {
@@ -129,12 +124,19 @@ export class ExplorerPool {
         this.secondaryHighlighter.unhighlight();
         this.highlighter.unhighlight();
     }
+    get speech() {
+        return this.explorers['speech'];
+    }
     colorOptions() {
-        let opts = this.document.options.a11y;
-        let foreground = { color: opts.foregroundColor.toLowerCase(),
-            alpha: opts.foregroundOpacity / 100 };
-        let background = { color: opts.backgroundColor.toLowerCase(),
-            alpha: opts.backgroundOpacity / 100 };
+        const opts = this.document.options.a11y;
+        const foreground = {
+            color: opts.foregroundColor.toLowerCase(),
+            alpha: opts.foregroundOpacity / 100,
+        };
+        const background = {
+            color: opts.backgroundColor.toLowerCase(),
+            alpha: opts.backgroundOpacity / 100,
+        };
         return [foreground, background];
     }
 }

@@ -58,6 +58,6 @@ Entities.add({
     tstrok: '\u0167',
     twixt: '\u226C',
     twoheadleftarrow: '\u219E',
-    twoheadrightarrow: '\u21A0'
+    twoheadrightarrow: '\u21A0',
 }, 't');
 //# sourceMappingURL=t.js.map

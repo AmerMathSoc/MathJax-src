@@ -8,5 +8,5 @@ export declare class PrioritizedList<DataClass> {
     constructor();
     [Symbol.iterator](): Iterator<PrioritizedListItem<DataClass>>;
     add(item: DataClass, priority?: number): DataClass;
-    remove(item: DataClass): void;
+    remove(item: DataClass): PrioritizedList<DataClass>;
 }

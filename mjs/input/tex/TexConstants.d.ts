@@ -1,5 +1,5 @@
-export declare namespace TexConstant {
-    const Variant: {
+export declare const TexConstant: {
+    Variant: {
         NORMAL: string;
         BOLD: string;
         ITALIC: string;
@@ -24,25 +24,25 @@ export declare namespace TexConstant {
         BOLDOLDSTYLE: string;
         MATHITALIC: string;
     };
-    const Form: {
+    Form: {
         PREFIX: string;
         INFIX: string;
         POSTFIX: string;
     };
-    const LineBreak: {
+    LineBreak: {
         AUTO: string;
         NEWLINE: string;
         NOBREAK: string;
         GOODBREAK: string;
         BADBREAK: string;
     };
-    const LineBreakStyle: {
+    LineBreakStyle: {
         BEFORE: string;
         AFTER: string;
         DUPLICATE: string;
         INFIXLINBREAKSTYLE: string;
     };
-    const IndentAlign: {
+    IndentAlign: {
         LEFT: string;
         CENTER: string;
         RIGHT: string;
@@ -50,15 +50,15 @@ export declare namespace TexConstant {
         ID: string;
         INDENTALIGN: string;
     };
-    const IndentShift: {
+    IndentShift: {
         INDENTSHIFT: string;
     };
-    const LineThickness: {
+    LineThickness: {
         THIN: string;
         MEDIUM: string;
         THICK: string;
     };
-    const Notation: {
+    Notation: {
         LONGDIV: string;
         ACTUARIAL: string;
         PHASORANGLE: string;
@@ -78,7 +78,7 @@ export declare namespace TexConstant {
         MADRUWB: string;
         UPDIAGONALARROW: string;
     };
-    const Align: {
+    Align: {
         TOP: string;
         BOTTOM: string;
         CENTER: string;
@@ -87,35 +87,35 @@ export declare namespace TexConstant {
         LEFT: string;
         RIGHT: string;
     };
-    const Lines: {
+    Lines: {
         NONE: string;
         SOLID: string;
         DASHED: string;
     };
-    const Side: {
+    Side: {
         LEFT: string;
         RIGHT: string;
         LEFTOVERLAP: string;
         RIGHTOVERLAP: string;
     };
-    const Width: {
+    Width: {
         AUTO: string;
         FIT: string;
     };
-    const Actiontype: {
+    Actiontype: {
         TOGGLE: string;
         STATUSLINE: string;
         TOOLTIP: string;
         INPUT: string;
     };
-    const Overflow: {
+    Overflow: {
         LINBREAK: string;
         SCROLL: string;
         ELIDE: string;
         TRUNCATE: string;
         SCALE: string;
     };
-    const Unit: {
+    Unit: {
         EM: string;
         EX: string;
         PX: string;
@@ -125,4 +125,8 @@ export declare namespace TexConstant {
         PT: string;
         PC: string;
     };
-}
+    Attr: {
+        LATEX: string;
+        LATEXITEM: string;
+    };
+};

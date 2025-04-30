@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMiMixin } from '../../common/Wrappers/mi.js';
+import { CommonMiMixin, } from '../../common/Wrappers/mi.js';
 import { MmlMi } from '../../../core/MmlTree/MmlNodes/mi.js';
 export const SvgMi = (function () {
     var _a;

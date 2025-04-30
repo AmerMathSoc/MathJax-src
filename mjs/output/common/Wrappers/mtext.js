@@ -24,12 +24,16 @@ export function CommonMtextMixin(Base) {
             getVariant() {
                 const options = this.jax.options;
                 const data = this.jax.math.outputData;
-                const merror = ((!!data.merrorFamily || !!options.merrorFont) && this.node.Parent.isKind('merror'));
+                const merror = (!!data.merrorFamily || !!options.merrorFont) &&
+                    this.node.Parent.isKind('merror');
                 if (!!data.mtextFamily || !!options.mtextFont || merror) {
                     const variant = this.node.attributes.get('mathvariant');
-                    const font = this.constructor.INHERITFONTS[variant] || this.jax.font.getCssFont(variant);
-                    const family = font[0] || (merror ? data.merrorFamily || options.merrorFont :
-                        data.mtextFamily || options.mtextFont);
+                    const font = this.constructor.INHERITFONTS[variant] ||
+                        this.jax.font.getCssFont(variant);
+                    const family = font[0] ||
+                        (merror
+                            ? data.merrorFamily || options.merrorFont
+                            : data.mtextFamily || options.mtextFont);
                     this.variant = this.explicitVariant(family, font[2] ? 'bold' : '', font[1] ? 'italic' : '');
                     return;
                 }
@@ -52,15 +56,21 @@ export function CommonMtextMixin(Base) {
                 }
                 else {
                     bbox.L = 0;
-                    bbox.indentData = [['left', '0'], ['left', '0'], ['left', '0']];
-                    i === this.breakCount && this.addRightBorders(bbox);
+                    bbox.indentData = [
+                        ['left', '0'],
+                        ['left', '0'],
+                        ['left', '0'],
+                    ];
+                    if (i === this.breakCount) {
+                        this.addRightBorders(bbox);
+                    }
                 }
                 return bbox;
             }
             getBreakWidth(i) {
                 const childNodes = this.childNodes;
                 let [si, sj] = this.breakPoints[i - 1] || [0, 0];
-                let [ei, ej] = this.breakPoints[i] || [childNodes.length, 0];
+                const [ei, ej] = this.breakPoints[i] || [childNodes.length, 0];
                 let words = childNodes[si].node.getText().split(/ /);
                 if (si === ei) {
                     return this.textWidth(words.slice(sj, ej).join(' '));
@@ -80,7 +90,7 @@ export function CommonMtextMixin(Base) {
             normal: ['', false, false],
             bold: ['', false, true],
             italic: ['', true, false],
-            'bold-italic': ['', true, true]
+            'bold-italic': ['', true, true],
         },
         _a;
 }

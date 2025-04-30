@@ -1,11 +1,15 @@
-import { FontData } from '../common/FontData.js';
+import { FontData, mergeOptions, } from '../common/FontData.js';
 export * from '../common/FontData.js';
 export class SvgFontData extends FontData {
     static charOptions(font, n) {
         return super.charOptions(font, n);
     }
+    static addExtension(data, prefix = '') {
+        super.addExtension(data, prefix);
+        mergeOptions(this, 'variantCacheIds', data.cacheIds);
+    }
 }
-SvgFontData.OPTIONS = Object.assign(Object.assign({}, FontData.OPTIONS), { dynamicPrefix: './output/svg/fonts' });
+SvgFontData.OPTIONS = Object.assign(Object.assign({}, FontData.OPTIONS), { dynamicPrefix: './svg/dynamic' });
 SvgFontData.JAX = 'SVG';
 export function AddPaths(font, paths, content) {
     for (const c of Object.keys(paths)) {

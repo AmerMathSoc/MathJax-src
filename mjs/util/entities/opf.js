@@ -51,6 +51,6 @@ Entities.add({
     wopf: '\uD835\uDD68',
     xopf: '\uD835\uDD69',
     yopf: '\uD835\uDD6A',
-    zopf: '\uD835\uDD6B'
+    zopf: '\uD835\uDD6B',
 }, 'opf');
 //# sourceMappingURL=opf.js.map

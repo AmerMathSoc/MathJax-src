@@ -14,8 +14,10 @@ export class MmlMath extends AbstractMmlLayoutNode {
             this.attributes.setInherited('display', 'block');
         }
         attributes = this.addInheritedAttributes(attributes, this.attributes.getAllAttributes());
-        display = (!!this.attributes.get('displaystyle') ||
-            (!this.attributes.get('displaystyle') && this.attributes.get('display') === 'block'));
+        display =
+            !!this.attributes.get('displaystyle') ||
+                (!this.attributes.get('displaystyle') &&
+                    this.attributes.get('display') === 'block');
         this.attributes.setInherited('displaystyle', display);
         level = (this.attributes.get('scriptlevel') ||
             this.constructor.defaults['scriptlevel']);

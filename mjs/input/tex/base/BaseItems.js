@@ -2,10 +2,12 @@ import { MapHandler } from '../MapHandler.js';
 import { entities } from '../../../util/Entities.js';
 import { TEXCLASS } from '../../../core/MmlTree/MmlNode.js';
 import TexError from '../TexError.js';
-import ParseUtil from '../ParseUtil.js';
+import { ParseUtil } from '../ParseUtil.js';
+import { UnitUtil } from '../UnitUtil.js';
 import NodeUtil from '../NodeUtil.js';
 import { BaseItem } from '../StackItem.js';
 import { TRBL } from '../../../util/Styles.js';
+import { TexConstant } from '../TexConstants.js';
 export class StartItem extends BaseItem {
     constructor(factory, global) {
         super(factory);
@@ -45,16 +47,16 @@ export class OpenItem extends BaseItem {
     }
     checkItem(item) {
         if (item.isKind('close')) {
-            let mml = this.toMml();
+            const mml = this.toMml();
             const node = this.create('node', 'TeXAtom', [mml]);
+            addLatexItem(node, item);
             return [[this.factory.create('mml', node)], true];
         }
         return super.checkItem(item);
     }
 }
 OpenItem.errors = Object.assign(Object.create(BaseItem.errors), {
-    'stop': ['ExtraOpenMissingClose',
-        'Extra open brace or missing close brace']
+    stop: ['ExtraOpenMissingClose', 'Extra open brace or missing close brace'],
 });
 export class CloseItem extends BaseItem {
     get kind() {
@@ -64,17 +66,28 @@ export class CloseItem extends BaseItem {
         return true;
     }
 }
+export class NullItem extends BaseItem {
+    get kind() {
+        return 'null';
+    }
+}
 export class PrimeItem extends BaseItem {
     get kind() {
         return 'prime';
     }
     checkItem(item) {
-        let [top0, top1] = this.Peek(2);
-        if (!NodeUtil.isType(top0, 'msubsup') || NodeUtil.isType(top0, 'msup')) {
-            const node = this.create('node', 'msup', [top0, top1]);
+        const [top0, top1] = this.Peek(2);
+        const isSup = (NodeUtil.isType(top0, 'msubsup') || NodeUtil.isType(top0, 'msup')) &&
+            !NodeUtil.getChildAt(top0, top0.sup);
+        const isOver = (NodeUtil.isType(top0, 'munderover') || NodeUtil.isType(top0, 'mover')) &&
+            !NodeUtil.getChildAt(top0, top0.over) &&
+            !NodeUtil.getProperty(top0, 'subsupOK');
+        if (!isSup && !isOver) {
+            const node = this.create('node', top0.getProperty('movesupsub') ? 'mover' : 'msup', [top0, top1]);
             return [[node, item], true];
         }
-        NodeUtil.setChild(top0, top0.sup, top1);
+        const pos = isSup ? top0.sup : top0.over;
+        NodeUtil.setChild(top0, pos, top1);
         return [[top0, item], true];
     }
 }
@@ -95,7 +108,10 @@ export class SubsupItem extends BaseItem {
                 }
                 else {
                     NodeUtil.setProperty(this.getProperty('primes'), 'variantForm', true);
-                    const node = this.create('node', 'mrow', [this.getProperty('primes'), item.First]);
+                    const node = this.create('node', 'mrow', [
+                        this.getProperty('primes'),
+                        item.First,
+                    ]);
                     item.First = node;
                 }
             }
@@ -106,20 +122,15 @@ export class SubsupItem extends BaseItem {
             const result = this.factory.create('mml', top);
             return [[result], true];
         }
-        if (super.checkItem(item)[1]) {
-            const error = this.getErrors(['', 'sub', 'sup'][position]);
-            throw new TexError(error[0], error[1], ...error.splice(2));
-        }
-        return null;
+        super.checkItem(item);
+        const error = this.getErrors(['', 'sub', 'sup'][position]);
+        throw new TexError(error[0], error[1], ...error.splice(2));
     }
 }
 SubsupItem.errors = Object.assign(Object.create(BaseItem.errors), {
-    'stop': ['MissingScript',
-        'Missing superscript or subscript argument'],
-    'sup': ['MissingOpenForSup',
-        'Missing open brace for superscript'],
-    'sub': ['MissingOpenForSub',
-        'Missing open brace for subscript']
+    stop: ['MissingScript', 'Missing superscript or subscript argument'],
+    sup: ['MissingOpenForSup', 'Missing open brace for superscript'],
+    sub: ['MissingOpenForSub', 'Missing open brace for subscript'],
 });
 export class OverItem extends BaseItem {
     constructor(factory) {
@@ -137,7 +148,10 @@ export class OverItem extends BaseItem {
             throw new TexError('AmbiguousUseOf', 'Ambiguous use of %1', item.getName());
         }
         if (item.isClose) {
-            let mml = this.create('node', 'mfrac', [this.getProperty('num'), this.toMml(false)]);
+            let mml = this.create('node', 'mfrac', [
+                this.getProperty('num'),
+                this.toMml(false),
+            ]);
             if (this.getProperty('thickness') != null) {
                 NodeUtil.setAttribute(mml, 'linethickness', this.getProperty('thickness'));
             }
@@ -145,13 +159,13 @@ export class OverItem extends BaseItem {
                 NodeUtil.setProperty(mml, 'withDelims', true);
                 mml = ParseUtil.fixedFence(this.factory.configuration, this.getProperty('ldelim'), mml, this.getProperty('rdelim'));
             }
+            mml.attributes.set(TexConstant.Attr.LATEXITEM, this.getProperty('name'));
             return [[this.factory.create('mml', mml), item], true];
         }
         return super.checkItem(item);
     }
     toString() {
-        return 'over[' + this.getProperty('num') +
-            ' / ' + this.nodes.join('; ') + ']';
+        return ('over[' + this.getProperty('num') + ' / ' + this.nodes.join('; ') + ']');
     }
 }
 export class LeftItem extends BaseItem {
@@ -167,14 +181,25 @@ export class LeftItem extends BaseItem {
     }
     checkItem(item) {
         if (item.isKind('right')) {
-            return [[this.factory.create('mml', ParseUtil.fenced(this.factory.configuration, this.getProperty('delim'), this.toMml(), item.getProperty('delim'), '', item.getProperty('color')))], true];
+            const fenced = ParseUtil.fenced(this.factory.configuration, this.getProperty('delim'), this.toMml(), item.getProperty('delim'), '', item.getProperty('color'));
+            const left = fenced.childNodes[0];
+            const right = fenced.childNodes[fenced.childNodes.length - 1];
+            const mrow = this.factory.create('mml', fenced);
+            addLatexItem(left, this, '\\left');
+            addLatexItem(right, item, '\\right');
+            mrow
+                .Peek()[0]
+                .attributes.set(TexConstant.Attr.LATEXITEM, '\\left' + item.startStr.slice(this.startI, item.stopI));
+            return [[mrow], true];
         }
         if (item.isKind('middle')) {
             const def = { stretchy: true };
             if (item.getProperty('color')) {
                 def.mathcolor = item.getProperty('color');
             }
-            this.Push(this.create('node', 'TeXAtom', [], { texClass: TEXCLASS.CLOSE }), this.create('token', 'mo', def, item.getProperty('delim')), this.create('node', 'TeXAtom', [], { texClass: TEXCLASS.OPEN }));
+            const middle = this.create('token', 'mo', def, item.getProperty('delim'));
+            addLatexItem(middle, item, '\\middle');
+            this.Push(this.create('node', 'TeXAtom', [], { texClass: TEXCLASS.CLOSE }), middle, this.create('node', 'TeXAtom', [], { texClass: TEXCLASS.OPEN }));
             this.env = {};
             return [[this], true];
         }
@@ -182,14 +207,15 @@ export class LeftItem extends BaseItem {
     }
 }
 LeftItem.errors = Object.assign(Object.create(BaseItem.errors), {
-    'stop': ['ExtraLeftMissingRight',
-        'Extra \\left or missing \\right']
+    stop: ['ExtraLeftMissingRight', 'Extra \\left or missing \\right'],
 });
 export class Middle extends BaseItem {
     constructor(factory, delim, color) {
         super(factory);
         this.setProperty('delim', delim);
-        color && this.setProperty('color', color);
+        if (color) {
+            this.setProperty('color', color);
+        }
     }
     get kind() {
         return 'middle';
@@ -202,7 +228,9 @@ export class RightItem extends BaseItem {
     constructor(factory, delim, color) {
         super(factory);
         this.setProperty('delim', delim);
-        color && this.setProperty('color', color);
+        if (color) {
+            this.setProperty('color', color);
+        }
     }
     get kind() {
         return 'right';
@@ -253,10 +281,9 @@ export class BeginItem extends BaseItem {
             if (item.getName() !== this.getName()) {
                 throw new TexError('EnvBadEnd', '\\begin{%1} ended with \\end{%2}', this.getName(), item.getName());
             }
-            if (!this.getProperty('end')) {
-                return [[this.factory.create('mml', this.toMml())], true];
-            }
-            return BaseItem.fail;
+            const node = this.toMml();
+            addLatexItem(node, item);
+            return [[this.factory.create('mml', node)], true];
         }
         if (item.isKind('stop')) {
             throw new TexError('EnvMissingEnd', 'Missing \\end{%1}', this.getName());
@@ -296,13 +323,21 @@ export class PositionItem extends BaseItem {
             let mml = item.toMml();
             switch (this.getProperty('move')) {
                 case 'vertical':
-                    mml = this.create('node', 'mpadded', [mml], { height: this.getProperty('dh'),
+                    mml = this.create('node', 'mpadded', [mml], {
+                        height: this.getProperty('dh'),
                         depth: this.getProperty('dd'),
-                        voffset: this.getProperty('dh') });
+                        voffset: this.getProperty('dh'),
+                    });
                     return [[this.factory.create('mml', mml)], true];
                 case 'horizontal':
-                    return [[this.factory.create('mml', this.getProperty('left')), item,
-                            this.factory.create('mml', this.getProperty('right'))], true];
+                    return [
+                        [
+                            this.factory.create('mml', this.getProperty('left')),
+                            item,
+                            this.factory.create('mml', this.getProperty('right')),
+                        ],
+                        true,
+                    ];
             }
         }
         return super.checkItem(item);
@@ -339,7 +374,8 @@ export class FnItem extends BaseItem {
                 if (!item.isKind('mml') || !mml) {
                     return [[top, item], true];
                 }
-                if ((NodeUtil.isType(mml, 'mstyle') && mml.childNodes.length &&
+                if ((NodeUtil.isType(mml, 'mstyle') &&
+                    mml.childNodes.length &&
                     NodeUtil.isType(mml.childNodes[0].childNodes[0], 'mspace')) ||
                     NodeUtil.isType(mml, 'mspace')) {
                     return [[top, item], true];
@@ -355,7 +391,7 @@ export class FnItem extends BaseItem {
             const node = this.create('token', 'mo', { texClass: TEXCLASS.NONE }, entities.ApplyFunction);
             return [[top, node, item], true];
         }
-        return super.checkItem.apply(this, arguments);
+        return super.checkItem(item);
     }
 }
 export class NotItem extends BaseItem {
@@ -374,11 +410,13 @@ export class NotItem extends BaseItem {
             return BaseItem.success;
         }
         if (item.isKind('mml') &&
-            (NodeUtil.isType(item.First, 'mo') || NodeUtil.isType(item.First, 'mi') ||
+            (NodeUtil.isType(item.First, 'mo') ||
+                NodeUtil.isType(item.First, 'mi') ||
                 NodeUtil.isType(item.First, 'mtext'))) {
             mml = item.First;
             c = NodeUtil.getText(mml);
-            if (c.length === 1 && !NodeUtil.getProperty(mml, 'movesupsub') &&
+            if (c.length === 1 &&
+                !NodeUtil.getProperty(mml, 'movesupsub') &&
                 NodeUtil.getChildren(mml).length === 1) {
                 if (this.remap.contains(c)) {
                     textNode = this.create('text', this.remap.lookup(c).char);
@@ -393,8 +431,12 @@ export class NotItem extends BaseItem {
         }
         textNode = this.create('text', '\u29F8');
         const mtextNode = this.create('node', 'mtext', [], {}, textNode);
-        const paddedNode = this.create('node', 'mpadded', [mtextNode], { width: 0 });
-        mml = this.create('node', 'TeXAtom', [paddedNode], { texClass: TEXCLASS.REL });
+        const paddedNode = this.create('node', 'mpadded', [mtextNode], {
+            width: 0,
+        });
+        mml = this.create('node', 'TeXAtom', [paddedNode], {
+            texClass: TEXCLASS.REL,
+        });
         return [[mml, item], true];
     }
 }
@@ -428,7 +470,7 @@ export class DotsItem extends BaseItem {
             return BaseItem.success;
         }
         let dots = this.getProperty('ldots');
-        let top = item.First;
+        const top = item.First;
         if (item.isKind('mml') && NodeUtil.isEmbellished(top)) {
             const tclass = NodeUtil.getTexClass(NodeUtil.getCoreMO(top));
             if (tclass === TEXCLASS.BIN || tclass === TEXCLASS.REL) {
@@ -454,8 +496,9 @@ export class ArrayItem extends BaseItem {
         this.breakAlign = {
             cell: '',
             row: '',
-            table: ''
+            table: '',
         };
+        this.templateSubs = 0;
     }
     get kind() {
         return 'array';
@@ -483,7 +526,7 @@ export class ArrayItem extends BaseItem {
             }
             this.EndTable();
             this.clearEnv();
-            let newItem = this.factory.create('mml', this.createMml());
+            const newItem = this.factory.create('mml', this.createMml());
             if (this.getProperty('requireClose')) {
                 if (item.isKind('close')) {
                     return [[newItem], true];
@@ -499,7 +542,7 @@ export class ArrayItem extends BaseItem {
         delete this.arraydef['scriptlevel'];
         let mml = this.create('node', 'mtable', this.table, this.arraydef);
         if (scriptlevel) {
-            mml.setProperty('scriptlevel', scriptlevel);
+            mml.setProperty('smallmatrix', true);
         }
         if (this.breakAlign.table) {
             NodeUtil.setAttribute(mml, 'data-break-align', this.breakAlign.table);
@@ -509,6 +552,9 @@ export class ArrayItem extends BaseItem {
             NodeUtil.setAttribute(mml, 'framespacing', this.getProperty('arrayPadding'));
         }
         mml = this.handleFrame(mml);
+        if (scriptlevel !== undefined) {
+            mml = this.create('node', 'mstyle', [mml], { scriptlevel });
+        }
         if (this.getProperty('open') || this.getProperty('close')) {
             mml = ParseUtil.fenced(this.factory.configuration, this.getProperty('open'), mml, this.getProperty('close'));
         }
@@ -518,7 +564,7 @@ export class ArrayItem extends BaseItem {
         if (!this.frame.length)
             return mml;
         const sides = new Map(this.frame);
-        const fstyle = this.frame.reduce((fstyle, [, style]) => style === fstyle ? style : '', this.frame[0][1]);
+        const fstyle = this.frame.reduce((fstyle, [, style]) => (style === fstyle ? style : ''), this.frame[0][1]);
         if (fstyle) {
             if (this.frame.length === 4) {
                 NodeUtil.setAttribute(mml, 'frame', fstyle);
@@ -529,12 +575,12 @@ export class ArrayItem extends BaseItem {
                 NodeUtil.setAttribute(mml, 'data-frame-styles', '');
                 mml = this.create('node', 'menclose', [mml], {
                     notation: Array.from(sides.keys()).join(' '),
-                    'data-padding': 0
+                    'data-padding': 0,
                 });
                 return mml;
             }
         }
-        const styles = TRBL.map(side => sides.get(side) || 'none').join(' ');
+        const styles = TRBL.map((side) => sides.get(side) || 'none').join(' ');
         NodeUtil.setAttribute(mml, 'data-frame-styles', styles);
         return mml;
     }
@@ -551,7 +597,8 @@ export class ArrayItem extends BaseItem {
             start += '&';
         }
         if (term !== '&') {
-            found = !!entry.trim() || !!(n || term.substr(0, 4) !== '\\end');
+            found =
+                !!entry.trim() || !!(n || (term && term.substring(0, 4) !== '\\end'));
             if (cextra[n + 1] && !cextra[n]) {
                 end = (end || '') + '&';
                 this.atEnd = true;
@@ -570,6 +617,13 @@ export class ArrayItem extends BaseItem {
             if (ralign) {
                 entry = '\\text{' + entry.trim() + '}';
             }
+            if (start || end || ralign) {
+                if (++this.templateSubs >
+                    parser.configuration.options.maxTemplateSubtitutions) {
+                    throw new TexError('MaxTemplateSubs', 'Maximum template substitutions exceeded; ' +
+                        'is there an invalid use of \\\\ in the template?');
+                }
+            }
         }
         if (prefix) {
             entry = ParseUtil.addArgs(parser, prefix, entry);
@@ -580,7 +634,8 @@ export class ArrayItem extends BaseItem {
     getEntry() {
         const parser = this.parser;
         const pattern = /^([^]*?)([&{}]|\\\\|\\(?:begin|end)\s*\{array\}|\\cr|\\)/;
-        let braces = 0, envs = 0;
+        let braces = 0;
+        let envs = 0;
         let i = parser.i;
         let match;
         const fail = ['', '', '', false];
@@ -599,14 +654,16 @@ export class ArrayItem extends BaseItem {
                     braces--;
                     break;
                 case '\\begin{array}':
-                    !braces && envs++;
+                    if (!braces) {
+                        envs++;
+                    }
                     break;
                 case '\\end{array}':
                     if (!braces && envs) {
                         envs--;
                         break;
                     }
-                default:
+                default: {
                     if (braces || envs)
                         continue;
                     i -= match[2].length;
@@ -618,6 +675,7 @@ export class ArrayItem extends BaseItem {
                     parser.string = parser.string.slice(i);
                     parser.i = 0;
                     return [(prefix === null || prefix === void 0 ? void 0 : prefix[0]) || '', entry, match[2], true];
+                }
             }
         }
         return fail;
@@ -634,15 +692,12 @@ export class ArrayItem extends BaseItem {
         }
         const ralign = this.ralign[this.row.length];
         if (ralign) {
-            let [valign, cwidth, calign] = ralign;
-            if (this.breakAlign.cell) {
-                valign = this.breakAlign.cell;
-            }
+            const [valign, cwidth, calign] = ralign;
             const box = this.create('node', 'mpadded', mtd.childNodes[0].childNodes, {
                 width: cwidth,
                 'data-overflow': 'auto',
                 'data-align': calign,
-                'data-vertical-align': valign
+                'data-vertical-align': valign,
             });
             box.setProperty('vbox', valign);
             mtd.childNodes[0].childNodes = [];
@@ -671,6 +726,7 @@ export class ArrayItem extends BaseItem {
             NodeUtil.setAttribute(node, 'data-break-align', this.breakAlign.row);
             this.breakAlign.row = '';
         }
+        addLatexItem(node, this);
         this.table.push(node);
         this.row = [];
         this.atEnd = false;
@@ -710,14 +766,14 @@ export class ArrayItem extends BaseItem {
         if (this.arraydef['rowspacing']) {
             const rows = this.arraydef['rowspacing'].split(/ /);
             if (!this.getProperty('rowspacing')) {
-                let dimem = ParseUtil.dimen2em(rows[0]);
+                const dimem = UnitUtil.dimen2em(rows[0]);
                 this.setProperty('rowspacing', dimem);
             }
             const rowspacing = this.getProperty('rowspacing');
             while (rows.length < this.table.length) {
-                rows.push(ParseUtil.Em(rowspacing));
+                rows.push(UnitUtil.em(rowspacing));
             }
-            rows[this.table.length - 1] = ParseUtil.Em(Math.max(0, rowspacing + ParseUtil.dimen2em(spacing)));
+            rows[this.table.length - 1] = UnitUtil.em(Math.max(0, rowspacing + UnitUtil.dimen2em(spacing)));
             this.arraydef['rowspacing'] = rows.join(' ');
         }
     }
@@ -732,7 +788,11 @@ export class EqnArrayItem extends ArrayItem {
         return 'eqnarray';
     }
     EndEntry() {
-        if (this.row.length) {
+        const calign = this.arraydef.columnalign.split(/ /);
+        const align = this.row.length && calign.length
+            ? calign[this.row.length % calign.length]
+            : 'right';
+        if (align !== 'right') {
             ParseUtil.fixInitialMO(this.factory.configuration, this.nodes);
         }
         super.EndEntry();
@@ -771,13 +831,11 @@ export class EqnArrayItem extends ArrayItem {
         }
     }
     addIndentshift() {
-        if (!this.arraydef.columnalign)
-            return;
         const align = this.arraydef.columnalign.split(/ /);
         let prev = '';
         for (const i of align.keys()) {
             if (align[i] === 'left' && i > 0) {
-                const indentshift = (prev === 'center' ? '.7em' : '2em');
+                const indentshift = prev === 'center' ? '.7em' : '2em';
                 for (const row of this.table) {
                     const cell = row.childNodes[row.isKind('mlabeledtr') ? i + 1 : i];
                     if (cell) {
@@ -821,15 +879,25 @@ export class EquationItem extends BaseItem {
     }
     checkItem(item) {
         if (item.isKind('end')) {
-            let mml = this.toMml();
-            let tag = this.factory.configuration.tags.getTag();
+            const mml = this.toMml();
+            const tag = this.factory.configuration.tags.getTag();
             this.factory.configuration.tags.end();
-            return [[tag ? this.factory.configuration.tags.enTag(mml, tag) : mml, item], true];
+            return [
+                [tag ? this.factory.configuration.tags.enTag(mml, tag) : mml, item],
+                true,
+            ];
         }
         if (item.isKind('stop')) {
             throw new TexError('EnvMissingEnd', 'Missing \\end{%1}', this.getName());
         }
         return super.checkItem(item);
+    }
+}
+function addLatexItem(node, item, prefix = '') {
+    const str = item.startStr.slice(item.startI, item.stopI);
+    if (str) {
+        node.attributes.set(TexConstant.Attr.LATEXITEM, prefix ? prefix + str : str);
+        node.attributes.set(TexConstant.Attr.LATEX, prefix ? prefix + str : str);
     }
 }
 //# sourceMappingURL=BaseItems.js.map

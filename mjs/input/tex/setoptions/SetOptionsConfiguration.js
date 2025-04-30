@@ -1,10 +1,12 @@
-import { Configuration, ConfigurationHandler } from '../Configuration.js';
-import { CommandMap } from '../SymbolMap.js';
+import { HandlerType, ConfigurationType } from '../HandlerTypes.js';
+import { Configuration, ConfigurationHandler, } from '../Configuration.js';
+import { CommandMap } from '../TokenMap.js';
 import TexError from '../TexError.js';
-import ParseUtil from '../ParseUtil.js';
-import { Macro } from '../Symbol.js';
+import { ParseUtil } from '../ParseUtil.js';
+import { Macro } from '../Token.js';
 import BaseMethods from '../base/BaseMethods.js';
 import { expandable, isObject } from '../../../util/Options.js';
+import { PrioritizedList } from '../../../util/PrioritizedList.js';
 export const SetOptionsUtil = {
     filterPackage(parser, extension) {
         if (extension !== 'tex' && !ConfigurationHandler.get(extension)) {
@@ -12,21 +14,30 @@ export const SetOptionsUtil = {
         }
         const config = parser.options.setoptions;
         const options = config.allowOptions[extension];
-        if ((options === undefined && !config.allowPackageDefault) || options === false) {
+        if ((options === undefined && !config.allowPackageDefault) ||
+            options === false) {
             throw new TexError('PackageNotSettable', 'Options can\'t be set for package "%1"', extension);
         }
         return true;
     },
     filterOption(parser, extension, option) {
-        var _a;
         const config = parser.options.setoptions;
         const options = config.allowOptions[extension] || {};
-        const allow = (options.hasOwnProperty(option) && !isObject(options[option]) ? options[option] : null);
+        const isTex = extension === 'tex';
+        const allow = Object.hasOwn(options, option) && !isObject(options[option])
+            ? options[option]
+            : null;
         if (allow === false || (allow === null && !config.allowOptionsDefault)) {
-            throw new TexError('OptionNotSettable', 'Option "%1" is not allowed to be set', option);
+            if (isTex) {
+                throw new TexError('TeXOptionNotSettable', 'Option "%1" is not allowed to be set', option);
+            }
+            else {
+                throw new TexError('OptionNotSettable', 'Option "%1" is not allowed to be set for package %2', option, extension);
+            }
         }
-        if (!((_a = (extension === 'tex' ? parser.options : parser.options[extension])) === null || _a === void 0 ? void 0 : _a.hasOwnProperty(option))) {
-            if (extension === 'tex') {
+        const extOptions = isTex ? parser.options : parser.options[extension];
+        if (!extOptions || !Object.hasOwn(extOptions, option)) {
+            if (isTex) {
                 throw new TexError('InvalidTexOption', 'Invalid TeX option "%1"', option);
             }
             else {
@@ -36,38 +47,47 @@ export const SetOptionsUtil = {
         return true;
     },
     filterValue(_parser, _extension, _option, value) {
-        return value;
-    }
+        if (typeof value !== 'string') {
+            return value;
+        }
+        const match = value.match(/^\/(.*)\/([dgimsuvy]*)$/);
+        return match ? new RegExp(match[1], match[2]) : value;
+    },
 };
-const setOptionsMap = new CommandMap('setoptions', {
-    setOptions: 'SetOptions'
-}, {
-    SetOptions(parser, name) {
-        const extension = parser.GetBrackets(name) || 'tex';
-        const options = ParseUtil.keyvalOptions(parser.GetArgument(name));
-        const config = parser.options.setoptions;
-        if (!config.filterPackage(parser, extension))
-            return;
-        for (const key of Object.keys(options)) {
-            if (config.filterOption(parser, extension, key)) {
-                (extension === 'tex' ? parser.options : parser.options[extension])[key] =
-                    config.filterValue(parser, extension, key, options[key]);
-            }
+function SetOptions(parser, name) {
+    const extension = parser.GetBrackets(name) || 'tex';
+    const options = ParseUtil.keyvalOptions(parser.GetArgument(name));
+    const config = parser.options.setoptions;
+    if (!config.filterPackage(parser, extension))
+        return;
+    for (const key of Object.keys(options)) {
+        if (config.filterOption(parser, extension, key)) {
+            (extension === 'tex' ? parser.options : parser.options[extension])[key] =
+                config.filterValue(parser, extension, key, options[key]);
         }
     }
-});
+    parser.Push(parser.itemFactory.create('null'));
+}
 function setoptionsConfig(_config, jax) {
-    const require = jax.parseOptions.handlers.get('macro').lookup('require');
+    const setOptionsMap = new CommandMap('setoptions', {
+        setOptions: SetOptions,
+    });
+    const macros = jax.parseOptions.handlers.get(HandlerType.MACRO);
+    macros.add(['setoptions'], null, PrioritizedList.DEFAULTPRIORITY - 1);
+    const require = macros.lookup('require');
     if (require) {
         setOptionsMap.add('Require', new Macro('Require', require._func));
-        setOptionsMap.add('require', new Macro('require', BaseMethods.Macro, ['\\Require{#2}\\setOptions[#2]{#1}', 2, '']));
+        setOptionsMap.add('require', new Macro('require', BaseMethods.Macro, [
+            '\\Require{#2}\\setOptions[#2]{#1}',
+            2,
+            '',
+        ]));
     }
 }
 export const SetOptionsConfiguration = Configuration.create('setoptions', {
-    handler: { macro: ['setoptions'] },
-    config: setoptionsConfig,
-    priority: 3,
-    options: {
+    [ConfigurationType.CONFIG]: setoptionsConfig,
+    [ConfigurationType.PRIORITY]: 3,
+    [ConfigurationType.OPTIONS]: {
         setoptions: {
             filterPackage: SetOptionsUtil.filterPackage,
             filterOption: SetOptionsUtil.filterOption,
@@ -93,6 +113,6 @@ export const SetOptionsConfiguration = Configuration.create('setoptions', {
                 tagformat: false
             })
         }
-    }
+    },
 });
 //# sourceMappingURL=SetOptionsConfiguration.js.map

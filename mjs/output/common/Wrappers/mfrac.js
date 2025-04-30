@@ -1,3 +1,4 @@
+import { DIRECTION } from '../FontData.js';
 export function CommonMfracMixin(Base) {
     return class CommonMfracMixin extends Base {
         getFractionBBox(bbox, display, t) {
@@ -8,15 +9,17 @@ export function CommonMfracMixin(Base) {
             const { T, u, v } = this.getTUV(display, t);
             bbox.combine(nbox, 0, a + T + Math.max(nbox.d * nbox.rscale, u));
             bbox.combine(dbox, 0, a - T - Math.max(dbox.h * dbox.rscale, v));
-            bbox.w += 2 * this.pad + .2;
+            bbox.w += 2 * this.pad + 0.2;
         }
         getTUV(display, t) {
             const tex = this.font.params;
             const a = tex.axis_height;
             const T = (display ? 3.5 : 1.5) * t;
-            return { T: (display ? 3.5 : 1.5) * t,
+            return {
+                T: (display ? 3.5 : 1.5) * t,
                 u: (display ? tex.num1 : tex.num2) - a - T,
-                v: (display ? tex.denom1 : tex.denom2) + a - T };
+                v: (display ? tex.denom1 : tex.denom2) + a - T,
+            };
         }
         getAtopBBox(bbox, display) {
             const { u, v, nbox, dbox } = this.getUVQ(display);
@@ -28,9 +31,9 @@ export function CommonMfracMixin(Base) {
             const nbox = this.childNodes[0].getOuterBBox();
             const dbox = this.childNodes[1].getOuterBBox();
             const tex = this.font.params;
-            let [u, v] = (display ? [tex.num1, tex.denom1] : [tex.num3, tex.denom2]);
-            let p = (display ? 7 : 3) * tex.rule_thickness;
-            let q = (u - nbox.d * nbox.scale) - (dbox.h * dbox.scale - v);
+            let [u, v] = display ? [tex.num1, tex.denom1] : [tex.num3, tex.denom2];
+            const p = (display ? 7 : 3) * tex.rule_thickness;
+            let q = u - nbox.d * nbox.scale - (dbox.h * dbox.scale - v);
             if (q < p) {
                 u += (p - q) / 2;
                 v += (p - q) / 2;
@@ -48,11 +51,12 @@ export function CommonMfracMixin(Base) {
         getBevelData(display) {
             const nbox = this.childNodes[0].getOuterBBox();
             const dbox = this.childNodes[1].getOuterBBox();
-            const delta = (display ? .4 : .15);
-            const H = Math.max(nbox.scale * (nbox.h + nbox.d), dbox.scale * (dbox.h + dbox.d)) + 2 * delta;
+            const delta = display ? 0.4 : 0.15;
+            const H = Math.max(nbox.scale * (nbox.h + nbox.d), dbox.scale * (dbox.h + dbox.d)) +
+                2 * delta;
             const a = this.font.params.axis_height;
-            const u = nbox.scale * (nbox.d - nbox.h) / 2 + a + delta;
-            const v = dbox.scale * (dbox.d - dbox.h) / 2 + a - delta;
+            const u = (nbox.scale * (nbox.d - nbox.h)) / 2 + a + delta;
+            const v = (dbox.scale * (dbox.d - dbox.h)) / 2 + a - delta;
             return { H, delta, u, v, nbox, dbox };
         }
         isDisplay() {
@@ -62,12 +66,14 @@ export function CommonMfracMixin(Base) {
         constructor(factory, node, parent = null) {
             super(factory, node, parent);
             this.bevel = null;
-            this.pad = (this.node.getProperty('withDelims') ? 0 : this.font.params.nulldelimiterspace);
+            this.pad = this.node.getProperty('withDelims')
+                ? 0
+                : this.font.params.nulldelimiterspace;
             if (this.node.attributes.get('bevelled')) {
                 const { H } = this.getBevelData(this.isDisplay());
-                const bevel = this.bevel = this.createMo('/');
+                const bevel = (this.bevel = this.createMo('/'));
                 bevel.node.attributes.set('symmetric', true);
-                bevel.canStretch(1);
+                bevel.canStretch(DIRECTION.Vertical);
                 bevel.getStretchedVariant([H], true);
             }
         }
@@ -80,14 +86,14 @@ export function CommonMfracMixin(Base) {
                 this.getBevelledBBox(bbox, display);
             }
             else {
-                const thickness = this.length2em(String(linethickness), .06);
+                const thickness = this.length2em(String(linethickness), 0.06);
                 w = -2 * this.pad;
                 if (thickness === 0) {
                     this.getAtopBBox(bbox, display);
                 }
                 else {
                     this.getFractionBBox(bbox, display, thickness);
-                    w -= .2;
+                    w -= 0.2;
                 }
                 w += bbox.w;
             }
@@ -99,7 +105,9 @@ export function CommonMfracMixin(Base) {
         }
         getChildAlign(i) {
             const attributes = this.node.attributes;
-            return (attributes.get('bevelled') ? 'left' : attributes.get(['numalign', 'denomalign'][i]));
+            return attributes.get('bevelled')
+                ? 'left'
+                : attributes.get(['numalign', 'denomalign'][i]);
         }
         getWrapWidth(i) {
             const attributes = this.node.attributes;
@@ -108,7 +116,7 @@ export function CommonMfracMixin(Base) {
             }
             const w = this.getBBox().w;
             const thickness = this.length2em(attributes.get('linethickness'));
-            return w - (thickness ? .2 : 0) - 2 * this.pad;
+            return w - (thickness ? 0.2 : 0) - 2 * this.pad;
         }
     };
 }

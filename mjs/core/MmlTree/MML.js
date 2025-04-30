@@ -19,18 +19,18 @@ import { MmlMenclose } from './MmlNodes/menclose.js';
 import { MmlMaction } from './MmlNodes/maction.js';
 import { MmlMsubsup, MmlMsub, MmlMsup } from './MmlNodes/msubsup.js';
 import { MmlMunderover, MmlMunder, MmlMover } from './MmlNodes/munderover.js';
-import { MmlMmultiscripts, MmlMprescripts, MmlNone } from './MmlNodes/mmultiscripts.js';
+import { MmlMmultiscripts, MmlMprescripts, MmlNone, } from './MmlNodes/mmultiscripts.js';
 import { MmlMtable } from './MmlNodes/mtable.js';
 import { MmlMtr, MmlMlabeledtr } from './MmlNodes/mtr.js';
 import { MmlMtd } from './MmlNodes/mtd.js';
 import { MmlMaligngroup } from './MmlNodes/maligngroup.js';
 import { MmlMalignmark } from './MmlNodes/malignmark.js';
 import { MmlMglyph } from './MmlNodes/mglyph.js';
-import { MmlSemantics, MmlAnnotation, MmlAnnotationXML } from './MmlNodes/semantics.js';
+import { MmlSemantics, MmlAnnotation, MmlAnnotationXML, } from './MmlNodes/semantics.js';
 import { TeXAtom } from './MmlNodes/TeXAtom.js';
 import { MathChoice } from './MmlNodes/mathchoice.js';
 import { HtmlNode } from './MmlNodes/HtmlNode.js';
-export let MML = {
+export const MML = {
     [MmlMath.prototype.kind]: MmlMath,
     [MmlMi.prototype.kind]: MmlMi,
     [MmlMn.prototype.kind]: MmlMn,

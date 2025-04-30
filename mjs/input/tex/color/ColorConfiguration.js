@@ -1,27 +1,28 @@
-import { CommandMap } from '../SymbolMap.js';
+import { HandlerType, ConfigurationType } from '../HandlerTypes.js';
+import { CommandMap } from '../TokenMap.js';
 import { Configuration } from '../Configuration.js';
 import { ColorMethods } from './ColorMethods.js';
 import { ColorModel } from './ColorUtil.js';
 new CommandMap('color', {
-    color: 'Color',
-    textcolor: 'TextColor',
-    definecolor: 'DefineColor',
-    colorbox: 'ColorBox',
-    fcolorbox: 'FColorBox'
-}, ColorMethods);
+    color: ColorMethods.Color,
+    textcolor: ColorMethods.TextColor,
+    definecolor: ColorMethods.DefineColor,
+    colorbox: ColorMethods.ColorBox,
+    fcolorbox: ColorMethods.FColorBox,
+});
 const config = function (_config, jax) {
     jax.parseOptions.packageData.set('color', { model: new ColorModel() });
 };
 export const ColorConfiguration = Configuration.create('color', {
-    handler: {
-        macro: ['color'],
+    [ConfigurationType.HANDLER]: {
+        [HandlerType.MACRO]: ['color'],
     },
-    options: {
+    [ConfigurationType.OPTIONS]: {
         color: {
             padding: '5px',
-            borderWidth: '2px'
-        }
+            borderWidth: '2px',
+        },
     },
-    config: config
+    [ConfigurationType.CONFIG]: config,
 });
 //# sourceMappingURL=ColorConfiguration.js.map

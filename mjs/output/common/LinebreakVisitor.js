@@ -4,35 +4,43 @@ import { TEXCLASS } from '../../core/MmlTree/MmlNode.js';
 import { OPTABLE } from '../../core/MmlTree/OperatorDictionary.js';
 export const NOBREAK = 1000000;
 export class Linebreaks extends AbstractVisitor {
-    breakToWidth(_wrapper, _W) {
-    }
+    breakToWidth(_wrapper, _W) { }
 }
 export class LinebreakVisitor extends Linebreaks {
     constructor() {
         super(...arguments);
         this.PENALTY = {
-            newline: _p => 0,
-            nobreak: _p => NOBREAK,
-            goodbreak: p => p - 200 * this.state.depth,
-            badbreak: p => p + 200 * this.state.depth,
-            auto: p => p,
+            newline: (_p) => 0,
+            nobreak: (_p) => NOBREAK,
+            goodbreak: (p) => p - 200 * this.state.depth,
+            badbreak: (p) => p + 200 * this.state.depth,
+            auto: (p) => p,
         };
         this.FACTORS = {
-            depth: p => p + 800 * this.state.depth,
-            width: p => p + Math.floor((this.state.width - this.state.w) / this.state.width * 2500),
-            tail: p => p + Math.floor(this.state.width / Math.max(.0001, this.state.mathLeft - this.state.w) * 500),
+            depth: (p) => p + 800 * this.state.depth,
+            width: (p) => p +
+                Math.floor(((this.state.width - this.state.w) / this.state.width) * 2500),
+            tail: (p) => p +
+                Math.floor((this.state.width /
+                    Math.max(0.0001, this.state.mathLeft - this.state.w)) *
+                    500),
             open: (p, mo) => {
                 const prevClass = mo.node.prevClass;
-                if (prevClass === TEXCLASS.BIN || prevClass === TEXCLASS.REL || prevClass === TEXCLASS.OP) {
+                if (prevClass === TEXCLASS.BIN ||
+                    prevClass === TEXCLASS.REL ||
+                    prevClass === TEXCLASS.OP) {
                     return p + 5000;
                 }
                 const prev = this.getPrevious(mo);
-                if (prev && (prev.attributes.get('form') !== 'postfix' || prev.attributes.get('linebreak') === 'nobreak')) {
+                if (prev &&
+                    (prev.attributes.get('form') !== 'postfix' ||
+                        prev.attributes.get('linebreak') === 'nobreak')) {
                     return p + 5000;
                 }
                 const parent = mo.node.Parent;
-                if ((parent === null || parent === void 0 ? void 0 : parent.isKind('mmultiscripts')) && mo.node === this.getFirstToken(parent)) {
-                    const prescripts = !!parent.childNodes.filter(node => node.isKind('mprescripts')).length;
+                if ((parent === null || parent === void 0 ? void 0 : parent.isKind('mmultiscripts')) &&
+                    mo.node === this.getFirstToken(parent)) {
+                    const prescripts = !!parent.childNodes.filter((node) => node.isKind('mprescripts')).length;
                     if (prescripts)
                         return NOBREAK;
                 }
@@ -42,7 +50,8 @@ export class LinebreakVisitor extends Linebreaks {
                 var _a;
                 const parent = mo.node.Parent;
                 if ((parent === null || parent === void 0 ? void 0 : parent.isKind('msubsup')) &&
-                    !(parent.isKind('mmultiscripts') && ((_a = parent.childNodes[1]) === null || _a === void 0 ? void 0 : _a.isKind('mprescripts'))) &&
+                    !(parent.isKind('mmultiscripts') &&
+                        ((_a = parent.childNodes[1]) === null || _a === void 0 ? void 0 : _a.isKind('mprescripts'))) &&
                     mo.node === this.getLastToken(parent.childNodes[0])) {
                     return NOBREAK;
                 }
@@ -53,14 +62,14 @@ export class LinebreakVisitor extends Linebreaks {
                 if (!mspace.canBreak)
                     return NOBREAK;
                 const w = mspace.getBBox().w;
-                return (w < 0 ? NOBREAK : w < 1 ? p : p - 100 * (w + 4));
+                return w < 0 ? NOBREAK : w < 1 ? p : p - 100 * (w + 4);
             },
-            separator: p => p + 500,
-            fuzz: p => p * .99,
+            separator: (p) => p + 500,
+            fuzz: (p) => p * 0.99,
         };
         this.TEXCLASS = {
-            [TEXCLASS.BIN]: p => p - 250,
-            [TEXCLASS.REL]: p => p - 500,
+            [TEXCLASS.BIN]: (p) => p - 250,
+            [TEXCLASS.REL]: (p) => p - 500,
         };
     }
     breakToWidth(wrapper, W) {
@@ -70,7 +79,9 @@ export class LinebreakVisitor extends Linebreaks {
         const n = wrapper.breakCount;
         for (let i = 0; i <= n; i++) {
             const line = wrapper.lineBBox[i] || wrapper.getLineBBox(i);
-            line.w > W && this.breakLineToWidth(wrapper, i);
+            if (line.w > W) {
+                this.breakLineToWidth(wrapper, i);
+            }
         }
         for (const [ww, ij] of this.state.breaks) {
             if (ij === null) {
@@ -82,7 +93,6 @@ export class LinebreakVisitor extends Linebreaks {
             }
             ww.invalidateBBox();
         }
-        ;
         this.state = state;
     }
     createState(wrapper) {
@@ -96,7 +106,7 @@ export class LinebreakVisitor extends Linebreaks {
             prevBreak: null,
             depth: 0,
             mathWidth: mathWidth,
-            mathLeft: mathWidth
+            mathLeft: mathWidth,
         };
     }
     breakLineToWidth(wrapper, i) {
@@ -110,7 +120,7 @@ export class LinebreakVisitor extends Linebreaks {
     }
     addWidth(bbox, w = null) {
         if (w === null) {
-            w = (bbox.L + bbox.w + bbox.R);
+            w = bbox.L + bbox.w + bbox.R;
         }
         if (!w)
             return;
@@ -135,7 +145,7 @@ export class LinebreakVisitor extends Linebreaks {
             else {
                 state.prevWidth = pw + dw;
             }
-            state.potential.forEach(data => data[2] -= pw);
+            state.potential.forEach((data) => (data[2] -= pw));
             state.prevBreak = br;
             state.mathLeft -= pw;
         }
@@ -145,13 +155,20 @@ export class LinebreakVisitor extends Linebreaks {
         const state = this.state;
         if (penalty >= NOBREAK || (state.w === 0 && state.prevWidth === 0))
             return;
-        while (state.potential.length && state.potential[0][1] > this.FACTORS.fuzz(penalty)) {
+        while (state.potential.length &&
+            state.potential[0][1] > this.FACTORS.fuzz(penalty)) {
             const data = state.potential.shift();
             if (state.potential.length) {
                 state.potential[0][4] += data[4];
             }
         }
-        state.potential.unshift([[wrapper, ij], penalty, state.w - (((_a = state.prevBreak) === null || _a === void 0 ? void 0 : _a[3]) || 0), w, 0]);
+        state.potential.unshift([
+            [wrapper, ij],
+            penalty,
+            state.w - (((_a = state.prevBreak) === null || _a === void 0 ? void 0 : _a[3]) || 0),
+            w,
+            0,
+        ]);
     }
     getBorderLR(wrapper) {
         var _a;
@@ -163,12 +180,16 @@ export class LinebreakVisitor extends Linebreaks {
         return [border[3] + padding[3], border[1] + padding[1]];
     }
     getFirstToken(node) {
-        return (node.isToken ? node : this.getFirstToken(node.childNodes[0]));
+        return node.isToken ? node : this.getFirstToken(node.childNodes[0]);
     }
     getLastToken(node) {
-        return (node.isToken ? node : this.getLastToken(node.childNodes[node.childNodes.length - 1]));
+        return node.isToken
+            ? node
+            : this.getLastToken(node.childNodes[node.childNodes.length - 1]);
     }
     visitNode(wrapper, i) {
+        if (!wrapper)
+            return;
         this.state.depth++;
         if (wrapper.node.isEmbellished && !wrapper.node.isKind('mo')) {
             this.visitEmbellishedOperator(wrapper, i);
@@ -179,15 +200,22 @@ export class LinebreakVisitor extends Linebreaks {
         this.state.depth--;
     }
     visitDefault(wrapper, i) {
+        var _a;
         const bbox = wrapper.getLineBBox(i);
-        if (wrapper.node.isToken || wrapper.node.linebreakContainer) {
+        if (wrapper.node.isToken ||
+            wrapper.node.linebreakContainer ||
+            !((_a = wrapper.childNodes) === null || _a === void 0 ? void 0 : _a[0])) {
             this.addWidth(bbox);
         }
         else {
             const [L, R] = this.getBorderLR(wrapper);
-            i === 0 && this.addWidth(bbox, bbox.L + L);
+            if (i === 0) {
+                this.addWidth(bbox, bbox.L + L);
+            }
             this.visitNode(wrapper.childNodes[0], i);
-            i === wrapper.breakCount && this.addWidth(bbox, bbox.R + R);
+            if (i === wrapper.breakCount) {
+                this.addWidth(bbox, bbox.R + R);
+            }
         }
     }
     visitEmbellishedOperator(wrapper, _i) {
@@ -203,7 +231,11 @@ export class LinebreakVisitor extends Linebreaks {
         }
         else {
             this.addWidth(bbox);
-            const w = (style === 'after' ? 0 : mo.multChar ? mo.multChar.getBBox().w : bbox.w) + dw;
+            const w = (style === 'after'
+                ? 0
+                : mo.multChar
+                    ? mo.multChar.getBBox().w
+                    : bbox.w) + dw;
             this.pushBreak(wrapper, penalty, w, null);
         }
     }
@@ -220,7 +252,11 @@ export class LinebreakVisitor extends Linebreaks {
         }
         else {
             this.addWidth(bbox);
-            const w = (style === 'after' ? 0 : mo.multChar ? mo.multChar.getBBox().w : bbox.w) + dw;
+            const w = (style === 'after'
+                ? 0
+                : mo.multChar
+                    ? mo.multChar.getBBox().w
+                    : bbox.w) + dw;
             this.pushBreak(wrapper, penalty, w, null);
         }
     }
@@ -238,8 +274,8 @@ export class LinebreakVisitor extends Linebreaks {
             penalty = FACTORS.close(penalty, mo);
             this.state.depth--;
         }
-        penalty = (this.TEXCLASS[mo.node.texClass] || (p => p))(penalty);
-        return (this.PENALTY[linebreak] || (p => p))(FACTORS.depth(penalty));
+        penalty = (this.TEXCLASS[mo.node.texClass] || ((p) => p))(penalty);
+        return (this.PENALTY[linebreak] || ((p) => p))(FACTORS.depth(penalty));
     }
     getPrevious(mo) {
         let child = mo.node;
@@ -253,7 +289,7 @@ export class LinebreakVisitor extends Linebreaks {
         if (!parent || !i)
             return null;
         const prev = parent.childNodes[i - 1];
-        return (prev.isEmbellished ? prev.coreMO() : null);
+        return prev.isEmbellished ? prev.coreMO() : null;
     }
     visitMspaceNode(wrapper, i) {
         const bbox = wrapper.getLineBBox(i);
@@ -269,8 +305,8 @@ export class LinebreakVisitor extends Linebreaks {
     mspacePenalty(mspace) {
         const linebreak = mspace.node.attributes.get('linebreak');
         const FACTORS = this.FACTORS;
-        let penalty = FACTORS.space(FACTORS.tail(FACTORS.width(0)), mspace);
-        return (this.PENALTY[linebreak] || (p => p))(FACTORS.depth(penalty));
+        const penalty = FACTORS.space(FACTORS.tail(FACTORS.width(0)), mspace);
+        return (this.PENALTY[linebreak] || ((p) => p))(FACTORS.depth(penalty));
     }
     visitMtextNode(wrapper, i) {
         if (!wrapper.getText().match(/ /)) {
@@ -324,7 +360,8 @@ export class LinebreakVisitor extends Linebreaks {
     }
     visitMfracNode(wrapper, i) {
         const mfrac = wrapper;
-        if (!mfrac.node.attributes.get('bevelled') && mfrac.getOuterBBox().w > this.state.width) {
+        if (!mfrac.node.attributes.get('bevelled') &&
+            mfrac.getOuterBBox().w > this.state.width) {
             this.breakToWidth(mfrac.childNodes[0], this.state.width);
             this.breakToWidth(mfrac.childNodes[1], this.state.width);
         }
@@ -364,7 +401,8 @@ export class LinebreakVisitor extends Linebreaks {
         const subbox = msubsup.subChild.getOuterBBox();
         const supbox = msubsup.supChild.getOuterBBox();
         const x = msubsup.getAdjustedIc();
-        const w = Math.max(subbox.rscale * subbox.w, x + supbox.rscale * supbox.w) + msubsup.font.params.scriptspace;
+        const w = Math.max(subbox.rscale * subbox.w, x + supbox.rscale * supbox.w) +
+            msubsup.font.params.scriptspace;
         const [L, R] = this.getBorderLR(wrapper);
         this.addWidth(wrapper.getLineBBox(i), L + w + R);
     }
@@ -385,17 +423,25 @@ export class LinebreakVisitor extends Linebreaks {
         const mfenced = wrapper;
         const bbox = wrapper.getLineBBox(i);
         const [L, R] = this.getBorderLR(wrapper);
-        i === 0 && this.addWidth(bbox, bbox.L + L);
+        if (i === 0) {
+            this.addWidth(bbox, bbox.L + L);
+        }
         this.visitNode(mfenced.mrow, i);
-        i === wrapper.breakCount && this.addWidth(bbox, bbox.R + R);
+        if (i === wrapper.breakCount) {
+            this.addWidth(bbox, bbox.R + R);
+        }
     }
     visitMactionNode(wrapper, i) {
         const maction = wrapper;
         const bbox = wrapper.getLineBBox(i);
         const [L, R] = this.getBorderLR(wrapper);
-        i === 0 && this.addWidth(bbox, bbox.L + L);
+        if (i === 0) {
+            this.addWidth(bbox, bbox.L + L);
+        }
         this.visitNode(maction.selected, i);
-        i === wrapper.breakCount && this.addWidth(bbox, bbox.R + R);
+        if (i === wrapper.breakCount) {
+            this.addWidth(bbox, bbox.R + R);
+        }
     }
 }
 (function () {

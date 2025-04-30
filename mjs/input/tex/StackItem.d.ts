@@ -18,10 +18,16 @@ export interface NodeStack {
     Peek(n?: number): MmlNode[];
     Size(): number;
     Clear(): void;
+    startStr: string;
+    startI: number;
+    stopI: number;
     toMml(inferred?: boolean, forceRow?: boolean): MmlNode;
 }
 export declare abstract class MmlStack implements NodeStack {
     private _nodes;
+    startStr: string;
+    startI: number;
+    stopI: number;
     constructor(_nodes: MmlNode[]);
     protected get nodes(): MmlNode[];
     Push(...nodes: MmlNode[]): void;

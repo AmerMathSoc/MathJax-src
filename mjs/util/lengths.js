@@ -45,19 +45,20 @@ export function length2em(length, size = 0, scale = 1, em = 16) {
     if (MATHSPACE[length]) {
         return MATHSPACE[length];
     }
-    let match = length.match(/^\s*([-+]?(?:\.\d+|\d+(?:\.\d*)?))?(pt|em|ex|mu|px|pc|in|mm|cm|%)?/);
-    if (!match) {
+    const match = length.match(/^\s*([-+]?(?:\.\d+|\d+(?:\.\d*)?))?(pt|em|ex|mu|px|pc|in|mm|cm|%)?/);
+    if (!match || match[0] === '') {
         return size;
     }
-    let m = parseFloat(match[1] || '1'), unit = match[2];
-    if (UNITS.hasOwnProperty(unit)) {
-        return m * UNITS[unit] / em / scale;
+    const m = parseFloat(match[1] || '1');
+    const unit = match[2];
+    if (Object.hasOwn(UNITS, unit)) {
+        return (m * UNITS[unit]) / em / scale;
     }
-    if (RELUNITS.hasOwnProperty(unit)) {
+    if (Object.hasOwn(RELUNITS, unit)) {
         return m * RELUNITS[unit];
     }
     if (unit === '%') {
-        return m / 100 * size;
+        return (m / 100) * size;
     }
     return m * size;
 }
@@ -65,21 +66,15 @@ export function percent(m) {
     return (100 * m).toFixed(1).replace(/\.?0+$/, '') + '%';
 }
 export function em(m) {
-    if (Math.abs(m) < .001)
+    if (Math.abs(m) < 0.001)
         return '0';
-    return (m.toFixed(3).replace(/\.?0+$/, '')) + 'em';
-}
-export function emRounded(m, em = 16) {
-    m = (Math.round(m * em) + .05) / em;
-    if (Math.abs(m) < .001)
-        return '0em';
     return m.toFixed(3).replace(/\.?0+$/, '') + 'em';
 }
 export function px(m, M = -BIGDIMEN, em = 16) {
     m *= em;
     if (M && m < M)
         m = M;
-    if (Math.abs(m) < .1)
+    if (Math.abs(m) < 0.1)
         return '0';
     return m.toFixed(1).replace(/\.0$/, '') + 'px';
 }

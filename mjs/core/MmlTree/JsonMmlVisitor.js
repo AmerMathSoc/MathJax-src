@@ -10,13 +10,13 @@ export class JsonMmlVisitor extends MmlVisitor {
         return { kind: node.kind, xml: node.getXML() };
     }
     visitDefault(node) {
-        let json = {
+        const json = {
             kind: node.kind.replace(/inferredM/, 'm'),
             texClass: node.texClass,
             attributes: this.getAttributes(node),
             inherited: this.getInherited(node),
             properties: this.getProperties(node),
-            childNodes: this.getChildren(node)
+            childNodes: this.getChildren(node),
         };
         if (node.isInferred) {
             json.isInferred = true;
@@ -30,7 +30,7 @@ export class JsonMmlVisitor extends MmlVisitor {
         return json;
     }
     getChildren(node) {
-        let children = [];
+        const children = [];
         for (const child of node.childNodes) {
             children.push(this.visitNode(child));
         }

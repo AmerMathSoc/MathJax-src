@@ -1,15 +1,16 @@
-import { Symbol } from './Symbol.js';
+import { Token } from './Token.js';
 import TexParser from './TexParser.js';
-declare namespace ParseMethods {
-    function variable(parser: TexParser, c: string): void;
-    function digit(parser: TexParser, c: string): void;
-    function controlSequence(parser: TexParser, _c: string): void;
-    function lcGreek(parser: TexParser, mchar: Symbol): void;
-    function ucGreek(parser: TexParser, mchar: Symbol): void;
-    function mathchar0mi(parser: TexParser, mchar: Symbol): void;
-    function mathchar0mo(parser: TexParser, mchar: Symbol): void;
-    function mathchar7(parser: TexParser, mchar: Symbol): void;
-    function delimiter(parser: TexParser, delim: Symbol): void;
-    function environment(parser: TexParser, env: string, func: Function, args: any[]): void;
-}
+import { ParseMethod, ParseResult } from './Types.js';
+declare const ParseMethods: {
+    variable(parser: TexParser, c: string): void;
+    digit(parser: TexParser, _c: string): ParseResult;
+    controlSequence(parser: TexParser, _c: string): void;
+    lcGreek(parser: TexParser, mchar: Token): void;
+    ucGreek(parser: TexParser, mchar: Token): void;
+    mathchar0mi(parser: TexParser, mchar: Token): void;
+    mathchar0mo(parser: TexParser, mchar: Token): void;
+    mathchar7(parser: TexParser, mchar: Token): void;
+    delimiter(parser: TexParser, delim: Token): void;
+    environment(parser: TexParser, env: string, func: ParseMethod, args: any[]): void;
+};
 export default ParseMethods;

@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMtrMixin, CommonMlabeledtrMixin } from '../../common/Wrappers/mtr.js';
+import { CommonMtrMixin, CommonMlabeledtrMixin, } from '../../common/Wrappers/mtr.js';
 import { MmlMtr, MmlMlabeledtr } from '../../../core/MmlTree/MmlNodes/mtr.js';
 export const ChtmlMtr = (function () {
     var _a;
@@ -19,20 +19,20 @@ export const ChtmlMtr = (function () {
                 display: 'table-row',
             },
             'mjx-mtr[rowalign="top"] > mjx-mtd': {
-                'vertical-align': 'top'
+                'vertical-align': 'top',
             },
             'mjx-mtr[rowalign="center"] > mjx-mtd': {
-                'vertical-align': 'middle'
+                'vertical-align': 'middle',
             },
             'mjx-mtr[rowalign="bottom"] > mjx-mtd': {
-                'vertical-align': 'bottom'
+                'vertical-align': 'bottom',
             },
             'mjx-mtr[rowalign="baseline"] > mjx-mtd': {
-                'vertical-align': 'baseline'
+                'vertical-align': 'baseline',
             },
             'mjx-mtr[rowalign="axis"] > mjx-mtd': {
-                'vertical-align': '.25em'
-            }
+                'vertical-align': '.25em',
+            },
         },
         _a;
 })();
@@ -46,7 +46,7 @@ export const ChtmlMlabeledtr = (function () {
                 if (child) {
                     this.adaptor.remove(child);
                     const align = this.node.attributes.get('rowalign');
-                    const attr = (align !== 'baseline' && align !== 'axis' ? { rowalign: align } : {});
+                    const attr = align !== 'baseline' && align !== 'axis' ? { rowalign: align } : {};
                     const row = this.html('mjx-mtr', attr, [child]);
                     this.adaptor.append(this.parent.labels, row);
                 }
@@ -59,23 +59,23 @@ export const ChtmlMlabeledtr = (function () {
         _a.kind = MmlMlabeledtr.prototype.kind,
         _a.styles = {
             'mjx-mlabeledtr': {
-                display: 'table-row'
+                display: 'table-row',
             },
             'mjx-mlabeledtr[rowalign="top"] > mjx-mtd': {
-                'vertical-align': 'top'
+                'vertical-align': 'top',
             },
             'mjx-mlabeledtr[rowalign="center"] > mjx-mtd': {
-                'vertical-align': 'middle'
+                'vertical-align': 'middle',
             },
             'mjx-mlabeledtr[rowalign="bottom"] > mjx-mtd': {
-                'vertical-align': 'bottom'
+                'vertical-align': 'bottom',
             },
             'mjx-mlabeledtr[rowalign="baseline"] > mjx-mtd': {
-                'vertical-align': 'baseline'
+                'vertical-align': 'baseline',
             },
             'mjx-mlabeledtr[rowalign="axis"] > mjx-mtd': {
-                'vertical-align': '.25em'
-            }
+                'vertical-align': '.25em',
+            },
         },
         _a;
 })();

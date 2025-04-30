@@ -1,6 +1,6 @@
-import { CommonMsubMixin, CommonMsupMixin, CommonMsubsupMixin } from '../../common/Wrappers/msubsup.js';
-import { ChtmlScriptbase } from './scriptbase.js';
-import { MmlMsubsup, MmlMsub, MmlMsup } from '../../../core/MmlTree/MmlNodes/msubsup.js';
+import { CommonMsubMixin, CommonMsupMixin, CommonMsubsupMixin, } from '../../common/Wrappers/msubsup.js';
+import { ChtmlScriptbase, } from './scriptbase.js';
+import { MmlMsubsup, MmlMsub, MmlMsup, } from '../../../core/MmlTree/MmlNodes/msubsup.js';
 export const ChtmlMsub = (function () {
     var _a;
     const Base = CommonMsubMixin(ChtmlScriptbase);
@@ -51,11 +51,11 @@ export const ChtmlMsubsup = (function () {
             'mjx-script': {
                 display: 'inline-block',
                 'padding-right': '.05em',
-                'padding-left': '.033em'
+                'padding-left': '.033em',
             },
             'mjx-script > mjx-spacer': {
-                display: 'block'
-            }
+                display: 'block',
+            },
         },
         _a;
 })();

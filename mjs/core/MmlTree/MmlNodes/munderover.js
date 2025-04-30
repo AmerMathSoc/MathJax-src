@@ -19,10 +19,10 @@ export class MmlMunderover extends AbstractMmlBaseNode {
         return true;
     }
     setChildInheritedAttributes(attributes, display, level, prime) {
-        let nodes = this.childNodes;
+        const nodes = this.childNodes;
         nodes[0].setInheritedAttributes(attributes, display, level, prime || !!nodes[this.over]);
-        let force = !!(!display && nodes[0].coreMO().attributes.get('movablelimits'));
-        let ACCENTS = this.constructor.ACCENTS;
+        const force = !!(!display && nodes[0].coreMO().attributes.get('movablelimits'));
+        const ACCENTS = this.constructor.ACCENTS;
         nodes[1].setInheritedAttributes(attributes, false, this.getScriptlevel(ACCENTS[1], force, level), prime || this.under === 1);
         this.setInheritedAccent(1, ACCENTS[1], display, level, prime, force);
         if (!nodes[2]) {
@@ -38,9 +38,9 @@ export class MmlMunderover extends AbstractMmlBaseNode {
         return level;
     }
     setInheritedAccent(n, accent, display, level, prime, force) {
-        let node = this.childNodes[n];
-        if (this.attributes.getExplicit(accent) == null && node.isEmbellished) {
-            let value = node.coreMO().attributes.get('accent');
+        const node = this.childNodes[n];
+        if (!this.attributes.hasExplicit(accent) && node.isEmbellished) {
+            const value = node.coreMO().attributes.get('accent');
             this.attributes.setInherited(accent, value);
             if (value !== this.attributes.getDefault(accent)) {
                 node.setInheritedAttributes({}, display, this.getScriptlevel(accent, force, level), prime);

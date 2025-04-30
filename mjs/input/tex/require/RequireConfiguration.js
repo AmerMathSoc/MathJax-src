@@ -1,7 +1,8 @@
-import { Configuration, ConfigurationHandler } from '../Configuration.js';
-import { CommandMap } from '../SymbolMap.js';
+import { HandlerType, ConfigurationType } from '../HandlerTypes.js';
+import { Configuration, ConfigurationHandler, } from '../Configuration.js';
+import { CommandMap } from '../TokenMap.js';
 import TexError from '../TexError.js';
-import { MathJax } from '../../../components/global.js';
+import { MathJax } from '../../../components/startup.js';
 import { Package } from '../../../components/package.js';
 import { Loader, CONFIG as LOADERCONFIG } from '../../../components/loader.js';
 import { mathjax } from '../../../mathjax.js';
@@ -9,49 +10,76 @@ import { expandable } from '../../../util/Options.js';
 const MJCONFIG = MathJax.config;
 function RegisterExtension(jax, name) {
     const require = jax.parseOptions.options.require;
-    const required = jax.parseOptions.packageData.get('require').required;
-    const extension = name.substr(require.prefix.length);
-    if (required.indexOf(extension) < 0) {
+    const required = jax.parseOptions.packageData.get('require')
+        .required;
+    const extension = name.substring(require.prefix.length);
+    if (!required.includes(extension)) {
         required.push(extension);
-        RegisterDependencies(jax, LOADERCONFIG.dependencies[name]);
-        const handler = ConfigurationHandler.get(extension);
-        if (handler) {
-            let options = MJCONFIG[name] || {};
-            if (handler.options && Object.keys(handler.options).length === 1 && handler.options[extension]) {
-                options = { [extension]: options };
-            }
-            jax.configuration.add(extension, jax, options);
-            const configured = jax.parseOptions.packageData.get('require').configured;
-            if (handler.preprocessors.length && !configured.has(extension)) {
-                configured.set(extension, true);
-                mathjax.retryAfter(Promise.resolve());
-            }
+        const retry = RegisterDependencies(jax, LOADERCONFIG.dependencies[name]);
+        if (retry) {
+            mathjax.retryAfter(retry.then(() => ProcessExtension(jax, name, extension)));
+        }
+        else {
+            ProcessExtension(jax, name, extension);
+        }
+    }
+}
+function ProcessExtension(jax, name, extension) {
+    const handler = ConfigurationHandler.get(extension);
+    if (handler) {
+        let options = MJCONFIG[name] || {};
+        if (handler.options &&
+            Object.keys(handler.options).length === 1 &&
+            handler.options[extension]) {
+            options = { [extension]: options };
+        }
+        jax.configuration.add(extension, jax, options);
+        const configured = jax.parseOptions.packageData.get('require').configured;
+        if (handler.preprocessors.length && !configured.has(extension)) {
+            configured.set(extension, true);
+            mathjax.retryAfter(Promise.resolve());
         }
     }
 }
 function RegisterDependencies(jax, names = []) {
     const prefix = jax.parseOptions.options.require.prefix;
+    const retries = [];
     for (const name of names) {
-        if (name.substr(0, prefix.length) === prefix) {
-            RegisterExtension(jax, name);
+        if (name.substring(0, prefix.length) === prefix) {
+            try {
+                RegisterExtension(jax, name);
+            }
+            catch (err) {
+                if (!err.retry)
+                    throw err;
+                retries.push(err.retry);
+            }
         }
     }
+    return retries.length ? Promise.all(retries) : null;
 }
 export function RequireLoad(parser, name) {
+    var _a;
     const options = parser.options.require;
     const allow = options.allow;
-    const extension = (name.substr(0, 1) === '[' ? '' : options.prefix) + name;
-    const allowed = (allow.hasOwnProperty(extension) ? allow[extension] :
-        allow.hasOwnProperty(name) ? allow[name] : options.defaultAllow);
+    const extension = (name.substring(0, 1) === '[' ? '' : options.prefix) + name;
+    const allowed = Object.hasOwn(allow, extension)
+        ? allow[extension]
+        : Object.hasOwn(allow, name)
+            ? allow[name]
+            : options.defaultAllow;
     if (!allowed) {
         throw new TexError('BadRequire', 'Extension "%1" is not allowed to be loaded', extension);
     }
-    if (Package.packages.has(extension)) {
-        RegisterExtension(parser.configuration.packageData.get('require').jax, extension);
-    }
-    else {
+    if (!Package.packages.has(extension)) {
         mathjax.retryAfter(Loader.load(extension));
     }
+    const require = (_a = LOADERCONFIG[extension]) === null || _a === void 0 ? void 0 : _a.rendererExtensions;
+    const menu = MathJax.startup.document.menu;
+    if (require && menu) {
+        menu.addRequiredExtensions(require);
+    }
+    RegisterExtension(parser.configuration.packageData.get('require').jax, extension);
 }
 function config(_config, jax) {
     jax.parseOptions.packageData.set('require', {
@@ -76,23 +104,29 @@ export const RequireMethods = {
             throw new TexError('BadPackageName', 'Argument for %1 is not a valid package name', name);
         }
         RequireLoad(parser, required);
-    }
+        parser.Push(parser.itemFactory.create('null'));
+    },
 };
 export const options = {
     require: {
         allow: expandable({
             base: false,
-            'all-packages': false,
             autoload: false,
             configmacros: false,
             tagformat: false,
             setoptions: false,
-            texhtml: false
+            texhtml: false,
         }),
         defaultAllow: true,
-        prefix: 'tex'
-    }
+        prefix: 'tex',
+    },
 };
-new CommandMap('require', { require: 'Require' }, RequireMethods);
-export const RequireConfiguration = Configuration.create('require', { handler: { macro: ['require'] }, config, options });
+new CommandMap('require', { require: RequireMethods.Require });
+export const RequireConfiguration = Configuration.create('require', {
+    [ConfigurationType.HANDLER]: {
+        [HandlerType.MACRO]: ['require'],
+    },
+    [ConfigurationType.CONFIG]: config,
+    [ConfigurationType.OPTIONS]: options,
+});
 //# sourceMappingURL=RequireConfiguration.js.map

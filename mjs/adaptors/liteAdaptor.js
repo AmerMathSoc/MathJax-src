@@ -1,7 +1,7 @@
 import { AbstractDOMAdaptor } from '../core/DOMAdaptor.js';
 import { NodeMixin } from './NodeMixin.js';
 import { LiteDocument } from './lite/Document.js';
-import { LiteElement } from './lite/Element.js';
+import { LiteElement, LiteIFrame } from './lite/Element.js';
 import { LiteText, LiteComment } from './lite/Text.js';
 import { LiteWindow } from './lite/Window.js';
 import { LiteParser } from './lite/Parser.js';
@@ -16,7 +16,7 @@ export class LiteBase extends AbstractDOMAdaptor {
         return this.parser.parseFromString(text, format, this);
     }
     create(kind, _ns = null) {
-        return new LiteElement(kind);
+        return kind === 'iframe' ? new LiteIFrame(kind) : new LiteElement(kind);
     }
     text(text) {
         return new LiteText(text);
@@ -27,31 +27,43 @@ export class LiteBase extends AbstractDOMAdaptor {
     createDocument() {
         return new LiteDocument();
     }
-    head(doc) {
+    head(doc = this.document) {
         return doc.head;
     }
-    body(doc) {
+    body(doc = this.document) {
         return doc.body;
     }
-    root(doc) {
+    root(doc = this.document) {
         return doc.root;
     }
-    doctype(doc) {
+    doctype(doc = this.document) {
         return doc.type;
     }
-    tags(node, name, ns = null) {
+    domain(_doc = this.document) {
+        return 'file://';
+    }
+    listener(listener, doc = this.document) {
+        return doc.addEventListener('message', listener);
+    }
+    post(msg, domain, doc = this.document) {
+        doc.postMessage(msg, domain);
+    }
+    tags(node, name, ns = null, stop = null) {
         let stack = [];
-        let tags = [];
+        const tags = [];
         if (ns) {
             return tags;
         }
         let n = node;
         while (n) {
-            let kind = n.kind;
+            const kind = n.kind;
             if (kind !== '#text' && kind !== '#comment') {
                 n = n;
                 if (kind === name) {
                     tags.push(n);
+                    if (tags.length === stop) {
+                        return tags;
+                    }
                 }
                 if (n.children.length) {
                     stack = n.children.concat(stack);
@@ -78,9 +90,9 @@ export class LiteBase extends AbstractDOMAdaptor {
         }
         return null;
     }
-    elementsByClass(node, name) {
+    elementsByClass(node, name, stop = null) {
         let stack = [];
-        let tags = [];
+        const tags = [];
         let n = node;
         while (n) {
             if (n.kind !== '#text' && n.kind !== '#comment') {
@@ -88,6 +100,31 @@ export class LiteBase extends AbstractDOMAdaptor {
                 const classes = (n.attributes['class'] || '').trim().split(/ +/);
                 if (classes.includes(name)) {
                     tags.push(n);
+                    if (tags.length === stop) {
+                        return tags;
+                    }
+                }
+                if (n.children.length) {
+                    stack = n.children.concat(stack);
+                }
+            }
+            n = stack.shift();
+        }
+        return tags;
+    }
+    elementsByAttribute(node, name, value, stop = null) {
+        let stack = [];
+        const tags = [];
+        let n = node;
+        while (n) {
+            if (n.kind !== '#text' && n.kind !== '#comment') {
+                n = n;
+                const attribute = n.attributes[name];
+                if (attribute === value) {
+                    tags.push(n);
+                    if (tags.length === stop) {
+                        return tags;
+                    }
                 }
                 if (n.children.length) {
                     stack = n.children.concat(stack);
@@ -101,7 +138,7 @@ export class LiteBase extends AbstractDOMAdaptor {
         let containers = [];
         const body = this.body(document);
         for (const node of nodes) {
-            if (typeof (node) === 'string') {
+            if (typeof node === 'string') {
                 if (node.charAt(0) === '#') {
                     const n = this.elementById(body, node.slice(1));
                     if (n) {
@@ -114,11 +151,18 @@ export class LiteBase extends AbstractDOMAdaptor {
                 else if (node.match(/^[-a-z][-a-z0-9]*$/i)) {
                     containers = containers.concat(this.tags(body, node));
                 }
+                else {
+                    const match = node.match(/^\[(.*?)="(.*?)"\]$/);
+                    if (match) {
+                        containers = containers.concat(this.elementsByAttribute(body, match[1], match[2]));
+                    }
+                }
             }
             else if (Array.isArray(node)) {
                 containers = containers.concat(node);
             }
-            else if (node instanceof this.window.NodeList || node instanceof this.window.HTMLCollection) {
+            else if (node instanceof this.window.NodeList ||
+                node instanceof this.window.HTMLCollection) {
                 containers = containers.concat(node.nodes);
             }
             else {
@@ -126,6 +170,25 @@ export class LiteBase extends AbstractDOMAdaptor {
             }
         }
         return containers;
+    }
+    getElement(selector, node = this.document) {
+        if (node instanceof LiteDocument) {
+            node = this.body(node);
+        }
+        if (selector.charAt(0) === '#') {
+            return this.elementById(node, selector.slice(1));
+        }
+        if (selector.charAt(0) === '.') {
+            return this.elementsByClass(node, selector.slice(1), 1)[0];
+        }
+        if (selector.match(/^[-a-z][-a-z0-9]*$/i)) {
+            return this.tags(node, selector, null, 1)[0];
+        }
+        const match = selector.match(/^\[(.*?)="(.*?)"\]$/);
+        if (match) {
+            return this.elementsByAttribute(node, match[1], match[2], 1)[0];
+        }
+        return null;
     }
     contains(container, node) {
         while (node && node !== container) {
@@ -137,7 +200,7 @@ export class LiteBase extends AbstractDOMAdaptor {
         return node.parent;
     }
     childIndex(node) {
-        return (node.parent ? node.parent.children.findIndex(n => n === node) : -1);
+        return node.parent ? node.parent.children.findIndex((n) => n === node) : -1;
     }
     append(node, child) {
         if (child.parent) {
@@ -145,6 +208,11 @@ export class LiteBase extends AbstractDOMAdaptor {
         }
         node.children.push(child);
         child.parent = node;
+        if (child instanceof LiteIFrame) {
+            if (String(child.attributes.id).match(/^WorkerHandler-\d+$/)) {
+                child.loadWorker(this.document);
+            }
+        }
         return child;
     }
     insert(nchild, ochild) {
@@ -177,19 +245,21 @@ export class LiteBase extends AbstractDOMAdaptor {
     clone(node, deep = true) {
         const nnode = new LiteElement(node.kind);
         nnode.attributes = Object.assign({}, node.attributes);
-        nnode.children = !deep ? [] : node.children.map(n => {
-            if (n.kind === '#text') {
-                return new LiteText(n.value);
-            }
-            else if (n.kind === '#comment') {
-                return new LiteComment(n.value);
-            }
-            else {
-                const m = this.clone(n);
-                m.parent = nnode;
-                return m;
-            }
-        });
+        nnode.children = !deep
+            ? []
+            : node.children.map((n) => {
+                if (n.kind === '#text') {
+                    return new LiteText(n.value);
+                }
+                else if (n.kind === '#comment') {
+                    return new LiteComment(n.value);
+                }
+                else {
+                    const m = this.clone(n);
+                    m.parent = nnode;
+                    return m;
+                }
+            });
         return nnode;
     }
     split(node, n) {
@@ -204,14 +274,14 @@ export class LiteBase extends AbstractDOMAdaptor {
         if (!parent)
             return null;
         const i = this.childIndex(node) + 1;
-        return (i >= 0 && i < parent.children.length ? parent.children[i] : null);
+        return i >= 0 && i < parent.children.length ? parent.children[i] : null;
     }
     previous(node) {
         const parent = node.parent;
         if (!parent)
             return null;
         const i = this.childIndex(node) - 1;
-        return (i >= 0 ? parent.children[i] : null);
+        return i >= 0 ? parent.children[i] : null;
     }
     firstChild(node) {
         return node.children[0];
@@ -229,13 +299,20 @@ export class LiteBase extends AbstractDOMAdaptor {
         return node.kind;
     }
     value(node) {
-        return (node.kind === '#text' ? node.value :
-            node.kind === '#comment' ? node.value.replace(/^<!(--)?((?:.|\n)*)\1>$/, '$2') : '');
+        return node.kind === '#text'
+            ? node.value
+            : node.kind === '#comment'
+                ? node.value.replace(/^<!(--)?((?:.|\n)*)\1>$/, '$2')
+                : '';
     }
     textContent(node) {
         return node.children.reduce((s, n) => {
-            return s + (n.kind === '#text' ? n.value :
-                n.kind === '#comment' ? '' : this.textContent(n));
+            return (s +
+                (n.kind === '#text'
+                    ? n.value
+                    : n.kind === '#comment'
+                        ? ''
+                        : this.textContent(n)));
         }, '');
     }
     innerHTML(node) {
@@ -266,7 +343,7 @@ export class LiteBase extends AbstractDOMAdaptor {
         delete node.attributes[name];
     }
     hasAttribute(node, name) {
-        return node.attributes.hasOwnProperty(name);
+        return Object.hasOwn(node.attributes, name);
     }
     allAttributes(node) {
         const attributes = node.attributes;
@@ -278,14 +355,14 @@ export class LiteBase extends AbstractDOMAdaptor {
     }
     addClass(node, name) {
         const classes = (node.attributes['class'] || '').split(/ /);
-        if (!classes.find(n => n === name)) {
+        if (!classes.find((n) => n === name)) {
             classes.push(name);
             node.attributes['class'] = classes.join(' ');
         }
     }
     removeClass(node, name) {
         const classes = (node.attributes['class'] || '').split(/ /);
-        const i = classes.findIndex(n => n === name);
+        const i = classes.findIndex((n) => n === name);
         if (i >= 0) {
             classes.splice(i, 1);
             node.attributes['class'] = classes.join(' ');
@@ -293,7 +370,7 @@ export class LiteBase extends AbstractDOMAdaptor {
     }
     hasClass(node, name) {
         const classes = (node.attributes['class'] || '').split(/ /);
-        return !!classes.find(n => n === name);
+        return !!classes.find((n) => n === name);
     }
     setStyle(node, name, value) {
         if (!node.styles) {
@@ -316,7 +393,9 @@ export class LiteBase extends AbstractDOMAdaptor {
         return this.getAttribute(node, 'style');
     }
     insertRules(node, rules) {
-        node.children = [this.text(rules.join('\n\n') + '\n\n' + this.textContent(node))];
+        node.children = [
+            this.text(this.textContent(node) + '\n\n' + rules.join('\n\n')),
+        ];
     }
     fontSize(_node) {
         return 0;

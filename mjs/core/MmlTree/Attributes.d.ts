@@ -8,8 +8,11 @@ export declare class Attributes {
     constructor(defaults: PropertyList, global: PropertyList);
     set(name: string, value: Property): void;
     setList(list: PropertyList): void;
+    unset(name: string): void;
     get(name: string): Property;
     getExplicit(name: string): Property;
+    hasExplicit(name: string): boolean;
+    hasOneOf(names: string[]): boolean;
     getList(...names: string[]): PropertyList;
     setInherited(name: string, value: Property): void;
     getInherited(name: string): Property;

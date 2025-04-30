@@ -32,6 +32,6 @@ Entities.add({
     frac56: '\u215A',
     frac58: '\u215D',
     frac78: '\u215E',
-    frasl: '\u2044'
+    frasl: '\u2044',
 }, 'f');
 //# sourceMappingURL=f.js.map

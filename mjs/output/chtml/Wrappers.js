@@ -14,14 +14,14 @@ import { ChtmlMfrac } from './Wrappers/mfrac.js';
 import { ChtmlMsqrt } from './Wrappers/msqrt.js';
 import { ChtmlMroot } from './Wrappers/mroot.js';
 import { ChtmlMsub, ChtmlMsup, ChtmlMsubsup } from './Wrappers/msubsup.js';
-import { ChtmlMover, ChtmlMunder, ChtmlMunderover } from './Wrappers/munderover.js';
+import { ChtmlMover, ChtmlMunder, ChtmlMunderover, } from './Wrappers/munderover.js';
 import { ChtmlMmultiscripts } from './Wrappers/mmultiscripts.js';
 import { ChtmlMtable } from './Wrappers/mtable.js';
 import { ChtmlMtr, ChtmlMlabeledtr } from './Wrappers/mtr.js';
 import { ChtmlMtd } from './Wrappers/mtd.js';
 import { ChtmlMaction } from './Wrappers/maction.js';
 import { ChtmlMglyph } from './Wrappers/mglyph.js';
-import { ChtmlSemantics, ChtmlAnnotation, ChtmlAnnotationXML, ChtmlXmlNode } from './Wrappers/semantics.js';
+import { ChtmlSemantics, ChtmlAnnotation, ChtmlAnnotationXML, ChtmlXmlNode, } from './Wrappers/semantics.js';
 import { ChtmlTeXAtom } from './Wrappers/TeXAtom.js';
 import { ChtmlTextNode } from './Wrappers/TextNode.js';
 import { ChtmlHtmlNode } from './Wrappers/HtmlNode.js';
@@ -61,6 +61,6 @@ export const ChtmlWrappers = {
     [ChtmlTeXAtom.kind]: ChtmlTeXAtom,
     [ChtmlTextNode.kind]: ChtmlTextNode,
     [ChtmlHtmlNode.kind]: ChtmlHtmlNode,
-    [ChtmlWrapper.kind]: ChtmlWrapper
+    [ChtmlWrapper.kind]: ChtmlWrapper,
 };
 //# sourceMappingURL=Wrappers.js.map

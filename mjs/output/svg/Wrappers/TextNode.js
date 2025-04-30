@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonTextNodeMixin } from '../../common/Wrappers/TextNode.js';
+import { CommonTextNodeMixin, } from '../../common/Wrappers/TextNode.js';
 import { TextNode } from '../../../core/MmlTree/MmlNode.js';
 export const SvgTextNode = (function () {
     var _a;
@@ -8,8 +8,8 @@ export const SvgTextNode = (function () {
             static addStyles(styles, jax) {
                 styles.addStyles({
                     'mjx-container[jax="SVG"] path[data-c], mjx-container[jax="SVG"] use[data-c]': {
-                        'stroke-width': jax.options.blacker
-                    }
+                        'stroke-width': jax.options.blacker,
+                    },
                 });
             }
             toSVG(parents) {
@@ -19,12 +19,16 @@ export const SvgTextNode = (function () {
                 if (text.length === 0)
                     return;
                 if (variant === '-explicitFont') {
-                    this.dom = [adaptor.append(parents[0], this.jax.unknownText(text, variant))];
+                    this.dom = [
+                        adaptor.append(parents[0], this.jax.unknownText(text, variant)),
+                    ];
                 }
                 else {
                     const chars = this.remappedText(text, variant);
                     if (this.parent.childNodes.length > 1) {
-                        parents = this.dom = [adaptor.append(parents[0], this.svg('g', { 'data-mml-node': 'text' }))];
+                        parents = this.dom = [
+                            adaptor.append(parents[0], this.svg('g', { 'data-mml-node': 'text' })),
+                        ];
                     }
                     else {
                         this.dom = parents;

@@ -1,8 +1,9 @@
 import { BBox } from '../../../util/BBox.js';
+import { DIRECTION } from '../FontData.js';
 import { split, isPercent } from '../../../util/string.js';
 import { sum, max } from '../../../util/numeric.js';
 import { Styles, TRBL } from '../../../util/Styles.js';
-export let BREAK_BELOW = .333;
+export const BREAK_BELOW = 0.333;
 export function CommonMtableMixin(Base) {
     return class CommonMtableMixin extends Base {
         get tableRows() {
@@ -31,43 +32,50 @@ export function CommonMtableMixin(Base) {
         }
         stretchRows() {
             const equal = this.node.attributes.get('equalrows');
-            const HD = (equal ? this.getEqualRowHeight() : 0);
-            const { H, D } = (equal ? this.getTableData() : { H: [0], D: [0] });
+            const HD = equal ? this.getEqualRowHeight() : 0;
+            const { H, D } = equal ? this.getTableData() : { H: [0], D: [0] };
             const rows = this.tableRows;
             for (let i = 0; i < this.numRows; i++) {
-                const hd = (equal ? [(HD + H[i] - D[i]) / 2, (HD - H[i] + D[i]) / 2] : null);
+                const hd = equal
+                    ? [(HD + H[i] - D[i]) / 2, (HD - H[i] + D[i]) / 2]
+                    : null;
                 rows[i].stretchChildren(hd);
             }
         }
         stretchColumns() {
+            const swidths = this.getColumnAttributes('columnwidth', 0);
             for (let i = 0; i < this.numCols; i++) {
-                const width = (typeof this.cWidths[i] === 'number' ? this.cWidths[i] : null);
+                const width = typeof this.cWidths[i] === 'number'
+                    ? this.cWidths[i]
+                    : null;
                 this.stretchColumn(i, width);
-                width !== null && this.breakColumn(i, width);
+                if (width !== null) {
+                    this.breakColumn(i, width, swidths[i]);
+                }
             }
         }
         stretchColumn(i, W) {
-            let stretchy = [];
+            const stretchy = [];
             for (const row of this.tableRows) {
                 const cell = row.getChild(i);
                 if (cell) {
                     const child = cell.childNodes[0];
-                    if (child.stretch.dir === 0 &&
-                        child.canStretch(2)) {
+                    if (child.stretch.dir === DIRECTION.None &&
+                        child.canStretch(DIRECTION.Horizontal)) {
                         stretchy.push(child);
                     }
                 }
             }
-            let count = stretchy.length;
-            let nodeCount = this.childNodes.length;
+            const count = stretchy.length;
+            const nodeCount = this.childNodes.length;
             if (count && nodeCount > 1 && W === null) {
                 W = 0;
-                let all = (count > 1 && count === nodeCount);
+                const all = count > 1 && count === nodeCount;
                 for (const row of this.tableRows) {
                     const cell = row.getChild(i);
                     if (cell) {
                         const child = cell.childNodes[0];
-                        const noStretch = (child.stretch.dir === 0);
+                        const noStretch = child.stretch.dir === DIRECTION.None;
                         if (all || noStretch) {
                             const { w } = child.getBBox(noStretch);
                             if (w > W) {
@@ -79,12 +87,17 @@ export function CommonMtableMixin(Base) {
             }
             if (W !== null) {
                 for (const child of stretchy) {
-                    child.coreMO().getStretchedVariant([Math.max(W, child.getBBox().w) / child.coreRScale()]);
+                    child
+                        .coreMO()
+                        .getStretchedVariant([
+                        Math.max(W, child.getBBox().w) / child.coreRScale(),
+                    ]);
                 }
             }
         }
-        breakColumn(i, W) {
-            if (this.jax.math.root.attributes.get('overflow') !== 'linebreak' || !this.jax.math.display)
+        breakColumn(i, W, type) {
+            if (this.jax.math.root.attributes.get('overflow') !== 'linebreak' ||
+                !this.jax.math.display)
                 return;
             const { D } = this.getTableData();
             let j = 0;
@@ -101,7 +114,10 @@ export function CommonMtableMixin(Base) {
                 }
                 j++;
             }
-            if (w > this.cWidths[i]) {
+            if (type === 'fit' ||
+                type === 'auto' ||
+                isPercent(type) ||
+                w > this.cWidths[i]) {
                 this.cWidths[i] = w;
             }
         }
@@ -146,10 +162,10 @@ export function CommonMtableMixin(Base) {
                 w *= scale;
             }
             if (this.node.getProperty('useHeight')) {
-                if (h < .75)
-                    h = .75;
-                if (d < .25)
-                    d = .25;
+                if (h < 0.75)
+                    h = 0.75;
+                if (d < 0.25)
+                    d = 0.25;
             }
             let m = 0;
             align = cell.node.attributes.get('rowalign') || align;
@@ -169,7 +185,7 @@ export function CommonMtableMixin(Base) {
         }
         extendHD(i, H, D, M) {
             const d = (M - (H[i] + D[i])) / 2;
-            if (d < .00001)
+            if (d < 0.00001)
                 return;
             H[i] += d;
             D[i] += d;
@@ -198,7 +214,7 @@ export function CommonMtableMixin(Base) {
                     center: [h2, h2],
                     bottom: [height, 0],
                     baseline: [h2, h2],
-                    axis: [h2 + a, h2 - a]
+                    axis: [h2 + a, h2 - a],
                 };
                 return HD[align] || [h2, h2];
             }
@@ -217,8 +233,11 @@ export function CommonMtableMixin(Base) {
                 if (labels && this.frame && this.fSpace[0]) {
                     pad -= this.fSpace[0];
                 }
-                return (align === 'center' && !labels ? [pad, pad] :
-                    side === 'left' ? [pad, 0] : [0, pad]);
+                return align === 'center' && !labels
+                    ? [pad, pad]
+                    : side === 'left'
+                        ? [pad, 0]
+                        : [0, pad];
             }
             return [((_a = this.bbox) === null || _a === void 0 ? void 0 : _a.L) || 0, 0];
         }
@@ -226,14 +245,18 @@ export function CommonMtableMixin(Base) {
             const { L } = this.getTableData();
             const sep = this.length2em(this.node.attributes.get('minlabelspacing'));
             let pad = L + sep;
-            const [lpad, rpad] = (this.styles == null ? ['', ''] :
-                [this.styles.get('padding-left'), this.styles.get('padding-right')]);
+            const [lpad, rpad] = this.styles == null
+                ? ['', '']
+                : [this.styles.get('padding-left'), this.styles.get('padding-right')];
             if (lpad || rpad) {
                 pad = Math.max(pad, this.length2em(lpad || '0'), this.length2em(rpad || '0'));
             }
             let [align, shift] = this.getAlignShift();
             if (align === side) {
-                shift = (side === 'left' ? Math.max(pad, shift) - pad : Math.min(-pad, shift) + pad);
+                shift =
+                    side === 'left'
+                        ? Math.max(pad, shift) - pad
+                        : Math.min(-pad, shift) + pad;
             }
             return [pad, align, shift];
         }
@@ -246,21 +269,28 @@ export function CommonMtableMixin(Base) {
                 return;
             const [pad, align] = this.getPadAlignShift(attributes.get('side'));
             const W = Math.max(this.containerWidth / 10, this.containerWidth - pad - (align === 'center' ? pad : 0));
-            this.naturalWidth() > W && this.adjustColumnWidths(W);
+            if (this.naturalWidth() > W) {
+                this.adjustColumnWidths(W);
+            }
         }
         naturalWidth() {
             const CW = this.getComputedWidths();
-            return sum(CW.concat(this.cLines, this.cSpace)) + 2 * this.fLine + this.fSpace[0] + this.fSpace[2];
+            return (sum(CW.concat(this.cLines, this.cSpace)) +
+                2 * this.fLine +
+                this.fSpace[0] +
+                this.fSpace[2]);
         }
         getEqualRowHeight() {
             const { H, D } = this.getTableData();
-            const HD = Array.from(H.keys()).map(i => H[i] + D[i]);
-            return Math.max.apply(Math, HD);
+            const HD = Array.from(H.keys()).map((i) => H[i] + D[i]);
+            return Math.max(...HD);
         }
         getComputedWidths() {
             const W = this.getTableData().W;
-            let CW = Array.from(W.keys()).map(i => {
-                return (typeof this.cWidths[i] === 'number' ? this.cWidths[i] : W[i]);
+            let CW = Array.from(W.keys()).map((i) => {
+                return typeof this.cWidths[i] === 'number'
+                    ? this.cWidths[i]
+                    : W[i];
             });
             if (this.node.attributes.get('equalcolumns')) {
                 CW = Array(CW.length).fill(max(CW));
@@ -292,13 +322,15 @@ export function CommonMtableMixin(Base) {
                 cwidth = this.percent(1 / n);
             }
             else {
-                const w = sum([].concat(this.cLines, this.cSpace)) + this.fSpace[0] + this.fSpace[2];
+                const w = sum([].concat(this.cLines, this.cSpace)) +
+                    this.fSpace[0] +
+                    this.fSpace[2];
                 cwidth = Math.max(0, this.length2em(width) - w) / n;
             }
             return Array(this.numCols).fill(cwidth);
         }
         getColumnWidthsAuto(swidths) {
-            return swidths.map(x => {
+            return swidths.map((x) => {
                 if (x === 'auto' || x === 'fit')
                     return null;
                 if (isPercent(x))
@@ -307,14 +339,14 @@ export function CommonMtableMixin(Base) {
             });
         }
         getColumnWidthsPercent(swidths) {
-            const hasFit = swidths.indexOf('fit') >= 0;
-            const { W } = (hasFit ? this.getTableData() : { W: null });
-            return Array.from(swidths.keys()).map(i => {
+            const hasFit = swidths.includes('fit');
+            const { W } = hasFit ? this.getTableData() : { W: null };
+            return Array.from(swidths.keys()).map((i) => {
                 const x = swidths[i];
                 if (x === 'fit')
                     return null;
                 if (x === 'auto')
-                    return (hasFit ? W[i] : null);
+                    return hasFit ? W[i] : null;
                 if (isPercent(x))
                     return x;
                 return this.length2em(x);
@@ -322,18 +354,21 @@ export function CommonMtableMixin(Base) {
         }
         getColumnWidthsFixed(swidths, width) {
             const indices = Array.from(swidths.keys());
-            const fit = indices.filter(i => swidths[i] === 'fit');
-            const auto = indices.filter(i => swidths[i] === 'auto');
+            const fit = indices.filter((i) => swidths[i] === 'fit');
+            const auto = indices.filter((i) => swidths[i] === 'auto');
             const n = fit.length || auto.length;
-            const { W } = (n ? this.getTableData() : { W: null });
-            const cwidth = width - sum([].concat(this.cLines, this.cSpace)) - this.fSpace[0] - this.fSpace[2];
+            const { W } = n ? this.getTableData() : { W: null };
+            const cwidth = width -
+                sum([].concat(this.cLines, this.cSpace)) -
+                this.fSpace[0] -
+                this.fSpace[2];
             let dw = cwidth;
-            indices.forEach(i => {
+            indices.forEach((i) => {
                 const x = swidths[i];
-                dw -= (x === 'fit' || x === 'auto' ? W[i] : this.length2em(x, cwidth));
+                dw -= x === 'fit' || x === 'auto' ? W[i] : this.length2em(x, cwidth);
             });
-            const fw = (n && dw > 0 ? dw / n : 0);
-            return indices.map(i => {
+            const fw = n && dw > 0 ? dw / n : 0;
+            return indices.map((i) => {
                 const x = swidths[i];
                 if (x === 'fit')
                     return W[i] + fw;
@@ -346,48 +381,66 @@ export function CommonMtableMixin(Base) {
             const { W } = this.getTableData();
             const swidths = this.getColumnAttributes('columnwidth', 0);
             const indices = Array.from(swidths.keys());
-            const fit = indices.filter(i => swidths[i] === 'fit').sort((a, b) => W[b] - W[a]);
-            const auto = indices.filter(i => swidths[i] === 'auto').sort((a, b) => W[b] - W[a]);
-            const percent = indices.filter(i => isPercent(swidths[i])).sort((a, b) => W[b] - W[a]);
-            const fixed = indices.filter(i => swidths[i] !== 'fit' && swidths[i] !== 'auto' &&
-                !isPercent(swidths[i])).sort((a, b) => W[b] - W[a]);
+            const fit = indices
+                .filter((i) => swidths[i] === 'fit')
+                .sort((a, b) => W[b] - W[a]);
+            const auto = indices
+                .filter((i) => swidths[i] === 'auto')
+                .sort((a, b) => W[b] - W[a]);
+            const percent = indices
+                .filter((i) => isPercent(swidths[i]))
+                .sort((a, b) => W[b] - W[a]);
+            const fixed = indices
+                .filter((i) => swidths[i] !== 'fit' &&
+                swidths[i] !== 'auto' &&
+                !isPercent(swidths[i]))
+                .sort((a, b) => W[b] - W[a]);
             const columns = [...fit, ...auto, ...percent, ...fixed];
             if (!columns.length)
                 return;
-            this.cWidths = indices.map(i => (typeof this.cWidths[i] === 'number' ? this.cWidths[i] : W[i]));
-            const cwidth = width - sum([].concat(this.cLines, this.cSpace)) - this.fSpace[0] - this.fSpace[2];
+            this.cWidths = indices.map((i) => typeof this.cWidths[i] === 'number' ? this.cWidths[i] : W[i]);
+            const cwidth = width -
+                sum([].concat(this.cLines, this.cSpace)) -
+                this.fSpace[0] -
+                this.fSpace[2];
             let dw = sum(this.cWidths) - cwidth;
-            let w = 0, n = 0;
+            let w = 0;
+            let n = 0;
             while (n < columns.length) {
                 w += W[columns[n++]];
                 if (w && dw / w < BREAK_BELOW)
                     break;
             }
             dw = 1 - dw / w;
-            columns.slice(0, n).forEach(i => this.cWidths[i] *= dw);
+            columns.slice(0, n).forEach((i) => (this.cWidths[i] *= dw));
         }
         getVerticalPosition(i, align) {
             const equal = this.node.attributes.get('equalrows');
             const { H, D } = this.getTableData();
-            const HD = (equal ? this.getEqualRowHeight() : 0);
+            const HD = equal ? this.getEqualRowHeight() : 0;
             const space = this.getRowHalfSpacing();
             let y = this.fLine;
             for (let j = 0; j < i; j++) {
-                y += space[j] + (equal ? HD : H[j] + D[j]) + space[j + 1] + this.rLines[j];
+                y +=
+                    space[j] + (equal ? HD : H[j] + D[j]) + space[j + 1] + this.rLines[j];
             }
-            const [h, d] = (equal ? [(HD + H[i] - D[i]) / 2, (HD - H[i] + D[i]) / 2] : [H[i], D[i]]);
+            const [h, d] = equal
+                ? [(HD + H[i] - D[i]) / 2, (HD - H[i] + D[i]) / 2]
+                : [H[i], D[i]];
             const offset = {
                 top: 0,
                 center: space[i] + (h + d) / 2,
                 bottom: space[i] + h + d + space[i + 1],
                 baseline: space[i] + h,
-                axis: space[i] + h - .25
+                axis: space[i] + h - 0.25,
             };
             y += offset[align] || 0;
             return y;
         }
         getFrameSpacing() {
-            const fspace = (this.fframe ? this.convertLengths(this.getAttributeArray('framespacing')) : [0, 0]);
+            const fspace = this.fframe
+                ? this.convertLengths(this.getAttributeArray('framespacing'))
+                : [0, 0];
             fspace[2] = fspace[0];
             const padding = this.node.attributes.get('data-array-padding');
             if (padding) {
@@ -404,13 +457,13 @@ export function CommonMtableMixin(Base) {
             return spaceEm;
         }
         getRowHalfSpacing() {
-            const space = this.rSpace.map(x => x / 2);
+            const space = this.rSpace.map((x) => x / 2);
             space.unshift(this.fSpace[1]);
             space.push(this.fSpace[1]);
             return space;
         }
         getColumnHalfSpacing() {
-            const space = this.cSpace.map(x => x / 2);
+            const space = this.cSpace.map((x) => x / 2);
             space.unshift(this.fSpace[0]);
             space.push(this.fSpace[2]);
             return space;
@@ -459,12 +512,12 @@ export function CommonMtableMixin(Base) {
         addEm(list, n = 1) {
             if (!list)
                 return null;
-            return list.map(x => this.em(x / n));
+            return list.map((x) => this.em(x / n));
         }
         convertLengths(list) {
             if (!list)
                 return null;
-            return list.map(x => this.length2em(x));
+            return list.map((x) => this.length2em(x));
         }
         constructor(factory, node, parent = null) {
             super(factory, node, parent);
@@ -473,11 +526,13 @@ export function CommonMtableMixin(Base) {
             this.data = null;
             this.pwidthCells = [];
             this.pWidth = 0;
-            this.numCols = max(this.tableRows.map(row => row.numCells));
+            this.numCols = max(this.tableRows.map((row) => row.numCells));
             this.numRows = this.childNodes.length;
             this.hasLabels = this.childNodes.reduce((value, row) => value || row.node.isKind('mlabeledtr'), false);
             this.findContainer();
-            this.isTop = !this.container || (this.container.node.isKind('math') && !this.container.parent);
+            this.isTop =
+                !this.container ||
+                    (this.container.node.isKind('math') && !this.container.parent);
             if (this.isTop) {
                 this.jax.table = this;
             }
@@ -485,13 +540,14 @@ export function CommonMtableMixin(Base) {
             const attributes = this.node.attributes;
             const frame = attributes.get('frame');
             this.frame = frame !== 'none';
-            this.fframe = this.frame || attributes.get('data-frame-styles') !== undefined;
-            this.fLine = (this.frame ? .07 : 0);
+            this.fframe =
+                this.frame || attributes.get('data-frame-styles') !== undefined;
+            this.fLine = this.frame ? 0.07 : 0;
             this.fSpace = this.getFrameSpacing();
             this.cSpace = this.convertLengths(this.getColumnAttributes('columnspacing'));
             this.rSpace = this.convertLengths(this.getRowAttributes('rowspacing'));
-            this.cLines = this.getColumnAttributes('columnlines').map(x => (x === 'none' ? 0 : .07));
-            this.rLines = this.getRowAttributes('rowlines').map(x => (x === 'none' ? 0 : .07));
+            this.cLines = this.getColumnAttributes('columnlines').map((x) => x === 'none' ? 0 : 0.07);
+            this.rLines = this.getRowAttributes('rowlines').map((x) => x === 'none' ? 0 : 0.07);
             this.cWidths = this.getColumnWidths();
             this.adjustWideTable();
             this.stretchColumns();
@@ -529,11 +585,11 @@ export function CommonMtableMixin(Base) {
             if (w !== 'auto') {
                 width = Math.max(this.length2em(w, 0) + 2 * this.fLine, width);
             }
-            let [h, d] = this.getBBoxHD(height);
+            const [h, d] = this.getBBoxHD(height);
             bbox.h = h;
             bbox.d = d;
             bbox.w = width;
-            let [L, R] = this.getBBoxLR();
+            const [L, R] = this.getBBoxLR();
             bbox.L = L;
             bbox.R = R;
             if (!isPercent(w)) {
@@ -550,10 +606,11 @@ export function CommonMtableMixin(Base) {
             }
             const { w, L, R } = this.bbox;
             const labelInWidth = this.node.attributes.get('data-width-includes-label');
-            const W = Math.max(w, this.length2em(width, Math.max(cwidth, L + w + R))) - (labelInWidth ? L + R : 0);
-            const cols = (this.node.attributes.get('equalcolumns') ?
-                Array(this.numCols).fill(this.percent(1 / Math.max(1, this.numCols))) :
-                this.getColumnAttributes('columnwidth', 0));
+            const W = Math.max(w, this.length2em(width, Math.max(cwidth, L + w + R))) -
+                (labelInWidth ? L + R : 0);
+            const cols = this.node.attributes.get('equalcolumns')
+                ? Array(this.numCols).fill(this.percent(1 / Math.max(1, this.numCols)))
+                : this.getColumnAttributes('columnwidth', 0);
             this.cWidths = this.getColumnWidthsFixed(cols, W);
             this.pWidth = this.naturalWidth();
             if (this.isTop) {
@@ -566,8 +623,9 @@ export function CommonMtableMixin(Base) {
             return this.pWidth !== w;
         }
         getAlignShift() {
-            return (this.isTop ? super.getAlignShift() :
-                [this.container.getChildAlign(this.containerI), 0]);
+            return this.isTop
+                ? super.getAlignShift()
+                : [this.container.getChildAlign(this.containerI), 0];
         }
     };
 }

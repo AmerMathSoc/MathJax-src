@@ -61,6 +61,6 @@ Entities.add({
     atilde: '\u00E3',
     auml: '\u00E4',
     awconint: '\u2233',
-    awint: '\u2A11'
+    awint: '\u2A11',
 }, 'a');
 //# sourceMappingURL=a.js.map

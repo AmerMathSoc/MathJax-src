@@ -5,11 +5,11 @@ export class PrioritizedList {
     }
     [Symbol.iterator]() {
         let i = 0;
-        let items = this.items;
+        const items = this.items;
         return {
             next() {
-                return { value: items[i++], done: (i > items.length) };
-            }
+                return { value: items[i++], done: i > items.length };
+            },
         };
     }
     add(item, priority = PrioritizedList.DEFAULTPRIORITY) {
@@ -28,6 +28,7 @@ export class PrioritizedList {
         if (i >= 0) {
             this.items.splice(i, 1);
         }
+        return this;
     }
 }
 PrioritizedList.DEFAULTPRIORITY = 5;

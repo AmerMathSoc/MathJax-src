@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMfracMixin } from '../../common/Wrappers/mfrac.js';
+import { CommonMfracMixin, } from '../../common/Wrappers/mfrac.js';
 import { MmlMfrac } from '../../../core/MmlTree/MmlNodes/mfrac.js';
 export const SvgMfrac = (function () {
     var _a;
@@ -15,7 +15,7 @@ export const SvgMfrac = (function () {
                     this.makeBevelled(display);
                 }
                 else {
-                    const thickness = this.length2em(String(linethickness), .06);
+                    const thickness = this.length2em(String(linethickness), 0.06);
                     if (thickness === 0) {
                         this.makeAtop(display);
                     }
@@ -32,8 +32,10 @@ export const SvgMfrac = (function () {
                 const dbox = den.getOuterBBox();
                 const tex = this.font.params;
                 const a = tex.axis_height;
-                const d = .1;
-                const pad = (this.node.getProperty('withDelims') ? 0 : tex.nulldelimiterspace);
+                const d = 0.1;
+                const pad = this.node.getProperty('withDelims')
+                    ? 0
+                    : tex.nulldelimiterspace;
                 const W = Math.max((nbox.L + nbox.w + nbox.R) * nbox.rscale, (dbox.L + dbox.w + dbox.R) * dbox.rscale);
                 const nx = this.getAlignX(W, nbox, numalign) + d + pad;
                 const dx = this.getAlignX(W, dbox, denomalign) + d + pad;
@@ -43,8 +45,10 @@ export const SvgMfrac = (function () {
                 den.toSVG(svg);
                 den.place(dx, a - T - Math.max(dbox.h * dbox.rscale, v));
                 this.adaptor.append(svg[0], this.svg('rect', {
-                    width: this.fixed(W + 2 * d), height: this.fixed(t),
-                    x: this.fixed(pad), y: this.fixed(a - t / 2)
+                    width: this.fixed(W + 2 * d),
+                    height: this.fixed(t),
+                    x: this.fixed(pad),
+                    y: this.fixed(a - t / 2),
                 }));
             }
             makeAtop(display) {
@@ -54,7 +58,9 @@ export const SvgMfrac = (function () {
                 const nbox = num.getOuterBBox();
                 const dbox = den.getOuterBBox();
                 const tex = this.font.params;
-                const pad = (this.node.getProperty('withDelims') ? 0 : tex.nulldelimiterspace);
+                const pad = this.node.getProperty('withDelims')
+                    ? 0
+                    : tex.nulldelimiterspace;
                 const W = Math.max((nbox.L + nbox.w + nbox.R) * nbox.rscale, (dbox.L + dbox.w + dbox.R) * dbox.rscale);
                 const nx = this.getAlignX(W, nbox, numalign) + pad;
                 const dx = this.getAlignX(W, dbox, denomalign) + pad;

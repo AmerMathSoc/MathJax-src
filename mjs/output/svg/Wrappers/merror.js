@@ -8,7 +8,9 @@ export const SvgMerror = (function () {
                 const { h, d, w } = this.getBBox();
                 this.adaptor.append(this.dom[0], this.svg('rect', {
                     'data-background': true,
-                    width: this.fixed(w), height: this.fixed(h + d), y: this.fixed(-d)
+                    width: this.fixed(w),
+                    height: this.fixed(h + d),
+                    y: this.fixed(-d),
                 }));
                 const title = this.node.attributes.get('title');
                 if (title) {
@@ -21,12 +23,12 @@ export const SvgMerror = (function () {
         _a.styles = {
             'g[data-mml-node="merror"] > g': {
                 fill: 'red',
-                stroke: 'red'
+                stroke: 'red',
             },
             'g[data-mml-node="merror"] > rect[data-background]': {
                 fill: 'yellow',
-                stroke: 'none'
-            }
+                stroke: 'none',
+            },
         },
         _a;
 })();

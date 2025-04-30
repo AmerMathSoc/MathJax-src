@@ -1,22 +1,21 @@
+import { HandlerType, ConfigurationType } from '../HandlerTypes.js';
 import { Configuration } from '../Configuration.js';
 import { ProofTreeItem } from './BussproofsItems.js';
-import { saveDocument, clearDocument, balanceRules, makeBsprAttributes } from './BussproofsUtil.js';
+import { saveDocument, clearDocument, balanceRules, makeBsprAttributes, } from './BussproofsUtil.js';
 import './BussproofsMappings.js';
 export const BussproofsConfiguration = Configuration.create('bussproofs', {
-    handler: {
-        macro: ['Bussproofs-macros'],
-        environment: ['Bussproofs-environments']
+    [ConfigurationType.HANDLER]: {
+        [HandlerType.MACRO]: ['Bussproofs-macros'],
+        [HandlerType.ENVIRONMENT]: ['Bussproofs-environments'],
     },
-    items: {
+    [ConfigurationType.ITEMS]: {
         [ProofTreeItem.prototype.kind]: ProofTreeItem,
     },
-    preprocessors: [
-        [saveDocument, 1]
-    ],
-    postprocessors: [
+    [ConfigurationType.PREPROCESSORS]: [[saveDocument, 1]],
+    [ConfigurationType.POSTPROCESSORS]: [
         [clearDocument, 3],
         [makeBsprAttributes, 2],
-        [balanceRules, 1]
-    ]
+        [balanceRules, 1],
+    ],
 });
 //# sourceMappingURL=BussproofsConfiguration.js.map

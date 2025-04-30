@@ -1,5 +1,6 @@
-import { FontData } from '../common/FontData.js';
+import { FontData, DIRECTION, } from '../common/FontData.js';
 import { Usage } from './Usage.js';
+import { StyleJsonSheet, } from '../../util/StyleJson.js';
 import { em } from '../../util/lengths.js';
 export * from '../common/FontData.js';
 export class ChtmlFontData extends FontData {
@@ -26,17 +27,30 @@ export class ChtmlFontData extends FontData {
             const name = font.slice(4);
             fontStyles[`@font-face /* ${name} */`] = {
                 'font-family': font,
-                src: `url("%%URL%%/${font.toLowerCase()}.woff") format("woff")`,
+                src: `url("%%URL%%/${font.toLowerCase()}.woff2") format("woff2")`,
             };
             styles[`.${name}`] = {
-                'font-family': `${this.defaultCssFamilyPrefix}, ${font}`
+                'font-family': `${this.defaultCssFamilyPrefix}, ${font}`,
             };
         }
         this.addFontURLs(styles, fontStyles, root);
     }
     static addExtension(data, prefix = '') {
         super.addExtension(data, prefix);
-        data.fonts && this.addDynamicFontCss(this.defaultStyles, data.fonts, data.fontURL);
+        if (data.fonts) {
+            this.addDynamicFontCss(this.defaultStyles, data.fonts, data.fontURL);
+        }
+    }
+    addExtension(data, prefix = '') {
+        super.addExtension(data, prefix);
+        if (!data.fonts || !this.options.adaptiveCSS) {
+            return [];
+        }
+        const css = {};
+        const styles = new StyleJsonSheet();
+        this.constructor.addDynamicFontCss(css, data.fonts, data.fontURL);
+        styles.addStyles(css);
+        return styles.getStyleRules();
     }
     adaptiveCSS(adapt) {
         this.options.adaptiveCSS = adapt;
@@ -77,7 +91,9 @@ export class ChtmlFontData extends FontData {
     updateDynamicStyles() {
         const styles = this.fontUsage;
         this.fontUsage = {};
-        !this.options.adaptiveCSS && this.updateStyles(styles);
+        if (!this.options.adaptiveCSS) {
+            this.updateStyles(styles);
+        }
         return styles;
     }
     get styles() {
@@ -127,8 +143,8 @@ export class ChtmlFontData extends FontData {
     addDelimiterStyles(styles, n, data) {
         if (!data.stretch)
             return;
-        const c = (data.c && data.c !== n ? this.charSelector(data.c) : this.charSelector(n));
-        if (data.dir === 1) {
+        const c = data.c && data.c !== n ? this.charSelector(data.c) : this.charSelector(n);
+        if (data.dir === DIRECTION.Vertical) {
             this.addDelimiterVStyles(styles, n, c, data);
         }
         else {
@@ -144,20 +160,19 @@ export class ChtmlFontData extends FontData {
         const He = this.addDelimiterVPart(styles, c, 'end', end, endV, HDW);
         if (mid) {
             const Hm = this.addDelimiterVPart(styles, c, 'mid', mid, midV, HDW);
-            const m = this.em(Hm / 2 - .03);
+            const m = this.em(Hm / 2 - 0.03);
             styles[`mjx-stretchy-v${c} > mjx-ext:first-of-type`] = {
                 height: '50%',
-                'border-width': `${this.em0(Hb - .03)} 0 ${m}`
+                'border-width': `${this.em1(Hb - 0.03)} 0 ${m}`,
             };
             styles[`mjx-stretchy-v${c} > mjx-ext:last-of-type`] = {
                 height: '50%',
-                'border-width': `${m} 0 ${this.em0(He - .03)}`
+                'border-width': `${m} 0 ${this.em1(He - 0.03)}`,
             };
         }
         else if (He || Hb) {
-            styles['mjx-stretchy-v' + c + ' > mjx-ext'] = {
-                'border-width': `${this.em0(Hb - .03)} 0 ${this.em0(He - .03)}`
-            };
+            styles[`mjx-stretchy-v${c} > mjx-ext`]['border-width'] =
+                `${this.em1(Hb - 0.03)} 0 ${this.em1(He - 0.03)}`;
         }
     }
     addDelimiterVPart(styles, c, part, n, v, HDW) {
@@ -166,23 +181,17 @@ export class ChtmlFontData extends FontData {
         const [h, d, w] = this.getChar(v, n);
         const css = { width: this.em0(w) };
         if (part !== 'ext') {
-            if (w > HDW[2]) {
-                css.margin = `0 ${this.em((HDW[2] - w) / 2)}`;
-            }
-            const y = (part === 'beg' ? h : part === 'end' ? -d : (h - d) / 2);
-            if (y > 0) {
-                css['padding-top'] = this.em(y);
-            }
-            else if (y < 0) {
-                css.transform = `translateY(${this.em(y)})`;
-            }
+            const dw = w > HDW[2] ? this.em((HDW[2] - w) / 2) : 'auto';
+            const y = part === 'beg' ? h : part === 'end' ? -d : (h - d) / 2;
+            css.margin = `${this.em(y)} ${dw} ${this.em(-y)}`;
         }
         else {
-            const y = h - (h + d) / 5;
-            css.transform = `translateY(${this.em(y)}) scaleY(500)`;
-            css['transform-origin'] = `center ${this.em(.03 - y)}`;
+            css['line-height'] = this.em0(h + d + 0.005);
+            styles[`mjx-stretchy-v${c} > mjx-${part} > mjx-spacer`] = {
+                'margin-top': this.em(-d),
+            };
         }
-        styles[`mjx-stretchy-v${c} mjx-${part} mjx-c`] = css;
+        styles[`mjx-stretchy-v${c} > mjx-${part}`] = css;
         return h + d;
     }
     addDelimiterHStyles(styles, n, c, data) {
@@ -199,46 +208,67 @@ export class ChtmlFontData extends FontData {
         const We = this.addDelimiterHPart(styles, c, 'end', end, endV, HDW);
         if (mid) {
             const Wm = this.addDelimiterHPart(styles, c, 'mid', mid, midV, HDW);
-            const m = this.em0(Wm / 2 - .03);
+            const m = this.em0(Wm / 2 - 0.03);
             styles[`mjx-stretchy-h${c} > mjx-ext:first-of-type`] = {
                 width: '50%',
-                'border-width': `0 ${m} 0 ${this.em0(Wb - .03)}`
+                'border-width': `0 ${m} 0 ${this.em0(Wb - 0.03)}`,
             };
             styles[`mjx-stretchy-h${c} > mjx-ext:last-of-type`] = {
                 width: '50%',
-                'border-width': `0 ${this.em0(We - .03)} 0 ${m}`
+                'border-width': `0 ${this.em0(We - 0.03)} 0 ${m}`,
             };
         }
         else if (Wb || We) {
-            styles[`mjx-stretchy-h${c} > mjx-ext`] = {
-                'border-width': `0 ${this.em0(We - .03)} 0 ${this.em0(Wb - .03)}`
-            };
+            styles[`mjx-stretchy-h${c} > mjx-ext`]['border-width'] =
+                `0 ${this.em0(We - 0.06)} 0 ${this.em0(Wb - 0.06)}`;
+        }
+        if (data.ext) {
+            styles[`mjx-stretchy-h${c} > mjx-ext > mjx-spacer`]['letter-spacing'] =
+                this.em(-data.ext);
         }
     }
     addDelimiterHPart(styles, c, part, n, v, HDW) {
         if (!n)
             return 0;
-        const [, , w, options] = this.getChar(v, n);
+        let [, , w, options] = this.getChar(v, n);
         const css = {
-            padding: this.padding(HDW, w - HDW[2])
+            padding: this.padding(HDW, w - HDW[2]),
         };
-        if (part === 'end') {
-            css['margin-left'] = this.em(-w);
+        if (part === 'ext') {
+            if (!w && options.dx) {
+                w = 2 * options.dx - 0.06;
+            }
+            styles[`mjx-stretchy-h${c} > mjx-${part} > mjx-spacer`] = {
+                'margin-left': this.em(-w / 2),
+            };
+            if (options.cmb) {
+                styles[`mjx-stretchy-h${c} > mjx-${part} > mjx-c`] = {
+                    width: this.em(w),
+                    'text-align': 'right',
+                };
+            }
         }
-        else if (part === 'mid') {
-            css['margin-left'] = this.em(-w / 2);
+        else {
+            if (part === 'mid') {
+                css['margin'] = `0 ${this.em(-w / 2)}`;
+            }
+            else {
+                css[part == 'end' ? 'margin-left' : 'margin-right'] = this.em(-w);
+            }
+            this.checkCombiningChar(options, css);
         }
-        this.checkCombiningChar(options, css);
-        styles[`mjx-stretchy-h${c} mjx-${part} mjx-c`] = css;
+        styles[`mjx-stretchy-h${c} > mjx-${part}`] = css;
         return w;
     }
     addCharStyles(styles, vletter, n, data) {
         const options = data[3];
-        const letter = (options.f !== undefined ? options.f : vletter);
+        const letter = options.f !== undefined ? options.f : vletter;
         const font = options.ff || (letter ? `${this.cssFontPrefix}-${letter}` : '');
         const selector = 'mjx-c' + this.charSelector(n) + (font ? '.' + font : '');
         const padding = options.oc || options.ic || 0;
-        styles[selector] = { padding: this.padding(data, padding) };
+        styles[selector] = {
+            padding: this.padding(data, padding),
+        };
         if (options.oc) {
             styles[selector + '[noic]'] = { 'padding-right': this.em(data[2]) };
         }
@@ -261,6 +291,10 @@ export class ChtmlFontData extends FontData {
     em0(n) {
         return em(Math.max(0, n));
     }
+    em1(n) {
+        const m = em(Math.max(0, n));
+        return m === '0' ? '.1px' : m;
+    }
     padding([h, d, w], ic = 0) {
         return [h, w + ic, d, 0].map(this.em0).join(' ');
     }
@@ -268,20 +302,21 @@ export class ChtmlFontData extends FontData {
         return '.mjx-c' + n.toString(16).toUpperCase();
     }
 }
-ChtmlFontData.OPTIONS = Object.assign(Object.assign({}, FontData.OPTIONS), { dynamicPrefix: './output/chtml/fonts', fontURL: 'js/output/chtml/fonts/woff' });
+ChtmlFontData.OPTIONS = Object.assign(Object.assign({}, FontData.OPTIONS), { dynamicPrefix: './chtml/dynamic', fontURL: './chtml/woff2' });
 ChtmlFontData.JAX = 'CHTML';
 ChtmlFontData.defaultVariantLetters = {};
 ChtmlFontData.defaultStyles = {};
 ChtmlFontData.defaultFonts = {};
 ChtmlFontData.combiningChars = [
-    [0x300, 0x36F], [0x20D0, 0x20FF]
+    [0x300, 0x36f],
+    [0x20d0, 0x20ff],
 ];
 export function AddCSS(font, options) {
     for (const c of Object.keys(options)) {
         const n = parseInt(c);
         const data = options[n];
         if (data.c) {
-            data.c = data.c.replace(/\\[0-9A-F]+/ig, (x) => String.fromCodePoint(parseInt(x.substr(1), 16)));
+            data.c = data.c.replace(/\\[0-9A-F]+/gi, (x) => String.fromCodePoint(parseInt(x.substring(1), 16)));
         }
         Object.assign(FontData.charOptions(font, n), data);
     }

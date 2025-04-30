@@ -7,11 +7,12 @@ export class HTMLHandler extends AbstractHandler {
     }
     handlesDocument(document) {
         const adaptor = this.adaptor;
-        if (typeof (document) === 'string') {
+        if (typeof document === 'string') {
             try {
                 document = adaptor.parse(document, 'text/html');
             }
-            catch (err) { }
+            catch (_err) {
+            }
         }
         if (document instanceof adaptor.window.Document ||
             document instanceof adaptor.window.HTMLElement ||
@@ -22,12 +23,12 @@ export class HTMLHandler extends AbstractHandler {
     }
     create(document, options) {
         const adaptor = this.adaptor;
-        if (typeof (document) === 'string') {
+        if (typeof document === 'string') {
             document = adaptor.parse(document, 'text/html');
         }
         else if (document instanceof adaptor.window.HTMLElement ||
             document instanceof adaptor.window.DocumentFragment) {
-            let child = document;
+            const child = document;
             document = adaptor.parse('', 'text/html');
             adaptor.append(adaptor.body(document), child);
         }

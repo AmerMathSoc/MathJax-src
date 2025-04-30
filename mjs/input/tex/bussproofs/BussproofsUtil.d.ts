@@ -10,11 +10,11 @@ type FilterData = {
     document: MATHDOCUMENT;
     data: ParseOptions;
 };
-export declare let balanceRules: (arg: FilterData) => void;
-export declare let setProperty: (node: MmlNode, property: string, value: Property) => void;
-export declare let getProperty: (node: MmlNode, property: string) => Property;
-export declare let removeProperty: (node: MmlNode, property: string) => void;
-export declare let makeBsprAttributes: (arg: FilterData) => void;
-export declare let saveDocument: (arg: FilterData) => void;
-export declare let clearDocument: (_arg: FilterData) => void;
+export declare const balanceRules: (arg: FilterData) => void;
+export declare const setProperty: (node: MmlNode, property: string, value: Property) => void;
+export declare const getProperty: (node: MmlNode, property: string) => Property;
+export declare const removeProperty: (node: MmlNode, property: string) => void;
+export declare const makeBsprAttributes: (arg: FilterData) => void;
+export declare const saveDocument: (arg: FilterData) => void;
+export declare const clearDocument: (_arg: FilterData) => void;
 export {};

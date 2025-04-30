@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonScriptbaseMixin } from '../../common/Wrappers/scriptbase.js';
+import { CommonScriptbaseMixin, } from '../../common/Wrappers/scriptbase.js';
 import { ChtmlMsubsup } from './msubsup.js';
 export const ChtmlScriptbase = (function () {
     var _a;
@@ -17,7 +17,9 @@ export const ChtmlScriptbase = (function () {
                 }
                 this.baseChild.toCHTML(this.dom);
                 const dom = this.dom[this.dom.length - 1];
-                this.scriptChild.toCHTML([this.adaptor.append(dom, this.html('mjx-script', { style }))]);
+                this.scriptChild.toCHTML([
+                    this.adaptor.append(dom, this.html('mjx-script', { style })),
+                ]);
             }
             markUsed() {
                 super.markUsed();
@@ -40,7 +42,9 @@ export const ChtmlScriptbase = (function () {
                     return;
                 const adaptor = this.adaptor;
                 const v = this.em(underbox.d);
-                const box = this.html('mjx-box', { style: { 'margin-bottom': v, 'vertical-align': v } });
+                const box = this.html('mjx-box', {
+                    style: { 'margin-bottom': v, 'vertical-align': v },
+                });
                 for (const child of adaptor.childNodes(adaptor.firstChild(under))) {
                     adaptor.append(box, child);
                 }

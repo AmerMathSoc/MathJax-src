@@ -1,3 +1,3 @@
-import { ChtmlFontData } from './FontData.js';
+import { ChtmlFontData as _ChtmlFontData } from './FontData.js';
 export declare const fontName: string;
-export declare const DefaultFont: typeof ChtmlFontData;
+export declare const DefaultFont: typeof _ChtmlFontData;

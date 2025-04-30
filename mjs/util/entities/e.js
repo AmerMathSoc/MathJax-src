@@ -64,6 +64,6 @@ Entities.add({
     excl: '\u0021',
     exist: '\u2203',
     expectation: '\u2130',
-    exponentiale: '\u2147'
+    exponentiale: '\u2147',
 }, 'e');
 //# sourceMappingURL=e.js.map

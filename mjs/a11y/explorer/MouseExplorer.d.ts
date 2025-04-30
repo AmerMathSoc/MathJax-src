@@ -18,7 +18,6 @@ export declare abstract class Hoverer<T> extends AbstractMouseExplorer<T> {
     protected node: HTMLElement;
     protected nodeQuery: (node: HTMLElement) => boolean;
     protected nodeAccess: (node: HTMLElement) => T;
-    protected coord: [number, number];
     protected constructor(document: A11yDocument, pool: ExplorerPool, region: Region<T>, node: HTMLElement, nodeQuery: (node: HTMLElement) => boolean, nodeAccess: (node: HTMLElement) => T);
     MouseOut(event: MouseEvent): void;
     MouseOver(event: MouseEvent): void;

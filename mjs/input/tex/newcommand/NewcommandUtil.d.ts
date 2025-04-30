@@ -1,20 +1,24 @@
 import TexParser from '../TexParser.js';
-import { Symbol } from '../Symbol.js';
 import { Args, Attributes, ParseMethod } from '../Types.js';
-declare namespace NewcommandUtil {
-    function disassembleSymbol(name: string, symbol: Symbol): Args[];
-    function assembleSymbol(args: Args[]): Symbol;
-    function GetCSname(parser: TexParser, cmd: string): string;
-    function GetCsNameArgument(parser: TexParser, name: string): string;
-    function GetArgCount(parser: TexParser, name: string): string;
-    function GetTemplate(parser: TexParser, cmd: string, cs: string): number | string[];
-    function GetParameter(parser: TexParser, name: string, param: string): string;
-    function MatchParam(parser: TexParser, param: string): number;
-    function addDelimiter(parser: TexParser, cs: string, char: string, attr: Attributes): void;
-    function addMacro(parser: TexParser, cs: string, func: ParseMethod, attr: Args[], symbol?: string): void;
-    function addEnvironment(parser: TexParser, env: string, func: ParseMethod, attr: Args[]): void;
-    const NEW_DELIMITER = "new-Delimiter";
-    const NEW_COMMAND = "new-Command";
-    const NEW_ENVIRONMENT = "new-Environment";
+import * as tm from '../TokenMap.js';
+export declare enum NewcommandTables {
+    NEW_DELIMITER = "new-Delimiter",
+    NEW_COMMAND = "new-Command",
+    NEW_ENVIRONMENT = "new-Environment"
 }
-export default NewcommandUtil;
+export declare const NewcommandPriority = -100;
+export declare const NewcommandUtil: {
+    GetCSname(parser: TexParser, cmd: string): string;
+    GetCsNameArgument(parser: TexParser, name: string): string;
+    GetArgCount(parser: TexParser, name: string): string;
+    GetTemplate(parser: TexParser, cmd: string, cs: string): number | string[];
+    GetParameter(parser: TexParser, name: string, param: string): string;
+    MatchParam(parser: TexParser, param: string): number;
+    checkGlobal<T>(parser: TexParser, tokens: string[], maps: string[]): tm.AbstractParseMap<T>[];
+    checkProtectedMacros(parser: TexParser, cs: string): void;
+    addDelimiter(parser: TexParser, cs: string, char: string, attr: Attributes): void;
+    addMacro(parser: TexParser, cs: string, func: ParseMethod, attr: Args[], token?: string): void;
+    addEnvironment(parser: TexParser, env: string, func: ParseMethod, attr: Args[]): void;
+    undefineMacro(parser: TexParser, cs: string): void;
+    undefineDelimiter(parser: TexParser, cs: string): void;
+};

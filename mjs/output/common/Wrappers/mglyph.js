@@ -7,8 +7,8 @@ export function CommonMglyphMixin(Base) {
         getParameters() {
             const { width, height, valign, src, index } = this.node.attributes.getList('width', 'height', 'valign', 'src', 'index');
             if (src) {
-                this.width = (width === 'auto' ? 1 : this.length2em(width));
-                this.height = (height === 'auto' ? 1 : this.length2em(height));
+                this.width = width === 'auto' ? 1 : this.length2em(width);
+                this.height = height === 'auto' ? 1 : this.length2em(height);
                 this.valign = this.length2em(valign || '0');
             }
             else {

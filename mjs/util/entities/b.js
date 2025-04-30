@@ -88,6 +88,6 @@ Entities.add({
     bump: '\u224E',
     bumpE: '\u2AAE',
     bumpe: '\u224F',
-    bumpeq: '\u224F'
+    bumpeq: '\u224F',
 }, 'b');
 //# sourceMappingURL=b.js.map

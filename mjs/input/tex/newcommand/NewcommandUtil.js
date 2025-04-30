@@ -1,70 +1,56 @@
-import ParseUtil from '../ParseUtil.js';
+import { HandlerType } from '../HandlerTypes.js';
+import { SubHandler } from '../MapHandler.js';
+import { UnitUtil } from '../UnitUtil.js';
 import TexError from '../TexError.js';
-import { Macro, Symbol } from '../Symbol.js';
-var NewcommandUtil;
-(function (NewcommandUtil) {
-    function disassembleSymbol(name, symbol) {
-        let newArgs = [name, symbol.char];
-        if (symbol.attributes) {
-            for (let key in symbol.attributes) {
-                newArgs.push(key);
-                newArgs.push(symbol.attributes[key]);
-            }
-        }
-        return newArgs;
-    }
-    NewcommandUtil.disassembleSymbol = disassembleSymbol;
-    function assembleSymbol(args) {
-        let name = args[0];
-        let char = args[1];
-        let attrs = {};
-        for (let i = 2; i < args.length; i = i + 2) {
-            attrs[args[i]] = args[i + 1];
-        }
-        return new Symbol(name, char, attrs);
-    }
-    NewcommandUtil.assembleSymbol = assembleSymbol;
-    function GetCSname(parser, cmd) {
-        let c = parser.GetNext();
+import { Macro, Token } from '../Token.js';
+export var NewcommandTables;
+(function (NewcommandTables) {
+    NewcommandTables["NEW_DELIMITER"] = "new-Delimiter";
+    NewcommandTables["NEW_COMMAND"] = "new-Command";
+    NewcommandTables["NEW_ENVIRONMENT"] = "new-Environment";
+})(NewcommandTables || (NewcommandTables = {}));
+export const NewcommandPriority = -100;
+export const NewcommandUtil = {
+    GetCSname(parser, cmd) {
+        const c = parser.GetNext();
         if (c !== '\\') {
             throw new TexError('MissingCS', '%1 must be followed by a control sequence', cmd);
         }
-        let cs = ParseUtil.trimSpaces(parser.GetArgument(cmd));
-        return cs.substr(1);
-    }
-    NewcommandUtil.GetCSname = GetCSname;
-    function GetCsNameArgument(parser, name) {
-        let cs = ParseUtil.trimSpaces(parser.GetArgument(name));
+        const cs = UnitUtil.trimSpaces(parser.GetArgument(cmd)).substring(1);
+        this.checkProtectedMacros(parser, cs);
+        return cs;
+    },
+    GetCsNameArgument(parser, name) {
+        let cs = UnitUtil.trimSpaces(parser.GetArgument(name));
         if (cs.charAt(0) === '\\') {
-            cs = cs.substr(1);
+            cs = cs.substring(1);
         }
         if (!cs.match(/^(.|[a-z]+)$/i)) {
             throw new TexError('IllegalControlSequenceName', 'Illegal control sequence name for %1', name);
         }
+        this.checkProtectedMacros(parser, cs);
         return cs;
-    }
-    NewcommandUtil.GetCsNameArgument = GetCsNameArgument;
-    function GetArgCount(parser, name) {
+    },
+    GetArgCount(parser, name) {
         let n = parser.GetBrackets(name);
         if (n) {
-            n = ParseUtil.trimSpaces(n);
+            n = UnitUtil.trimSpaces(n);
             if (!n.match(/^[0-9]+$/)) {
                 throw new TexError('IllegalParamNumber', 'Illegal number of parameters specified in %1', name);
             }
         }
         return n;
-    }
-    NewcommandUtil.GetArgCount = GetArgCount;
-    function GetTemplate(parser, cmd, cs) {
+    },
+    GetTemplate(parser, cmd, cs) {
         let c = parser.GetNext();
-        let params = [];
+        const params = [];
         let n = 0;
         let i = parser.i;
         while (parser.i < parser.string.length) {
             c = parser.GetNext();
             if (c === '#') {
                 if (i !== parser.i) {
-                    params[n] = parser.string.substr(i, parser.i - i);
+                    params[n] = parser.string.substring(i, parser.i);
                 }
                 c = parser.string.charAt(++parser.i);
                 if (!c.match(/^[1-9]$/)) {
@@ -77,7 +63,7 @@ var NewcommandUtil;
             }
             else if (c === '{') {
                 if (i !== parser.i) {
-                    params[n] = parser.string.substr(i, parser.i - i);
+                    params[n] = parser.string.substring(i, parser.i);
                 }
                 if (params.length > 0) {
                     return [n.toString()].concat(params);
@@ -89,9 +75,8 @@ var NewcommandUtil;
             parser.i++;
         }
         throw new TexError('MissingReplacementString', 'Missing replacement string for definition of %1', cmd);
-    }
-    NewcommandUtil.GetTemplate = GetTemplate;
-    function GetParameter(parser, name, param) {
+    },
+    GetParameter(parser, name, param) {
         if (param == null) {
             return parser.GetArgument(name);
         }
@@ -99,7 +84,7 @@ var NewcommandUtil;
         let j = 0;
         let hasBraces = 0;
         while (parser.i < parser.string.length) {
-            let c = parser.string.charAt(parser.i);
+            const c = parser.string.charAt(parser.i);
             if (c === '{') {
                 if (parser.i === i) {
                     hasBraces = 1;
@@ -107,18 +92,18 @@ var NewcommandUtil;
                 parser.GetArgument(name);
                 j = parser.i - i;
             }
-            else if (MatchParam(parser, param)) {
+            else if (this.MatchParam(parser, param)) {
                 if (hasBraces) {
                     i++;
                     j -= 2;
                 }
-                return parser.string.substr(i, j);
+                return parser.string.substring(i, i + j);
             }
             else if (c === '\\') {
                 parser.i++;
                 j++;
                 hasBraces = 0;
-                let match = parser.string.substr(parser.i).match(/[a-z]+|./i);
+                const match = parser.string.substring(parser.i).match(/[a-z]+|./i);
                 if (match) {
                     parser.i += match[0].length;
                     j = parser.i - i;
@@ -131,10 +116,9 @@ var NewcommandUtil;
             }
         }
         throw new TexError('RunawayArgument', 'Runaway argument for %1?', name);
-    }
-    NewcommandUtil.GetParameter = GetParameter;
-    function MatchParam(parser, param) {
-        if (parser.string.substr(parser.i, param.length) !== param) {
+    },
+    MatchParam(parser, param) {
+        if (parser.string.substring(parser.i, parser.i + param.length) !== param) {
             return 0;
         }
         if (param.match(/\\[a-z]+$/i) &&
@@ -143,29 +127,58 @@ var NewcommandUtil;
         }
         parser.i += param.length;
         return 1;
-    }
-    NewcommandUtil.MatchParam = MatchParam;
-    function addDelimiter(parser, cs, char, attr) {
-        const handlers = parser.configuration.handlers;
-        const handler = handlers.retrieve(NewcommandUtil.NEW_DELIMITER);
-        handler.add(cs, new Symbol(cs, char, attr));
-    }
-    NewcommandUtil.addDelimiter = addDelimiter;
-    function addMacro(parser, cs, func, attr, symbol = '') {
-        const handlers = parser.configuration.handlers;
-        const handler = handlers.retrieve(NewcommandUtil.NEW_COMMAND);
-        handler.add(cs, new Macro(symbol ? symbol : cs, func, attr));
-    }
-    NewcommandUtil.addMacro = addMacro;
-    function addEnvironment(parser, env, func, attr) {
-        const handlers = parser.configuration.handlers;
-        const handler = handlers.retrieve(NewcommandUtil.NEW_ENVIRONMENT);
-        handler.add(env, new Macro(env, func, attr));
-    }
-    NewcommandUtil.addEnvironment = addEnvironment;
-    NewcommandUtil.NEW_DELIMITER = 'new-Delimiter';
-    NewcommandUtil.NEW_COMMAND = 'new-Command';
-    NewcommandUtil.NEW_ENVIRONMENT = 'new-Environment';
-})(NewcommandUtil || (NewcommandUtil = {}));
-export default NewcommandUtil;
+    },
+    checkGlobal(parser, tokens, maps) {
+        return (parser.stack.env.isGlobal
+            ? parser.configuration.packageData
+                .get('begingroup')
+                .stack.checkGlobal(tokens, maps)
+            : maps.map((name) => parser.configuration.handlers.retrieve(name)));
+    },
+    checkProtectedMacros(parser, cs) {
+        var _a;
+        if ((_a = parser.options.protectedMacros) === null || _a === void 0 ? void 0 : _a.includes(cs)) {
+            throw new TexError('ProtectedMacro', "The control sequence %1 can't be redefined", `\\${cs}`);
+        }
+    },
+    addDelimiter(parser, cs, char, attr) {
+        const name = cs.substring(1);
+        this.checkProtectedMacros(parser, name);
+        const [macros, delims] = NewcommandUtil.checkGlobal(parser, [name, cs], [NewcommandTables.NEW_COMMAND, NewcommandTables.NEW_DELIMITER]);
+        if (name !== cs) {
+            macros.remove(name);
+        }
+        delims.add(cs, new Token(cs, char, attr));
+        delete parser.stack.env.isGlobal;
+    },
+    addMacro(parser, cs, func, attr, token = '') {
+        this.checkProtectedMacros(parser, cs);
+        const macros = NewcommandUtil.checkGlobal(parser, [cs], [NewcommandTables.NEW_COMMAND])[0];
+        this.undefineDelimiter(parser, '\\' + cs);
+        macros.add(cs, new Macro(token ? token : cs, func, attr));
+        delete parser.stack.env.isGlobal;
+    },
+    addEnvironment(parser, env, func, attr) {
+        const envs = NewcommandUtil.checkGlobal(parser, [env], [NewcommandTables.NEW_ENVIRONMENT])[0];
+        envs.add(env, new Macro(env, func, attr));
+        delete parser.stack.env.isGlobal;
+    },
+    undefineMacro(parser, cs) {
+        const macros = NewcommandUtil.checkGlobal(parser, [cs], [NewcommandTables.NEW_COMMAND])[0];
+        macros.remove(cs);
+        if (parser.configuration.handlers.get(HandlerType.MACRO).applicable(cs)) {
+            macros.add(cs, new Macro(cs, () => SubHandler.FALLBACK, []));
+            this.undefineDelimiter(parser, '\\' + cs);
+        }
+        delete parser.stack.env.isGlobal;
+    },
+    undefineDelimiter(parser, cs) {
+        const delims = NewcommandUtil.checkGlobal(parser, [cs], [NewcommandTables.NEW_DELIMITER])[0];
+        delims.remove(cs);
+        if (parser.configuration.handlers.get(HandlerType.DELIMITER).applicable(cs)) {
+            delims.add(cs, new Token(cs, null, {}));
+        }
+        delete parser.stack.env.isGlobal;
+    },
+};
 //# sourceMappingURL=NewcommandUtil.js.map

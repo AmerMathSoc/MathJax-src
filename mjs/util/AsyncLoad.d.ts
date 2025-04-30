@@ -1,1 +1,1 @@
-export declare function asyncLoad(name: string): Promise<void>;
+export declare function asyncLoad(name: string): Promise<any>;

@@ -1,25 +1,28 @@
 import ParseOptions from './ParseOptions.js';
-declare namespace FilterUtil {
-    let cleanStretchy: (arg: {
+declare const FilterUtil: {
+    cleanStretchy(arg: {
         math: any;
         data: ParseOptions;
-    }) => void;
-    let cleanAttributes: (arg: {
+    }): void;
+    cleanAttributes(arg: {
         data: ParseOptions;
-    }) => void;
-    let combineRelations: (arg: {
+    }): void;
+    combineRelations(arg: {
         data: ParseOptions;
-    }) => void;
-    let cleanSubSup: (arg: {
+    }): void;
+    cleanSubSup(arg: {
         math: any;
         data: ParseOptions;
-    }) => void;
-    let moveLimits: (arg: {
+    }): void;
+    moveLimits(arg: {
         data: ParseOptions;
-    }) => void;
-    let setInherited: (arg: {
+    }): void;
+    setInherited(arg: {
         math: any;
         data: ParseOptions;
-    }) => void;
-}
+    }): void;
+    checkScriptlevel(arg: {
+        data: ParseOptions;
+    }): void;
+};
 export default FilterUtil;

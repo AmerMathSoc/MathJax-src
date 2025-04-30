@@ -11,5 +11,4 @@ export declare const MATHSPACE: {
 export declare function length2em(length: string | number, size?: number, scale?: number, em?: number): number;
 export declare function percent(m: number): string;
 export declare function em(m: number): string;
-export declare function emRounded(m: number, em?: number): string;
 export declare function px(m: number, M?: number, em?: number): string;

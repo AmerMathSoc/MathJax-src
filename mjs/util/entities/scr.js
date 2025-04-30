@@ -51,6 +51,6 @@ Entities.add({
     wscr: '\uD835\uDCCC',
     xscr: '\uD835\uDCCD',
     yscr: '\uD835\uDCCE',
-    zscr: '\uD835\uDCCF'
+    zscr: '\uD835\uDCCF',
 }, 'scr');
 //# sourceMappingURL=scr.js.map

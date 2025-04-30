@@ -1,6 +1,5 @@
 import { OptionList } from '../../util/Options.js';
-import { StyleList } from '../../util/StyleList.js';
-import { DIRECTION } from './Direction.js';
+import { StyleJson } from '../../util/StyleJson.js';
 export { DIRECTION } from './Direction.js';
 export interface CharOptions {
     ic?: number;
@@ -11,16 +10,7 @@ export interface CharOptions {
     smp?: number;
     hd?: [number, number];
 }
-export type CharDataArray<C extends CharOptions> = [
-    number,
-    number,
-    number
-] | [
-    number,
-    number,
-    number,
-    C
-];
+export type CharDataArray<C extends CharOptions> = [number, number, number] | [number, number, number, C];
 export type CharData<C extends CharOptions> = DynamicFile | CharDataArray<C>;
 export type CharMap<C extends CharOptions> = {
     [n: number]: CharData<C>;
@@ -40,7 +30,7 @@ export type CssFontMap = {
     [name: string]: CssFontData;
 };
 export type DelimiterData = {
-    dir: DIRECTION;
+    dir: string;
     sizes?: number[];
     variants?: number[];
     schar?: number[];
@@ -48,6 +38,7 @@ export type DelimiterData = {
     stretchv?: number[];
     HDW?: number[];
     hd?: number[];
+    ext?: number;
     min?: number;
     c?: number;
     fullExt?: [number, number];
@@ -66,7 +57,16 @@ export type RemapMapMap = {
 export type SmpMap = {
     [c: number]: number;
 };
-export type SmpData = [number, number, number?, number?, number?];
+export type SmpData = [
+    number,
+    number,
+    number?,
+    number?,
+    number?,
+    {
+        [n: number]: number;
+    }?
+];
 export type FontParameters = {
     x_height: number;
     quad: number;
@@ -106,7 +106,7 @@ export type FontParameterList = {
     [key in keyof FontParameters]?: number;
 };
 export type Font = FontData<CharOptions, VariantData<CharOptions>, DelimiterData>;
-export type DynamicSetup = ((font: Font) => void);
+export type DynamicSetup = (font: Font) => void;
 export type DynamicRanges = (number | [number, number])[];
 export type DynamicVariants = {
     [name: string]: DynamicRanges;
@@ -142,6 +142,9 @@ export interface FontExtensionData<C extends CharOptions, D extends DelimiterDat
         '[+]'?: string[][];
         '[-]'?: string[][];
     };
+    variantSmp?: {
+        [name: string]: SmpData | string;
+    };
     cssFonts?: CssFontMap;
     accentMap?: RemapMap;
     moMap?: RemapMap;
@@ -159,7 +162,7 @@ export interface FontExtensionData<C extends CharOptions, D extends DelimiterDat
     };
     ranges?: DynamicFileDef[];
 }
-export declare function mergeOptions(dst: OptionList, src: OptionList): any;
+export declare function mergeOptions(obj: OptionList, dst: string, src: OptionList): OptionList;
 export declare class FontData<C extends CharOptions, V extends VariantData<C>, D extends DelimiterData> {
     static OPTIONS: OptionList;
     static JAX: string;
@@ -168,7 +171,7 @@ export declare class FontData<C extends CharOptions, V extends VariantData<C>, D
     static defaultCssFonts: CssFontMap;
     protected static defaultCssFamilyPrefix: string;
     static VariantSmp: {
-        [name: string]: SmpData;
+        [name: string]: SmpData | string;
     };
     static SmpRanges: number[][];
     static SmpRemap: SmpMap;
@@ -183,7 +186,7 @@ export declare class FontData<C extends CharOptions, V extends VariantData<C>, D
     protected static defaultSizeVariants: string[];
     protected static defaultStretchVariants: string[];
     protected static dynamicFiles: DynamicFileList;
-    protected static dynamicExtensions: DynamicFontMap;
+    static dynamicExtensions: DynamicFontMap;
     protected options: OptionList;
     protected variant: VariantMap<C, V>;
     protected delimiters: DelimiterMap<D>;
@@ -195,7 +198,7 @@ export declare class FontData<C extends CharOptions, V extends VariantData<C>, D
     protected remapChars: RemapMapMap;
     params: FontParameters;
     skewIcFactor: number;
-    protected _styles: StyleList;
+    protected _styles: StyleJson;
     get CLASS(): typeof FontData;
     static charOptions(font: CharMap<CharOptions>, n: number): CharOptions;
     static defineDynamicFiles(dynamicFiles: DynamicFileDef[], extension?: string): DynamicFileList;
@@ -205,9 +208,9 @@ export declare class FontData<C extends CharOptions, V extends VariantData<C>, D
     static addExtension(data: FontExtensionData<CharOptions, DelimiterData>, prefix?: string): void;
     constructor(options?: OptionList);
     setOptions(options: OptionList): void;
-    addExtension(data: FontExtensionData<C, D>, prefix?: string): void;
-    get styles(): StyleList;
-    set styles(style: StyleList);
+    addExtension(data: FontExtensionData<C, D>, prefix?: string): string[];
+    get styles(): StyleJson;
+    set styles(style: StyleJson);
     createVariant(name: string, inherit?: string, link?: string): void;
     protected remapSmpChars(chars: CharMap<C>, name: string): void;
     protected smpChar(n: number): CharDataArray<C>;

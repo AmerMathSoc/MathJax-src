@@ -4,7 +4,7 @@ export class AbstractInputJax {
     constructor(options = {}) {
         this.adaptor = null;
         this.mmlFactory = null;
-        let CLASS = this.constructor;
+        const CLASS = this.constructor;
         this.options = userOptions(defaultOptions({}, CLASS.OPTIONS), options);
         this.preFilters = new FunctionList();
         this.postFilters = new FunctionList();
@@ -18,10 +18,8 @@ export class AbstractInputJax {
     setMmlFactory(mmlFactory) {
         this.mmlFactory = mmlFactory;
     }
-    initialize() {
-    }
-    reset(..._args) {
-    }
+    initialize() { }
+    reset(..._args) { }
     get processStrings() {
         return true;
     }
@@ -29,7 +27,7 @@ export class AbstractInputJax {
         return [];
     }
     executeFilters(filters, math, document, data) {
-        let args = { math: math, document: document, data: data };
+        const args = { math: math, document: document, data: data };
         filters.execute(args);
         return args.data;
     }

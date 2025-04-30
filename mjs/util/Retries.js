@@ -1,24 +1,33 @@
 export function handleRetriesFor(code) {
     return new Promise(function run(ok, fail) {
-        try {
-            ok(code());
-        }
-        catch (err) {
-            if (err.retry && err.retry instanceof Promise) {
-                err.retry.then(() => run(ok, fail))
-                    .catch((perr) => fail(perr));
+        const handleRetry = (err) => {
+            var _a;
+            if (err.retry instanceof Promise) {
+                err.retry.then(() => run(ok, fail)).catch((e) => fail(e));
             }
-            else if (err.restart && err.restart.isCallback) {
+            else if ((_a = err.restart) === null || _a === void 0 ? void 0 : _a.isCallback) {
                 MathJax.Callback.After(() => run(ok, fail), err.restart);
             }
             else {
                 fail(err);
             }
+        };
+        try {
+            const result = code();
+            if (result instanceof Promise) {
+                result.then((value) => ok(value)).catch((err) => handleRetry(err));
+            }
+            else {
+                ok(result);
+            }
+        }
+        catch (err) {
+            handleRetry(err);
         }
     });
 }
 export function retryAfter(promise) {
-    let err = new Error('MathJax retry');
+    const err = new Error('MathJax retry');
     err.retry = promise;
     throw err;
 }

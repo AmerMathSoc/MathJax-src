@@ -22,8 +22,9 @@ class ParseOptions {
         this.itemFactory.configuration = this;
         defaultOptions(this.options, ...options);
         defaultOptions(this.options, configuration.options);
-        this.mathStyle = ParseOptions.getVariant.get(this.options.mathStyle) ||
-            ParseOptions.getVariant.get('TeX');
+        this.mathStyle =
+            ParseOptions.getVariant.get(this.options.mathStyle) ||
+                ParseOptions.getVariant.get('TeX');
     }
     pushParser(parser) {
         this.parsers.unshift(parser);
@@ -48,15 +49,17 @@ class ParseOptions {
         }
         list.push(node);
         if (node.kind !== property) {
-            const inlists = (NodeUtil.getProperty(node, 'in-lists') || '');
-            const lists = (inlists ? inlists.split(/,/) : []).concat(property).join(',');
+            const inlists = NodeUtil.getProperty(node, 'in-lists') || '';
+            const lists = (inlists ? inlists.split(/,/) : [])
+                .concat(property)
+                .join(',');
             NodeUtil.setProperty(node, 'in-lists', lists);
         }
     }
     getList(property) {
-        let list = this.nodeLists[property] || [];
-        let result = [];
-        for (let node of list) {
+        const list = this.nodeLists[property] || [];
+        const result = [];
+        for (const node of list) {
             if (this.inTree(node)) {
                 result.push(node);
             }
@@ -81,10 +84,18 @@ class ParseOptions {
     }
 }
 ParseOptions.getVariant = new Map([
-    ['TeX', (c, b) => (b ? c.match(/^[\u0391-\u03A9\u03F4]/) ? MATHVARIANT.NORMAL : '' : '')],
+    [
+        'TeX',
+        (c, b) => b ? (c.match(/^[\u0391-\u03A9\u03F4]/) ? MATHVARIANT.NORMAL : '') : '',
+    ],
     ['ISO', (_c) => MATHVARIANT.ITALIC],
-    ['French', (c) => (c.normalize('NFD').match(/^[a-z]/) ? MATHVARIANT.ITALIC : MATHVARIANT.NORMAL)],
-    ['upright', (_c) => MATHVARIANT.NORMAL]
+    [
+        'French',
+        (c) => c.normalize('NFD').match(/^[a-z]/)
+            ? MATHVARIANT.ITALIC
+            : MATHVARIANT.NORMAL,
+    ],
+    ['upright', (_c) => MATHVARIANT.NORMAL],
 ]);
 export default ParseOptions;
 //# sourceMappingURL=ParseOptions.js.map

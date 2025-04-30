@@ -1,12 +1,5 @@
 import { liteAdaptor } from './liteAdaptor.js';
 import { browserAdaptor } from './browserAdaptor.js';
-let choose;
-try {
-    document;
-    choose = browserAdaptor;
-}
-catch (e) {
-    choose = liteAdaptor;
-}
-export const chooseAdaptor = choose;
+import { context } from '../util/context.js';
+export const chooseAdaptor = context.document ? browserAdaptor : liteAdaptor;
 //# sourceMappingURL=chooseAdaptor.js.map

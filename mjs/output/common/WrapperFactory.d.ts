@@ -8,5 +8,5 @@ export declare class CommonWrapperFactory<N, T, D, JX extends CommonOutputJax<N,
         [kind: string]: CommonWrapperClass<any, any, any, any, any, any, any, any, any, any, any, any>;
     };
     jax: JX;
-    get Wrappers(): Object;
+    get Wrappers(): object;
 }

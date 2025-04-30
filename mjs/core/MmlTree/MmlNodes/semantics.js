@@ -22,7 +22,7 @@ export class MmlAnnotation extends MmlAnnotationXML {
     constructor() {
         super(...arguments);
         this.properties = {
-            isChars: true
+            isChars: true,
         };
     }
     get kind() {

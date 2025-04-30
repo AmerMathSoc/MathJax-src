@@ -2,7 +2,7 @@ export function CommonTextNodeMixin(Base) {
     return class CommonTextNodeMixin extends Base {
         remappedText(text, variant) {
             const c = this.parent.stretch.c;
-            return (c ? [c] : this.parent.remapChars(this.unicodeChars(text, variant)));
+            return c ? [c] : this.parent.remapChars(this.unicodeChars(text, variant));
         }
         computeBBox(bbox, _recompute = false) {
             const variant = this.parent.variant;
@@ -19,7 +19,7 @@ export function CommonTextNodeMixin(Base) {
                 let utext = '';
                 bbox.empty();
                 for (let i = 0; i < chars.length; i++) {
-                    let [h, d, w, data] = this.getVariantChar(variant, chars[i]);
+                    const [h, d, w, data] = this.getVariantChar(variant, chars[i]);
                     if (data.unknown) {
                         utext += String.fromCodePoint(chars[i]);
                     }
@@ -35,8 +35,9 @@ export function CommonTextNodeMixin(Base) {
                         if (this.node !== children[children.length - 1].node)
                             continue;
                         const parent = this.parent.parent.node;
-                        let next = (parent.isKind('mrow') || parent.isInferred ?
-                            parent.childNodes[parent.childIndex(this.parent.node) + 1] : null);
+                        let next = parent.isKind('mrow') || parent.isInferred
+                            ? parent.childNodes[parent.childIndex(this.parent.node) + 1]
+                            : null;
                         if ((next === null || next === void 0 ? void 0 : next.isKind('mo')) && next.getText() === '\u2062') {
                             next = parent.childNodes[parent.childIndex(next) + 1];
                         }

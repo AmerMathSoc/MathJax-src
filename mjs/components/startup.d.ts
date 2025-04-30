@@ -6,6 +6,7 @@ import { InputJax } from '../core/InputJax.js';
 import { OutputJax } from '../core/OutputJax.js';
 import { CommonOutputJax } from '../output/common.js';
 import { DOMAdaptor } from '../core/DOMAdaptor.js';
+import { PrioritizedList } from '../util/PrioritizedList.js';
 import { TeX } from '../input/tex.js';
 export interface MathJaxConfig extends MJConfig {
     startup?: {
@@ -47,7 +48,7 @@ export interface MathJaxObject extends MJObject {
         adaptor: DOMADAPTOR;
         elements: any[];
         document: MATHDOCUMENT;
-        promise: Promise<void>;
+        promise: Promise<any>;
         registerConstructor(name: string, constructor: any): void;
         useHandler(name: string, force?: boolean): void;
         useAdaptor(name: string, force?: boolean): void;
@@ -70,41 +71,45 @@ export interface MathJaxObject extends MJObject {
     };
     [name: string]: any;
 }
-export declare namespace Startup {
-    const constructors: {
+export declare abstract class Startup {
+    static extensions: PrioritizedList<HandlerExtension>;
+    static visitor: any;
+    static mathjax: any;
+    static constructors: {
         [name: string]: any;
     };
-    let input: JAXARRAY;
-    let output: OUTPUTJAX;
-    let handler: HANDLER;
-    let adaptor: DOMADAPTOR;
-    let elements: any[];
-    let document: MATHDOCUMENT;
-    let promiseResolve: () => void;
-    let promiseReject: (reason: any) => void;
-    let promise: Promise<void>;
-    let pagePromise: Promise<void>;
-    function toMML(node: MmlNode): string;
-    function registerConstructor(name: string, constructor: any): void;
-    function useHandler(name: string, force?: boolean): void;
-    function useAdaptor(name: string, force?: boolean): void;
-    function useInput(name: string, force?: boolean): void;
-    function useOutput(name: string, force?: boolean): void;
-    function extendHandler(extend: HandlerExtension, priority?: number): void;
-    function defaultReady(): void;
-    function defaultPageReady(): any;
-    function typesetPromise(elements: any[]): any;
-    function getComponents(): void;
-    function makeMethods(): void;
-    function makeTypesetMethods(): void;
-    function makeOutputMethods(iname: string, oname: string, input: INPUTJAX): void;
-    function makeMmlMethods(name: string, input: INPUTJAX): void;
-    function makeResetMethod(name: string, input: INPUTJAX): void;
-    function getInputJax(): JAXARRAY;
-    function getOutputJax(): OUTPUTJAX;
-    function getAdaptor(): DOMADAPTOR;
-    function getHandler(): HANDLER;
-    function getDocument(root?: any): MathDocument<any, any, any>;
+    static input: JAXARRAY;
+    static output: OUTPUTJAX;
+    static handler: HANDLER;
+    static adaptor: DOMADAPTOR;
+    static elements: any[];
+    static document: MATHDOCUMENT;
+    static promiseResolve: (value?: any) => any;
+    static promiseReject: (reason: any) => void;
+    static promise: Promise<any>;
+    static pagePromise: Promise<void>;
+    static hasTypeset: boolean;
+    static toMML(node: MmlNode): string;
+    static registerConstructor(name: string, constructor: any): void;
+    static useHandler(name: string, force?: boolean): void;
+    static useAdaptor(name: string, force?: boolean): void;
+    static useInput(name: string, force?: boolean): void;
+    static useOutput(name: string, force?: boolean): void;
+    static extendHandler(extend: HandlerExtension, priority?: number): void;
+    static defaultReady(): void;
+    static defaultPageReady(): Promise<void>;
+    static typesetPromise(elements: any[]): Promise<any>;
+    static getComponents(): void;
+    static makeMethods(): void;
+    static makeTypesetMethods(): void;
+    static makeOutputMethods(iname: string, oname: string, input: INPUTJAX): void;
+    static makeMmlMethods(name: string, input: INPUTJAX): void;
+    static makeResetMethod(name: string, input: INPUTJAX): void;
+    static getInputJax(): JAXARRAY;
+    static getOutputJax(): OUTPUTJAX;
+    static getAdaptor(): DOMADAPTOR;
+    static getHandler(): HANDLER;
+    static getDocument(root?: any): MathDocument<any, any, any>;
 }
 export declare const MathJax: MathJaxObject;
 export declare const CONFIG: {

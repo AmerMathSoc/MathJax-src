@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonScriptbaseMixin } from '../../common/Wrappers/scriptbase.js';
+import { CommonScriptbaseMixin, } from '../../common/Wrappers/scriptbase.js';
 export const SvgScriptbase = (function () {
     var _a;
     const Base = CommonScriptbaseMixin(SvgWrapper);

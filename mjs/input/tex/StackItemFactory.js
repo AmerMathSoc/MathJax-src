@@ -10,7 +10,7 @@ class StackItemFactory extends AbstractFactory {
     }
 }
 StackItemFactory.DefaultStackItems = {
-    [DummyItem.prototype.kind]: DummyItem
+    [DummyItem.prototype.kind]: DummyItem,
 };
 export default StackItemFactory;
 //# sourceMappingURL=StackItemFactory.js.map

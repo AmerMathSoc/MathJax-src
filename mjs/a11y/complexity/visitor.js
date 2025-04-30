@@ -19,7 +19,7 @@ export class ComplexityVisitor extends MmlVisitor {
             xml: 2,
             glyph: 2
         };
-        let CLASS = this.constructor;
+        const CLASS = this.constructor;
         this.options = userOptions(defaultOptions({}, CLASS.OPTIONS), options);
         this.collapse = new this.options.Collapse(this);
         this.factory = factory;
@@ -47,7 +47,8 @@ export class ComplexityVisitor extends MmlVisitor {
         return this.setComplexity(node, complexity, save);
     }
     visitMfracNode(node, save) {
-        const complexity = this.childrenComplexity(node) * this.complexity.script + this.complexity.fraction;
+        const complexity = this.childrenComplexity(node) * this.complexity.script +
+            this.complexity.fraction;
         return this.setComplexity(node, complexity, save);
     }
     visitMsqrtNode(node, save) {
@@ -55,17 +56,18 @@ export class ComplexityVisitor extends MmlVisitor {
         return this.setComplexity(node, complexity, save);
     }
     visitMrootNode(node, save) {
-        const complexity = this.childrenComplexity(node) + this.complexity.sqrt
-            - (1 - this.complexity.script) * this.getComplexity(node.childNodes[1]);
+        const complexity = this.childrenComplexity(node) +
+            this.complexity.sqrt -
+            (1 - this.complexity.script) * this.getComplexity(node.childNodes[1]);
         return this.setComplexity(node, complexity, save);
     }
     visitMphantomNode(node, save) {
         return this.setComplexity(node, this.complexity.phantom, save);
     }
     visitMsNode(node, save) {
-        const text = node.attributes.get('lquote')
-            + node.getText()
-            + node.attributes.get('rquote');
+        const text = node.attributes.get('lquote') +
+            node.getText() +
+            node.attributes.get('rquote');
         const complexity = text.length * this.complexity.text;
         return this.setComplexity(node, complexity, save);
     }
@@ -76,7 +78,7 @@ export class ComplexityVisitor extends MmlVisitor {
         const base = node.childNodes[node.base];
         let complexity = Math.max(sub ? this.getComplexity(sub) : 0, sup ? this.getComplexity(sup) : 0) * this.complexity.script;
         complexity += this.complexity.child * ((sub ? 1 : 0) + (sup ? 1 : 0));
-        complexity += (base ? this.getComplexity(base) + this.complexity.child : 0);
+        complexity += base ? this.getComplexity(base) + this.complexity.child : 0;
         complexity += this.complexity.subsup;
         return this.setComplexity(node, complexity, save);
     }
@@ -95,7 +97,9 @@ export class ComplexityVisitor extends MmlVisitor {
         if (base) {
             complexity = Math.max(this.getComplexity(base), complexity);
         }
-        complexity += this.complexity.child * ((under ? 1 : 0) + (over ? 1 : 0) + (base ? 1 : 0));
+        complexity +=
+            this.complexity.child *
+                ((under ? 1 : 0) + (over ? 1 : 0) + (base ? 1 : 0));
         complexity += this.complexity.underover;
         return this.setComplexity(node, complexity, save);
     }
@@ -134,7 +138,9 @@ export class ComplexityVisitor extends MmlVisitor {
     }
     getComplexity(node) {
         const collapsed = node.getProperty('collapsedComplexity');
-        return (collapsed != null ? collapsed : node.attributes.get('data-semantic-complexity'));
+        return (collapsed != null
+            ? collapsed
+            : node.attributes.get('data-semantic-complexity'));
     }
     setComplexity(node, complexity, save) {
         if (save) {

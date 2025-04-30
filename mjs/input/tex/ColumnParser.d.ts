@@ -29,10 +29,11 @@ export declare class ColumnParser {
     protected setPadding(state: ColumnState, array: ArrayItem): void;
     getColumn(state: ColumnState, ralign: string, calign?: string): void;
     getDimen(state: ColumnState): string;
-    getAlign(state: ColumnState): any;
+    getAlign(state: ColumnState): string;
     getBraces(state: ColumnState): string;
     macroColumn(state: ColumnState, macro: string, n: number): void;
     addRule(state: ColumnState, rule: string): void;
     addAt(state: ColumnState, macro: string): void;
     addBang(state: ColumnState, macro: string): void;
+    repeat(state: ColumnState): void;
 }

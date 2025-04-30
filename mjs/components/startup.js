@@ -1,134 +1,111 @@
-import { MathJax as MJGlobal, combineWithMathJax, combineDefaults, GLOBAL as global } from './global.js';
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import { MathJax as MJGlobal, combineWithMathJax, combineDefaults, GLOBAL as global, } from './global.js';
 import { PrioritizedList } from '../util/PrioritizedList.js';
 import { OPTIONS } from '../util/Options.js';
-export var Startup;
-(function (Startup) {
-    const extensions = new PrioritizedList();
-    let visitor;
-    let mathjax;
-    Startup.constructors = {};
-    Startup.input = [];
-    Startup.output = null;
-    Startup.handler = null;
-    Startup.adaptor = null;
-    Startup.elements = null;
-    Startup.document = null;
-    Startup.promise = new Promise((resolve, reject) => {
-        Startup.promiseResolve = resolve;
-        Startup.promiseReject = reject;
-    });
-    Startup.pagePromise = new Promise((resolve, _reject) => {
-        const doc = global.document;
-        if (!doc || !doc.readyState || doc.readyState === 'complete' || doc.readyState === 'interactive') {
-            resolve();
-        }
-        else {
-            const listener = () => resolve();
-            doc.defaultView.addEventListener('load', listener, true);
-            doc.defaultView.addEventListener('DOMContentLoaded', listener, true);
-        }
-    });
-    function toMML(node) {
-        return visitor.visitTree(node, Startup.document);
+import { context } from '../util/context.js';
+export class Startup {
+    static toMML(node) {
+        return Startup.visitor.visitTree(node, this.document);
     }
-    Startup.toMML = toMML;
-    function registerConstructor(name, constructor) {
+    static registerConstructor(name, constructor) {
         Startup.constructors[name] = constructor;
     }
-    Startup.registerConstructor = registerConstructor;
-    function useHandler(name, force = false) {
+    static useHandler(name, force = false) {
         if (!CONFIG.handler || force) {
             CONFIG.handler = name;
         }
     }
-    Startup.useHandler = useHandler;
-    function useAdaptor(name, force = false) {
+    static useAdaptor(name, force = false) {
         if (!CONFIG.adaptor || force) {
             CONFIG.adaptor = name;
         }
     }
-    Startup.useAdaptor = useAdaptor;
-    function useInput(name, force = false) {
+    static useInput(name, force = false) {
         if (!inputSpecified || force) {
             CONFIG.input.push(name);
         }
     }
-    Startup.useInput = useInput;
-    function useOutput(name, force = false) {
+    static useOutput(name, force = false) {
         if (!CONFIG.output || force) {
             CONFIG.output = name;
         }
     }
-    Startup.useOutput = useOutput;
-    function extendHandler(extend, priority = 10) {
-        extensions.add(extend, priority);
+    static extendHandler(extend, priority = 10) {
+        Startup.extensions.add(extend, priority);
     }
-    Startup.extendHandler = extendHandler;
-    function defaultReady() {
-        getComponents();
-        makeMethods();
+    static defaultReady() {
+        Startup.getComponents();
+        Startup.makeMethods();
         Startup.pagePromise
             .then(() => CONFIG.pageReady())
             .then(() => Startup.promiseResolve())
             .catch((err) => Startup.promiseReject(err));
     }
-    Startup.defaultReady = defaultReady;
-    function defaultPageReady() {
-        return (CONFIG.loadAllFontFiles && Startup.output.font ?
-            Startup.output.font.loadDynamicFiles() : Promise.resolve())
-            .then(CONFIG.typeset && MathJax.typesetPromise ?
-            typesetPromise(CONFIG.elements) :
-            Promise.resolve());
+    static defaultPageReady() {
+        return (CONFIG.loadAllFontFiles && Startup.output.font
+            ? Startup.output.font.loadDynamicFiles()
+            : Promise.resolve())
+            .then(CONFIG.typeset && MathJax.typesetPromise
+            ? () => Startup.typesetPromise(CONFIG.elements)
+            : Promise.resolve())
+            .then(() => Startup.promiseResolve());
     }
-    Startup.defaultPageReady = defaultPageReady;
-    function typesetPromise(elements) {
-        Startup.document.options.elements = elements;
-        Startup.document.reset();
-        return mathjax.handleRetriesFor(() => {
-            Startup.document.render();
-        });
+    static typesetPromise(elements) {
+        return Startup.document.whenReady(() => __awaiter(this, void 0, void 0, function* () {
+            Startup.document.options.elements = elements;
+            Startup.document.reset();
+            yield Startup.document.renderPromise();
+            this.hasTypeset = true;
+        }));
     }
-    Startup.typesetPromise = typesetPromise;
-    function getComponents() {
-        visitor = new MathJax._.core.MmlTree.SerializedMmlVisitor.SerializedMmlVisitor();
-        mathjax = MathJax._.mathjax.mathjax;
-        Startup.input = getInputJax();
-        Startup.output = getOutputJax();
-        Startup.adaptor = getAdaptor();
+    static getComponents() {
+        Startup.visitor =
+            new MathJax._.core.MmlTree.SerializedMmlVisitor.SerializedMmlVisitor();
+        Startup.mathjax = MathJax._.mathjax.mathjax;
+        Startup.input = Startup.getInputJax();
+        Startup.output = Startup.getOutputJax();
+        Startup.adaptor = Startup.getAdaptor();
         if (Startup.handler) {
-            mathjax.handlers.unregister(Startup.handler);
+            Startup.mathjax.handlers.unregister(Startup.handler);
         }
-        Startup.handler = getHandler();
+        Startup.handler = Startup.getHandler();
         if (Startup.handler) {
-            mathjax.handlers.register(Startup.handler);
-            Startup.document = getDocument();
+            Startup.mathjax.handlers.register(Startup.handler);
+            Startup.document = Startup.getDocument();
         }
     }
-    Startup.getComponents = getComponents;
-    function makeMethods() {
+    static makeMethods() {
         if (Startup.input && Startup.output) {
-            makeTypesetMethods();
+            Startup.makeTypesetMethods();
         }
-        const oname = (Startup.output ? Startup.output.name.toLowerCase() : '');
+        const oname = Startup.output ? Startup.output.name.toLowerCase() : '';
         for (const jax of Startup.input) {
             const iname = jax.name.toLowerCase();
-            makeMmlMethods(iname, jax);
-            makeResetMethod(iname, jax);
+            Startup.makeMmlMethods(iname, jax);
+            Startup.makeResetMethod(iname, jax);
             if (Startup.output) {
-                makeOutputMethods(iname, oname, jax);
+                Startup.makeOutputMethods(iname, oname, jax);
             }
         }
+        MathJax.done = () => Startup.document.done();
     }
-    Startup.makeMethods = makeMethods;
-    function makeTypesetMethods() {
+    static makeTypesetMethods() {
         MathJax.typeset = (elements = null) => {
             Startup.document.options.elements = elements;
             Startup.document.reset();
             Startup.document.render();
+            this.hasTypeset = true;
         };
         MathJax.typesetPromise = (elements = null) => {
-            Startup.promise = Startup.promise.then(() => typesetPromise(elements));
-            return Startup.promise;
+            return Startup.typesetPromise(elements);
         };
         MathJax.typesetClear = (elements = null) => {
             if (elements) {
@@ -139,22 +116,16 @@ export var Startup;
             }
         };
     }
-    Startup.makeTypesetMethods = makeTypesetMethods;
-    function makeOutputMethods(iname, oname, input) {
+    static makeOutputMethods(iname, oname, input) {
         const name = iname + '2' + oname;
-        MathJax[name] =
-            (math, options = {}) => {
-                options.format = input.name;
-                return Startup.document.convert(math, options);
-            };
-        MathJax[name + 'Promise'] =
-            (math, options = {}) => {
-                Startup.promise = Startup.promise.then(() => {
-                    options.format = input.name;
-                    return mathjax.handleRetriesFor(() => Startup.document.convert(math, options));
-                });
-                return Startup.promise;
-            };
+        MathJax[name] = (math, options = {}) => {
+            options.format = input.name;
+            return Startup.document.convert(math, options);
+        };
+        MathJax[name + 'Promise'] = (math, options = {}) => {
+            options.format = input.name;
+            return Startup.document.convertPromise(math, options);
+        };
         MathJax[oname + 'Stylesheet'] = () => Startup.output.styleSheet(Startup.document);
         if ('getMetricsFor' in Startup.output) {
             MathJax.getMetricsFor = (node, display) => {
@@ -162,31 +133,24 @@ export var Startup;
             };
         }
     }
-    Startup.makeOutputMethods = makeOutputMethods;
-    function makeMmlMethods(name, input) {
+    static makeMmlMethods(name, input) {
         const STATE = MathJax._.core.MathItem.STATE;
-        MathJax[name + '2mml'] =
-            (math, options = {}) => {
-                options.end = STATE.CONVERT;
-                options.format = input.name;
-                return toMML(Startup.document.convert(math, options));
-            };
-        MathJax[name + '2mmlPromise'] =
-            (math, options = {}) => {
-                Startup.promise = Startup.promise.then(() => {
-                    options.end = STATE.CONVERT;
-                    options.format = input.name;
-                    return mathjax.handleRetriesFor(() => toMML(Startup.document.convert(math, options)));
-                });
-                return Startup.promise;
-            };
+        MathJax[name + '2mml'] = (math, options = {}) => {
+            options.end = STATE.CONVERT;
+            options.format = input.name;
+            return Startup.toMML(Startup.document.convert(math, options));
+        };
+        MathJax[name + '2mmlPromise'] = (math_1, ...args_1) => __awaiter(this, [math_1, ...args_1], void 0, function* (math, options = {}) {
+            options.end = STATE.CONVERT;
+            options.format = input.name;
+            const node = yield Startup.document.convertPromise(math, options);
+            return Startup.toMML(node);
+        });
     }
-    Startup.makeMmlMethods = makeMmlMethods;
-    function makeResetMethod(name, input) {
+    static makeResetMethod(name, input) {
         MathJax[name + 'Reset'] = (...args) => input.reset(...args);
     }
-    Startup.makeResetMethod = makeResetMethod;
-    function getInputJax() {
+    static getInputJax() {
         const jax = [];
         for (const name of CONFIG.input) {
             const inputClass = Startup.constructors[name];
@@ -200,8 +164,7 @@ export var Startup;
         }
         return jax;
     }
-    Startup.getInputJax = getInputJax;
-    function getOutputJax() {
+    static getOutputJax() {
         const name = CONFIG.output;
         if (!name)
             return null;
@@ -211,8 +174,7 @@ export var Startup;
         }
         return new outputClass(MathJax.config[name]);
     }
-    Startup.getOutputJax = getOutputJax;
-    function getAdaptor() {
+    static getAdaptor() {
         const name = CONFIG.adaptor;
         if (!name || name === 'none')
             return null;
@@ -222,8 +184,7 @@ export var Startup;
         }
         return adaptor(MathJax.config[name]);
     }
-    Startup.getAdaptor = getAdaptor;
-    function getHandler() {
+    static getHandler() {
         const name = CONFIG.handler;
         if (!name || name === 'none' || !Startup.adaptor)
             return null;
@@ -232,17 +193,42 @@ export var Startup;
             throw Error('Handler "' + name + '" is not defined (has it been loaded?)');
         }
         let handler = new handlerClass(Startup.adaptor, 5);
-        for (const extend of extensions) {
+        for (const extend of Startup.extensions) {
             handler = extend.item(handler);
         }
         return handler;
     }
-    Startup.getHandler = getHandler;
-    function getDocument(root = null) {
-        return mathjax.document(root || CONFIG.document, Object.assign(Object.assign({}, MathJax.config.options), { InputJax: Startup.input, OutputJax: Startup.output }));
+    static getDocument(root = null) {
+        return Startup.mathjax.document(root || CONFIG.document, Object.assign(Object.assign({}, MathJax.config.options), { InputJax: Startup.input, OutputJax: Startup.output }));
     }
-    Startup.getDocument = getDocument;
-})(Startup || (Startup = {}));
+}
+Startup.extensions = new PrioritizedList();
+Startup.constructors = {};
+Startup.input = [];
+Startup.output = null;
+Startup.handler = null;
+Startup.adaptor = null;
+Startup.elements = null;
+Startup.document = null;
+Startup.promise = new Promise((resolve, reject) => {
+    Startup.promiseResolve = resolve;
+    Startup.promiseReject = reject;
+});
+Startup.pagePromise = new Promise((resolve, _reject) => {
+    const doc = global.document;
+    if (!doc ||
+        !doc.readyState ||
+        doc.readyState === 'complete' ||
+        doc.readyState === 'interactive') {
+        resolve();
+    }
+    else {
+        const listener = () => resolve();
+        doc.defaultView.addEventListener('load', listener, true);
+        doc.defaultView.addEventListener('DOMContentLoaded', listener, true);
+    }
+});
+Startup.hasTypeset = false;
 export const MathJax = MJGlobal;
 if (typeof MathJax._.startup === 'undefined') {
     combineDefaults(MathJax.config, 'startup', {
@@ -250,15 +236,15 @@ if (typeof MathJax._.startup === 'undefined') {
         output: '',
         handler: null,
         adaptor: null,
-        document: (typeof document === 'undefined' ? '' : document),
+        document: context.document || '',
         elements: null,
         typeset: true,
         ready: Startup.defaultReady.bind(Startup),
-        pageReady: Startup.defaultPageReady.bind(Startup)
+        pageReady: Startup.defaultPageReady.bind(Startup),
     });
     combineWithMathJax({
         startup: Startup,
-        options: {}
+        options: {},
     });
     if (MathJax.config.startup.invalidOption) {
         OPTIONS.invalidOption = MathJax.config.startup.invalidOption;

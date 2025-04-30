@@ -1,38 +1,28 @@
-import { AbstractMmlEmptyNode } from '../MmlNode.js';
-export class HtmlNode extends AbstractMmlEmptyNode {
-    constructor() {
-        super(...arguments);
-        this.html = null;
-        this.adaptor = null;
-    }
+import { XMLNode } from '../MmlNode.js';
+export class HtmlNode extends XMLNode {
     get kind() {
         return 'html';
     }
     getHTML() {
-        return this.html;
+        return this.getXML();
     }
     setHTML(html, adaptor = null) {
         try {
             adaptor.getAttribute(html, 'data-mjx-hdw');
         }
-        catch (error) {
+        catch (_error) {
             html = adaptor.node('span', {}, [html]);
         }
-        this.html = html;
-        this.adaptor = adaptor;
-        return this;
+        return this.setXML(html, adaptor);
     }
     getSerializedHTML() {
-        return this.adaptor.outerHTML(this.html);
+        return this.adaptor.outerHTML(this.xml);
     }
     textContent() {
-        return this.adaptor.textContent(this.html);
-    }
-    copy() {
-        return this.factory.create(this.kind).setHTML(this.adaptor.clone(this.html));
+        return this.adaptor.textContent(this.xml);
     }
     toString() {
-        const kind = this.adaptor.kind(this.html);
+        const kind = this.adaptor.kind(this.xml);
         return `HTML=<${kind}>...</${kind}>`;
     }
     verifyTree(options) {

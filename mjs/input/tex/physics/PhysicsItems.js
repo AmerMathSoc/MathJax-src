@@ -1,5 +1,5 @@
 import { BaseItem } from '../StackItem.js';
-import ParseUtil from '../ParseUtil.js';
+import { ParseUtil } from '../ParseUtil.js';
 import NodeUtil from '../NodeUtil.js';
 import TexParser from '../TexParser.js';
 export class AutoOpen extends BaseItem {
@@ -17,23 +17,26 @@ export class AutoOpen extends BaseItem {
         if (!inferred) {
             return super.toMml(inferred, forceRow);
         }
-        let parser = this.factory.configuration.parser;
-        let right = this.getProperty('right');
+        const parser = this.factory.configuration.parser;
+        const right = this.getProperty('right');
         if (this.getProperty('smash')) {
-            let mml = super.toMml();
-            const smash = parser.create('node', 'mpadded', [mml], { height: 0, depth: 0 });
+            const mml = super.toMml();
+            const smash = parser.create('node', 'mpadded', [mml], {
+                height: 0,
+                depth: 0,
+            });
             this.Clear();
             this.Push(parser.create('node', 'TeXAtom', [smash]));
         }
         if (right) {
             this.Push(new TexParser(right, parser.stack.env, parser.configuration).mml());
         }
-        let mml = ParseUtil.fenced(this.factory.configuration, this.getProperty('open'), super.toMml(), this.getProperty('close'), this.getProperty('big'));
+        const mml = ParseUtil.fenced(this.factory.configuration, this.getProperty('open'), super.toMml(), this.getProperty('close'), this.getProperty('big'));
         NodeUtil.removeProperties(mml, 'open', 'close', 'texClass');
         return mml;
     }
     closing(fence) {
-        return (fence === this.getProperty('close') && !this.openCount--);
+        return fence === this.getProperty('close') && !this.openCount--;
     }
     checkItem(item) {
         if (item.getProperty('pre-autoclose')) {
@@ -48,7 +51,8 @@ export class AutoOpen extends BaseItem {
         }
         if (item.isKind('mml') && item.Size() === 1) {
             const mml = item.toMml();
-            if (mml.isKind('mo') && mml.getText() === this.getProperty('open')) {
+            if (mml.isKind('mo') &&
+                mml.getText() === this.getProperty('open')) {
                 this.openCount++;
             }
         }
@@ -56,6 +60,6 @@ export class AutoOpen extends BaseItem {
     }
 }
 AutoOpen.errors = Object.assign(Object.create(BaseItem.errors), {
-    'stop': ['ExtraOrMissingDelims', 'Extra open or missing close delimiter']
+    stop: ['ExtraOrMissingDelims', 'Extra open or missing close delimiter'],
 });
 //# sourceMappingURL=PhysicsItems.js.map

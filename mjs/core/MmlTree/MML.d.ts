@@ -1,4 +1,4 @@
 import { MmlNodeClass } from './MmlNode.js';
-export declare let MML: {
+export declare const MML: {
     [kind: string]: MmlNodeClass;
 };

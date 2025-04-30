@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonTeXAtomMixin } from '../../common/Wrappers/TeXAtom.js';
+import { CommonTeXAtomMixin, } from '../../common/Wrappers/TeXAtom.js';
 import { TeXAtom } from '../../../core/MmlTree/MmlNodes/TeXAtom.js';
 import { TEXCLASSNAMES } from '../../../core/MmlTree/MmlNode.js';
 export const SvgTeXAtom = (function () {

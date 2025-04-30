@@ -10,7 +10,15 @@ export class LiteWindow {
         this.HTMLElement = LiteElement;
         this.DocumentFragment = LiteList;
         this.Document = LiteDocument;
-        this.document = new LiteDocument();
+        this.document = new LiteDocument(this);
+    }
+    postMessage(msg, domain) {
+        this.document.postMessage(msg, domain);
+    }
+    addEventListener(kind, listener) {
+        if (kind === 'message') {
+            this.document.listeners.push(listener);
+        }
     }
 }
 //# sourceMappingURL=Window.js.map

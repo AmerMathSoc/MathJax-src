@@ -29,11 +29,13 @@ export const DiagonalStrike = function (name, neg) {
     return Notation.CommonDiagonalStrike((cname) => (node, _child) => {
         const { w, h, d } = node.getBBox();
         const [a, W] = node.getArgMod(w, h + d);
-        const t = neg * node.thickness / 2;
-        const strike = node.adjustBorder(node.html(cname, { style: {
+        const t = (neg * node.thickness) / 2;
+        const strike = node.adjustBorder(node.html(cname, {
+            style: {
                 width: node.Em(W),
                 transform: 'rotate(' + node.fixed(-neg * a) + 'rad) translateY(' + t + 'em)',
-            } }));
+            },
+        }));
         node.adaptor.append(node.dom[0], strike);
     })(name);
 };

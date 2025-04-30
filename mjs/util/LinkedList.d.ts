@@ -14,7 +14,7 @@ export declare class LinkedList<DataClass> {
     pop(): DataClass;
     unshift(...args: DataClass[]): LinkedList<DataClass>;
     shift(): DataClass;
-    remove(...items: DataClass[]): void;
+    remove(...items: DataClass[]): LinkedList<DataClass>;
     clear(): LinkedList<DataClass>;
     [Symbol.iterator](): IterableIterator<DataClass>;
     reversed(): IterableIterator<DataClass>;

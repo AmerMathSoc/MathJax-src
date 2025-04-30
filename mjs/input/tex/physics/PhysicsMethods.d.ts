@@ -1,3 +1,5 @@
 import { ParseMethod } from '../Types.js';
-declare let PhysicsMethods: Record<string, ParseMethod>;
+declare const PhysicsMethods: {
+    [key: string]: ParseMethod;
+};
 export default PhysicsMethods;

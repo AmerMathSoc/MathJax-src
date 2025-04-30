@@ -7,6 +7,11 @@ export class MmlMstyle extends AbstractMmlLayoutNode {
     get notParent() {
         return this.childNodes[0] && this.childNodes[0].childNodes.length === 1;
     }
+    setInheritedAttributes(attributes = {}, display = false, level = 0, prime = false) {
+        this.attributes.setInherited('displaystyle', display);
+        this.attributes.setInherited('scriptlevel', level);
+        super.setInheritedAttributes(attributes, display, level, prime);
+    }
     setChildInheritedAttributes(attributes, display, level, prime) {
         let scriptlevel = this.attributes.getExplicit('scriptlevel');
         if (scriptlevel != null) {
@@ -19,9 +24,9 @@ export class MmlMstyle extends AbstractMmlLayoutNode {
             }
             prime = false;
         }
-        let displaystyle = this.attributes.getExplicit('displaystyle');
+        const displaystyle = this.attributes.getExplicit('displaystyle');
         if (displaystyle != null) {
-            display = (displaystyle === true);
+            display = displaystyle === true;
             prime = false;
         }
         const cramped = this.attributes.getExplicit('data-cramped');

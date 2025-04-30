@@ -1,11 +1,13 @@
 export class AbstractVisitor {
     static methodName(kind) {
-        return 'visit' + (kind.charAt(0).toUpperCase() + kind.substr(1)).replace(/[^a-z0-9_]/ig, '_') + 'Node';
+        return ('visit' +
+            (kind.charAt(0).toUpperCase() + kind.substring(1)).replace(/[^a-z0-9_]/gi, '_') +
+            'Node');
     }
     constructor(factory) {
         this.nodeHandlers = new Map();
         for (const kind of factory.getKinds()) {
-            let method = this[AbstractVisitor.methodName(kind)];
+            const method = this[AbstractVisitor.methodName(kind)];
             if (method) {
                 this.nodeHandlers.set(kind, method);
             }
@@ -15,7 +17,7 @@ export class AbstractVisitor {
         return this.visitNode(tree, ...args);
     }
     visitNode(node, ...args) {
-        let handler = this.nodeHandlers.get(node.kind) || this.visitDefault;
+        const handler = this.nodeHandlers.get(node.kind) || this.visitDefault;
         return handler.call(this, node, ...args);
     }
     visitDefault(node, ...args) {

@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMsqrtMixin } from '../../common/Wrappers/msqrt.js';
+import { CommonMsqrtMixin, } from '../../common/Wrappers/msqrt.js';
 import { MmlMsqrt } from '../../../core/MmlTree/MmlNodes/msqrt.js';
 export const ChtmlMsqrt = (function () {
     var _a;
@@ -21,10 +21,10 @@ export const ChtmlMsqrt = (function () {
                     root = this.childNodes[this.root];
                 }
                 const SQRT = adaptor.append(CHTML[0], this.html('mjx-sqrt', {}, [
-                    SURD = this.html('mjx-surd'),
-                    BASE = this.html('mjx-box', { style: { paddingTop: this.em(q) } })
+                    (SURD = this.html('mjx-surd')),
+                    (BASE = this.html('mjx-box', { style: { paddingTop: this.em(q) } })),
                 ]));
-                if (t !== .06) {
+                if (t !== 0.06) {
                     adaptor.setStyle(BASE, 'border-top-width', this.em(t * this.font.params.rule_factor));
                 }
                 this.addRoot(ROOT, root, sbox, H);
@@ -34,32 +34,31 @@ export const ChtmlMsqrt = (function () {
                     adaptor.addClass(SQRT, 'mjx-tall');
                 }
             }
-            addRoot(_ROOT, _root, _sbox, _H) {
-            }
+            addRoot(_ROOT, _root, _sbox, _H) { }
         },
         _a.kind = MmlMsqrt.prototype.kind,
         _a.styles = {
             'mjx-root': {
                 display: 'inline-block',
-                'white-space': 'nowrap'
+                'white-space': 'nowrap',
             },
             'mjx-surd': {
                 display: 'inline-block',
-                'vertical-align': 'top'
+                'vertical-align': 'top',
             },
             'mjx-sqrt': {
                 display: 'inline-block',
-                'padding-top': '.075em'
+                'padding-top': '.075em',
             },
             'mjx-sqrt > mjx-box': {
                 'border-top': '.075em solid',
                 'padding-left': '.03em',
-                'margin-left': '-.03em'
+                'margin-left': '-.03em',
             },
             'mjx-sqrt.mjx-tall > mjx-box': {
                 'padding-left': '.3em',
-                'margin-left': '-.3em'
-            }
+                'margin-left': '-.3em',
+            },
         },
         _a;
 })();

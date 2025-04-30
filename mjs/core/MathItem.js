@@ -1,6 +1,13 @@
 export function protoItem(open, math, close, n, start, end, display = null) {
-    let item = { open: open, math: math, close: close,
-        n: n, start: { n: start }, end: { n: end }, display: display };
+    const item = {
+        open: open,
+        math: math,
+        close: close,
+        n: n,
+        start: { n: start },
+        end: { n: end },
+        display: display,
+    };
     return item;
 }
 export class AbstractMathItem {
@@ -50,12 +57,15 @@ export class AbstractMathItem {
         }
     }
     updateDocument(_document) { }
-    removeFromDocument(_restore = false) { }
+    removeFromDocument(_restore = false) {
+        this.clear();
+    }
     setMetrics(em, ex, cwidth, scale) {
         this.metrics = {
-            em: em, ex: ex,
+            em: em,
+            ex: ex,
             containerWidth: cwidth,
-            scale: scale
+            scale: scale,
         };
     }
     state(state = null, restore = false) {
@@ -76,6 +86,7 @@ export class AbstractMathItem {
     reset(restore = false) {
         this.state(STATE.UNPROCESSED, restore);
     }
+    clear() { }
 }
 export const STATE = {
     UNPROCESSED: 0,
@@ -86,7 +97,7 @@ export const STATE = {
     RERENDER: 125,
     TYPESET: 150,
     INSERTED: 200,
-    LAST: 10000
+    LAST: 10000,
 };
 export function newState(name, state) {
     if (name in STATE) {

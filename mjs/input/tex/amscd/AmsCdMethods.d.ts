@@ -1,3 +1,5 @@
 import { ParseMethod } from '../Types.js';
-declare let AmsCdMethods: Record<string, ParseMethod>;
+declare const AmsCdMethods: {
+    [key: string]: ParseMethod;
+};
 export default AmsCdMethods;

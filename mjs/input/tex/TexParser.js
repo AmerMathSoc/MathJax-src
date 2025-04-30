@@ -1,7 +1,10 @@
-import ParseUtil from './ParseUtil.js';
+import { HandlerType } from './HandlerTypes.js';
+import { UnitUtil } from './UnitUtil.js';
 import Stack from './Stack.js';
 import TexError from './TexError.js';
 import { AbstractMmlNode } from '../../core/MmlTree/MmlNode.js';
+import { BaseItem } from './StackItem.js';
+import { TexConstant } from './TexConstants.js';
 export default class TexParser {
     constructor(_string, env, configuration) {
         this._string = _string;
@@ -9,7 +12,8 @@ export default class TexParser {
         this.macroCount = 0;
         this.i = 0;
         this.currentCS = '';
-        const inner = env.hasOwnProperty('isInner');
+        this.saveI = 0;
+        const inner = Object.hasOwn(env, 'isInner');
         const isInner = env['isInner'];
         delete env['isInner'];
         let ENV;
@@ -23,6 +27,7 @@ export default class TexParser {
         this.stack = new Stack(this.itemFactory, ENV, inner ? isInner : true);
         this.Parse();
         this.Push(this.itemFactory.create('stop'));
+        this.updateResult(this.string, this.i);
         this.stack.env = ENV;
     }
     get options() {
@@ -41,19 +46,27 @@ export default class TexParser {
         return this._string;
     }
     parse(kind, input) {
-        return this.configuration.handlers.get(kind).parse(input);
+        const i = this.saveI;
+        this.saveI = this.i;
+        const result = this.configuration.handlers.get(kind).parse(input);
+        this.updateResult(input[1], i);
+        this.saveI = i;
+        return result;
     }
-    lookup(kind, symbol) {
-        return this.configuration.handlers.get(kind).lookup(symbol);
+    lookup(kind, token) {
+        return this.configuration.handlers.get(kind).lookup(token);
     }
-    contains(kind, symbol) {
-        return this.configuration.handlers.get(kind).contains(symbol);
+    contains(kind, token) {
+        return this.configuration.handlers.get(kind).contains(token);
     }
     toString() {
         let str = '';
         for (const config of Array.from(this.configuration.handlers.keys())) {
-            str += config + ': ' +
-                this.configuration.handlers.get(config) + '\n';
+            str +=
+                config +
+                    ': ' +
+                    this.configuration.handlers.get(config) +
+                    '\n';
         }
         return str;
     }
@@ -62,10 +75,15 @@ export default class TexParser {
         while (this.i < this.string.length) {
             c = this.getCodePoint();
             this.i += c.length;
-            this.parse('character', [this, c]);
+            this.parse(HandlerType.CHARACTER, [this, c]);
         }
     }
     Push(arg) {
+        if (arg instanceof BaseItem) {
+            arg.startI = this.saveI;
+            arg.stopI = this.i;
+            arg.startStr = this.string;
+        }
         if (arg instanceof AbstractMmlNode && arg.isInferred) {
             this.PushAll(arg.childNodes);
         }
@@ -82,13 +100,15 @@ export default class TexParser {
         if (!this.stack.Top().isKind('mml')) {
             return null;
         }
-        let node = this.stack.Top().First;
+        const node = this.stack.Top().First;
         this.configuration.popParser();
+        node.attributes.set(TexConstant.Attr.LATEX, this.string);
         return node;
     }
     convertDelimiter(c) {
-        const symbol = this.lookup('delimiter', c);
-        return symbol ? symbol.char : null;
+        var _a;
+        const token = this.lookup(HandlerType.DELIMITER, c);
+        return (_a = token === null || token === void 0 ? void 0 : token.char) !== null && _a !== void 0 ? _a : null;
     }
     getCodePoint() {
         const code = this.string.codePointAt(this.i);
@@ -104,7 +124,9 @@ export default class TexParser {
         return this.getCodePoint();
     }
     GetCS() {
-        let CS = this.string.slice(this.i).match(/^(([a-z]+) ?|[\uD800-\uDBFF].|.)/i);
+        const CS = this.string
+            .slice(this.i)
+            .match(/^(([a-z]+) ?|[\uD800-\uDBFF].|.)/i);
         if (CS) {
             this.i += CS[0].length;
             return CS[2] || CS[1];
@@ -114,7 +136,7 @@ export default class TexParser {
             return ' ';
         }
     }
-    GetArgument(_name, noneOK) {
+    GetArgument(_name, noneOK = false) {
         switch (this.GetNext()) {
             case '':
                 if (!noneOK) {
@@ -129,8 +151,9 @@ export default class TexParser {
             case '\\':
                 this.i++;
                 return '\\' + this.GetCS();
-            case '{':
-                let j = ++this.i, parens = 1;
+            case '{': {
+                const j = ++this.i;
+                let parens = 1;
                 while (this.i < this.string.length) {
                     switch (this.string.charAt(this.i++)) {
                         case '\\':
@@ -147,39 +170,49 @@ export default class TexParser {
                     }
                 }
                 throw new TexError('MissingCloseBrace', 'Missing close brace');
+            }
         }
         const c = this.getCodePoint();
         this.i += c.length;
         return c;
     }
-    GetBrackets(_name, def) {
+    GetBrackets(_name, def, matchBrackets = false) {
         if (this.GetNext() !== '[') {
             return def;
         }
-        let j = ++this.i, parens = 0;
+        const j = ++this.i;
+        let braces = 0;
+        let brackets = 0;
         while (this.i < this.string.length) {
             switch (this.string.charAt(this.i++)) {
                 case '{':
-                    parens++;
+                    braces++;
                     break;
                 case '\\':
                     this.i++;
                     break;
                 case '}':
-                    if (parens-- <= 0) {
-                        throw new TexError('ExtraCloseLooking', 'Extra close brace while looking for %1', '\']\'');
+                    if (braces-- <= 0) {
+                        throw new TexError('ExtraCloseLooking', 'Extra close brace while looking for %1', "']'");
                     }
                     break;
+                case '[':
+                    if (braces === 0)
+                        brackets++;
+                    break;
                 case ']':
-                    if (parens === 0) {
-                        return this.string.slice(j, this.i - 1);
+                    if (braces === 0) {
+                        if (!matchBrackets || brackets === 0) {
+                            return this.string.slice(j, this.i - 1);
+                        }
+                        brackets--;
                     }
                     break;
             }
         }
-        throw new TexError('MissingCloseBracket', 'Could not find closing \']\' for argument to %1', this.currentCS);
+        throw new TexError('MissingCloseBracket', "Could not find closing ']' for argument to %1", this.currentCS);
     }
-    GetDelimiter(name, braceOK) {
+    GetDelimiter(name, braceOK = false) {
         let c = this.GetNext();
         this.i += c.length;
         if (this.i <= this.string.length) {
@@ -190,7 +223,7 @@ export default class TexParser {
                 this.i--;
                 c = this.GetArgument(name).trim();
             }
-            if (this.contains('delimiter', c)) {
+            if (this.contains(HandlerType.DELIMITER, c)) {
                 return this.convertDelimiter(c);
             }
         }
@@ -198,15 +231,15 @@ export default class TexParser {
     }
     GetDimen(name) {
         if (this.GetNext() === '{') {
-            let dimen = this.GetArgument(name);
-            let [value, unit] = ParseUtil.matchDimen(dimen);
+            const dimen = this.GetArgument(name);
+            const [value, unit] = UnitUtil.matchDimen(dimen);
             if (value) {
                 return value + unit;
             }
         }
         else {
-            let dimen = this.string.slice(this.i);
-            let [value, unit, length] = ParseUtil.matchDimen(dimen, true);
+            const dimen = this.string.slice(this.i);
+            const [value, unit, length] = UnitUtil.matchDimen(dimen, true);
             if (value) {
                 this.i += length;
                 return value + unit;
@@ -218,10 +251,10 @@ export default class TexParser {
         while (this.nextIsSpace()) {
             this.i++;
         }
-        let j = this.i;
-        let parens = 0;
+        const j = this.i;
+        let braces = 0;
         while (this.i < this.string.length) {
-            let k = this.i;
+            const k = this.i;
             let c = this.GetNext();
             this.i += c.length;
             switch (c) {
@@ -229,16 +262,16 @@ export default class TexParser {
                     c += this.GetCS();
                     break;
                 case '{':
-                    parens++;
+                    braces++;
                     break;
                 case '}':
-                    if (parens === 0) {
+                    if (braces === 0) {
                         throw new TexError('ExtraCloseLooking', 'Extra close brace while looking for %1', token);
                     }
-                    parens--;
+                    braces--;
                     break;
             }
-            if (parens === 0 && c === token) {
+            if (braces === 0 && c === token) {
                 return this.string.slice(j, k);
             }
         }
@@ -251,24 +284,123 @@ export default class TexParser {
         return new TexParser(this.GetUpTo(name, token), this.stack.env, this.configuration).mml();
     }
     GetDelimiterArg(name) {
-        let c = ParseUtil.trimSpaces(this.GetArgument(name));
+        const c = UnitUtil.trimSpaces(this.GetArgument(name));
         if (c === '') {
             return null;
         }
-        if (this.contains('delimiter', c)) {
+        if (this.contains(HandlerType.DELIMITER, c)) {
             return c;
         }
         throw new TexError('MissingOrUnrecognizedDelim', 'Missing or unrecognized delimiter for %1', this.currentCS);
     }
     GetStar() {
-        let star = (this.GetNext() === '*');
+        const star = this.GetNext() === '*';
         if (star) {
             this.i++;
         }
         return star;
     }
     create(kind, ...rest) {
-        return this.configuration.nodeFactory.create(kind, ...rest);
+        const node = this.configuration.nodeFactory.create(kind, ...rest);
+        if (node.isToken && node.attributes.hasExplicit('mathvariant')) {
+            if (node.attributes.get('mathvariant').charAt(0) === '-') {
+                node.setProperty('ignore-variant', true);
+            }
+        }
+        return node;
+    }
+    updateResult(input, old) {
+        const node = this.stack.Prev(true);
+        if (!node) {
+            return;
+        }
+        const existing = node.attributes.get(TexConstant.Attr.LATEXITEM);
+        if (existing !== undefined) {
+            node.attributes.set(TexConstant.Attr.LATEX, existing);
+            return;
+        }
+        old = old < this.saveI ? this.saveI : old;
+        let str = old !== this.i ? this.string.slice(old, this.i) : input;
+        str = str.trim();
+        if (!str) {
+            return;
+        }
+        if (input === '\\') {
+            str = '\\' + str;
+        }
+        if (node.attributes.get(TexConstant.Attr.LATEX) === '^' &&
+            str !== '^' &&
+            str !== '\\^') {
+            if (node.childNodes[2]) {
+                if (str === '}') {
+                    this.composeBraces(node.childNodes[2]);
+                }
+                else {
+                    node.childNodes[2].attributes.set(TexConstant.Attr.LATEX, str);
+                }
+            }
+            if (node.childNodes[1]) {
+                const sub = node.childNodes[1].attributes.get(TexConstant.Attr.LATEX);
+                this.composeLatex(node, `_${sub}^`, 0, 2);
+            }
+            else {
+                this.composeLatex(node, '^', 0, 2);
+            }
+            return;
+        }
+        if (node.attributes.get(TexConstant.Attr.LATEX) === '_' &&
+            str !== '_' &&
+            str !== '\\_') {
+            if (node.childNodes[1]) {
+                if (str === '}') {
+                    this.composeBraces(node.childNodes[1]);
+                }
+                else {
+                    node.childNodes[1].attributes.set(TexConstant.Attr.LATEX, str);
+                }
+            }
+            if (node.childNodes[2]) {
+                const sub = node.childNodes[2].attributes.get(TexConstant.Attr.LATEX);
+                this.composeLatex(node, `^${sub}_`, 0, 1);
+            }
+            else {
+                this.composeLatex(node, '_', 0, 1);
+            }
+            return;
+        }
+        if (str === '}') {
+            this.composeBraces(node);
+            return;
+        }
+        node.attributes.set(TexConstant.Attr.LATEX, str);
+    }
+    composeLatex(node, comp, pos1, pos2) {
+        if (!node.childNodes[pos1] || !node.childNodes[pos2])
+            return;
+        const expr = (node.childNodes[pos1].attributes.get(TexConstant.Attr.LATEX) || '') +
+            comp +
+            node.childNodes[pos2].attributes.get(TexConstant.Attr.LATEX);
+        node.attributes.set(TexConstant.Attr.LATEX, expr);
+    }
+    composeBraces(atom) {
+        const str = this.composeBracedContent(atom);
+        atom.attributes.set(TexConstant.Attr.LATEX, `{${str}}`);
+    }
+    composeBracedContent(atom) {
+        var _a, _b;
+        const children = ((_a = atom.childNodes[0]) === null || _a === void 0 ? void 0 : _a.childNodes) || [];
+        let expr = '';
+        for (const child of children) {
+            const att = (((_b = child.attributes) === null || _b === void 0 ? void 0 : _b.get(TexConstant.Attr.LATEX)) ||
+                '');
+            if (!att)
+                continue;
+            expr +=
+                expr && expr.match(/[a-zA-Z]$/) && att.match(/^[a-zA-Z]/)
+                    ? ' ' + att
+                    : att;
+        }
+        return expr;
     }
 }
 //# sourceMappingURL=TexParser.js.map

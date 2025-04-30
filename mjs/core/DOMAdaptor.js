@@ -11,19 +11,26 @@ export class AbstractDOMAdaptor {
         }
         return node;
     }
+    setProperty(node, name, value) {
+        node[name] = value;
+    }
+    getProperty(node, name) {
+        return node[name];
+    }
     setAttributes(node, def) {
-        if (def.style && typeof (def.style) !== 'string') {
-            for (let key of Object.keys(def.style)) {
+        if (def.style && typeof def.style !== 'string') {
+            for (const key of Object.keys(def.style)) {
                 this.setStyle(node, key.replace(/-([a-z])/g, (_m, c) => c.toUpperCase()), def.style[key]);
             }
         }
         if (def.properties) {
-            for (let key of Object.keys(def.properties)) {
+            for (const key of Object.keys(def.properties)) {
                 node[key] = def.properties[key];
             }
         }
-        for (let key of Object.keys(def)) {
-            if ((key !== 'style' || typeof (def.style) === 'string') && key !== 'properties') {
+        for (const key of Object.keys(def)) {
+            if ((key !== 'style' || typeof def.style === 'string') &&
+                key !== 'properties') {
                 this.setAttribute(node, key, def[key]);
             }
         }
@@ -38,8 +45,16 @@ export class AbstractDOMAdaptor {
     }
     allClasses(node) {
         const classes = this.getAttribute(node, 'class');
-        return (!classes ? [] :
-            classes.replace(/  +/g, ' ').replace(/^ /, '').replace(/ $/, '').split(/ /));
+        return !classes
+            ? []
+            : classes
+                .replace(/  +/g, ' ')
+                .replace(/^ /, '')
+                .replace(/ $/, '')
+                .split(/ /);
+    }
+    cssText(node) {
+        return this.kind(node) === 'style' ? this.textContent(node) : '';
     }
 }
 //# sourceMappingURL=DOMAdaptor.js.map

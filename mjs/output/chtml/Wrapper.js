@@ -1,4 +1,4 @@
-import { CommonWrapper, SPACE } from '../common/Wrapper.js';
+import { CommonWrapper, SPACE, } from '../common/Wrapper.js';
 import { BBox } from '../../util/BBox.js';
 export const FONTSIZE = {
     '70.7%': 's',
@@ -10,7 +10,7 @@ export const FONTSIZE = {
     '144%': 'Lg',
     '173%': 'LG',
     '207%': 'hg',
-    '249%': 'HG'
+    '249%': 'HG',
 };
 export class ChtmlWrapper extends CommonWrapper {
     toCHTML(parents) {
@@ -22,14 +22,19 @@ export class ChtmlWrapper extends CommonWrapper {
         if (parents.length <= 1 || !this.node.isEmbellished)
             return false;
         const adaptor = this.adaptor;
-        parents.forEach(dom => adaptor.append(dom, this.html('mjx-linestrut')));
+        parents.forEach((dom) => adaptor.append(dom, this.html('mjx-linestrut')));
         const style = this.coreMO().embellishedBreakStyle;
         const dom = [];
-        for (const [parent, STYLE] of [[parents[0], 'before'], [parents[1], 'after']]) {
+        for (const [parent, STYLE] of [
+            [parents[0], 'before'],
+            [parents[1], 'after'],
+        ]) {
             if (style !== STYLE) {
                 this.toCHTML([parent]);
                 dom.push(this.dom[0]);
-                STYLE === 'after' && adaptor.removeAttribute(this.dom[0], 'space');
+                if (STYLE === 'after') {
+                    adaptor.removeAttribute(this.dom[0], 'space');
+                }
             }
             else {
                 dom.push(this.createChtmlNodes([parent])[0]);
@@ -59,7 +64,7 @@ export class ChtmlWrapper extends CommonWrapper {
         this.jax.wrapperUsage.add(this.kind);
     }
     createChtmlNodes(parents) {
-        this.dom = parents.map(_parent => this.html('mjx-' + this.node.kind));
+        this.dom = parents.map((_parent) => this.html('mjx-' + this.node.kind));
         parents = this.handleHref(parents);
         for (const i of parents.keys()) {
             this.adaptor.append(parents[i], this.dom[i]);
@@ -70,7 +75,7 @@ export class ChtmlWrapper extends CommonWrapper {
         const href = this.node.attributes.get('href');
         if (!href)
             return parents;
-        return parents.map(parent => this.adaptor.append(parent, this.html('a', { href: href })));
+        return parents.map((parent) => this.adaptor.append(parent, this.html('a', { href: href })));
     }
     handleStyles() {
         if (!this.styles)
@@ -78,18 +83,18 @@ export class ChtmlWrapper extends CommonWrapper {
         const styles = this.styles.cssText;
         if (styles) {
             const adaptor = this.adaptor;
-            this.dom.forEach(dom => adaptor.setAttribute(dom, 'style', styles));
+            this.dom.forEach((dom) => adaptor.setAttribute(dom, 'style', styles));
             const family = this.styles.get('font-family');
             if (family) {
-                this.dom.forEach(dom => adaptor.setStyle(dom, 'font-family', this.font.cssFamilyPrefix + ', ' + family));
+                this.dom.forEach((dom) => adaptor.setStyle(dom, 'font-family', this.font.cssFamilyPrefix + ', ' + family));
             }
         }
     }
     handleScale() {
-        this.dom.forEach(dom => this.setScale(dom, this.bbox.rscale));
+        this.dom.forEach((dom) => this.setScale(dom, this.bbox.rscale));
     }
     setScale(chtml, rscale) {
-        const scale = (Math.abs(rscale - 1) < .001 ? 1 : rscale);
+        const scale = Math.abs(rscale - 1) < 0.001 ? 1 : rscale;
         if (chtml && scale !== 1) {
             const size = this.percent(scale);
             if (FONTSIZE[size]) {
@@ -103,15 +108,18 @@ export class ChtmlWrapper extends CommonWrapper {
     }
     handleSpace() {
         const adaptor = this.adaptor;
-        const breakable = !!this.node.getProperty('breakable');
+        const breakable = !!this.node.getProperty('breakable') && !this.node.getProperty('newline');
         const n = this.dom.length - 1;
-        for (const data of [[this.getLineBBox(0).L, 'space', 'marginLeft', 0],
-            [this.getLineBBox(n).R, 'rspace', 'marginRight', n]]) {
+        for (const data of [
+            [this.getLineBBox(0).L, 'space', 'marginLeft', 0],
+            [this.getLineBBox(n).R, 'rspace', 'marginRight', n],
+        ]) {
             const [dimen, name, margin, i] = data;
             const space = this.em(dimen);
             if (breakable && name === 'space') {
-                const node = adaptor.node('mjx-break', SPACE[space] ? { size: SPACE[space] } :
-                    { style: `letter-spacing: ${this.em(dimen - 1)}` });
+                const node = adaptor.node('mjx-break', SPACE[space]
+                    ? { size: SPACE[space] }
+                    : { style: `letter-spacing: ${this.em(dimen - 1)}` }, [adaptor.text(' ')]);
                 adaptor.insert(node, this.dom[i]);
             }
             else if (dimen) {
@@ -156,15 +164,16 @@ export class ChtmlWrapper extends CommonWrapper {
         var _a;
         const adaptor = this.adaptor;
         const attributes = this.node.attributes;
-        const color = (attributes.getExplicit('mathcolor') || attributes.getExplicit('color'));
+        const color = (attributes.getExplicit('mathcolor') ||
+            attributes.getExplicit('color'));
         const background = (attributes.getExplicit('mathbackground') ||
             attributes.getExplicit('background') ||
             ((_a = this.styles) === null || _a === void 0 ? void 0 : _a.get('background-color')));
         if (color) {
-            this.dom.forEach(dom => adaptor.setStyle(dom, 'color', color));
+            this.dom.forEach((dom) => adaptor.setStyle(dom, 'color', color));
         }
         if (background) {
-            this.dom.forEach(dom => adaptor.setStyle(dom, 'backgroundColor', background));
+            this.dom.forEach((dom) => adaptor.setStyle(dom, 'backgroundColor', background));
         }
     }
     handleAttributes() {
@@ -173,30 +182,32 @@ export class ChtmlWrapper extends CommonWrapper {
         const defaults = attributes.getAllDefaults();
         const skip = ChtmlWrapper.skipAttributes;
         for (const name of attributes.getExplicitNames()) {
-            if (skip[name] === false || (!(name in defaults) && !skip[name] &&
-                !adaptor.hasAttribute(this.dom[0], name))) {
+            if (skip[name] === false ||
+                (!(name in defaults) &&
+                    !skip[name] &&
+                    !adaptor.hasAttribute(this.dom[0], name))) {
                 const value = attributes.getExplicit(name);
-                this.dom.forEach(dom => adaptor.setAttribute(dom, name, value));
+                this.dom.forEach((dom) => adaptor.setAttribute(dom, name, value));
             }
         }
         if (attributes.get('class')) {
             const names = attributes.get('class').trim().split(/ +/);
             for (const name of names) {
-                this.dom.forEach(dom => adaptor.addClass(dom, name));
+                this.dom.forEach((dom) => adaptor.addClass(dom, name));
             }
         }
         if (this.node.getProperty('inline-breaks')) {
-            this.dom.forEach(dom => adaptor.setAttribute(dom, 'inline-breaks', 'true'));
+            this.dom.forEach((dom) => adaptor.setAttribute(dom, 'inline-breaks', 'true'));
         }
     }
     handlePWidth() {
         if (this.bbox.pwidth) {
             const adaptor = this.adaptor;
             if (this.bbox.pwidth === BBox.fullWidth) {
-                this.dom.forEach(dom => adaptor.setAttribute(dom, 'width', 'full'));
+                this.dom.forEach((dom) => adaptor.setAttribute(dom, 'width', 'full'));
             }
             else {
-                this.dom.forEach(dom => adaptor.setStyle(dom, 'width', this.bbox.pwidth));
+                this.dom.forEach((dom) => adaptor.setStyle(dom, 'width', this.bbox.pwidth));
             }
         }
     }
@@ -212,22 +223,29 @@ export class ChtmlWrapper extends CommonWrapper {
         }
     }
     drawBBox() {
-        let { w, h, d, R } = this.getOuterBBox();
-        const box = this.html('mjx-box', { style: {
-                opacity: .25, 'margin-left': this.em(-w - R)
-            } }, [
-            this.html('mjx-box', { style: {
+        const { w, h, d, R } = this.getOuterBBox();
+        const box = this.html('mjx-box', {
+            style: {
+                opacity: 0.25,
+                'margin-left': this.em(-w - R),
+            },
+        }, [
+            this.html('mjx-box', {
+                style: {
                     height: this.em(h),
                     width: this.em(w),
-                    'background-color': 'red'
-                } }),
-            this.html('mjx-box', { style: {
+                    'background-color': 'red',
+                },
+            }),
+            this.html('mjx-box', {
+                style: {
                     height: this.em(d),
                     width: this.em(w),
                     'margin-left': this.em(-w),
                     'vertical-align': this.em(-d),
-                    'background-color': 'green'
-                } })
+                    'background-color': 'green',
+                },
+            }),
         ]);
         const node = this.dom[0] || this.parent.dom[0];
         const size = this.adaptor.getAttribute(node, 'size');
@@ -248,7 +266,7 @@ export class ChtmlWrapper extends CommonWrapper {
         return this.jax.text(text);
     }
     char(n) {
-        return this.font.charSelector(n).substr(1);
+        return this.font.charSelector(n).substring(1);
     }
 }
 ChtmlWrapper.kind = 'unknown';

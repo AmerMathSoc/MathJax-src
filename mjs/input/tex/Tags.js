@@ -32,13 +32,13 @@ export class AbstractTags {
         this.history = [];
         this.stack = [];
         this.enTag = function (node, tag) {
-            let nf = this.configuration.nodeFactory;
-            let cell = nf.create('node', 'mtd', [node]);
-            let row = nf.create('node', 'mlabeledtr', [tag, cell]);
-            let table = nf.create('node', 'mtable', [row], {
+            const nf = this.configuration.nodeFactory;
+            const cell = nf.create('node', 'mtd', [node]);
+            const row = nf.create('node', 'mlabeledtr', [tag, cell]);
+            const table = nf.create('node', 'mtable', [row], {
                 side: this.configuration.options['tagSide'],
                 minlabelspacing: this.configuration.options['tagIndent'],
-                displaystyle: true
+                displaystyle: true,
             });
             return table;
         };
@@ -153,7 +153,7 @@ export class AbstractTags {
         if (this.redo) {
             math.inputData.recompile = {
                 state: math.state(),
-                counter: this.allCounter
+                counter: this.allCounter,
             };
         }
         if (!this.refUpdate) {
@@ -163,17 +163,17 @@ export class AbstractTags {
         Object.assign(this.allLabels, this.labels);
     }
     finalize(node, env) {
-        if (!env.display || this.currentTag.env ||
-            this.currentTag.tag == null) {
+        if (!env.display || this.currentTag.env || this.currentTag.tag == null) {
             return node;
         }
-        let tag = this.makeTag();
-        let table = this.enTag(node, tag);
+        const tag = this.makeTag();
+        const table = this.enTag(node, tag);
         return table;
     }
     makeId() {
-        this.currentTag.tagId = this.formatId(this.configuration.options['useLabelIds'] ?
-            (this.label || this.currentTag.tag) : this.currentTag.tag);
+        this.currentTag.tagId = this.formatId(this.configuration.options['useLabelIds']
+            ? this.label || this.currentTag.tag
+            : this.currentTag.tag);
     }
     makeTag() {
         this.makeId();
@@ -181,10 +181,10 @@ export class AbstractTags {
             this.labels[this.label] = new Label(this.currentTag.tag, this.currentTag.tagId);
             this.label = '';
         }
-        let mml = new TexParser('\\text{' + this.currentTag.tagFormat + '}', {}, this.configuration).mml();
+        const mml = new TexParser('\\text{' + this.currentTag.tagFormat + '}', {}, this.configuration).mml();
         return this.configuration.nodeFactory.create('node', 'mtd', [mml], {
             id: this.currentTag.tagId,
-            rowalign: this.configuration.options.tagAlign
+            rowalign: this.configuration.options.tagAlign,
         });
     }
 }
@@ -196,48 +196,50 @@ export class NoTags extends AbstractTags {
 }
 export class AllTags extends AbstractTags {
     finalize(node, env) {
-        if (!env.display || this.history.find(function (x) { return x.taggable; })) {
+        if (!env.display ||
+            this.history.find(function (x) {
+                return x.taggable;
+            })) {
             return node;
         }
-        let tag = this.getTag(true);
+        const tag = this.getTag(true);
         return this.enTag(node, tag);
     }
 }
-export var TagsFactory;
-(function (TagsFactory) {
-    let tagsMapping = new Map([
-        ['none', NoTags],
-        ['all', AllTags]
-    ]);
-    let defaultTags = 'none';
-    TagsFactory.OPTIONS = {
+const tagsMapping = new Map([
+    ['none', NoTags],
+    ['all', AllTags],
+]);
+let defaultTags = 'none';
+export const TagsFactory = {
+    OPTIONS: {
         tags: defaultTags,
         tagSide: 'right',
         tagIndent: '0.8em',
         useLabelIds: true,
         ignoreDuplicateLabels: false,
-        tagAlign: 'baseline'
-    };
-    TagsFactory.add = function (name, constr) {
+        tagAlign: 'baseline',
+    },
+    add(name, constr) {
         tagsMapping.set(name, constr);
-    };
-    TagsFactory.addTags = function (tags) {
+    },
+    addTags(tags) {
         for (const key of Object.keys(tags)) {
             TagsFactory.add(key, tags[key]);
         }
-    };
-    TagsFactory.create = function (name) {
-        let constr = tagsMapping.get(name) || tagsMapping.get(defaultTags);
+    },
+    create(name) {
+        const constr = tagsMapping.get(name) || tagsMapping.get(defaultTags);
         if (!constr) {
             throw Error('Unknown tags class');
         }
         return new constr();
-    };
-    TagsFactory.setDefault = function (name) {
+    },
+    setDefault(name) {
         defaultTags = name;
-    };
-    TagsFactory.getDefault = function () {
+    },
+    getDefault() {
         return TagsFactory.create(defaultTags);
-    };
-})(TagsFactory || (TagsFactory = {}));
+    },
+};
 //# sourceMappingURL=Tags.js.map

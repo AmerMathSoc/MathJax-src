@@ -14,11 +14,11 @@ export function CommonMencloseMixin(Base) {
             }
             const arrowhead = attributes.get('data-arrowhead');
             if (arrowhead !== undefined) {
-                let [x, y, dx] = split(arrowhead);
+                const [x, y, dx] = split(arrowhead);
                 this.arrowhead = {
-                    x: (x ? parseFloat(x) : Notation.ARROWX),
-                    y: (y ? parseFloat(y) : Notation.ARROWY),
-                    dx: (dx ? parseFloat(dx) : Notation.ARROWDX)
+                    x: x ? parseFloat(x) : Notation.ARROWX,
+                    y: y ? parseFloat(y) : Notation.ARROWY,
+                    dx: dx ? parseFloat(dx) : Notation.ARROWDX,
                 };
             }
         }
@@ -47,25 +47,27 @@ export function CommonMencloseMixin(Base) {
         initializeNotations() {
             for (const name of Object.keys(this.notations)) {
                 const init = this.notations[name].init;
-                init && init(this);
+                if (init) {
+                    init(this);
+                }
             }
         }
         getBBoxExtenders() {
-            let TRBL = [0, 0, 0, 0];
+            const TRBL = [0, 0, 0, 0];
             for (const name of Object.keys(this.notations)) {
                 this.maximizeEntries(TRBL, this.notations[name].bbox(this));
             }
             return TRBL;
         }
         getPadding() {
-            let BTRBL = [0, 0, 0, 0];
+            const BTRBL = [0, 0, 0, 0];
             for (const name of Object.keys(this.notations)) {
                 const border = this.notations[name].border;
                 if (border) {
                     this.maximizeEntries(BTRBL, border(this));
                 }
             }
-            return [0, 1, 2, 3].map(i => this.TRBL[i] - BTRBL[i]);
+            return [0, 1, 2, 3].map((i) => this.TRBL[i] - BTRBL[i]);
         }
         maximizeEntries(X, Y) {
             for (let i = 0; i < X.length; i++) {
@@ -75,9 +77,9 @@ export function CommonMencloseMixin(Base) {
             }
         }
         getOffset(direction) {
-            let [T, R, B, L] = this.TRBL;
+            const [T, R, B, L] = this.TRBL;
             const d = (direction === 'X' ? R - L : B - T) / 2;
-            return (Math.abs(d) > .001 ? d : 0);
+            return Math.abs(d) > 0.001 ? d : 0;
         }
         getArgMod(w, h) {
             return [Math.atan2(h, w), Math.sqrt(w * w + h * h)];
@@ -91,8 +93,8 @@ export function CommonMencloseMixin(Base) {
             const { h, d, w } = this.childNodes[0].getBBox();
             const H = h + d;
             const R = Math.sqrt(H * H + w * w);
-            const x = Math.max(p, r * w / R);
-            const y = Math.max(p, r * H / R);
+            const x = Math.max(p, (r * w) / R);
+            const y = Math.max(p, (r * H) / R);
             const [a, W] = this.getArgMod(w + 2 * x, H + 2 * y);
             return { a, W, x, y };
         }
@@ -122,7 +124,11 @@ export function CommonMencloseMixin(Base) {
             this.msqrt = null;
             this.padding = Notation.PADDING;
             this.thickness = Notation.THICKNESS;
-            this.arrowhead = { x: Notation.ARROWX, y: Notation.ARROWY, dx: Notation.ARROWDX };
+            this.arrowhead = {
+                x: Notation.ARROWX,
+                y: Notation.ARROWY,
+                dx: Notation.ARROWDX,
+            };
             this.TRBL = [0, 0, 0, 0];
             this.getParameters();
             this.getNotations();
@@ -131,7 +137,7 @@ export function CommonMencloseMixin(Base) {
             this.TRBL = this.getBBoxExtenders();
         }
         computeBBox(bbox, recompute = false) {
-            let [T, R, B, L] = this.TRBL;
+            const [T, R, B, L] = this.TRBL;
             const child = this.childNodes[0].getBBox();
             bbox.combine(child, L, 0);
             bbox.h += T;

@@ -10,12 +10,15 @@ export interface PackageConfig {
     ready?: PackageReady;
     failed?: PackageFailed;
     checkReady?: () => Promise<void>;
+    extraLoads?: string[];
+    rendererExtensions?: string[];
 }
 export declare class Package {
     static packages: PackageMap;
     name: string;
     isLoaded: boolean;
     promise: Promise<string>;
+    result: any;
     protected isLoading: boolean;
     protected hasFailed: boolean;
     protected noLoad: boolean;
@@ -26,6 +29,7 @@ export declare class Package {
     protected dependencyCount: number;
     protected provided: Package[];
     get canLoad(): boolean;
+    static loadPromise(name: string): Promise<void>;
     static resolvePath(name: string, addExtension?: boolean): string;
     static loadAll(): void;
     constructor(name: string, noLoad?: boolean);

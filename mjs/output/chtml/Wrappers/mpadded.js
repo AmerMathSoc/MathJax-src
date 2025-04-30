@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMpaddedMixin } from '../../common/Wrappers/mpadded.js';
+import { CommonMpaddedMixin, } from '../../common/Wrappers/mpadded.js';
 import { MmlMpadded } from '../../../core/MmlTree/MmlNodes/mpadded.js';
 export const ChtmlMpadded = (function () {
     var _a;
@@ -21,7 +21,11 @@ export const ChtmlMpadded = (function () {
                 if (x + dx || y) {
                     style.position = 'relative';
                     const rbox = this.html('mjx-rbox', {
-                        style: { left: this.em(x + dx), top: this.em(-y), 'max-width': style.width }
+                        style: {
+                            left: this.em(x + dx),
+                            top: this.em(-y),
+                            'max-width': style.width,
+                        },
                     });
                     if (x + dx && this.childNodes[0].getBBox().pwidth) {
                         this.adaptor.setAttribute(rbox, 'width', 'full');
@@ -29,7 +33,9 @@ export const ChtmlMpadded = (function () {
                     }
                     content.push(rbox);
                 }
-                chtml = [this.adaptor.append(chtml[0], this.html('mjx-block', { style: style }, content))];
+                chtml = [
+                    this.adaptor.append(chtml[0], this.html('mjx-block', { style: style }, content)),
+                ];
                 if (this.childNodes[0].childNodes.length) {
                     this.childNodes[0].toCHTML([content[0] || chtml[0]]);
                 }
@@ -41,12 +47,12 @@ export const ChtmlMpadded = (function () {
         _a.kind = MmlMpadded.prototype.kind,
         _a.styles = {
             'mjx-mpadded': {
-                display: 'inline-block'
+                display: 'inline-block',
             },
             'mjx-rbox': {
                 display: 'inline-block',
-                position: 'relative'
-            }
+                position: 'relative',
+            },
         },
         _a;
 })();

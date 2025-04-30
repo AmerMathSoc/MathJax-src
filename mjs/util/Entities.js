@@ -1,7 +1,7 @@
 import { retryAfter } from './Retries.js';
 import { asyncLoad } from './AsyncLoad.js';
 export const options = {
-    loadMissingEntities: true
+    loadMissingEntities: true,
 };
 export const entities = {
     ApplyFunction: '\u2061',
@@ -409,7 +409,7 @@ export const entities = {
     zigrarr: '\u21DD',
     nbsp: '\u00A0',
     rsquo: '\u2019',
-    lsquo: '\u2018'
+    lsquo: '\u2018',
 };
 const loaded = {};
 export function add(additions, file) {
@@ -420,7 +420,7 @@ export function remove(entity) {
     delete entities[entity];
 }
 export function translate(text) {
-    return text.replace(/&([a-z][a-z0-9]*|#(?:[0-9]+|x[0-9a-f]+));/ig, replace);
+    return text.replace(/&([a-z][a-z0-9]*|#(?:[0-9]+|x[0-9a-f]+));/gi, replace);
 }
 function replace(match, entity) {
     if (entity.charAt(0) === '#') {
@@ -430,7 +430,9 @@ function replace(match, entity) {
         return entities[entity];
     }
     if (options['loadMissingEntities']) {
-        let file = (entity.match(/^[a-zA-Z](fr|scr|opf)$/) ? RegExp.$1 : entity.charAt(0).toLowerCase());
+        const file = entity.match(/^[a-zA-Z](fr|scr|opf)$/)
+            ? RegExp.$1
+            : entity.charAt(0).toLowerCase();
         if (!loaded[file]) {
             loaded[file] = true;
             retryAfter(asyncLoad('./util/entities/' + file + '.js'));
@@ -439,9 +441,7 @@ function replace(match, entity) {
     return match;
 }
 export function numeric(entity) {
-    let n = (entity.charAt(0) === 'x' ?
-        parseInt(entity.slice(1), 16) :
-        parseInt(entity));
+    const n = entity.charAt(0) === 'x' ? parseInt(entity.slice(1), 16) : parseInt(entity);
     return String.fromCodePoint(n);
 }
 //# sourceMappingURL=Entities.js.map

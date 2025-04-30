@@ -7,14 +7,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { mathjax } from '../../mathjax.js';
 import { defaultOptions, userOptions } from '../../util/Options.js';
 import { asyncLoad } from '../../util/AsyncLoad.js';
 import { retryAfter } from '../../util/Retries.js';
-import { mathjax } from '../../mathjax.js';
-export const NOSTRETCH = { dir: 0 };
-;
-export function mergeOptions(dst, src) {
-    return (src ? defaultOptions([dst], [src])[0] : dst);
+import { DIRECTION } from './Direction.js';
+export { DIRECTION } from './Direction.js';
+export const NOSTRETCH = { dir: DIRECTION.None };
+export function mergeOptions(obj, dst, src) {
+    return src ? defaultOptions(obj, { [dst]: src })[dst] : obj[dst];
 }
 export class FontData {
     get CLASS() {
@@ -34,24 +35,35 @@ export class FontData {
         const list = {};
         (dynamicFiles || []).forEach(([file, variants, delimiters]) => {
             list[file] = {
-                extension, file, variants, delimiters: delimiters || [],
-                promise: null, failed: false, setup: ((_font) => { list[file].failed = true; })
+                extension,
+                file,
+                variants,
+                delimiters: delimiters || [],
+                promise: null,
+                failed: false,
+                setup: (_font) => {
+                    list[file].failed = true;
+                },
             };
         });
         return list;
     }
     static dynamicSetup(extension, file, variants, delimiters = {}, fonts = null) {
-        const data = (extension ? this.dynamicExtensions.get(extension) : null);
-        const files = (extension ? data.files : this.dynamicFiles);
+        const data = extension ? this.dynamicExtensions.get(extension) : null;
+        const files = extension ? data.files : this.dynamicFiles;
         files[file].setup = (font) => {
-            Object.keys(variants).forEach(name => font.defineChars(name, variants[name]));
+            Object.keys(variants).forEach((name) => font.defineChars(name, variants[name]));
             font.defineDelimiters(delimiters);
-            extension && this.adjustDelimiters(font.delimiters, Object.keys(delimiters), data.sizeN, data.stretchN);
-            fonts && font.addDynamicFontCss(fonts);
+            if (extension) {
+                this.adjustDelimiters(font.delimiters, Object.keys(delimiters), data.sizeN, data.stretchN);
+            }
+            if (fonts) {
+                font.addDynamicFontCss(fonts);
+            }
         };
     }
     static adjustDelimiters(delimiters, keys, sizeN, stretchN) {
-        keys.forEach(id => {
+        keys.forEach((id) => {
             const delim = delimiters[parseInt(id)];
             if ('dir' in delim) {
                 if (delim.variants) {
@@ -64,20 +76,21 @@ export class FontData {
         });
     }
     static adjustArrayIndices(list, N) {
-        return list.map(n => (n < 0 ? N - 1 - n : n));
+        return list.map((n) => (n < 0 ? N - 1 - n : n));
     }
     static addExtension(data, prefix = '') {
         const extension = {
             name: data.name,
-            prefix: prefix,
+            prefix: prefix || `[${data.name}-extension]/${this.JAX.toLowerCase()}/dynamic`,
             files: this.defineDynamicFiles(data.ranges, data.name),
             sizeN: this.defaultSizeVariants.length,
-            stretchN: this.defaultStretchVariants.length
+            stretchN: this.defaultStretchVariants.length,
         };
         this.dynamicExtensions.set(data.name, extension);
         for (const [src, dst] of [
             ['options', 'OPTIONS'],
             ['variants', 'defaultVariants'],
+            ['variantSmp', 'VariantSmp'],
             ['cssFonts', 'defaultCssFonts'],
             ['accentMap', 'defaultAccentMap'],
             ['moMap', 'defaultMoMap'],
@@ -85,9 +98,9 @@ export class FontData {
             ['parameters', 'defaultParams'],
             ['chars', 'defaultChars'],
             ['sizeVariants', 'defaultSizeVariants'],
-            ['stretchVariants', 'defaultStretchVariants']
+            ['stretchVariants', 'defaultStretchVariants'],
         ]) {
-            mergeOptions(this[dst], data[src]);
+            mergeOptions(this, dst, data[src]);
         }
         if (data.delimiters) {
             Object.assign(this.defaultDelimiters, data.delimiters);
@@ -100,8 +113,8 @@ export class FontData {
         this.cssFontMap = {};
         this.cssFontPrefix = '';
         this.remapChars = {};
-        this.skewIcFactor = .75;
-        let CLASS = this.CLASS;
+        this.skewIcFactor = 0.75;
+        const CLASS = this.CLASS;
         this.options = userOptions(defaultOptions({}, CLASS.OPTIONS), options);
         this.params = Object.assign({}, CLASS.defaultParams);
         this.sizeVariants = [...CLASS.defaultSizeVariants];
@@ -110,33 +123,35 @@ export class FontData {
         this.cssFamilyPrefix = CLASS.defaultCssFamilyPrefix;
         this.createVariants(CLASS.defaultVariants);
         this.defineDelimiters(CLASS.defaultDelimiters);
-        Object.keys(CLASS.defaultChars).forEach(name => this.defineChars(name, CLASS.defaultChars[name]));
+        Object.keys(CLASS.defaultChars).forEach((name) => this.defineChars(name, CLASS.defaultChars[name]));
         this.defineRemap('accent', CLASS.defaultAccentMap);
         this.defineRemap('mo', CLASS.defaultMoMap);
         this.defineRemap('mn', CLASS.defaultMnMap);
         this.defineDynamicCharacters(CLASS.dynamicFiles);
-        CLASS.dynamicExtensions.forEach(data => this.defineDynamicCharacters(data.files));
+        CLASS.dynamicExtensions.forEach((data) => this.defineDynamicCharacters(data.files));
     }
     setOptions(options) {
-        mergeOptions(this.options, options);
+        defaultOptions(this.options, options);
     }
     addExtension(data, prefix = '') {
+        const jax = this.constructor.JAX.toLowerCase();
         const dynamicFont = {
             name: data.name,
-            prefix: prefix,
+            prefix: prefix || `[${data.name}-extension]/${jax}/dynamic`,
             files: this.CLASS.defineDynamicFiles(data.ranges, prefix),
             sizeN: this.sizeVariants.length,
-            stretchN: this.stretchVariants.length
+            stretchN: this.stretchVariants.length,
         };
         this.CLASS.dynamicExtensions.set(data.name, dynamicFont);
         defaultOptions(this.options, data.options || {});
         defaultOptions(this.params, data.parameters || {});
-        this.sizeVariants = mergeOptions(this.sizeVariants, data.sizeVariants);
-        this.stretchVariants = mergeOptions(this.stretchVariants, data.stretchVariants);
-        this.defineCssFonts(mergeOptions([], data.cssFonts));
-        this.createVariants(mergeOptions([], data.variants));
+        mergeOptions(this, 'sizeVariants', data.sizeVariants);
+        mergeOptions(this, 'stretchVariants', data.stretchVariants);
+        mergeOptions(this.constructor, 'VariantSmp', data.variantSmp);
+        this.defineCssFonts(mergeOptions({ cssFonts: {} }, 'cssFonts', data.cssFonts));
+        this.createVariants(mergeOptions({ variants: [] }, 'variants', data.variants));
         if (data.delimiters) {
-            this.defineDelimiters(mergeOptions([], data.delimiters));
+            this.defineDelimiters(mergeOptions({ delimiters: {} }, 'delimiters', data.delimiters));
             this.CLASS.adjustDelimiters(this.delimiters, Object.keys(data.delimiters), dynamicFont.sizeN, dynamicFont.stretchN);
         }
         for (const name of Object.keys(data.chars || {})) {
@@ -148,6 +163,7 @@ export class FontData {
         if (data.ranges) {
             this.defineDynamicCharacters(dynamicFont.files);
         }
+        return [];
     }
     get styles() {
         return this._styles;
@@ -156,9 +172,9 @@ export class FontData {
         this._styles = style;
     }
     createVariant(name, inherit = null, link = null) {
-        let variant = {
+        const variant = {
             linked: [],
-            chars: Object.create(inherit ? this.variant[inherit].chars : {})
+            chars: Object.create(inherit ? this.variant[inherit].chars : {}),
         };
         if (this.variant[link]) {
             Object.assign(variant.chars, this.variant[link].chars);
@@ -170,29 +186,33 @@ export class FontData {
     }
     remapSmpChars(chars, name) {
         const CLASS = this.CLASS;
-        if (CLASS.VariantSmp[name]) {
-            const SmpRemap = CLASS.SmpRemap;
-            const SmpGreek = [null, null, CLASS.SmpRemapGreekU, CLASS.SmpRemapGreekL];
-            for (const [i, lo, hi] of CLASS.SmpRanges) {
-                const base = CLASS.VariantSmp[name][i];
-                if (!base)
+        let remap = CLASS.VariantSmp[name];
+        if (typeof remap === 'string') {
+            remap = CLASS.VariantSmp[remap];
+        }
+        if (!remap)
+            return;
+        const SmpRemap = CLASS.SmpRemap;
+        const SmpGreek = [null, null, CLASS.SmpRemapGreekU, CLASS.SmpRemapGreekL];
+        for (const [i, lo, hi] of CLASS.SmpRanges) {
+            const base = remap[i];
+            if (!base)
+                continue;
+            for (let n = lo; n <= hi; n++) {
+                if (n === 0x3a2)
                     continue;
-                for (let n = lo; n <= hi; n++) {
-                    if (n === 0x3A2)
-                        continue;
-                    const smp = base + n - lo;
-                    chars[n] = this.smpChar(SmpRemap[smp] || smp);
-                }
-                if (SmpGreek[i]) {
-                    for (const n of Object.keys(SmpGreek[i]).map((x) => parseInt(x))) {
-                        chars[n] = this.smpChar(base + SmpGreek[i][n]);
-                    }
+                const smp = base + n - lo;
+                chars[n] = this.smpChar(SmpRemap[smp] || smp);
+            }
+            if (SmpGreek[i]) {
+                for (const n of Object.keys(SmpGreek[i]).map((x) => parseInt(x))) {
+                    chars[n] = this.smpChar(base + SmpGreek[i][n]);
                 }
             }
         }
-        if (name === 'bold') {
-            chars[0x3DC] = this.smpChar(0x1D7CA);
-            chars[0x3DD] = this.smpChar(0x1D7CB);
+        const extra = remap[5] || {};
+        for (const n of Object.keys(extra)) {
+            chars[n] = this.smpChar(remap[5][n]);
         }
     }
     smpChar(n) {
@@ -223,7 +243,7 @@ export class FontData {
     }
     defineRemap(name, remap) {
         if (remap) {
-            if (!this.remapChars.hasOwnProperty(name)) {
+            if (!Object.hasOwn(this.remapChars, name)) {
                 this.remapChars[name] = {};
             }
             Object.assign(this.remapChars[name], remap);
@@ -253,17 +273,19 @@ export class FontData {
         return chars;
     }
     dynamicFileName(dynamic) {
-        const prefix = (!dynamic.extension ? this.options.dynamicPrefix :
-            this.CLASS.dynamicExtensions.get(dynamic.extension).prefix);
-        return (dynamic.file.match(/^(?:[\/\[]|[a-z]+:\/\/|[a-z]:)/i) ? dynamic.file :
-            prefix + '/' + dynamic.file.replace(/\.js$/, ''));
+        const prefix = !dynamic.extension
+            ? this.options.dynamicPrefix
+            : this.CLASS.dynamicExtensions.get(dynamic.extension).prefix;
+        return dynamic.file.match(/^(?:[/[]|[a-z]+:\/\/|[a-z]:)/i)
+            ? dynamic.file
+            : prefix + '/' + dynamic.file.replace(/(\.js)?$/, '.js');
     }
     loadDynamicFile(dynamic) {
         return __awaiter(this, void 0, void 0, function* () {
             if (dynamic.failed)
                 return Promise.reject(new Error(`dynamic file '${dynamic.file}' failed to load`));
             if (!dynamic.promise) {
-                dynamic.promise = asyncLoad(this.dynamicFileName(dynamic)).catch(err => {
+                dynamic.promise = asyncLoad(this.dynamicFileName(dynamic)).catch((err) => {
                     dynamic.failed = true;
                     console.warn(err);
                 });
@@ -273,20 +295,21 @@ export class FontData {
     }
     loadDynamicFiles() {
         const dynamicFiles = this.CLASS.dynamicFiles;
-        const promises = Object.keys(dynamicFiles).map(name => this.loadDynamicFile(dynamicFiles[name]));
+        const promises = Object.keys(dynamicFiles).map((name) => this.loadDynamicFile(dynamicFiles[name]));
         for (const data of this.CLASS.dynamicExtensions.values()) {
-            promises.push(...Object.keys(data.files).map(name => this.loadDynamicFile(data.files[name])));
+            promises.push(...Object.keys(data.files).map((name) => this.loadDynamicFile(data.files[name])));
         }
         return Promise.all(promises);
     }
     loadDynamicFilesSync() {
-        if (!mathjax.asyncLoad) {
-            throw Error('MathJax(loadDynamicFilesSync): mathjax.asyncLoad must be specified and synchronous');
+        if (!mathjax.asyncIsSynchronous) {
+            throw Error('MathJax(loadDynamicFilesSync): mathjax.asyncLoad must be specified and synchronous\n' +
+                '    Try importing #js/../components/require.mjs and #js/util/asyncLoad/node.js');
         }
         const dynamicFiles = this.CLASS.dynamicFiles;
-        Object.keys(dynamicFiles).forEach(name => this.loadDynamicFileSync(dynamicFiles[name]));
+        Object.keys(dynamicFiles).forEach((name) => this.loadDynamicFileSync(dynamicFiles[name]));
         for (const data of this.CLASS.dynamicExtensions.values()) {
-            Object.keys(data.files).forEach(name => this.loadDynamicFileSync(data.files[name]));
+            Object.keys(data.files).forEach((name) => this.loadDynamicFileSync(data.files[name]));
         }
     }
     loadDynamicFileSync(dynamic) {
@@ -302,8 +325,7 @@ export class FontData {
             dynamic.setup(this);
         }
     }
-    addDynamicFontCss(_fonts, _root) {
-    }
+    addDynamicFontCss(_fonts, _root) { }
     getDelimiter(n) {
         const delim = this.delimiters[n];
         if (delim && !('dir' in delim)) {
@@ -325,14 +347,14 @@ export class FontData {
         return this.stretchVariants[delim.stretchv ? delim.stretchv[i] : 0];
     }
     getStretchVariants(n) {
-        return [0, 1, 2, 3].map(i => this.getStretchVariant(n, i));
+        return [0, 1, 2, 3].map((i) => this.getStretchVariant(n, i));
     }
     getChar(name, n) {
         const char = this.variant[name].chars[n];
         if (char && !Array.isArray(char)) {
             const variant = this.variant[name];
             delete variant.chars[n];
-            variant.linked.forEach(link => delete link[n]);
+            variant.linked.forEach((link) => delete link[n]);
             retryAfter(this.loadDynamicFile(char));
             return null;
         }
@@ -345,7 +367,7 @@ export class FontData {
         return this.cssFontMap[variant] || ['serif', false, false];
     }
     getFamily(family) {
-        return (this.cssFamilyPrefix ? this.cssFamilyPrefix + ', ' + family : family);
+        return this.cssFamilyPrefix ? this.cssFamilyPrefix + ', ' + family : family;
     }
     getRemappedChar(name, c) {
         const map = this.remapChars[name] || {};
@@ -354,7 +376,7 @@ export class FontData {
 }
 FontData.OPTIONS = {
     unknownFamily: 'serif',
-    dynamicPrefix: '.'
+    dynamicPrefix: '.',
 };
 FontData.JAX = 'common';
 FontData.NAME = '';
@@ -380,7 +402,7 @@ FontData.defaultVariants = [
     ['-tex-oldstyle', 'normal'],
     ['-tex-bold-oldstyle', 'bold'],
     ['-tex-mathit', 'italic'],
-    ['-tex-variant', 'normal']
+    ['-tex-variant', 'normal'],
 ];
 FontData.defaultCssFonts = {
     normal: ['unknown', false, false],
@@ -404,23 +426,30 @@ FontData.defaultCssFonts = {
     '-tex-oldstyle': ['unknown', false, false],
     '-tex-bold-oldstyle': ['unknown', false, true],
     '-tex-mathit': ['unknown', true, false],
-    '-tex-variant': ['unknown', false, false]
+    '-tex-variant': ['unknown', false, false],
 };
 FontData.defaultCssFamilyPrefix = '';
 FontData.VariantSmp = {
-    bold: [0x1D400, 0x1D41A, 0x1D6A8, 0x1D6C2, 0x1D7CE],
-    italic: [0x1D434, 0x1D44E, 0x1D6E2, 0x1D6FC],
-    'bold-italic': [0x1D468, 0x1D482, 0x1D71C, 0x1D736],
-    script: [0x1D49C, 0x1D4B6],
-    'bold-script': [0x1D4D0, 0x1D4EA],
-    fraktur: [0x1D504, 0x1D51E],
-    'double-struck': [0x1D538, 0x1D552, , , 0x1D7D8],
-    'bold-fraktur': [0x1D56C, 0x1D586],
-    'sans-serif': [0x1D5A0, 0x1D5BA, , , 0x1D7E2],
-    'bold-sans-serif': [0x1D5D4, 0x1D5EE, 0x1D756, 0x1D770, 0x1D7EC],
-    'sans-serif-italic': [0x1D608, 0x1D622],
-    'sans-serif-bold-italic': [0x1D63C, 0x1D656, 0x1D790, 0x1D7AA],
-    'monospace': [0x1D670, 0x1D68A, , , 0x1D7F6]
+    bold: [
+        0x1d400,
+        0x1d41a,
+        0x1d6a8,
+        0x1d6c2,
+        0x1d7ce,
+        { 0x3dc: 0x1d7ca, 0x3dd: 0x1d7cb },
+    ],
+    italic: [0x1d434, 0x1d44e, 0x1d6e2, 0x1d6fc],
+    'bold-italic': [0x1d468, 0x1d482, 0x1d71c, 0x1d736],
+    script: [0x1d49c, 0x1d4b6],
+    'bold-script': [0x1d4d0, 0x1d4ea],
+    fraktur: [0x1d504, 0x1d51e],
+    'double-struck': [0x1d538, 0x1d552, , , 0x1d7d8],
+    'bold-fraktur': [0x1d56c, 0x1d586],
+    'sans-serif': [0x1d5a0, 0x1d5ba, , , 0x1d7e2],
+    'bold-sans-serif': [0x1d5d4, 0x1d5ee, 0x1d756, 0x1d770, 0x1d7ec],
+    'sans-serif-italic': [0x1d608, 0x1d622],
+    'sans-serif-bold-italic': [0x1d63c, 0x1d656, 0x1d790, 0x1d7aa],
+    monospace: [0x1d670, 0x1d68a, , , 0x1d7f6],
 };
 FontData.SmpRanges = [
     [0, 0x41, 0x5A],
@@ -484,10 +513,10 @@ FontData.defaultAccentMap = {
     0x2192: '\u20D7'
 };
 FontData.defaultMoMap = {
-    0x002D: '\u2212'
+    0x002d: '\u2212',
 };
 FontData.defaultMnMap = {
-    0x002D: '\u2212'
+    0x002d: '\u2212',
 };
 FontData.defaultParams = {
     x_height: .442,

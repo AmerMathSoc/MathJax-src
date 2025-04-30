@@ -14,7 +14,7 @@ export class Safe {
             ['scriptminsize', 'filterFontSize'],
             ['scriptsizemultiplier', 'filterSizeMultiplier'],
             ['scriptlevel', 'filterScriptLevel'],
-            ['data-', 'filterData']
+            ['data-', 'filterData'],
         ]);
         this.filterMethods = Object.assign({}, SafeMethods);
         this.adaptor = document.adaptor;
@@ -36,7 +36,10 @@ export class Safe {
             if (method) {
                 const value = this.filterMethods[method](this, attributes[id]);
                 if (value) {
-                    if (value !== (typeof value === 'number' ? parseFloat(attributes[id]) : attributes[id])) {
+                    if (value !==
+                        (typeof value === 'number'
+                            ? parseFloat(attributes[id])
+                            : attributes[id])) {
                         attributes[id] = value;
                     }
                 }
@@ -50,15 +53,21 @@ export class Safe {
         if (id === 'class')
             return null;
         const method = this.filterAttributes.get(id);
-        const filter = (method || (id.substr(0, 5) === 'data-' ? this.filterAttributes.get('data-') : null));
+        const filter = method ||
+            (id.substring(0, 5) === 'data-'
+                ? this.filterAttributes.get('data-')
+                : null);
         if (!filter) {
             return value;
         }
         const result = this.filterMethods[filter](this, value, id);
-        return (typeof result === 'number' || typeof result === 'boolean' ? String(result) : result);
+        return typeof result === 'number' || typeof result === 'boolean'
+            ? String(result)
+            : result;
     }
     mmlClassList(list) {
-        return list.map((name) => this.filterMethods.filterClass(this, name))
+        return list
+            .map((name) => this.filterMethods.filterClass(this, name))
             .filter((value) => value !== null);
     }
 }
@@ -67,10 +76,10 @@ Safe.OPTIONS = {
         URLs: 'safe',
         classes: 'safe',
         cssIDs: 'safe',
-        styles: 'safe'
+        styles: 'safe',
     },
     lengthMax: 3,
-    scriptsizemultiplierRange: [.6, 1],
+    scriptsizemultiplierRange: [0.6, 1],
     scriptlevelRange: [-2, 2],
     classPattern: /^mjx-[-a-zA-Z0-9_.]+$/,
     idPattern: /^mjx-[-a-zA-Z0-9_.]+$/,
@@ -80,7 +89,7 @@ Safe.OPTIONS = {
         https: true,
         file: true,
         javascript: false,
-        data: false
+        data: false,
     }),
     safeStyles: expandable({
         color: true,
@@ -95,13 +104,13 @@ Safe.OPTIONS = {
         fontStyle: true,
         fontWeight: true,
         opacity: true,
-        outline: true
+        outline: true,
     }),
     styleParts: expandable({
         border: true,
         padding: true,
         margin: true,
-        outline: true
+        outline: true,
     }),
     styleLengths: expandable({
         borderTop: 'borderTopWidth',
@@ -120,7 +129,7 @@ Safe.OPTIONS = {
         outlineRight: true,
         outlineBottom: true,
         outlineLeft: true,
-        fontSize: [.707, 1.44]
-    })
+        fontSize: [0.707, 1.44],
+    }),
 };
 //# sourceMappingURL=safe.js.map

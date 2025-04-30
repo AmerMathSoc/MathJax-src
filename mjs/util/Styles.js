@@ -67,10 +67,10 @@ function combineSame(name) {
 }
 const BORDER = {
     width: /^(?:[\d.]+(?:[a-z]+)|thin|medium|thick|inherit|initial|unset)$/,
-    style: /^(?:none|hidden|dotted|dashed|solid|double|groove|ridge|inset|outset|inherit|initial|unset)$/
+    style: /^(?:none|hidden|dotted|dashed|solid|double|groove|ridge|inset|outset|inherit|initial|unset)$/,
 };
 function splitWSC(name) {
-    let parts = { width: '', style: '', color: '' };
+    const parts = { width: '', style: '', color: '' };
     for (const part of splitSpaces(this.styles[name])) {
         if (part.match(BORDER.width) && parts.width === '') {
             parts.width = part;
@@ -104,7 +104,8 @@ function combineWSC(name) {
 const FONT = {
     style: /^(?:normal|italic|oblique|inherit|initial|unset)$/,
     variant: new RegExp('^(?:' +
-        ['normal|none',
+        [
+            'normal|none',
             'inherit|initial|unset',
             'common-ligatures|no-common-ligatures',
             'discretionary-ligatures|no-discretionary-ligatures',
@@ -117,29 +118,47 @@ const FONT = {
             'ordinal|slashed-zero',
             'jis78|jis83|jis90|jis04|simplified|traditional',
             'full-width|proportional-width',
-            'ruby'].join('|') + ')$'),
+            'ruby',
+        ].join('|') +
+        ')$'),
     weight: /^(?:normal|bold|bolder|lighter|[1-9]00|inherit|initial|unset)$/,
     stretch: new RegExp('^(?:' +
-        ['normal',
-            '(?:(?:ultra|extra|semi)-)?condensed',
-            '(?:(?:semi|extra|ulta)-)?expanded',
-            'inherit|initial|unset'].join('|') + ')$'),
+        [
+            'normal',
+            '(?:(?:ultra|extra|semi)-)?(?:condensed|expanded)',
+            'inherit|initial|unset',
+        ].join('|') +
+        ')$'),
     size: new RegExp('^(?:' +
-        ['xx-small|x-small|small|medium|large|x-large|xx-large|larger|smaller',
-            '[\d.]+%|[\d.]+[a-z]+',
-            'inherit|initial|unset'].join('|') + ')' +
-        '(?:\/(?:normal|[\d.\+](?:%|[a-z]+)?))?$')
+        [
+            'xx-small|x-small|small|medium|large|x-large|xx-large|larger|smaller',
+            '[\\d.]+%|[\\d.]+[a-z]+',
+            'inherit|initial|unset',
+        ].join('|') +
+        ')' +
+        '(?:/(?:normal|[\\d.]+(?:%|[a-z]+)?))?$'),
 };
 function splitFont(name) {
     const parts = splitSpaces(this.styles[name]);
     const value = {
-        style: '', variant: [], weight: '', stretch: '',
-        size: '', family: '', 'line-height': ''
+        style: '',
+        variant: [],
+        weight: '',
+        stretch: '',
+        size: '',
+        family: '',
+        'line-height': '',
     };
     for (const part of parts) {
-        value.family = part;
+        if (!value.family) {
+            value.family = part;
+        }
         for (const name of Object.keys(FONT)) {
-            if ((Array.isArray(value[name]) || value[name] === '') && part.match(FONT[name])) {
+            if ((Array.isArray(value[name]) || value[name] === '') &&
+                part.match(FONT[name])) {
+                if (value.family === part) {
+                    value.family = '';
+                }
                 if (name === 'size') {
                     const [size, height] = part.split(/\//);
                     value[name] = size;
@@ -151,14 +170,14 @@ function splitFont(name) {
                     if (Array.isArray(value[name])) {
                         value[name].push(part);
                     }
-                    else {
+                    else if (value[name] === '') {
                         value[name] = part;
                     }
                 }
             }
         }
     }
-    saveFontParts(name, value);
+    saveFontParts.call(this, name, value);
     delete this.styles[name];
 }
 function saveFontParts(name, value) {
@@ -180,12 +199,27 @@ export class Styles {
     constructor(cssText = '') {
         this.parse(cssText);
     }
+    sanitizeValue(text) {
+        const PATTERN = this.constructor.pattern;
+        if (!text.match(PATTERN.sanitize)) {
+            return text;
+        }
+        text = text.replace(PATTERN.value, '$1');
+        const test = text
+            .replace(/\\./g, '')
+            .replace(/(['"]).*?\1/g, '')
+            .replace(/[^'"]/g, '');
+        if (test.length) {
+            text += test.charAt(0);
+        }
+        return text;
+    }
     get cssText() {
         const styles = [];
         for (const name of Object.keys(this.styles)) {
             const parent = this.parentName(name);
             if (!this.styles[parent]) {
-                styles.push(name + ': ' + this.styles[name] + ';');
+                styles.push(`${name}: ${this.styles[name]};`);
             }
         }
         return styles.join(' ');
@@ -195,7 +229,7 @@ export class Styles {
     }
     set(name, value) {
         name = this.normalizeName(name);
-        this.setStyle(name, value);
+        this.setStyle(name, String(value));
         if (Styles.connect[name] && !Styles.connect[name].combine) {
             this.combineChildren(name);
             delete this.styles[name];
@@ -209,10 +243,10 @@ export class Styles {
     }
     get(name) {
         name = this.normalizeName(name);
-        return (this.styles.hasOwnProperty(name) ? this.styles[name] : '');
+        return Object.hasOwn(this.styles, name) ? this.styles[name] : '';
     }
     setStyle(name, value) {
-        this.styles[name] = value;
+        this.styles[name] = this.sanitizeValue(value);
         if (Styles.connect[name] && Styles.connect[name].children) {
             Styles.connect[name].split.call(this, name);
         }
@@ -229,7 +263,7 @@ export class Styles {
     }
     parentName(name) {
         const parent = name.replace(/-[^-]*$/, '');
-        return (name === parent ? '' : parent);
+        return name === parent ? '' : parent;
     }
     childName(name, child) {
         if (child.match(/-/)) {
@@ -242,74 +276,87 @@ export class Styles {
         return name + '-' + child;
     }
     normalizeName(name) {
-        return name.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
+        return name.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
     }
     parse(cssText = '') {
-        let PATTERN = this.constructor.pattern;
+        const PATTERN = this.constructor.pattern;
         this.styles = {};
-        const parts = cssText.replace(PATTERN.comment, '').split(PATTERN.style);
+        const parts = cssText
+            .replace(/\n/g, ' ')
+            .replace(PATTERN.comment, '')
+            .split(PATTERN.style);
         while (parts.length > 1) {
-            let [space, name, value] = parts.splice(0, 3);
-            if (space.match(/[^\s\n]/))
+            const [space, name, value] = parts.splice(0, 3);
+            if (space.match(/[^\s\n;]/))
                 return;
             this.set(name, value);
         }
     }
 }
 Styles.pattern = {
-    style: /([-a-z]+)[\s\n]*:[\s\n]*((?:'[^']*'|"[^"]*"|\n|.)*?)[\s\n]*(?:;|$)/g,
-    comment: /\/\*[^]*?\*\//g
+    sanitize: /['";]/,
+    value: /^((:?'(?:\\.|[^'])*(?:'|$)|"(?:\\.|[^"])*(?:"|$)|\n|\\.|[^'";])*?)[\s\n]*(?:;|$).*/,
+    style: /([-a-z]+)[\s\n]*:[\s\n]*((?:'(?:\\.|[^'])*(?:'|$)|"(?:\\.|[^"])*(?:"|$)|\n|\\.|[^'";])*?)[\s\n]*(?:;|$)/g,
+    comment: /\/\*[^]*?\*\//g,
 };
 Styles.connect = {
     padding: {
         children: TRBL,
         split: splitTRBL,
-        combine: combineTRBL
+        combine: combineTRBL,
     },
     border: {
         children: TRBL,
         split: splitSame,
-        combine: combineSame
+        combine: combineSame,
     },
     'border-top': {
         children: WSC,
         split: splitWSC,
-        combine: combineWSC
+        combine: combineWSC,
     },
     'border-right': {
         children: WSC,
         split: splitWSC,
-        combine: combineWSC
+        combine: combineWSC,
     },
     'border-bottom': {
         children: WSC,
         split: splitWSC,
-        combine: combineWSC
+        combine: combineWSC,
     },
     'border-left': {
         children: WSC,
         split: splitWSC,
-        combine: combineWSC
+        combine: combineWSC,
     },
     'border-width': {
         children: TRBL,
         split: splitTRBL,
-        combine: null
+        combine: null,
     },
     'border-style': {
         children: TRBL,
         split: splitTRBL,
-        combine: null
+        combine: null,
     },
     'border-color': {
         children: TRBL,
         split: splitTRBL,
-        combine: null
+        combine: null,
     },
     font: {
-        children: ['style', 'variant', 'weight', 'stretch', 'line-height', 'size', 'family'],
+        children: [
+            'style',
+            'variant',
+            'weight',
+            'stretch',
+            'line-height',
+            'size',
+            'family',
+        ],
         split: splitFont,
-        combine: combineFont
-    }
+        combine: combineFont,
+    },
 };
 //# sourceMappingURL=Styles.js.map

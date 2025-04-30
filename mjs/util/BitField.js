@@ -41,9 +41,9 @@ BitField.MAXBIT = 1 << 31;
 BitField.next = 1;
 BitField.names = new Map();
 export function BitFieldClass(...names) {
-    const Bits = class extends BitField {
+    const bits = class extends BitField {
     };
-    Bits.allocate(...names);
-    return Bits;
+    bits.allocate(...names);
+    return bits;
 }
 //# sourceMappingURL=BitField.js.map

@@ -1,6 +1,7 @@
 import { PropertyList } from '../../Tree/Node.js';
 import { AbstractMmlTokenNode } from '../MmlNode.js';
 export declare class MmlMtext extends AbstractMmlTokenNode {
+    static NONSPACELIKE: string[];
     static defaults: PropertyList;
     protected texclass: number;
     get kind(): string;

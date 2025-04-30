@@ -1,12 +1,86 @@
 import { TEXCLASS } from '../../core/MmlTree/MmlNode.js';
 import NodeUtil from './NodeUtil.js';
-var FilterUtil;
-(function (FilterUtil) {
-    FilterUtil.cleanStretchy = function (arg) {
-        let options = arg.data;
-        for (let mo of options.getList('fixStretchy')) {
+function _copyExplicit(attrs, node1, node2) {
+    const attr1 = node1.attributes;
+    const attr2 = node2.attributes;
+    attrs.forEach((x) => {
+        const attr = attr2.getExplicit(x);
+        if (attr != null) {
+            attr1.set(x, attr);
+        }
+    });
+}
+function _compareExplicit(node1, node2) {
+    const filter = (attr, space) => {
+        const exp = attr.getExplicitNames();
+        return exp.filter((x) => {
+            return (x !== space &&
+                (x !== 'stretchy' || attr.getExplicit('stretchy')) &&
+                x !== 'data-latex' &&
+                x !== 'data-latex-item');
+        });
+    };
+    const attr1 = node1.attributes;
+    const attr2 = node2.attributes;
+    const exp1 = filter(attr1, 'lspace');
+    const exp2 = filter(attr2, 'rspace');
+    if (exp1.length !== exp2.length) {
+        return false;
+    }
+    for (const name of exp1) {
+        if (attr1.getExplicit(name) !== attr2.getExplicit(name)) {
+            return false;
+        }
+    }
+    return true;
+}
+function _cleanSubSup(options, low, up) {
+    const remove = [];
+    for (const mml of options.getList('m' + low + up)) {
+        const children = mml.childNodes;
+        if (children[mml[low]] && children[mml[up]]) {
+            continue;
+        }
+        const parent = mml.parent;
+        const newNode = children[mml[low]]
+            ? options.nodeFactory.create('node', 'm' + low, [
+                children[mml.base],
+                children[mml[low]],
+            ])
+            : options.nodeFactory.create('node', 'm' + up, [
+                children[mml.base],
+                children[mml[up]],
+            ]);
+        NodeUtil.copyAttributes(mml, newNode);
+        parent.replaceChild(newNode, mml);
+        remove.push(mml);
+    }
+    options.removeFromList('m' + low + up, remove);
+}
+function _moveLimits(options, underover, subsup) {
+    const remove = [];
+    for (const mml of options.getList(underover)) {
+        if (mml.attributes.get('displaystyle')) {
+            continue;
+        }
+        const base = mml.childNodes[mml.base];
+        const mo = base.coreMO();
+        if (base.getProperty('movablelimits') &&
+            !mo.attributes.hasExplicit('movablelimits')) {
+            const node = options.nodeFactory.create('node', subsup, mml.childNodes);
+            NodeUtil.copyAttributes(mml, node);
+            mml.parent.replaceChild(node, mml);
+            remove.push(mml);
+        }
+    }
+    options.removeFromList(underover, remove);
+}
+const FilterUtil = {
+    cleanStretchy(arg) {
+        const options = arg.data;
+        for (const mo of options.getList('fixStretchy')) {
             if (NodeUtil.getProperty(mo, 'fixStretchy')) {
-                let symbol = NodeUtil.getForm(mo);
+                const symbol = NodeUtil.getForm(mo);
                 if (symbol && symbol[3] && symbol[3]['stretchy']) {
                     NodeUtil.setAttribute(mo, 'stretchy', false);
                 }
@@ -19,37 +93,37 @@ var FilterUtil;
                 NodeUtil.removeProperties(mo, 'fixStretchy');
             }
         }
-    };
-    FilterUtil.cleanAttributes = function (arg) {
-        let node = arg.data.root;
+    },
+    cleanAttributes(arg) {
+        const node = arg.data.root;
         node.walkTree((mml, _d) => {
-            let attribs = mml.attributes;
-            if (!attribs) {
-                return;
-            }
+            const attribs = mml.attributes;
             const keep = new Set((attribs.get('mjx-keep-attrs') || '').split(/ /));
-            delete (attribs.getAllAttributes())['mjx-keep-attrs'];
+            attribs.unset('mjx-keep-attrs');
             for (const key of attribs.getExplicitNames()) {
-                if (!keep.has(key) && attribs.attributes[key] === mml.attributes.getInherited(key)) {
-                    delete attribs.attributes[key];
+                if (!keep.has(key) &&
+                    attribs.get(key) === mml.attributes.getInherited(key)) {
+                    attribs.unset(key);
                 }
             }
         }, {});
-    };
-    FilterUtil.combineRelations = function (arg) {
+    },
+    combineRelations(arg) {
         const remove = [];
-        for (let mo of arg.data.getList('mo')) {
-            if (mo.getProperty('relationsCombined') || !mo.parent ||
+        for (const mo of arg.data.getList('mo')) {
+            if (mo.getProperty('relationsCombined') ||
+                !mo.parent ||
                 (mo.parent && !NodeUtil.isType(mo.parent, 'mrow')) ||
                 NodeUtil.getTexClass(mo) !== TEXCLASS.REL) {
                 continue;
             }
-            let mml = mo.parent;
+            const mml = mo.parent;
             let m2;
-            let children = mml.childNodes;
-            let next = children.indexOf(mo) + 1;
-            let variantForm = NodeUtil.getProperty(mo, 'variantForm');
-            while (next < children.length && (m2 = children[next]) &&
+            const children = mml.childNodes;
+            const next = children.indexOf(mo) + 1;
+            const variantForm = NodeUtil.getProperty(mo, 'variantForm');
+            while (next < children.length &&
+                (m2 = children[next]) &&
                 NodeUtil.isType(m2, 'mo') &&
                 NodeUtil.getTexClass(m2) === TEXCLASS.REL) {
                 if (variantForm === NodeUtil.getProperty(m2, 'variantForm') &&
@@ -59,16 +133,21 @@ var FilterUtil;
                     for (const name of m2.getPropertyNames()) {
                         mo.setProperty(name, m2.getProperty(name));
                     }
+                    if (m2.attributes.get('data-latex')) {
+                        mo.attributes.set('data-latex', mo.attributes.get('data-latex') +
+                            m2.attributes.get('data-latex'));
+                    }
                     children.splice(next, 1);
                     remove.push(m2);
                     m2.parent = null;
                     m2.setProperty('relationsCombined', true);
+                    mo.setProperty('texClass', TEXCLASS.REL);
                 }
                 else {
-                    if (mo.attributes.getExplicit('rspace') == null) {
+                    if (!mo.attributes.hasExplicit('rspace')) {
                         NodeUtil.setAttribute(mo, 'rspace', '0pt');
                     }
-                    if (m2.attributes.getExplicit('lspace') == null) {
+                    if (!m2.attributes.hasExplicit('lspace')) {
                         NodeUtil.setAttribute(m2, 'lspace', '0pt');
                     }
                     break;
@@ -77,101 +156,48 @@ var FilterUtil;
             mo.attributes.setInherited('form', mo.getForms()[0]);
         }
         arg.data.removeFromList('mo', remove);
-    };
-    let _copyExplicit = function (attrs, node1, node2) {
-        let attr1 = node1.attributes;
-        let attr2 = node2.attributes;
-        attrs.forEach(x => {
-            let attr = attr2.getExplicit(x);
-            if (attr != null) {
-                attr1.set(x, attr);
-            }
-        });
-    };
-    let _compareExplicit = function (node1, node2) {
-        let filter = (attr, space) => {
-            let exp = attr.getExplicitNames();
-            return exp.filter(x => {
-                return x !== space &&
-                    (x !== 'stretchy' ||
-                        attr.getExplicit('stretchy'));
-            });
-        };
-        let attr1 = node1.attributes;
-        let attr2 = node2.attributes;
-        let exp1 = filter(attr1, 'lspace');
-        let exp2 = filter(attr2, 'rspace');
-        if (exp1.length !== exp2.length) {
-            return false;
-        }
-        for (let name of exp1) {
-            if (attr1.getExplicit(name) !== attr2.getExplicit(name)) {
-                return false;
-            }
-        }
-        return true;
-    };
-    let _cleanSubSup = function (options, low, up) {
-        const remove = [];
-        for (let mml of options.getList('m' + low + up)) {
-            const children = mml.childNodes;
-            if (children[mml[low]] && children[mml[up]]) {
-                continue;
-            }
-            const parent = mml.parent;
-            let newNode = (children[mml[low]] ?
-                options.nodeFactory.create('node', 'm' + low, [children[mml.base], children[mml[low]]]) :
-                options.nodeFactory.create('node', 'm' + up, [children[mml.base], children[mml[up]]]));
-            NodeUtil.copyAttributes(mml, newNode);
-            if (parent) {
-                parent.replaceChild(newNode, mml);
-            }
-            else {
-                options.root = newNode;
-            }
-            remove.push(mml);
-        }
-        options.removeFromList('m' + low + up, remove);
-    };
-    FilterUtil.cleanSubSup = function (arg) {
-        let options = arg.data;
+    },
+    cleanSubSup(arg) {
+        const options = arg.data;
         if (options.error) {
             return;
         }
         _cleanSubSup(options, 'sub', 'sup');
         _cleanSubSup(options, 'under', 'over');
-    };
-    let _moveLimits = function (options, underover, subsup) {
-        const remove = [];
-        for (const mml of options.getList(underover)) {
-            if (mml.attributes.get('displaystyle')) {
-                continue;
-            }
-            const base = mml.childNodes[mml.base];
-            const mo = base.coreMO();
-            if (base.getProperty('movablelimits') && !mo.attributes.getExplicit('movablelimits')) {
-                let node = options.nodeFactory.create('node', subsup, mml.childNodes);
-                NodeUtil.copyAttributes(mml, node);
-                if (mml.parent) {
-                    mml.parent.replaceChild(node, mml);
-                }
-                else {
-                    options.root = node;
-                }
-                remove.push(mml);
-            }
-        }
-        options.removeFromList(underover, remove);
-    };
-    FilterUtil.moveLimits = function (arg) {
+    },
+    moveLimits(arg) {
         const options = arg.data;
         _moveLimits(options, 'munderover', 'msubsup');
         _moveLimits(options, 'munder', 'msub');
         _moveLimits(options, 'mover', 'msup');
-    };
-    FilterUtil.setInherited = function (arg) {
+    },
+    setInherited(arg) {
         arg.data.root.setInheritedAttributes({}, arg.math['display'], 0, false);
-    };
-})(FilterUtil || (FilterUtil = {}));
+    },
+    checkScriptlevel(arg) {
+        const options = arg.data;
+        const remove = [];
+        for (const mml of options.getList('mstyle')) {
+            if (mml.childNodes[0].childNodes.length !== 1) {
+                continue;
+            }
+            const attributes = mml.attributes;
+            for (const key of ['displaystyle', 'scriptlevel']) {
+                if (attributes.getExplicit(key) === attributes.getInherited(key)) {
+                    attributes.unset(key);
+                }
+            }
+            const names = attributes.getExplicitNames();
+            if (names.filter((key) => key.substring(0, 10) !== 'data-latex').length ===
+                0) {
+                const child = mml.childNodes[0].childNodes[0];
+                names.forEach((key) => child.attributes.set(key, attributes.get(key)));
+                mml.parent.replaceChild(child, mml);
+                remove.push(mml);
+            }
+        }
+        options.removeFromList('mstyle', remove);
+    },
+};
 export default FilterUtil;
 //# sourceMappingURL=FilterUtil.js.map

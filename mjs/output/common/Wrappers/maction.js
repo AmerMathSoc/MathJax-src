@@ -22,19 +22,23 @@ export function CommonMactionMixin(Base) {
         get selected() {
             const selection = this.node.attributes.get('selection');
             const i = Math.max(1, Math.min(this.childNodes.length, selection)) - 1;
-            return this.childNodes[i] || this.wrap(this.node.selected);
+            return (this.childNodes[i] || this.wrap(this.node.selected));
         }
         getParameters() {
             const offsets = this.node.attributes.get('data-offsets');
-            let [dx, dy] = split(offsets || '');
+            const [dx, dy] = split(offsets || '');
             this.tipDx = this.length2em(dx || TooltipData.dx);
             this.tipDy = this.length2em(dy || TooltipData.dy);
         }
         constructor(factory, node, parent = null) {
             super(factory, node, parent);
-            const actions = this.constructor.actions;
+            const actions = this.constructor
+                .actions;
             const action = this.node.attributes.get('actiontype');
-            const [handler, data] = actions.get(action) || [((_node, _data) => { }), {}];
+            const [handler, data] = actions.get(action) || [
+                ((_node, _data) => { }),
+                {},
+            ];
             this.action = handler;
             this.data = data;
             this.getParameters();
@@ -44,7 +48,9 @@ export function CommonMactionMixin(Base) {
             this.selected.setChildPWidths(recompute);
         }
         get breakCount() {
-            return (this.node.isEmbellished ? this.selected.coreMO().embellishedBreakCount : this.selected.breakCount);
+            return this.node.isEmbellished
+                ? this.selected.coreMO().embellishedBreakCount
+                : this.selected.breakCount;
         }
         computeLineBBox(i) {
             return this.getChildLineBBox(this.selected, i);

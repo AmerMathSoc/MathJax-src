@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMtableMixin } from '../../common/Wrappers/mtable.js';
+import { CommonMtableMixin, } from '../../common/Wrappers/mtable.js';
 import { MmlMtable } from '../../../core/MmlTree/MmlNodes/mtable.js';
 const CLASSPREFIX = 'mjx-';
 export const SvgMtable = (function () {
@@ -24,7 +24,7 @@ export const SvgMtable = (function () {
                 }
             }
             getRowHD(equal, HD, H, D) {
-                return (equal ? [(HD + H - D) / 2, (HD - H + D) / 2] : [H, D]);
+                return equal ? [(HD + H - D) / 2, (HD - H + D) / 2] : [H, D];
             }
             handleColor() {
                 super.handleColor();
@@ -86,9 +86,10 @@ export const SvgMtable = (function () {
                 const { w, L, R } = this.getBBox();
                 const W = L + this.pWidth + R;
                 const align = this.getAlignShift()[0];
-                const CW = Math.max(this.isTop ? W : 0, this.container.getWrapWidth(this.containerI)) - L - R;
+                const max = Math.max(this.isTop ? W : 0, this.container.getWrapWidth(this.containerI));
+                const CW = max - L - R;
                 const dw = w - (this.pWidth > CW ? CW : this.pWidth);
-                const dx = (align === 'left' ? 0 : align === 'right' ? dw : dw / 2);
+                const dx = align === 'left' ? 0 : align === 'right' ? dw : dw / 2;
                 if (dx) {
                     const table = this.svg('g', {}, this.adaptor.childNodes(svg));
                     this.place(dx, 0, table);
@@ -102,34 +103,46 @@ export const SvgMtable = (function () {
             makeFrame(w, h, d, style) {
                 const t = this.fLine;
                 return this.svg('rect', this.setLineThickness(t, style, {
-                    'data-frame': true, 'class': this.lineClass(style),
-                    width: this.fixed(w - t), height: this.fixed(h + d - t),
-                    x: this.fixed(t / 2), y: this.fixed(t / 2 - d)
+                    'data-frame': true,
+                    class: this.lineClass(style),
+                    width: this.fixed(w - t),
+                    height: this.fixed(h + d - t),
+                    x: this.fixed(t / 2),
+                    y: this.fixed(t / 2 - d),
                 }));
             }
             makeVLine(x, style, t) {
                 const { h, d } = this.getBBox();
-                const dt = (style === 'dotted' ? t / 2 : 0);
+                const dt = style === 'dotted' ? t / 2 : 0;
                 const X = this.fixed(x + t / 2);
                 return this.svg('line', this.setLineThickness(t, style, {
-                    'data-line': 'v', 'class': this.lineClass(style),
-                    x1: X, y1: this.fixed(dt - d), x2: X, y2: this.fixed(h - dt)
+                    'data-line': 'v',
+                    class: this.lineClass(style),
+                    x1: X,
+                    y1: this.fixed(dt - d),
+                    x2: X,
+                    y2: this.fixed(h - dt),
                 }));
             }
             makeHLine(y, style, t) {
                 const w = this.getBBox().w;
-                const dt = (style === 'dotted' ? t / 2 : 0);
+                const dt = style === 'dotted' ? t / 2 : 0;
                 const Y = this.fixed(y - t / 2);
                 return this.svg('line', this.setLineThickness(t, style, {
-                    'data-line': 'h', 'class': this.lineClass(style),
-                    x1: this.fixed(dt), y1: Y, x2: this.fixed(w - dt), y2: Y
+                    'data-line': 'h',
+                    class: this.lineClass(style),
+                    x1: this.fixed(dt),
+                    y1: Y,
+                    x2: this.fixed(w - dt),
+                    y2: Y,
                 }));
             }
             setLineThickness(t, style, properties) {
-                if (t !== .07) {
+                if (t !== 0.07) {
                     properties['stroke-thickness'] = this.fixed(t);
                     if (style !== 'solid') {
-                        properties['stroke-dasharray'] = (style === 'dotted' ? '0,' : '') + this.fixed(2 * t);
+                        properties['stroke-dasharray'] =
+                            (style === 'dotted' ? '0,' : '') + this.fixed(2 * t);
                     }
                 }
                 return properties;
@@ -141,7 +154,9 @@ export const SvgMtable = (function () {
                 const attributes = this.node.attributes;
                 const side = attributes.get('side');
                 this.spaceLabels();
-                this.isTop ? this.topTable(svg, labels, side) : this.subTable(svg, labels, side, dx);
+                this.isTop
+                    ? this.topTable(svg, labels, side)
+                    : this.subTable(svg, labels, side, dx);
             }
             spaceLabels() {
                 const adaptor = this.adaptor;
@@ -155,7 +170,15 @@ export const SvgMtable = (function () {
                     if (row.node.isKind('mlabeledtr')) {
                         const cell = row.childNodes[0];
                         y -= space[i] + row.H;
-                        row.placeCell(cell, { x: 0, y: y, w: L, lSpace: 0, rSpace: 0, lLine: 0, rLine: 0 });
+                        row.placeCell(cell, {
+                            x: 0,
+                            y: y,
+                            w: L,
+                            lSpace: 0,
+                            rSpace: 0,
+                            lLine: 0,
+                            rLine: 0,
+                        });
                         y -= row.D + space[i + 1] + this.rLines[i];
                         current = adaptor.next(current);
                     }
@@ -174,17 +197,24 @@ export const SvgMtable = (function () {
                 const matrix = 'matrix(1 0 0 -1 0 0)';
                 const scale = `scale(${this.jax.fixed((this.font.params.x_height * 1000) / this.metrics.ex, 2)})`;
                 const transform = `translate(0 ${this.fixed(h)}) ${matrix} ${scale}`;
-                let table = this.svg('svg', {
+                const table = this.svg('svg', {
                     'data-table': true,
-                    preserveAspectRatio: (align === 'left' ? 'xMinYMid' : align === 'right' ? 'xMaxYMid' : 'xMidYMid'),
-                    viewBox: [this.fixed(-dx), this.fixed(-h), 1, this.fixed(h + d)].join(' ')
-                }, [
-                    this.svg('g', { transform: matrix }, adaptor.childNodes(svg))
-                ]);
+                    preserveAspectRatio: align === 'left'
+                        ? 'xMinYMid'
+                        : align === 'right'
+                            ? 'xMaxYMid'
+                            : 'xMidYMid',
+                    viewBox: `${this.fixed(-dx)} ${this.fixed(-h)} 1 ${this.fixed(h + d)}`,
+                }, [this.svg('g', { transform: matrix }, adaptor.childNodes(svg))]);
                 labels = this.svg('svg', {
                     'data-labels': true,
-                    preserveAspectRatio: (side === 'left' ? 'xMinYMid' : 'xMaxYMid'),
-                    viewBox: [side === 'left' ? 0 : this.fixed(LW), this.fixed(-h), 1, this.fixed(h + d)].join(' ')
+                    preserveAspectRatio: side === 'left' ? 'xMinYMid' : 'xMaxYMid',
+                    viewBox: [
+                        side === 'left' ? 0 : this.fixed(LW),
+                        this.fixed(-h),
+                        1,
+                        this.fixed(h + d),
+                    ].join(' '),
                 }, [labels]);
                 adaptor.append(svg, this.svg('g', { transform: transform }, [table, labels]));
                 this.place(-L, 0, svg);
@@ -196,9 +226,19 @@ export const SvgMtable = (function () {
                 const labelW = this.getTableData().L;
                 const align = this.getAlignShift()[0];
                 const CW = Math.max(W, this.container.getWrapWidth(this.containerI));
-                this.place(side === 'left' ?
-                    (align === 'left' ? 0 : align === 'right' ? W - CW + dx : (W - CW) / 2 + dx) - L :
-                    (align === 'left' ? CW : align === 'right' ? W + dx : (CW + W) / 2 + dx) - L - labelW, 0, labels);
+                this.place(side === 'left'
+                    ? (align === 'left'
+                        ? 0
+                        : align === 'right'
+                            ? W - CW + dx
+                            : (W - CW) / 2 + dx) - L
+                    : (align === 'left'
+                        ? CW
+                        : align === 'right'
+                            ? W + dx
+                            : (CW + W) / 2 + dx) -
+                        L -
+                        labelW, 0, labels);
                 adaptor.append(svg, labels);
             }
             constructor(factory, node, parent = null) {
@@ -223,22 +263,22 @@ export const SvgMtable = (function () {
         _a.styles = {
             'g[data-mml-node="mtable"] > line[data-line], svg[data-table] > g > line[data-line]': {
                 'stroke-width': '70px',
-                fill: 'none'
+                fill: 'none',
             },
             'g[data-mml-node="mtable"] > rect[data-frame], svg[data-table] > g > rect[data-frame]': {
                 'stroke-width': '70px',
-                fill: 'none'
+                fill: 'none',
             },
             'g[data-mml-node="mtable"] > .mjx-dashed, svg[data-table] > g > .mjx-dashed': {
-                'stroke-dasharray': '140'
+                'stroke-dasharray': '140',
             },
             'g[data-mml-node="mtable"] > .mjx-dotted, svg[data-table] > g > .mjx-dotted': {
                 'stroke-linecap': 'round',
-                'stroke-dasharray': '0,140'
+                'stroke-dasharray': '0,140',
             },
             'g[data-mml-node="mtable"] > g > svg': {
-                overflow: 'visible'
-            }
+                overflow: 'visible',
+            },
         },
         _a;
 })();

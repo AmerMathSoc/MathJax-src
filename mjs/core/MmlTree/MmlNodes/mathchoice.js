@@ -10,7 +10,7 @@ export class MathChoice extends AbstractMmlBaseNode {
         return true;
     }
     setInheritedAttributes(attributes, display, level, prime) {
-        const selection = (display ? 0 : Math.max(0, Math.min(level, 2)) + 1);
+        const selection = display ? 0 : Math.max(0, Math.min(level, 2)) + 1;
         const child = this.childNodes[selection] || this.factory.create('mrow');
         this.parent.replaceChild(child, this);
         child.setInheritedAttributes(attributes, display, level, prime);

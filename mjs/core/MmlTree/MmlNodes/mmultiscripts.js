@@ -11,12 +11,12 @@ export class MmlMmultiscripts extends MmlMsubsup {
         this.childNodes[0].setInheritedAttributes(attributes, display, level, prime);
         let prescripts = false;
         for (let i = 1, n = 0; i < this.childNodes.length; i++) {
-            let child = this.childNodes[i];
+            const child = this.childNodes[i];
             if (child.isKind('mprescripts')) {
                 if (!prescripts) {
                     prescripts = true;
                     if (i % 2 === 0) {
-                        let none = this.factory.create('none');
+                        const none = this.factory.create('none');
                         this.childNodes.splice(i, 0, none);
                         none.parent = this;
                         i++;
@@ -24,7 +24,7 @@ export class MmlMmultiscripts extends MmlMsubsup {
                 }
             }
             else {
-                let primestyle = prime || (n % 2 === 0);
+                const primestyle = prime || n % 2 === 0;
                 child.setInheritedAttributes(attributes, false, level + 1, primestyle);
                 n++;
             }
@@ -36,9 +36,9 @@ export class MmlMmultiscripts extends MmlMsubsup {
     }
     verifyChildren(options) {
         let prescripts = false;
-        let fix = options['fixMmultiscripts'];
+        const fix = options['fixMmultiscripts'];
         for (let i = 0; i < this.childNodes.length; i++) {
-            let child = this.childNodes[i];
+            const child = this.childNodes[i];
             if (child.isKind('mprescripts')) {
                 if (prescripts) {
                     child.mError(child.kind + ' can only appear once in ' + this.kind, options, true);

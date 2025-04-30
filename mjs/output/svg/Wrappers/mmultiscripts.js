@@ -1,13 +1,13 @@
-import { CommonMmultiscriptsMixin } from '../../common/Wrappers/mmultiscripts.js';
+import { CommonMmultiscriptsMixin, } from '../../common/Wrappers/mmultiscripts.js';
 import { SvgMsubsup } from './msubsup.js';
 import { MmlMmultiscripts } from '../../../core/MmlTree/MmlNodes/mmultiscripts.js';
 import { split } from '../../../util/string.js';
 export function AlignX(align) {
-    return {
+    return ({
         left: (_w, _W) => 0,
         center: (w, W) => (W - w) / 2,
-        right: (w, W) => W - w
-    }[align] || ((_w, _W) => 0);
+        right: (w, W) => W - w,
+    }[align] || ((_w, _W) => 0));
 }
 export const SvgMmultiscripts = (function () {
     var _a;
@@ -42,7 +42,7 @@ export const SvgMmultiscripts = (function () {
                 const subRow = adaptor.append(svg, this.svg('g'));
                 this.place(x, u, supRow);
                 this.place(x, v, subRow);
-                let m = i + 2 * n;
+                const m = i + 2 * n;
                 let dx = 0;
                 while (i < m) {
                     const [sub, sup] = [this.childNodes[i++], this.childNodes[i++]];

@@ -53,7 +53,7 @@ export type RenderActions<N, T, D> = {
 export declare class RenderList<N, T, D> extends PrioritizedList<RenderData<N, T, D>> {
     static create<N, T, D>(actions: RenderActions<N, T, D>): RenderList<N, T, D>;
     static action<N, T, D>(id: string, action: RenderAction<N, T, D>): [RenderData<N, T, D>, number];
-    protected static methodActions(method1: string, method2?: string): ((math: any, document: any) => boolean)[];
+    protected static methodActions(method1: string, method2?: string): [(document: any) => boolean, (math: any, document: any) => boolean];
     renderDoc(document: MathDocument<N, T, D>, start?: number): void;
     renderMath(math: MathItem<N, T, D>, document: MathDocument<N, T, D>, start?: number): void;
     renderConvert(math: MathItem<N, T, D>, document: MathDocument<N, T, D>, end?: number): void;
@@ -82,8 +82,15 @@ export interface MathDocument<N, T, D> {
     addRenderAction(id: string, ...action: any[]): void;
     removeRenderAction(id: string): void;
     render(): MathDocument<N, T, D>;
+    renderPromise(): Promise<MathDocument<N, T, D>>;
     rerender(start?: number): MathDocument<N, T, D>;
+    rerenderPromise(start?: number): Promise<MathDocument<N, T, D>>;
     convert(math: string, options?: OptionList): MmlNode | N;
+    convertPromise(math: string, options?: OptionList): Promise<MmlNode | N>;
+    whenReady(action: () => any): Promise<any>;
+    actionPromises(): Promise<any[]>;
+    clearPromises(): void;
+    savePromise(promise: Promise<any>): void;
     findMath(options?: OptionList): MathDocument<N, T, D>;
     compile(): MathDocument<N, T, D>;
     getMetrics(): MathDocument<N, T, D>;
@@ -93,6 +100,7 @@ export interface MathDocument<N, T, D> {
     state(state: number, restore?: boolean): MathDocument<N, T, D>;
     reset(options?: ResetList): MathDocument<N, T, D>;
     clear(): MathDocument<N, T, D>;
+    done(): Promise<void>;
     concat(list: MathList<N, T, D>): MathDocument<N, T, D>;
     clearMathItemsWithin(containers: ContainerList<N>): MathItem<N, T, D>[];
     getMathItemsWithin(elements: ContainerList<N>): MathItem<N, T, D>[];
@@ -105,6 +113,8 @@ export declare abstract class AbstractMathDocument<N, T, D> implements MathDocum
     options: OptionList;
     math: MathList<N, T, D>;
     renderActions: RenderList<N, T, D>;
+    protected _actionPromises: Promise<void>[];
+    protected _readyPromise: Promise<any>;
     processed: BitField;
     inputJax: InputJax<N, T, D>[];
     outputJax: OutputJax<N, T, D>;
@@ -115,8 +125,15 @@ export declare abstract class AbstractMathDocument<N, T, D> implements MathDocum
     addRenderAction(id: string, ...action: any[]): void;
     removeRenderAction(id: string): void;
     render(): this;
+    renderPromise(): Promise<any>;
     rerender(start?: number): this;
+    rerenderPromise(start?: number): Promise<any>;
     convert(math: string, options?: OptionList): any;
+    convertPromise(math: string, options?: OptionList): Promise<any>;
+    whenReady(action: () => any): Promise<any>;
+    actionPromises(): Promise<void[]>;
+    clearPromises(): void;
+    savePromise(promise: Promise<any>): void;
     findMath(_options?: OptionList): this;
     compile(): this;
     protected compileMath(math: MathItem<N, T, D>): void;
@@ -129,6 +146,7 @@ export declare abstract class AbstractMathDocument<N, T, D> implements MathDocum
     state(state: number, restore?: boolean): this;
     reset(options?: ResetList): this;
     clear(): this;
+    done(): Promise<void>;
     concat(list: MathList<N, T, D>): this;
     clearMathItemsWithin(containers: ContainerList<N>): MathItem<N, T, D>[];
     getMathItemsWithin(elements: ContainerList<N>): MathItem<N, T, D>[];

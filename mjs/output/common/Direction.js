@@ -1,3 +1,4 @@
-export const V = 1;
-export const H = 2;
+export const DIRECTION = { None: '', Vertical: 'v', Horizontal: 'h' };
+export const V = DIRECTION.Vertical;
+export const H = DIRECTION.Horizontal;
 //# sourceMappingURL=Direction.js.map

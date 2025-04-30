@@ -1,6 +1,7 @@
+import { HandlerType, ConfigurationType } from '../HandlerTypes.js';
 import { ArrayItem } from '../base/BaseItems.js';
-import { Configuration, ConfigurationHandler } from '../Configuration.js';
-import { CommandMap } from '../SymbolMap.js';
+import { Configuration, ConfigurationHandler, } from '../Configuration.js';
+import { CommandMap } from '../TokenMap.js';
 import TexError from '../TexError.js';
 export class ColorArrayItem extends ArrayItem {
     constructor() {
@@ -8,7 +9,7 @@ export class ColorArrayItem extends ArrayItem {
         this.color = {
             cell: '',
             row: '',
-            col: []
+            col: [],
         };
         this.hasColor = false;
     }
@@ -28,7 +29,10 @@ export class ColorArrayItem extends ArrayItem {
     }
     createMml() {
         const mml = super.createMml();
-        let table = (mml.isKind('mrow') ? mml.childNodes[1] : mml);
+        let table = mml.isKind('mrow') ? mml.childNodes[1] : mml;
+        if (table.isKind('mstyle')) {
+            table = table.childNodes[0].childNodes[0];
+        }
         if (table.isKind('menclose')) {
             table = table.childNodes[0].childNodes[0];
         }
@@ -42,35 +46,34 @@ export class ColorArrayItem extends ArrayItem {
         return mml;
     }
 }
-new CommandMap('colortbl', {
-    cellcolor: ['TableColor', 'cell'],
-    rowcolor: ['TableColor', 'row'],
-    columncolor: ['TableColor', 'col']
-}, {
-    TableColor(parser, name, type) {
-        const lookup = parser.configuration.packageData.get('color').model;
-        const model = parser.GetBrackets(name, '');
-        const color = lookup.getColor(model, parser.GetArgument(name));
-        const top = parser.stack.Top();
-        if (!(top instanceof ColorArrayItem)) {
-            throw new TexError('UnsupportedTableColor', 'Unsupported use of %1', parser.currentCS);
+function TableColor(parser, name, type) {
+    const lookup = parser.configuration.packageData.get('color').model;
+    const model = parser.GetBrackets(name, '');
+    const color = lookup.getColor(model, parser.GetArgument(name));
+    const top = parser.stack.Top();
+    if (!(top instanceof ColorArrayItem)) {
+        throw new TexError('UnsupportedTableColor', 'Unsupported use of %1', parser.currentCS);
+    }
+    if (type === 'col') {
+        if (top.table.length && top.color.col[top.row.length] !== color) {
+            throw new TexError('ColumnColorNotTop', '%1 must be in the top row or preamble', name);
         }
-        if (type === 'col') {
-            if (top.table.length && top.color.col[top.row.length] !== color) {
-                throw new TexError('ColumnColorNotTop', '%1 must be in the top row or preamble', name);
-            }
-            top.color.col[top.row.length] = color;
-            if (parser.GetBrackets(name, '')) {
-                parser.GetBrackets(name, '');
-            }
-        }
-        else {
-            top.color[type] = color;
-            if (type === 'row' && (top.Size() || top.row.length)) {
-                throw new TexError('RowColorNotFirst', '%1 must be at the beginning of a row', name);
-            }
+        top.color.col[top.row.length] = color;
+        if (parser.GetBrackets(name, '')) {
+            parser.GetBrackets(name, '');
         }
     }
+    else {
+        top.color[type] = color;
+        if (type === 'row' && (top.Size() || top.row.length)) {
+            throw new TexError('RowColorNotFirst', '%1 must be at the beginning of a row', name);
+        }
+    }
+}
+new CommandMap('colortbl', {
+    cellcolor: [TableColor, 'cell'],
+    rowcolor: [TableColor, 'row'],
+    columncolor: [TableColor, 'col'],
 });
 const config = function (config, jax) {
     if (!jax.parseOptions.packageData.has('color')) {
@@ -78,9 +81,9 @@ const config = function (config, jax) {
     }
 };
 export const ColortblConfiguration = Configuration.create('colortbl', {
-    handler: { macro: ['colortbl'] },
-    items: { 'array': ColorArrayItem },
-    priority: 10,
-    config: [config, 10]
+    [ConfigurationType.HANDLER]: { [HandlerType.MACRO]: ['colortbl'] },
+    [ConfigurationType.ITEMS]: { array: ColorArrayItem },
+    [ConfigurationType.PRIORITY]: 10,
+    [ConfigurationType.CONFIG]: [config, 10],
 });
 //# sourceMappingURL=ColortblConfiguration.js.map

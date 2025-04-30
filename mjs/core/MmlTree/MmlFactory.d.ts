@@ -4,5 +4,5 @@ export declare class MmlFactory extends AbstractNodeFactory<MmlNode, MmlNodeClas
     static defaultNodes: {
         [kind: string]: MmlNodeClass;
     };
-    get MML(): Object;
+    get MML(): object;
 }

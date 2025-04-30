@@ -11,4 +11,6 @@ export declare class LiteWindow {
     DocumentFragment: typeof LiteList;
     Document: typeof LiteDocument;
     constructor();
+    postMessage(msg: any, domain: string): void;
+    addEventListener(kind: string, listener: (event: any) => void): void;
 }

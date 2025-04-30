@@ -62,6 +62,6 @@ Entities.add({
     otimes: '\u2297',
     otimesas: '\u2A36',
     ouml: '\u00F6',
-    ovbar: '\u233D'
+    ovbar: '\u233D',
 }, 'o');
 //# sourceMappingURL=o.js.map

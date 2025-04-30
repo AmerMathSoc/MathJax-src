@@ -1,5 +1,5 @@
 import { ArrayItem, EqnArrayItem } from '../base/BaseItems.js';
-import ParseUtil from '../ParseUtil.js';
+import { ParseUtil } from '../ParseUtil.js';
 import NodeUtil from '../NodeUtil.js';
 import TexError from '../TexError.js';
 import { TexConstant } from '../TexConstants.js';
@@ -25,23 +25,27 @@ export class MultlineItem extends ArrayItem {
         if (this.row.length !== 1) {
             throw new TexError('MultlineRowsOneCol', 'The rows within the %1 environment must have exactly one column', 'multline');
         }
-        let row = this.create('node', 'mtr', this.row);
+        const row = this.create('node', 'mtr', this.row);
         this.table.push(row);
         this.row = [];
     }
     EndTable() {
         super.EndTable();
         if (this.table.length) {
-            let m = this.table.length - 1, label = -1;
+            const m = this.table.length - 1;
+            let label = -1;
             if (!NodeUtil.getAttribute(NodeUtil.getChildren(this.table[0])[0], 'columnalign')) {
                 NodeUtil.setAttribute(NodeUtil.getChildren(this.table[0])[0], 'columnalign', TexConstant.Align.LEFT);
             }
             if (!NodeUtil.getAttribute(NodeUtil.getChildren(this.table[m])[0], 'columnalign')) {
                 NodeUtil.setAttribute(NodeUtil.getChildren(this.table[m])[0], 'columnalign', TexConstant.Align.RIGHT);
             }
-            let tag = this.factory.configuration.tags.getTag();
+            const tag = this.factory.configuration.tags.getTag();
             if (tag) {
-                label = (this.arraydef.side === TexConstant.Align.LEFT ? 0 : this.table.length - 1);
+                label =
+                    this.arraydef.side === TexConstant.Align.LEFT
+                        ? 0
+                        : this.table.length - 1;
                 const mtr = this.table[label];
                 const mlabel = this.create('node', 'mlabeledtr', [tag].concat(NodeUtil.getChildren(mtr)));
                 NodeUtil.copyAttributes(mtr, mlabel);
@@ -74,7 +78,7 @@ export class FlalignItem extends EqnArrayItem {
     }
     EndRow() {
         let cell;
-        let row = this.row;
+        const row = this.row;
         const n = this.getProperty('xalignat');
         while (row.length < n) {
             row.push(this.create('node', 'mtd'));

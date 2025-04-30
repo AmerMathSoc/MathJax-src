@@ -21,6 +21,6 @@ export const ZeroFontDataUrl = [
     'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAEAQABAQETbWp4LWxtLXplcm9SZWd1bGFyAAEBASf4GwD4',
     'HAL4HQP4HgSLi/mC+nwFHQAAAIYPHQAAAIkRix0AAACUEgAFAQEMHyoxNlZlcnNpb24gMC4xbWp4LWxt',
     'LXplcm8gUmVndWxhcm1qeC1sbS16ZXJvUmVndWxhcnNwYWNlAAAAAYsAAgEBAwaLDvp8DgAAAAAD6AAA',
-    ') format("woff")'
+    ') format("woff")',
 ].join('');
 //# sourceMappingURL=zero.js.map

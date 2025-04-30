@@ -4,5 +4,6 @@ export declare class MmlMstyle extends AbstractMmlLayoutNode {
     static defaults: PropertyList;
     get kind(): string;
     get notParent(): boolean;
+    setInheritedAttributes(attributes?: AttributeList, display?: boolean, level?: number, prime?: boolean): void;
     protected setChildInheritedAttributes(attributes: AttributeList, display: boolean, level: number, prime: boolean): void;
 }

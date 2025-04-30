@@ -1,7 +1,7 @@
 import { STATE, newState } from '../core/MathItem.js';
-import { EnrichHandler } from './semantic-enrich.js';
+import { EnrichHandler, } from './semantic-enrich.js';
 import { ComplexityVisitor } from './complexity/visitor.js';
-import { selectOptionsFromKeys, expandable } from '../util/Options.js';
+import { selectOptionsFromKeys, expandable, } from '../util/Options.js';
 newState('COMPLEXITY', 40);
 export function ComplexityMathItemMixin(BaseMathItem, computeComplexity) {
     return class extends BaseMathItem {
@@ -27,9 +27,8 @@ export function ComplexityMathDocumentMixin(BaseDocument) {
                 }
                 const visitorOptions = selectOptionsFromKeys(this.options, this.options.ComplexityVisitor.OPTIONS);
                 this.complexityVisitor = new this.options.ComplexityVisitor(this.mmlFactory, visitorOptions);
-                const computeComplexity = ((node) => this.complexityVisitor.visitTree(node));
-                this.options.MathItem =
-                    ComplexityMathItemMixin(this.options.MathItem, computeComplexity);
+                const computeComplexity = (node) => this.complexityVisitor.visitTree(node);
+                this.options.MathItem = ComplexityMathItemMixin(this.options.MathItem, computeComplexity);
             }
             complexity() {
                 if (!this.processed.isSet('complexity')) {

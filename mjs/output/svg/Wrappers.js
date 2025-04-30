@@ -22,7 +22,7 @@ import { SvgMtr, SvgMlabeledtr } from './Wrappers/mtr.js';
 import { SvgMtd } from './Wrappers/mtd.js';
 import { SvgMaction } from './Wrappers/maction.js';
 import { SvgMenclose } from './Wrappers/menclose.js';
-import { SvgSemantics, SvgAnnotation, SvgAnnotationXML, SvgXmlNode } from './Wrappers/semantics.js';
+import { SvgSemantics, SvgAnnotation, SvgAnnotationXML, SvgXmlNode, } from './Wrappers/semantics.js';
 import { SvgMglyph } from './Wrappers/mglyph.js';
 import { SvgTeXAtom } from './Wrappers/TeXAtom.js';
 import { SvgTextNode } from './Wrappers/TextNode.js';
@@ -65,6 +65,6 @@ export const SvgWrappers = {
     [SvgTeXAtom.kind]: SvgTeXAtom,
     [SvgTextNode.kind]: SvgTextNode,
     [SvgHtmlNode.kind]: SvgHtmlNode,
-    [SvgWrapper.kind]: SvgWrapper
+    [SvgWrapper.kind]: SvgWrapper,
 };
 //# sourceMappingURL=Wrappers.js.map

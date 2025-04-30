@@ -11,7 +11,9 @@ export function CommonMtdMixin(Base) {
             const table = this.parent.parent;
             const row = this.parent;
             const i = this.node.childPosition() - (row.labeled ? 1 : 0);
-            return (typeof (table.cWidths[i]) === 'number' ? table.cWidths[i] : table.getTableData().W[i]);
+            return (typeof table.cWidths[i] === 'number'
+                ? table.cWidths[i]
+                : table.getTableData().W[i]);
         }
         getChildAlign(_i) {
             return this.node.attributes.get('columnalign');

@@ -1,3 +1,4 @@
+import { DIRECTION } from '../FontData.js';
 export function CommonMtrMixin(Base) {
     return class CommonMtrMixin extends Base {
         get numCells() {
@@ -13,25 +14,28 @@ export function CommonMtrMixin(Base) {
             return this.childNodes[i];
         }
         getChildBBoxes() {
-            return this.childNodes.map(cell => cell.getBBox());
+            return this.childNodes.map((cell) => cell.getBBox());
         }
         stretchChildren(HD = null) {
-            let stretchy = [];
-            let children = (this.labeled ? this.childNodes.slice(1) : this.childNodes);
+            const stretchy = [];
+            const children = this.labeled
+                ? this.childNodes.slice(1)
+                : this.childNodes;
             for (const mtd of children) {
                 const child = mtd.childNodes[0];
-                if (child.canStretch(1)) {
+                if (child.canStretch(DIRECTION.Vertical)) {
                     stretchy.push(child);
                 }
             }
-            let count = stretchy.length;
-            let nodeCount = this.childNodes.length;
+            const count = stretchy.length;
+            const nodeCount = this.childNodes.length;
             if (count && nodeCount > 1 && !HD) {
-                let H = 0, D = 0;
-                let all = (count > 1 && count === nodeCount);
+                let H = 0;
+                let D = 0;
+                const all = count > 1 && count === nodeCount;
                 for (const mtd of children) {
                     const child = mtd.childNodes[0];
-                    const noStretch = (child.stretch.dir === 0);
+                    const noStretch = child.stretch.dir === DIRECTION.None;
                     if (all || noStretch) {
                         const { h, d } = child.getBBox(noStretch);
                         if (h > H) {
@@ -47,7 +51,7 @@ export function CommonMtrMixin(Base) {
             if (HD) {
                 for (const child of stretchy) {
                     const rscale = child.coreRScale();
-                    child.coreMO().getStretchedVariant(HD.map(x => x * rscale));
+                    child.coreMO().getStretchedVariant(HD.map((x) => x * rscale));
                 }
             }
         }
@@ -71,7 +75,7 @@ export function CommonMlabeledtrMixin(Base) {
             return this.childNodes[i + 1];
         }
         getChildBBoxes() {
-            return this.childNodes.slice(1).map(cell => cell.getBBox());
+            return this.childNodes.slice(1).map((cell) => cell.getBBox());
         }
     };
 }

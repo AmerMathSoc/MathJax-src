@@ -15,10 +15,9 @@ export class AbstractFactory {
     }
     setNodeClass(kind, nodeClass) {
         this.nodeMap.set(kind, nodeClass);
-        let THIS = this;
-        let KIND = this.nodeMap.get(kind);
+        const KIND = this.nodeMap.get(kind);
         this.node[kind] = (...args) => {
-            return new KIND(THIS, ...args);
+            return new KIND(this, ...args);
         };
     }
     getNodeClass(kind) {
@@ -29,7 +28,7 @@ export class AbstractFactory {
         delete this.node[kind];
     }
     nodeIsKind(node, kind) {
-        return (node instanceof this.getNodeClass(kind));
+        return node instanceof this.getNodeClass(kind);
     }
     getKinds() {
         return Array.from(this.nodeMap.keys());

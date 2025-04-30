@@ -35,6 +35,15 @@ export function LazyMathItemMixin(BaseMathItem) {
             this.lazyCompile = true;
             this.lazyTypeset = true;
             this.lazyTex = false;
+            this.attachSpeech = (document) => {
+                var _a;
+                if (this.state() >= STATE.ATTACHSPEECH)
+                    return;
+                if (!this.lazyTypeset) {
+                    (_a = super.attachSpeech) === null || _a === void 0 ? void 0 : _a.call(this, document);
+                }
+                this.state(STATE.ATTACHSPEECH);
+            };
             if (!this.end.node) {
                 this.lazyCompile = this.lazyTypeset = false;
             }
@@ -45,7 +54,7 @@ export function LazyMathItemMixin(BaseMathItem) {
                 return;
             }
             if (this.state() < STATE.COMPILED) {
-                this.lazyTex = (this.inputJax.name === 'TeX');
+                this.lazyTex = this.inputJax.name === 'TeX';
                 this.root = document.mmlFactory.create('math');
                 this.state(STATE.COMPILED);
             }
@@ -65,7 +74,9 @@ export function LazyMathItemMixin(BaseMathItem) {
                 if (!this.lazyMarker) {
                     const id = document.lazyList.add(this);
                     this.lazyMarker = adaptor.node('mjx-lazy', { [LAZYID]: id });
-                    this.typesetRoot = adaptor.node('mjx-container', {}, [this.lazyMarker]);
+                    this.typesetRoot = adaptor.node('mjx-container', {}, [
+                        this.lazyMarker,
+                    ]);
                 }
                 this.state(STATE.TYPESET);
             }
@@ -88,20 +99,24 @@ export function LazyMathDocumentMixin(BaseDocument) {
                 this.lazyPromise = Promise.resolve();
                 this.lazyIdle = false;
                 this.lazySet = new Set();
-                this.options.MathItem =
-                    LazyMathItemMixin(this.options.MathItem);
+                this.options.MathItem = LazyMathItemMixin(this.options.MathItem);
                 const ProcessBits = this.constructor.ProcessBits;
-                !ProcessBits.has('lazyAlways') && ProcessBits.allocate('lazyAlways');
+                if (!ProcessBits.has('lazyAlways')) {
+                    ProcessBits.allocate('lazyAlways');
+                }
                 this.lazyObserver = new IntersectionObserver(this.lazyObserve.bind(this), { rootMargin: this.options.lazyMargin });
                 this.lazyList = new LazyList();
                 const callback = this.lazyHandleSet.bind(this);
-                this.lazyProcessSet = (window && window.requestIdleCallback ?
-                    () => window.requestIdleCallback(callback) :
-                    () => setTimeout(callback, 10));
+                this.lazyProcessSet =
+                    window && window.requestIdleCallback
+                        ? () => window.requestIdleCallback(callback)
+                        : () => setTimeout(callback, 10);
                 if (window) {
                     let done = false;
                     const handler = () => {
-                        !done && this.lazyTypesetAll();
+                        if (!done) {
+                            this.lazyTypesetAll();
+                        }
                         done = true;
                     };
                     window.matchMedia('print').addListener(handler);
@@ -161,7 +176,9 @@ export function LazyMathDocumentMixin(BaseDocument) {
                                 state = STATE.TYPESET;
                         }
                         math.lazyCompile = math.lazyTypeset = false;
-                        math.lazyMarker && this.lazyObserver.unobserve(math.lazyMarker);
+                        if (math.lazyMarker) {
+                            this.lazyObserver.unobserve(math.lazyMarker);
+                        }
                     }
                     if (state === STATE.LAST)
                         return Promise.resolve();
@@ -197,7 +214,9 @@ export function LazyMathDocumentMixin(BaseDocument) {
                 const set = this.lazySet;
                 this.lazySet = new Set();
                 this.lazyPromise = this.lazyPromise.then(() => {
-                    let state = this.compileEarlierItems(set) ? STATE.COMPILED : STATE.TYPESET;
+                    let state = this.compileEarlierItems(set)
+                        ? STATE.COMPILED
+                        : STATE.TYPESET;
                     state = this.resetStates(set, state);
                     this.state(state - 1, null);
                     return handleRetriesFor(() => {
@@ -213,16 +232,22 @@ export function LazyMathDocumentMixin(BaseDocument) {
                         math.state(STATE.COMPILED - 1);
                         state = STATE.COMPILED;
                     }
+                    else if (!Object.hasOwn(math.metrics, 'em')) {
+                        math.state(STATE.METRICS - 1);
+                        state = STATE.METRICS;
+                    }
                     else {
                         math.state(STATE.TYPESET - 1);
                     }
                     math.lazyCompile = math.lazyTypeset = false;
-                    math.lazyMarker && this.lazyObserver.unobserve(math.lazyMarker);
+                    if (math.lazyMarker) {
+                        this.lazyObserver.unobserve(math.lazyMarker);
+                    }
                 }
                 return state;
             }
             compileEarlierItems(set) {
-                let math = this.earliestTex(set);
+                const math = this.earliestTex(set);
                 if (!math)
                     return false;
                 let compile = false;
@@ -232,7 +257,9 @@ export function LazyMathDocumentMixin(BaseDocument) {
                         break;
                     }
                     earlier.lazyCompile = false;
-                    earlier.lazyMarker && this.lazyObserver.unobserve(earlier.lazyMarker);
+                    if (earlier.lazyMarker) {
+                        this.lazyObserver.unobserve(earlier.lazyMarker);
+                    }
                     earlier.state(STATE.COMPILED - 1);
                     compile = true;
                 }
@@ -265,20 +292,20 @@ export function LazyMathDocumentMixin(BaseDocument) {
             }
             render() {
                 const always = this.options.lazyAlwaysTypeset;
-                this.lazyAlwaysContainers = !always ? null :
-                    this.adaptor.getElements(Array.isArray(always) ? always : [always], this.document);
+                this.lazyAlwaysContainers = !always
+                    ? null
+                    : this.adaptor.getElements(Array.isArray(always) ? always : [always], this.document);
                 this.lazyAlwaysIndex = 0;
                 super.render();
                 return this;
             }
         },
-        _a.OPTIONS = Object.assign(Object.assign({}, BaseDocument.OPTIONS), { lazyMargin: '200px', lazyAlwaysTypeset: null, renderActions: Object.assign(Object.assign({}, BaseDocument.OPTIONS.renderActions), { lazyAlways: [STATE.LAZYALWAYS, 'lazyAlways', '', false] }) }),
+        _a.OPTIONS = Object.assign(Object.assign({}, BaseDocument.OPTIONS), { lazyMargin: '500px', lazyAlwaysTypeset: null, speechTiming: Object.assign(Object.assign({}, (BaseDocument.OPTIONS.speechTiming || {})), { initial: 150, threshold: 100, intermediate: 10 }), renderActions: Object.assign(Object.assign({}, BaseDocument.OPTIONS.renderActions), { lazyAlways: [STATE.LAZYALWAYS, 'lazyAlways', '', false] }) }),
         _a;
 }
 export function LazyHandler(handler) {
     if (typeof IntersectionObserver !== 'undefined') {
-        handler.documentClass =
-            LazyMathDocumentMixin(handler.documentClass);
+        handler.documentClass = LazyMathDocumentMixin(handler.documentClass);
     }
     return handler;
 }

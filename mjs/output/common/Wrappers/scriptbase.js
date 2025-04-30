@@ -1,4 +1,5 @@
 import { LineBBox } from '../LineBBox.js';
+import { DIRECTION } from '../FontData.js';
 export function CommonScriptbaseMixin(Base) {
     var _a;
     return _a = class CommonScriptbaseMixin extends Base {
@@ -10,15 +11,20 @@ export function CommonScriptbaseMixin(Base) {
             }
             getBaseCore() {
                 let core = this.getSemanticBase() || this.childNodes[0];
+                let node = core === null || core === void 0 ? void 0 : core.node;
                 while (core &&
                     ((core.childNodes.length === 1 &&
-                        (core.node.isKind('mrow') || core.node.isKind('TeXAtom') ||
-                            core.node.isKind('mstyle') || core.node.isKind('mpadded') ||
-                            core.node.isKind('mphantom') || core.node.isKind('semantics'))) ||
-                        (core.node.isKind('munderover') &&
+                        (node.isKind('mrow') ||
+                            node.isKind('TeXAtom') ||
+                            node.isKind('mstyle') ||
+                            (node.isKind('mpadded') && !node.getProperty('vbox')) ||
+                            node.isKind('mphantom') ||
+                            node.isKind('semantics'))) ||
+                        (node.isKind('munderover') &&
                             core.isMathAccent))) {
                     this.setBaseAccentsFor(core);
                     core = core.childNodes[0];
+                    node = core === null || core === void 0 ? void 0 : core.node;
                 }
                 if (!core) {
                     this.baseHasAccentOver = this.baseHasAccentUnder = false;
@@ -36,7 +42,7 @@ export function CommonScriptbaseMixin(Base) {
                 }
             }
             getSemanticBase() {
-                let fence = this.node.attributes.getExplicit('data-semantic-fencepointer');
+                const fence = this.node.attributes.getExplicit('data-semantic-fencepointer');
                 return this.getBaseFence(this.baseChild, fence);
             }
             getBaseFence(fence, id) {
@@ -68,13 +74,15 @@ export function CommonScriptbaseMixin(Base) {
                 return this.baseCore.getOuterBBox().ic * this.baseScale;
             }
             getAdjustedIc() {
-                return (this.baseIc ? 1.05 * this.baseIc + .05 : 0);
+                return this.baseIc ? 1.05 * this.baseIc + 0.05 : 0;
             }
             isCharBase() {
-                let base = this.baseCore;
+                const base = this.baseCore;
                 return (((base.node.isKind('mo') && base.size === null) ||
-                    base.node.isKind('mi') || base.node.isKind('mn')) &&
-                    base.bbox.rscale === 1 && Array.from(base.getText()).length === 1);
+                    base.node.isKind('mi') ||
+                    base.node.isKind('mn')) &&
+                    base.bbox.rscale === 1 &&
+                    Array.from(base.getText()).length === 1);
             }
             checkLineAccents() {
                 if (!this.node.isKind('munderover'))
@@ -93,11 +101,13 @@ export function CommonScriptbaseMixin(Base) {
             }
             isLineAccent(script) {
                 const node = script.coreMO().node;
-                return (node.isToken && node.getText() === '\u2015');
+                return node.isToken && node.getText() === '\u2015';
             }
             getBaseWidth() {
                 const bbox = this.baseChild.getLineBBox(this.baseChild.breakCount);
-                return bbox.w * bbox.rscale - (this.baseRemoveIc ? this.baseIc : 0) + this.font.params.extra_ic;
+                return (bbox.w * bbox.rscale -
+                    (this.baseRemoveIc ? this.baseIc : 0) +
+                    this.font.params.extra_ic);
             }
             getOffset() {
                 return [0, 0];
@@ -107,7 +117,7 @@ export function CommonScriptbaseMixin(Base) {
                 const sized = !!(this.baseCore.node.isKind('mo') &&
                     this.baseCore.size);
                 const scale = this.baseScale;
-                return (this.baseIsChar && !largeop && !sized && scale === 1 ? 0 : n);
+                return this.baseIsChar && !largeop && !sized && scale === 1 ? 0 : n;
             }
             getV() {
                 const base = this.baseCore;
@@ -124,23 +134,25 @@ export function CommonScriptbaseMixin(Base) {
                 const tex = this.font.params;
                 const attr = this.node.attributes.getList('displaystyle', 'superscriptshift');
                 const prime = this.node.getProperty('texprimestyle');
-                const p = prime ? tex.sup3 : (attr.displaystyle ? tex.sup1 : tex.sup2);
+                const p = prime ? tex.sup3 : attr.displaystyle ? tex.sup1 : tex.sup2;
                 const superscriptshift = this.length2em(attr.superscriptshift, p);
                 return Math.max(this.baseCharZero(bbox.h * this.baseScale - tex.sup_drop * sbox.rscale), superscriptshift, sbox.d * sbox.rscale + (1 / 4) * tex.x_height);
             }
             hasMovableLimits() {
                 const display = this.node.attributes.get('displaystyle');
                 const mo = this.baseChild.coreMO().node;
-                return (!display && !!mo.attributes.get('movablelimits'));
+                return !display && !!mo.attributes.get('movablelimits');
             }
             getOverKU(basebox, overbox) {
                 const accent = this.node.attributes.get('accent');
                 const tex = this.font.params;
                 const d = overbox.d * overbox.rscale;
                 const t = tex.rule_thickness * tex.separation_factor;
-                const delta = (this.baseHasAccentOver ? t : 0);
-                const T = (this.isLineAbove ? 3 * tex.rule_thickness : t);
-                const k = (accent ? T : Math.max(tex.big_op_spacing1, tex.big_op_spacing3 - Math.max(0, d))) - delta;
+                const delta = this.baseHasAccentOver ? t : 0;
+                const T = this.isLineAbove ? 3 * tex.rule_thickness : t;
+                const k = (accent
+                    ? T
+                    : Math.max(tex.big_op_spacing1, tex.big_op_spacing3 - Math.max(0, d))) - delta;
                 return [k, basebox.h * basebox.rscale + k + d];
             }
             getUnderKV(basebox, underbox) {
@@ -148,21 +160,29 @@ export function CommonScriptbaseMixin(Base) {
                 const tex = this.font.params;
                 const h = underbox.h * underbox.rscale;
                 const t = tex.rule_thickness * tex.separation_factor;
-                const delta = (this.baseHasAccentUnder ? t : 0);
-                const T = (this.isLineBelow ? 3 * tex.rule_thickness : t);
-                const k = (accent ? T : Math.max(tex.big_op_spacing2, tex.big_op_spacing4 - h)) - delta;
+                const delta = this.baseHasAccentUnder ? t : 0;
+                const T = this.isLineBelow ? 3 * tex.rule_thickness : t;
+                const k = (accent ? T : Math.max(tex.big_op_spacing2, tex.big_op_spacing4 - h)) -
+                    delta;
                 return [k, -(basebox.d * basebox.rscale + k + h)];
             }
             getDeltaW(boxes, delta = [0, 0, 0]) {
                 const align = this.node.attributes.get('align');
-                const widths = boxes.map(box => box.w * box.rscale);
-                widths[0] -= (this.baseRemoveIc && !this.baseCore.node.attributes.get('largeop') ? this.baseIc : 0);
+                const widths = boxes.map((box) => box.w * box.rscale);
+                widths[0] -=
+                    this.baseRemoveIc && !this.baseCore.node.attributes.get('largeop')
+                        ? this.baseIc
+                        : 0;
                 const w = Math.max(...widths);
                 const dw = [];
                 let m = 0;
                 for (const i of widths.keys()) {
-                    dw[i] = (align === 'center' ? (w - widths[i]) / 2 :
-                        align === 'right' ? w - widths[i] : 0) + delta[i];
+                    dw[i] =
+                        (align === 'center'
+                            ? (w - widths[i]) / 2
+                            : align === 'right'
+                                ? w - widths[i]
+                                : 0) + delta[i];
                     if (dw[i] < m) {
                         m = -dw[i];
                     }
@@ -172,7 +192,7 @@ export function CommonScriptbaseMixin(Base) {
                         dw[i] += m;
                     }
                 }
-                [1, 2].map(i => dw[i] += (boxes[i] ? boxes[i].dx * boxes[0].rscale : 0));
+                [1, 2].map((i) => (dw[i] += boxes[i] ? boxes[i].dx * boxes[0].rscale : 0));
                 return dw;
             }
             getDelta(script, noskew = false) {
@@ -181,22 +201,23 @@ export function CommonScriptbaseMixin(Base) {
                 if (accent) {
                     sk -= script.getOuterBBox().sk;
                 }
-                return ((accent && !noskew ? sk : 0) + this.font.skewIcFactor * ic) * this.baseScale;
+                return (((accent && !noskew ? sk : 0) + this.font.skewIcFactor * ic) *
+                    this.baseScale);
             }
             stretchChildren() {
-                let stretchy = [];
+                const stretchy = [];
                 for (const child of this.childNodes) {
-                    if (child.canStretch(2)) {
+                    if (child.canStretch(DIRECTION.Horizontal)) {
                         stretchy.push(child);
                     }
                 }
-                let count = stretchy.length;
-                let nodeCount = this.childNodes.length;
+                const count = stretchy.length;
+                const nodeCount = this.childNodes.length;
                 if (count && nodeCount > 1) {
                     let W = 0;
-                    let all = (count > 1 && count === nodeCount);
+                    const all = count > 1 && count === nodeCount;
                     for (const child of this.childNodes) {
-                        const noStretch = (child.stretch.dir === 0);
+                        const noStretch = child.stretch.dir === DIRECTION.None;
                         if (all || noStretch) {
                             const { w, rscale } = child.getOuterBBox(noStretch);
                             if (w * rscale > W)
@@ -222,19 +243,24 @@ export function CommonScriptbaseMixin(Base) {
                 this.isLineAbove = false;
                 this.isLineBelow = false;
                 this.isMathAccent = false;
-                const core = this.baseCore = this.getBaseCore();
+                const core = (this.baseCore = this.getBaseCore());
                 if (!core)
                     return;
                 this.setBaseAccentsFor(core);
                 this.baseScale = this.getBaseScale();
                 this.baseIc = this.getBaseIc();
                 this.baseIsChar = this.isCharBase();
-                this.isMathAccent = this.baseIsChar &&
-                    (this.scriptChild && !!this.scriptChild.coreMO().node.getProperty('mathaccent'));
+                this.isMathAccent =
+                    this.baseIsChar &&
+                        this.scriptChild &&
+                        this.scriptChild.coreMO().node.getProperty('mathaccent') !== undefined;
                 this.checkLineAccents();
-                this.baseRemoveIc = !this.isLineAbove && !this.isLineBelow &&
-                    (!this.constructor.useIC ||
-                        this.isMathAccent);
+                this.baseRemoveIc =
+                    !this.isLineAbove &&
+                        !this.isLineBelow &&
+                        (!(this.constructor
+                            .useIC) ||
+                            this.isMathAccent);
             }
             computeBBox(bbox, recompute = false) {
                 bbox.empty();
@@ -252,14 +278,20 @@ export function CommonScriptbaseMixin(Base) {
             }
             get breakCount() {
                 if (this._breakCount < 0) {
-                    this._breakCount = (this.node.isEmbellished ? this.coreMO().embellishedBreakCount :
-                        !this.node.linebreakContainer ? this.childNodes[0].breakCount : 0);
+                    this._breakCount = this.node.isEmbellished
+                        ? this.coreMO().embellishedBreakCount
+                        : !this.node.linebreakContainer
+                            ? this.childNodes[0].breakCount
+                            : 0;
                 }
                 return this._breakCount;
             }
             breakTop(mrow, child) {
-                return (this.node.linebreakContainer || !this.parent ||
-                    this.node.childIndex(child.node) ? mrow : this.parent.breakTop(mrow, this));
+                return this.node.linebreakContainer ||
+                    !this.parent ||
+                    this.node.childIndex(child.node)
+                    ? mrow
+                    : this.parent.breakTop(mrow, this);
             }
             computeLineBBox(i) {
                 const n = this.breakCount;
@@ -267,7 +299,9 @@ export function CommonScriptbaseMixin(Base) {
                     return LineBBox.from(this.getOuterBBox(), this.linebreakOptions.lineleading);
                 const bbox = this.baseChild.getLineBBox(i).copy();
                 if (i < n) {
-                    i === 0 && this.addLeftBorders(bbox);
+                    if (i === 0) {
+                        this.addLeftBorders(bbox);
+                    }
                     this.addMiddleBorders(bbox);
                 }
                 else {

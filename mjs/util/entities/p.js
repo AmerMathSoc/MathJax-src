@@ -56,6 +56,6 @@ Entities.add({
     propto: '\u221D',
     prsim: '\u227E',
     prurel: '\u22B0',
-    puncsp: '\u2008'
+    puncsp: '\u2008',
 }, 'p');
 //# sourceMappingURL=p.js.map

@@ -1,6 +1,8 @@
-export const ARROWX = 4, ARROWDX = 1, ARROWY = 2;
-export const THICKNESS = .067;
-export const PADDING = .2;
+export const ARROWX = 4;
+export const ARROWDX = 1;
+export const ARROWY = 2;
+export const THICKNESS = 0.067;
+export const PADDING = 0.2;
 export const SOLID = THICKNESS + 'em solid';
 export const sideIndex = { top: 0, right: 1, bottom: 2, left: 3 };
 export const sideNames = Object.keys(sideIndex);
@@ -30,7 +32,7 @@ export const arrowDef = {
     right: [0, false, false, 'horizontalstrike'],
     left: [Math.PI, false, false, 'horizontalstrike'],
     updown: [Math.PI / 2, true, true, 'verticalstrike uparrow downarrow'],
-    leftright: [0, true, false, 'horizontalstrike leftarrow rightarrow']
+    leftright: [0, true, false, 'horizontalstrike leftarrow rightarrow'],
 };
 export const diagonalArrowDef = {
     updiagonal: [-1, 0, false, 'updiagonalstrike northeastarrow'],
@@ -38,8 +40,18 @@ export const diagonalArrowDef = {
     southeast: [1, 0, false, 'downdiagonalstrike'],
     northwest: [1, Math.PI, false, 'downdiagonalstrike'],
     southwest: [-1, Math.PI, false, 'updiagonalstrike'],
-    northeastsouthwest: [-1, 0, true, 'updiagonalstrike northeastarrow updiagonalarrow southwestarrow'],
-    northwestsoutheast: [1, 0, true, 'downdiagonalstrike northwestarrow southeastarrow']
+    northeastsouthwest: [
+        -1,
+        0,
+        true,
+        'updiagonalstrike northeastarrow updiagonalarrow southwestarrow',
+    ],
+    northwestsoutheast: [
+        1,
+        0,
+        true,
+        'downdiagonalstrike northwestarrow southeastarrow',
+    ],
 };
 export const arrowBBox = {
     up: (node) => arrowBBoxW(node, [arrowHead(node), 0, node.padding, 0]),
@@ -47,12 +59,14 @@ export const arrowBBox = {
     right: (node) => arrowBBoxHD(node, [0, arrowHead(node), 0, node.padding]),
     left: (node) => arrowBBoxHD(node, [0, node.padding, 0, arrowHead(node)]),
     updown: (node) => arrowBBoxW(node, [arrowHead(node), 0, arrowHead(node), 0]),
-    leftright: (node) => arrowBBoxHD(node, [0, arrowHead(node), 0, arrowHead(node)])
+    leftright: (node) => arrowBBoxHD(node, [0, arrowHead(node), 0, arrowHead(node)]),
 };
 export const CommonBorder = function (render) {
     return (side) => {
         const i = sideIndex[side];
-        return [side, {
+        return [
+            side,
+            {
                 renderer: render,
                 bbox: (node) => {
                     const bbox = [0, 0, 0, 0];
@@ -63,15 +77,18 @@ export const CommonBorder = function (render) {
                     const bbox = [0, 0, 0, 0];
                     bbox[i] = node.thickness;
                     return bbox;
-                }
-            }];
+                },
+            },
+        ];
     };
 };
 export const CommonBorder2 = function (render) {
     return (name, side1, side2) => {
         const i1 = sideIndex[side1];
         const i2 = sideIndex[side2];
-        return [name, {
+        return [
+            name,
+            {
                 renderer: render,
                 bbox: (node) => {
                     const t = node.thickness + node.padding;
@@ -84,23 +101,29 @@ export const CommonBorder2 = function (render) {
                     bbox[i1] = bbox[i2] = node.thickness;
                     return bbox;
                 },
-                remove: side1 + ' ' + side2
-            }];
+                remove: side1 + ' ' + side2,
+            },
+        ];
     };
 };
 export const CommonDiagonalStrike = function (render) {
     return (name) => {
         const cname = 'mjx-' + name.charAt(0) + 'strike';
-        return [name + 'diagonalstrike', {
+        return [
+            name + 'diagonalstrike',
+            {
                 renderer: render(cname),
-                bbox: fullBBox
-            }];
+                bbox: fullBBox,
+            },
+        ];
     };
 };
 export const CommonDiagonalArrow = function (render) {
     return (name) => {
         const [c, pi, double, remove] = diagonalArrowDef[name];
-        return [name + 'arrow', {
+        return [
+            name + 'arrow',
+            {
                 renderer: (node, _child) => {
                     const [a, W] = node.arrowAW();
                     const arrow = node.arrow(W, c * (a - pi), double);
@@ -108,30 +131,41 @@ export const CommonDiagonalArrow = function (render) {
                 },
                 bbox: (node) => {
                     const { a, x, y } = node.arrowData();
-                    const [ax, ay, adx] = [node.arrowhead.x, node.arrowhead.y, node.arrowhead.dx];
+                    const [ax, ay, adx] = [
+                        node.arrowhead.x,
+                        node.arrowhead.y,
+                        node.arrowhead.dx,
+                    ];
                     const [b, ar] = node.getArgMod(ax + adx, ay);
                     const dy = y + (b > a ? node.thickness * ar * Math.sin(b - a) : 0);
-                    const dx = x + (b > Math.PI / 2 - a ? node.thickness * ar * Math.sin(b + a - Math.PI / 2) : 0);
+                    const dx = x +
+                        (b > Math.PI / 2 - a
+                            ? node.thickness * ar * Math.sin(b + a - Math.PI / 2)
+                            : 0);
                     return [dy, dx, dy, dx];
                 },
-                remove: remove
-            }];
+                remove: remove,
+            },
+        ];
     };
 };
 export const CommonArrow = function (render) {
     return (name) => {
         const [angle, double, isVertical, remove] = arrowDef[name];
-        return [name + 'arrow', {
+        return [
+            name + 'arrow',
+            {
                 renderer: (node, _child) => {
                     const { w, h, d } = node.getBBox();
-                    const [W, offset] = (isVertical ? [h + d, 'X'] : [w, 'Y']);
+                    const [W, offset] = isVertical ? [h + d, 'X'] : [w, 'Y'];
                     const dd = node.getOffset(offset);
                     const arrow = node.arrow(W, angle, double, offset, dd);
                     render(node, arrow);
                 },
                 bbox: arrowBBox[name],
-                remove: remove
-            }];
+                remove: remove,
+            },
+        ];
     };
 };
 //# sourceMappingURL=Notation.js.map

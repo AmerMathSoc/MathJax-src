@@ -26,16 +26,15 @@ export class MmlMaction extends AbstractMmlNode {
     verifyAttributes(options) {
         super.verifyAttributes(options);
         if (this.attributes.get('actiontype') !== 'toggle' &&
-            this.attributes.getExplicit('selection') !== undefined) {
-            const attributes = this.attributes.getAllAttributes();
-            delete attributes.selection;
+            this.attributes.hasExplicit('selection')) {
+            this.attributes.unset('selection');
         }
     }
     setTeXclass(prev) {
         if (this.attributes.get('actiontype') === 'tooltip' && this.childNodes[1]) {
             this.childNodes[1].setTeXclass(null);
         }
-        let selected = this.selected;
+        const selected = this.selected;
         prev = selected.setTeXclass(prev);
         this.updateTeXclass(selected);
         return prev;

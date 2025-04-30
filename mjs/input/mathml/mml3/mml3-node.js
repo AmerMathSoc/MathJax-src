@@ -1,15 +1,15 @@
-import { xsltFilename } from '#mml3/xsltFilename.js';
+import { mjxRoot } from '#root/root.js';
 export function createTransform() {
     const nodeRequire = eval('require');
     try {
         nodeRequire.resolve('saxon-js');
     }
-    catch (err) {
+    catch (_err) {
         throw Error('Saxon-js not found.  Run the command:\n    npm install saxon-js\nand try again.');
     }
     const Saxon = nodeRequire('saxon-js');
     const path = nodeRequire('path');
-    const xslt = nodeRequire(xsltFilename(path));
+    const xslt = nodeRequire(path.resolve(mjxRoot(), 'input', 'mml', 'extensions', 'mml3.sef.json'));
     return (node, doc) => {
         const adaptor = doc.adaptor;
         let mml = adaptor.outerHTML(node);
@@ -21,10 +21,10 @@ export function createTransform() {
             result = adaptor.firstChild(adaptor.body(adaptor.parse(Saxon.transform({
                 stylesheetInternal: xslt,
                 sourceText: mml,
-                destination: 'serialized'
+                destination: 'serialized',
             }).principalResult)));
         }
-        catch (err) {
+        catch (_err) {
             result = node;
         }
         return result;

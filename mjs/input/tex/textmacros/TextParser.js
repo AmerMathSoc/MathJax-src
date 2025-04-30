@@ -1,6 +1,6 @@
 import TexParser from '../TexParser.js';
 import TexError from '../TexError.js';
-import ParseUtil from '../ParseUtil.js';
+import { ParseUtil } from '../ParseUtil.js';
 import { AbstractMmlNode } from '../../../core/MmlTree/MmlNode.js';
 import NodeUtil from '../NodeUtil.js';
 import { StopItem, StyleItem } from '../base/BaseItems.js';
@@ -18,9 +18,14 @@ export class TextParser extends TexParser {
     mml() {
         this.copyLists();
         this.configuration.popParser();
-        return (this.level != null ?
-            this.create('node', 'mstyle', this.nodes, { displaystyle: false, scriptlevel: this.level }) :
-            this.nodes.length === 1 ? this.nodes[0] : this.create('node', 'mrow', this.nodes));
+        return this.level != null
+            ? this.create('node', 'mstyle', this.nodes, {
+                displaystyle: false,
+                scriptlevel: this.level,
+            })
+            : this.nodes.length === 1
+                ? this.nodes[0]
+                : this.create('node', 'mrow', this.nodes);
     }
     copyLists() {
         const parseOptions = this.texParser.configuration;
@@ -63,11 +68,8 @@ export class TextParser extends TexParser {
     }
     PushMath(mml) {
         const env = this.stack.env;
-        if (!mml.isKind('TeXAtom')) {
-            mml = this.create('node', 'TeXAtom', [mml]);
-        }
         for (const name of ['mathsize', 'mathcolor']) {
-            if (env[name] && !mml.attributes.getExplicit(name)) {
+            if (env[name] && !mml.attributes.hasExplicit(name)) {
                 if (!mml.isToken && !mml.isKind('mstyle')) {
                     mml = this.create('node', 'mstyle', [mml]);
                 }
@@ -77,6 +79,9 @@ export class TextParser extends TexParser {
         if (mml.isInferred) {
             mml = this.create('node', 'mrow', mml.childNodes);
         }
+        if (!mml.isKind('TeXAtom')) {
+            mml = this.create('node', 'TeXAtom', [mml]);
+        }
         this.nodes.push(mml);
     }
     addAttributes(mml) {
@@ -84,7 +89,7 @@ export class TextParser extends TexParser {
         if (!mml.isToken)
             return;
         for (const name of ['mathsize', 'mathcolor', 'mathvariant']) {
-            if (env[name] && !mml.attributes.getExplicit(name)) {
+            if (env[name] && !mml.attributes.hasExplicit(name)) {
                 NodeUtil.setAttribute(mml, name, env[name]);
             }
         }
@@ -92,10 +97,10 @@ export class TextParser extends TexParser {
     ParseTextArg(name, env) {
         const text = this.GetArgument(name);
         env = Object.assign(Object.assign({}, this.stack.env), env);
-        return (new TextParser(text, env, this.configuration)).mml();
+        return new TextParser(text, env, this.configuration).mml();
     }
     ParseArg(name) {
-        return (new TextParser(this.GetArgument(name), this.stack.env, this.configuration)).mml();
+        return new TextParser(this.GetArgument(name), this.stack.env, this.configuration).mml();
     }
     Error(id, message, ...args) {
         throw new TexError(id, message, ...args);

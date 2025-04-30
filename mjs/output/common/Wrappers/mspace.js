@@ -6,12 +6,15 @@ export function CommonMspaceMixin(Base) {
             return this.node.canBreak;
         }
         get breakCount() {
-            return (this.breakStyle ? 1 : 0);
+            return this.breakStyle ? 1 : 0;
         }
         setBreakStyle(linebreak = '') {
-            this.breakStyle = (linebreak ||
-                ((this.node.hasNewline ||
-                    this.node.getProperty('forcebreak')) ? 'before' : ''));
+            this.breakStyle =
+                linebreak ||
+                    (this.node.hasNewline ||
+                        this.node.getProperty('forcebreak')
+                        ? 'before'
+                        : '');
         }
         constructor(factory, node, parent = null) {
             super(factory, node, parent);
@@ -29,7 +32,8 @@ export function CommonMspaceMixin(Base) {
             const bbox = LineBBox.from(BBox.zero(), leading);
             if (i === 1) {
                 bbox.getIndentData(this.node);
-                bbox.isFirst = true;
+                bbox.w = this.getBBox().w;
+                bbox.isFirst = bbox.w === 0;
             }
             return bbox;
         }

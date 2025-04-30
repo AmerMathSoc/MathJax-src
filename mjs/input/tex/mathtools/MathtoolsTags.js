@@ -3,10 +3,11 @@ import { TagsFactory } from '../Tags.js';
 let tagID = 0;
 export function MathtoolsTagFormat(config, jax) {
     const tags = jax.parseOptions.options.tags;
-    if (tags !== 'base' && config.tags.hasOwnProperty(tags)) {
+    if (tags !== 'base' && Object.hasOwn(config.tags, tags)) {
         TagsFactory.add(tags, config.tags[tags]);
     }
-    const TagClass = TagsFactory.create(jax.parseOptions.options.tags).constructor;
+    const TagClass = TagsFactory.create(jax.parseOptions.options.tags)
+        .constructor;
     class TagFormat extends TagClass {
         constructor() {
             super();
@@ -15,7 +16,7 @@ export function MathtoolsTagFormat(config, jax) {
             const forms = jax.parseOptions.options.mathtools.tagforms;
             for (const form of Object.keys(forms)) {
                 if (!Array.isArray(forms[form]) || forms[form].length !== 3) {
-                    throw new TexError('InvalidTagFormDef', 'The tag form definition for "%1" should be an array fo three strings', form);
+                    throw new TexError('InvalidTagFormDef', 'The tag form definition for "%1" should be an array of three strings', form);
                 }
                 this.mtFormats.set(form, forms[form]);
             }
@@ -23,7 +24,9 @@ export function MathtoolsTagFormat(config, jax) {
         formatTag(tag) {
             if (this.mtCurrent) {
                 const [left, right, format] = this.mtCurrent;
-                return (format ? `${left}${format}{${tag}}${right}` : `${left}${tag}${right}`);
+                return format
+                    ? `${left}${format}{${tag}}${right}`
+                    : `${left}${tag}${right}`;
             }
             return super.formatTag(tag);
         }

@@ -4,9 +4,14 @@ import { OptionList } from './util/Options.js';
 import { MathDocument } from './core/MathDocument.js';
 export declare const mathjax: {
     version: string;
+    context: {
+        window: Window & typeof globalThis;
+        document: Document;
+    };
     handlers: HandlerList<any, any, any>;
     document: (document: any, options: OptionList) => MathDocument<any, any, any>;
     handleRetriesFor: typeof handleRetriesFor;
     retryAfter: typeof retryAfter;
     asyncLoad: (file: string) => any;
+    asyncIsSynchronous: boolean;
 };

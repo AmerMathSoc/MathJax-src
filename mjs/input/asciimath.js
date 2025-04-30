@@ -4,9 +4,10 @@ import { separateOptions } from '../util/Options.js';
 import { FindAsciiMath } from './asciimath/FindAsciiMath.js';
 export class AsciiMath extends AbstractInputJax {
     constructor(options) {
-        let [, find, am] = separateOptions(options, FindAsciiMath.OPTIONS, AsciiMath.OPTIONS);
+        const [, find, am] = separateOptions(options, FindAsciiMath.OPTIONS, AsciiMath.OPTIONS);
         super(am);
-        this.findAsciiMath = this.options['FindAsciiMath'] || new FindAsciiMath(find);
+        this.findAsciiMath =
+            this.options['FindAsciiMath'] || new FindAsciiMath(find);
     }
     compile(math, _document) {
         return LegacyAsciiMath.Compile(math.math, math.display);

@@ -14,7 +14,7 @@ export class ProofTreeItem extends BaseItem {
     }
     checkItem(item) {
         if (item.isKind('end') && item.getName() === 'prooftree') {
-            let node = this.toMml();
+            const node = this.toMml();
             BussproofsUtil.setProperty(node, 'proof', true);
             return [[this.factory.create('mml', node), item], true];
         }
@@ -31,7 +31,7 @@ export class ProofTreeItem extends BaseItem {
             return tree;
         }
         this.innerStack.Push(this.factory.create('stop'));
-        let prefix = this.innerStack.Top().toMml();
+        const prefix = this.innerStack.Top().toMml();
         return this.create('node', 'mrow', [prefix, tree], {});
     }
 }

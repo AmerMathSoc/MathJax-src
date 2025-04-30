@@ -16,7 +16,9 @@ export function CommonMunderMixin(Base) {
             const basebox = this.baseChild.getOuterBBox();
             const underbox = this.scriptChild.getOuterBBox();
             const v = this.getUnderKV(basebox, underbox)[1];
-            const delta = (this.isLineBelow ? 0 : this.getDelta(this.scriptChild, true));
+            const delta = this.isLineBelow
+                ? 0
+                : this.getDelta(this.scriptChild, true);
             const [bw, uw] = this.getDeltaW([basebox, underbox], [0, -delta]);
             bbox.combine(basebox, bw, 0);
             bbox.combine(underbox, uw, v);
@@ -47,7 +49,7 @@ export function CommonMoverMixin(Base) {
                 basebox.h = Math.max(basebox.h, this.font.params.x_height * this.baseScale);
             }
             const u = this.getOverKU(basebox, overbox)[1];
-            const delta = (this.isLineAbove ? 0 : this.getDelta(this.scriptChild));
+            const delta = this.isLineAbove ? 0 : this.getDelta(this.scriptChild);
             const [bw, ow] = this.getDeltaW([basebox, overbox], [0, delta]);
             bbox.combine(basebox, bw, 0);
             bbox.combine(overbox, ow, u);

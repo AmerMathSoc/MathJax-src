@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMfencedMixin } from '../../common/Wrappers/mfenced.js';
+import { CommonMfencedMixin, } from '../../common/Wrappers/mfenced.js';
 import { MmlMfenced } from '../../../core/MmlTree/MmlNodes/mfenced.js';
 export const ChtmlMfenced = (function () {
     var _a;

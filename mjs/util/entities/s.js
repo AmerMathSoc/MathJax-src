@@ -142,6 +142,6 @@ Entities.add({
     swarhk: '\u2926',
     swarrow: '\u2199',
     swnwar: '\u292A',
-    szlig: '\u00DF'
+    szlig: '\u00DF',
 }, 's');
 //# sourceMappingURL=s.js.map

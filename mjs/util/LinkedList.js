@@ -17,7 +17,7 @@ export class LinkedList {
     }
     push(...args) {
         for (const data of args) {
-            let item = new ListItem(data);
+            const item = new ListItem(data);
             item.next = this.list;
             item.prev = this.list.prev;
             this.list.prev = item;
@@ -26,7 +26,7 @@ export class LinkedList {
         return this;
     }
     pop() {
-        let item = this.list.prev;
+        const item = this.list.prev;
         if (item.data === END) {
             return null;
         }
@@ -37,7 +37,7 @@ export class LinkedList {
     }
     unshift(...args) {
         for (const data of args.slice(0).reverse()) {
-            let item = new ListItem(data);
+            const item = new ListItem(data);
             item.next = this.list.next;
             item.prev = this.list;
             this.list.next = item;
@@ -46,7 +46,7 @@ export class LinkedList {
         return this;
     }
     shift() {
-        let item = this.list.next;
+        const item = this.list.next;
         if (item.data === END) {
             return null;
         }
@@ -70,6 +70,7 @@ export class LinkedList {
             }
             item = next;
         }
+        return this;
     }
     clear() {
         this.list.next.prev = this.list.prev.next = null;
@@ -94,9 +95,10 @@ export class LinkedList {
         if (isBefore === null) {
             isBefore = this.isBefore.bind(this);
         }
-        let item = new ListItem(data);
+        const item = new ListItem(data);
         let cur = this.list.next;
-        while (cur.data !== END && isBefore(cur.data, item.data)) {
+        while (cur.data !== END &&
+            isBefore(cur.data, item.data)) {
             cur = cur.next;
         }
         item.prev = cur.prev;
@@ -108,14 +110,14 @@ export class LinkedList {
         if (isBefore === null) {
             isBefore = this.isBefore.bind(this);
         }
-        let lists = [];
+        const lists = [];
         for (const item of this) {
             lists.push(new LinkedList(item));
         }
         this.list.next = this.list.prev = this.list;
         while (lists.length > 1) {
-            let l1 = lists.shift();
-            let l2 = lists.shift();
+            const l1 = lists.shift();
+            const l2 = lists.shift();
             l1.merge(l2, isBefore);
             lists.push(l1);
         }

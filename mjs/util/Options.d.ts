@@ -10,7 +10,7 @@ export declare const OPTIONS: {
 };
 export declare class Expandable {
 }
-export declare function expandable(def: OptionList): any;
+export declare function expandable(def: OptionList): OptionList;
 export declare function makeArray(x: any): any[];
 export declare function keys(def: OptionList): (string | symbol)[];
 export declare function copy(def: OptionList): OptionList;

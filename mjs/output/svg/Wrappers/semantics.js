@@ -1,6 +1,7 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonSemanticsMixin } from '../../common/Wrappers/semantics.js';
-import { MmlSemantics, MmlAnnotation, MmlAnnotationXML } from '../../../core/MmlTree/MmlNodes/semantics.js';
+import { CommonSemanticsMixin, } from '../../common/Wrappers/semantics.js';
+import { CommonXmlNodeMixin, } from '../../common/Wrappers/XmlNode.js';
+import { MmlSemantics, MmlAnnotation, MmlAnnotationXML, } from '../../../core/MmlTree/MmlNodes/semantics.js';
 import { XMLNode } from '../../../core/MmlTree/MmlNode.js';
 export const SvgSemantics = (function () {
     var _a;
@@ -40,39 +41,46 @@ export const SvgAnnotationXML = (function () {
             'foreignObject[data-mjx-xml]': {
                 'font-family': 'initial',
                 'line-height': 'normal',
-                overflow: 'visible'
-            }
+                overflow: 'visible',
+            },
         },
         _a;
 })();
 export const SvgXmlNode = (function () {
     var _a;
-    return _a = class SvgXmlNode extends SvgWrapper {
+    const Base = CommonXmlNodeMixin(SvgWrapper);
+    return _a = class SvgXmlNode extends Base {
             toSVG(parents) {
-                const xml = this.adaptor.clone(this.node.getXML());
-                const em = this.jax.math.metrics.em * this.jax.math.metrics.scale;
-                const scale = this.fixed(1 / em);
+                const metrics = this.jax.math.metrics;
+                const em = metrics.em * metrics.scale * this.rscale;
+                const scale = this.fixed(1 / em, 3);
                 const { w, h, d } = this.getBBox();
-                this.dom = [this.adaptor.append(parents[0], this.svg('foreignObject', {
+                this.dom = [
+                    this.adaptor.append(parents[0], this.svg('foreignObject', {
                         'data-mjx-xml': true,
                         y: this.jax.fixed(-h * em) + 'px',
                         width: this.jax.fixed(w * em) + 'px',
                         height: this.jax.fixed((h + d) * em) + 'px',
-                        transform: `scale(${scale}) matrix(1 0 0 -1 0 0)`
-                    }, [xml]))];
+                        transform: `scale(${scale}) matrix(1 0 0 -1 0 0)`,
+                    }, [this.getHTML()])),
+                ];
             }
-            computeBBox(bbox, _recompute = false) {
-                const { w, h, d } = this.jax.measureXMLnode(this.node.getXML());
-                bbox.w = w;
-                bbox.h = h;
-                bbox.d = d;
+            addHDW(html, styles) {
+                html = this.html('mjx-html-holder', { style: styles }, [html]);
+                const { h, d, w } = this.getBBox();
+                const scale = this.metrics.scale;
+                styles.height = this.em((h + d) * scale);
+                styles.width = this.em(w * scale);
+                styles['vertical-align'] = this.em(-d * scale);
+                delete styles['font-size'];
+                delete styles['font-family'];
+                return html;
             }
-            getStyles() { }
-            getScale() { }
-            getVariant() { }
         },
         _a.kind = XMLNode.prototype.kind,
-        _a.autoStyle = false,
+        _a.styles = Object.assign({ 'foreignObject[data-mjx-html]': {
+                overflow: 'visible',
+            } }, Base.styles),
         _a;
 })();
 //# sourceMappingURL=semantics.js.map

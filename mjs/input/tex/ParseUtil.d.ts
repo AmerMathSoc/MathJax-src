@@ -3,31 +3,38 @@ import { EnvList } from './StackItem.js';
 import { ArrayItem } from './base/BaseItems.js';
 import ParseOptions from './ParseOptions.js';
 import TexParser from './TexParser.js';
-declare namespace ParseUtil {
-    function matchDimen(dim: string, rest?: boolean): [string, string, number];
-    function dimen2em(dim: string): number;
-    function Em(m: number): string;
-    function cols(...W: number[]): string;
-    function fenced(configuration: ParseOptions, open: string, mml: MmlNode, close: string, big?: string, color?: string): MmlNode;
-    function fixedFence(configuration: ParseOptions, open: string, mml: MmlNode, close: string): MmlNode;
-    function mathPalette(configuration: ParseOptions, fence: string, side: string): MmlNode;
-    function fixInitialMO(configuration: ParseOptions, nodes: MmlNode[]): void;
-    function internalMath(parser: TexParser, text: string, level?: number | string, font?: string): MmlNode[];
-    function internalText(parser: TexParser, text: string, def: EnvList): MmlNode;
-    function underOver(parser: TexParser, base: MmlNode, script: MmlNode, pos: string, stack: boolean): MmlNode;
-    function checkMovableLimits(base: MmlNode): void;
-    function trimSpaces(text: string): string;
-    function setArrayAlign(array: ArrayItem, align: string, parser?: TexParser): ArrayItem;
-    function substituteArgs(parser: TexParser, args: string[], str: string): string;
-    function addArgs(parser: TexParser, s1: string, s2: string): string;
-    function checkMaxMacros(parser: TexParser, isMacro?: boolean): void;
-    function checkEqnEnv(parser: TexParser, nestable?: boolean): void;
-    function copyNode(node: MmlNode, parser: TexParser): MmlNode;
-    function MmlFilterAttribute(_parser: TexParser, _name: string, value: string): string;
-    function getFontDef(parser: TexParser): EnvList;
-    function keyvalOptions(attrib: string, allowed?: {
-        [key: string]: number;
-    }, error?: boolean): EnvList;
-    function isLatinOrGreekChar(c: string): boolean;
+export declare class KeyValueDef<T> {
+    name: string;
+    verify: (value: string) => boolean;
+    convert: (value: string) => T;
+    static oneof(...values: string[]): KeyValueDef<string>;
+    constructor(name: string, verify: (value: string) => boolean, convert: (value: string) => T);
 }
-export default ParseUtil;
+export type KeyValueFn = (...data: any[]) => KeyValueDef<any>;
+export type KeyValueType = KeyValueDef<any>;
+export declare const KeyValueTypes: {
+    [name: string]: KeyValueType;
+};
+export declare const ParseUtil: {
+    cols(...W: number[]): string;
+    fenced(configuration: ParseOptions, open: string, mml: MmlNode, close: string, big?: string, color?: string): MmlNode;
+    fixedFence(configuration: ParseOptions, open: string, mml: MmlNode, close: string): MmlNode;
+    mathPalette(configuration: ParseOptions, fence: string, side: string): MmlNode;
+    fixInitialMO(configuration: ParseOptions, nodes: MmlNode[]): void;
+    internalMath(parser: TexParser, text: string, level?: number | string, font?: string): MmlNode[];
+    internalText(parser: TexParser, text: string, def: EnvList): MmlNode;
+    underOver(parser: TexParser, base: MmlNode, script: MmlNode, pos: string, stack: boolean): MmlNode;
+    checkMovableLimits(base: MmlNode): void;
+    setArrayAlign(array: ArrayItem, align: string, parser?: TexParser): ArrayItem;
+    substituteArgs(parser: TexParser, args: string[], str: string): string;
+    addArgs(parser: TexParser, s1: string, s2: string): string;
+    checkMaxMacros(parser: TexParser, isMacro?: boolean): void;
+    checkEqnEnv(parser: TexParser, nestable?: boolean): void;
+    copyNode(node: MmlNode, parser: TexParser): MmlNode;
+    mmlFilterAttribute(_parser: TexParser, _name: string, value: string): string;
+    getFontDef(parser: TexParser): EnvList;
+    keyvalOptions(attrib: string, allowed?: {
+        [key: string]: number | KeyValueType;
+    }, error?: boolean, l3keys?: boolean): EnvList;
+    isLatinOrGreekChar(c: string): boolean;
+};

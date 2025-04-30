@@ -7,6 +7,6 @@ Entities.add({
     wedgeq: '\u2259',
     wp: '\u2118',
     wr: '\u2240',
-    wreath: '\u2240'
+    wreath: '\u2240',
 }, 'w');
 //# sourceMappingURL=w.js.map

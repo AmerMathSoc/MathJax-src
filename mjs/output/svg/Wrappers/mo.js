@@ -1,6 +1,7 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMoMixin } from '../../common/Wrappers/mo.js';
+import { CommonMoMixin, } from '../../common/Wrappers/mo.js';
 import { MmlMo } from '../../../core/MmlTree/MmlNodes/mo.js';
+import { DIRECTION } from '../FontData.js';
 const VFUZZ = 0.1;
 const HFUZZ = 0.1;
 export const SvgMo = (function () {
@@ -9,14 +10,15 @@ export const SvgMo = (function () {
     return _a = class SvgMo extends Base {
             toSVG(parents) {
                 const attributes = this.node.attributes;
-                const symmetric = attributes.get('symmetric') && this.stretch.dir !== 2;
-                const stretchy = this.stretch.dir !== 0;
+                const symmetric = attributes.get('symmetric') &&
+                    this.stretch.dir !== DIRECTION.Horizontal;
+                const stretchy = this.stretch.dir !== DIRECTION.None;
                 if (stretchy && this.size === null) {
                     this.getStretchedVariant([]);
                 }
-                let svg = this.standardSvgNodes(parents);
+                const svg = this.standardSvgNodes(parents);
                 if (svg.length > 1 && this.breakStyle !== 'duplicate') {
-                    const i = (this.breakStyle === 'after' ? 1 : 0);
+                    const i = this.breakStyle === 'after' ? 1 : 0;
                     this.adaptor.remove(svg[i]);
                     svg[i] = null;
                 }
@@ -24,21 +26,33 @@ export const SvgMo = (function () {
                     this.stretchSvg();
                 }
                 else {
-                    const u = (symmetric || attributes.get('largeop') ? this.fixed(this.getCenterOffset()) : '0');
-                    const v = (this.node.getProperty('mathaccent') ? this.fixed(this.getAccentOffset()) : '0');
+                    const u = symmetric || attributes.get('largeop')
+                        ? this.fixed(this.getCenterOffset())
+                        : '0';
+                    const v = this.node.getProperty('mathaccent')
+                        ? this.fixed(this.getAccentOffset())
+                        : '0';
                     if (u !== '0' || v !== '0') {
-                        svg[0] && this.adaptor.setAttribute(svg[0], 'transform', `translate(${v} ${u})`);
-                        svg[1] && this.adaptor.setAttribute(svg[1], 'transform', `translate(${v} ${u})`);
+                        if (svg[0]) {
+                            this.adaptor.setAttribute(svg[0], 'transform', `translate(${v} ${u})`);
+                        }
+                        if (svg[1]) {
+                            this.adaptor.setAttribute(svg[1], 'transform', `translate(${v} ${u})`);
+                        }
                     }
-                    svg[0] && this.addChildren([svg[0]]);
-                    svg[1] && (this.multChar || this).addChildren([svg[1]]);
+                    if (svg[0]) {
+                        this.addChildren([svg[0]]);
+                    }
+                    if (svg[1]) {
+                        (this.multChar || this).addChildren([svg[1]]);
+                    }
                 }
             }
             stretchSvg() {
                 const stretch = this.stretch.stretch;
                 const variants = this.getStretchVariants();
                 const bbox = this.getBBox();
-                if (this.stretch.dir === 1) {
+                if (this.stretch.dir === DIRECTION.Vertical) {
                     this.stretchVertical(stretch, variants, bbox);
                 }
                 else {
@@ -146,7 +160,7 @@ export const SvgMo = (function () {
                 return [h + y, d - y];
             }
             addLeft(n, v) {
-                return (n ? this.addGlyph(n, v, 0, 0) : 0);
+                return n ? this.addGlyph(n, v, 0, 0) : 0;
             }
             addExtH(n, v, W, L, R, x = 0) {
                 if (!n)
@@ -162,13 +176,15 @@ export const SvgMo = (function () {
                 if (X <= 0)
                     return;
                 const svg = this.svg('svg', {
-                    width: this.fixed(X), height: this.fixed(Y),
-                    x: this.fixed(x + L), y: this.fixed(D),
-                    viewBox: [(s * w - X) / 2, D, X, Y].map(x => this.fixed(x)).join(' ')
+                    width: this.fixed(X),
+                    height: this.fixed(Y),
+                    x: this.fixed(x + L),
+                    y: this.fixed(D),
+                    viewBox: [(s * w - X) / 2, D, X, Y].map((x) => this.fixed(x)).join(' '),
                 });
                 this.addGlyph(n, v, 0, 0, svg);
                 const glyph = adaptor.lastChild(svg);
-                adaptor.setAttribute(glyph, 'transform', 'scale(' + this.jax.fixed(s) + ',1)');
+                adaptor.setAttribute(glyph, 'transform', `scale(${this.jax.fixed(s)},1)`);
                 if (this.dom[0]) {
                     adaptor.append(this.dom[0], svg);
                 }

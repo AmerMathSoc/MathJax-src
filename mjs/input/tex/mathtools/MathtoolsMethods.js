@@ -1,4 +1,5 @@
-import ParseUtil from '../ParseUtil.js';
+import { ParseUtil } from '../ParseUtil.js';
+import { UnitUtil } from '../UnitUtil.js';
 import { AmsMethods } from '../ams/AmsMethods.js';
 import BaseMethods from '../base/BaseMethods.js';
 import TexParser from '../TexParser.js';
@@ -7,9 +8,16 @@ import NodeUtil from '../NodeUtil.js';
 import { TEXCLASS } from '../../../core/MmlTree/MmlNode.js';
 import { length2em, em } from '../../../util/lengths.js';
 import { lookup } from '../../../util/Options.js';
-import NewcommandUtil from '../newcommand/NewcommandUtil.js';
+import { HandlerType } from '../HandlerTypes.js';
+import { Macro } from '../Token.js';
+import { NewcommandUtil, NewcommandTables, } from '../newcommand/NewcommandUtil.js';
 import NewcommandMethods from '../newcommand/NewcommandMethods.js';
+import { PrioritizedList } from '../../../util/PrioritizedList.js';
 import { MathtoolsUtil } from './MathtoolsUtil.js';
+export const LEGACYCONFIG = {
+    [HandlerType.MACRO]: ['mathtools-legacycolonsymbols'],
+};
+export const LEGACYPRIORITY = PrioritizedList.DEFAULTPRIORITY - 1;
 export const MathtoolsMethods = {
     MtMatrix(parser, begin, open, close) {
         const align = parser.GetBrackets(`\\begin{${begin.getName()}}`, 'c');
@@ -19,13 +27,14 @@ export const MathtoolsMethods = {
         if (!align) {
             align = parser.GetBrackets(`\\begin{${begin.getName()}}`, parser.options.mathtools['smallmatrix-align']);
         }
-        return MathtoolsMethods.Array(parser, begin, open, close, align, ParseUtil.Em(1 / 3), '.2em', 'S', 1);
+        return MathtoolsMethods.Array(parser, begin, open, close, align, UnitUtil.em(1 / 3), '.2em', 'S', 1);
     },
     MtMultlined(parser, begin) {
         const name = `\\begin{${begin.getName()}}`;
-        let pos = 'c', width = '';
+        let pos = parser.options.mathtools['multlined-pos'] || 'c';
+        let width = parser.options.mathtools['multlined-width'] || '';
         if (!parser.nextIsSpace()) {
-            const arg = parser.GetBrackets(name, parser.options.mathtools['multlined-pos'] || 'c');
+            const arg = parser.GetBrackets(name, pos);
             if (arg.match(/^[ctb]$/)) {
                 pos = arg;
                 width = !parser.nextIsSpace() ? parser.GetBrackets(name, '') : '';
@@ -33,7 +42,7 @@ export const MathtoolsMethods = {
             else {
                 width = arg;
             }
-            if (width && !ParseUtil.matchDimen(width)[0]) {
+            if (width && !UnitUtil.matchDimen(width)[0]) {
                 throw new TexError('BadWidth', 'Width for %1 must be a dimension', name);
             }
         }
@@ -45,10 +54,10 @@ export const MathtoolsMethods = {
             width: width || 'auto',
             columnwidth: '100%',
         };
-        return ParseUtil.setArrayAlign(item, pos || 'c');
+        return ParseUtil.setArrayAlign(item, pos);
     },
     HandleShove(parser, name, shove) {
-        let top = parser.stack.Top();
+        const top = parser.stack.Top();
         if (top.kind !== 'multline' && top.kind !== 'multlined') {
             throw new TexError('CommandInMultlined', '%1 can only appear within the multline or multlined environments', name);
         }
@@ -56,11 +65,11 @@ export const MathtoolsMethods = {
             throw new TexError('CommandAtTheBeginingOfLine', '%1 must come at the beginning of the line', name);
         }
         top.setProperty('shove', shove);
-        let shift = parser.GetBrackets(name);
+        const shift = parser.GetBrackets(name);
         let mml = parser.ParseArg(name);
         if (shift) {
-            let mrow = parser.create('node', 'mrow', []);
-            let mspace = parser.create('node', 'mspace', [], { width: shift });
+            const mrow = parser.create('node', 'mrow', []);
+            const mspace = parser.create('node', 'mspace', [], { width: shift });
             if (shove === 'left') {
                 mrow.appendChild(mspace);
                 mrow.appendChild(mml);
@@ -92,16 +101,19 @@ export const MathtoolsMethods = {
         else {
             const spread = parser.GetDimen(`\\begin{${begin.getName()}}`);
             begin.setProperty('spread', spread);
-            begin.setProperty('nestable', true);
+            begin.setProperty('nestStart', true);
+            ParseUtil.checkEqnEnv(parser);
             parser.Push(begin);
         }
     },
     Cases(parser, begin, open, close, style) {
-        const array = parser.itemFactory.create('array').setProperty('casesEnv', begin.getName());
+        const array = parser.itemFactory
+            .create('array')
+            .setProperty('casesEnv', begin.getName());
         array.arraydef = {
             rowspacing: '.2em',
             columnspacing: '1em',
-            columnalign: 'left'
+            columnalign: 'left',
         };
         if (style === 'D') {
             array.arraydef.displaystyle = true;
@@ -112,8 +124,10 @@ export const MathtoolsMethods = {
     },
     MathLap(parser, name, pos, cramped) {
         const style = parser.GetBrackets(name, '').trim();
-        let mml = parser.create('node', 'mstyle', [
-            parser.create('node', 'mpadded', [parser.ParseArg(name)], Object.assign({ width: 0 }, (pos === 'r' ? {} : { lspace: (pos === 'l' ? '-1width' : '-.5width') })))
+        const mml = parser.create('node', 'mstyle', [
+            parser.create('node', 'mpadded', [parser.ParseArg(name)], Object.assign({ width: 0 }, (pos === 'r'
+                ? {}
+                : { lspace: pos === 'l' ? '-1width' : '-.5width' }))),
         ], { 'data-cramped': cramped });
         MathtoolsUtil.setDisplayLevel(mml, style);
         parser.Push(parser.create('node', 'TeXAtom', [mml]));
@@ -121,13 +135,15 @@ export const MathtoolsMethods = {
     Cramped(parser, name) {
         const style = parser.GetBrackets(name, '').trim();
         const arg = parser.ParseArg(name);
-        const mml = parser.create('node', 'mstyle', [arg], { 'data-cramped': true });
+        const mml = parser.create('node', 'mstyle', [arg], {
+            'data-cramped': true,
+        });
         MathtoolsUtil.setDisplayLevel(mml, style);
         parser.Push(mml);
     },
     MtLap(parser, name, pos) {
         const content = ParseUtil.internalMath(parser, parser.GetArgument(name), 0);
-        let mml = parser.create('node', 'mpadded', content, { width: 0 });
+        const mml = parser.create('node', 'mpadded', content, { width: 0 });
         if (pos !== 'r') {
             NodeUtil.setAttribute(mml, 'lspace', pos === 'l' ? '-1width' : '-.5width');
         }
@@ -153,42 +169,54 @@ export const MathtoolsMethods = {
         parser.Push(parser.create('node', 'mrow', [parser.ParseArg(name)]));
     },
     UnderOverBracket(parser, name) {
-        const thickness = length2em(parser.GetBrackets(name, '.1em'), .1);
+        const thickness = length2em(parser.GetBrackets(name, '.1em'), 0.1);
         const height = parser.GetBrackets(name, '.2em');
         const arg = parser.GetArgument(name);
-        const [pos, accent, border] = (name.charAt(1) === 'o' ?
-            ['over', 'accent', 'bottom'] :
-            ['under', 'accentunder', 'top']);
+        const [pos, accent, border] = name.charAt(1) === 'o'
+            ? ['over', 'accent', 'bottom']
+            : ['under', 'accentunder', 'top'];
         const t = em(thickness);
         const base = new TexParser(arg, parser.stack.env, parser.configuration).mml();
         const copy = new TexParser(arg, parser.stack.env, parser.configuration).mml();
-        const script = parser.create('node', 'mpadded', [
-            parser.create('node', 'mphantom', [copy])
-        ], {
+        const script = parser.create('node', 'mpadded', [parser.create('node', 'mphantom', [copy])], {
             style: `border: ${t} solid; border-${border}: none`,
             height: height,
-            depth: 0
+            depth: 0,
         });
         const node = ParseUtil.underOver(parser, base, script, pos, true);
         const munderover = NodeUtil.getChildAt(NodeUtil.getChildAt(node, 0), 0);
         NodeUtil.setAttribute(munderover, accent, true);
         parser.Push(node);
     },
-    Aboxed(parser, name) {
+    Aboxed(parser, name, box = 'boxed', math = true) {
         const top = MathtoolsUtil.checkAlignment(parser, name);
         if (top.row.length % 2 === 1) {
             top.row.push(parser.create('node', 'mtd', []));
         }
         const arg = parser.GetArgument(name);
-        const rest = parser.string.substr(parser.i);
+        const rest = parser.string.substring(parser.i);
         parser.string = arg + '&&\\endAboxed';
         parser.i = 0;
         const left = parser.GetUpTo(name, '&');
         const right = parser.GetUpTo(name, '&');
         parser.GetUpTo(name, '\\endAboxed');
-        const tex = ParseUtil.substituteArgs(parser, [left, right], '\\rlap{\\boxed{#1{}#2}}\\kern.267em\\phantom{#1}&\\phantom{{}#2}\\kern.267em');
+        const [bmath, emath] = math ? ['', ''] : ['$\\displaystyle{', '}$'];
+        const tex = ParseUtil.substituteArgs(parser, [left, right], `\\rlap{\\${box}{${bmath}#1{}#2${emath}}}` +
+            '\\kern.267em\\phantom{#1}&\\phantom{{}#2}\\kern.267em');
         parser.string = tex + rest;
         parser.i = 0;
+    },
+    MakeAboxedCommand(parser, name) {
+        const star = parser.GetStar();
+        const cs = NewcommandUtil.GetCSname(parser, name);
+        const box = NewcommandUtil.GetCSname(parser, name + '\\' + cs);
+        const handlers = parser.configuration.handlers;
+        if (handlers.get(HandlerType.MACRO).lookup(cs)) {
+            throw new TexError('AlreadyDefined', '%1 is already defined', '\\' + cs);
+        }
+        const handler = handlers.retrieve(NewcommandTables.NEW_COMMAND);
+        handler.add(cs, new Macro(cs, MathtoolsMethods.Aboxed, [box, star]));
+        parser.Push(parser.itemFactory.create('null'));
     },
     ArrowBetweenLines(parser, name) {
         const top = MathtoolsUtil.checkAlignment(parser, name);
@@ -201,54 +229,66 @@ export const MathtoolsMethods = {
             top.EndEntry();
             top.EndEntry();
         }
-        const tex = (star ? '\\quad' + symbol : symbol + '\\quad');
+        const tex = star ? '\\quad' + symbol : symbol + '\\quad';
         const mml = new TexParser(tex, parser.stack.env, parser.configuration).mml();
         parser.Push(mml);
         top.EndEntry();
         top.EndRow();
     },
     VDotsWithin(parser, name) {
-        const top = parser.stack.Top();
-        const isFlush = (top.getProperty('flushspaceabove') === top.table.length);
         const arg = '\\mmlToken{mi}{}' + parser.GetArgument(name) + '\\mmlToken{mi}{}';
         const base = new TexParser(arg, parser.stack.env, parser.configuration).mml();
-        let mml = parser.create('node', 'mpadded', [
-            parser.create('node', 'mpadded', [
-                parser.create('node', 'mo', [
-                    parser.create('text', '\u22EE')
-                ])
-            ], Object.assign({ width: 0, lspace: '-.5width' }, (isFlush ? { height: '-.6em', voffset: '-.18em' } : {}))),
-            parser.create('node', 'mphantom', [base])
+        const mml = parser.create('node', 'mpadded', [
+            parser.create('node', 'mpadded', [parser.create('node', 'mo', [parser.create('text', '\u22EE')])], { width: 0, lspace: '-.5width' }),
+            parser.create('node', 'mphantom', [base]),
         ], {
-            lspace: '.5width'
+            lspace: '.5width',
         });
         parser.Push(mml);
     },
     ShortVDotsWithin(parser, _name) {
         const top = parser.stack.Top();
         const star = parser.GetStar();
-        MathtoolsMethods.FlushSpaceAbove(parser, '\\MTFlushSpaceAbove');
-        !star && top.EndEntry();
+        if (top.EndEntry) {
+            MathtoolsMethods.FlushSpaceAbove(parser, '\\MTFlushSpaceAbove');
+            if (!star) {
+                top.EndEntry();
+            }
+        }
         MathtoolsMethods.VDotsWithin(parser, '\\vdotswithin');
-        star && top.EndEntry();
-        MathtoolsMethods.FlushSpaceBelow(parser, '\\MTFlushSpaceBelow');
+        if (top.EndEntry) {
+            if (star) {
+                top.EndEntry();
+            }
+            MathtoolsMethods.FlushSpaceBelow(parser, '\\MTFlushSpaceBelow');
+        }
     },
     FlushSpaceAbove(parser, name) {
         const top = MathtoolsUtil.checkAlignment(parser, name);
-        top.setProperty('flushspaceabove', top.table.length);
-        top.addRowSpacing('-' + parser.options.mathtools['shortvdotsadjustabove']);
+        if (top.table) {
+            top.setProperty('flushspaceabove', top.table.length);
+            top.addRowSpacing('-' + parser.options.mathtools['shortvdotsadjustabove']);
+        }
     },
     FlushSpaceBelow(parser, name) {
         const top = MathtoolsUtil.checkAlignment(parser, name);
-        top.Size() && top.EndEntry();
-        top.EndRow();
-        top.addRowSpacing('-' + parser.options.mathtools['shortvdotsadjustbelow']);
+        if (top.table) {
+            if (top.Size()) {
+                top.EndEntry();
+            }
+            top.EndRow();
+            top.addRowSpacing('-' + parser.options.mathtools['shortvdotsadjustbelow']);
+        }
     },
     PairedDelimiters(parser, name, open, close, body = '#1', n = 1, pre = '', post = '') {
         const star = parser.GetStar();
-        const size = (star ? '' : parser.GetBrackets(name));
-        const [left, right] = (star ? ['\\left', '\\right'] : size ? [size + 'l', size + 'r'] : ['', '']);
-        const delim = (star ? '\\middle' : size || '');
+        const size = star ? '' : parser.GetBrackets(name);
+        const [left, right, after] = star
+            ? ['\\mathopen{\\left', '\\right', '}\\mathclose{}']
+            : size
+                ? [size + 'l', size + 'r', '']
+                : ['', '', ''];
+        const delim = star ? '\\middle' : size || '';
         if (n) {
             const args = [];
             for (let i = args.length; i < n; i++) {
@@ -259,8 +299,17 @@ export const MathtoolsMethods = {
             post = ParseUtil.substituteArgs(parser, args, post);
         }
         body = body.replace(/\\delimsize/g, delim);
-        parser.string = [pre, left, open, body, right, close, post, parser.string.substr(parser.i)]
-            .reduce((s, part) => ParseUtil.addArgs(parser, s, part), '');
+        parser.string = [
+            pre,
+            left,
+            open,
+            body,
+            right,
+            close,
+            after,
+            post,
+            parser.string.substring(parser.i),
+        ].reduce((s, part) => ParseUtil.addArgs(parser, s, part), '');
         parser.i = 0;
         ParseUtil.checkMaxMacros(parser);
     },
@@ -268,7 +317,8 @@ export const MathtoolsMethods = {
         const cs = NewcommandUtil.GetCsNameArgument(parser, name);
         const open = parser.GetArgument(name);
         const close = parser.GetArgument(name);
-        MathtoolsUtil.addPairedDelims(parser.configuration, cs, [open, close]);
+        MathtoolsUtil.addPairedDelims(parser, cs, [open, close]);
+        parser.Push(parser.itemFactory.create('null'));
     },
     DeclarePairedDelimiterX(parser, name) {
         const cs = NewcommandUtil.GetCsNameArgument(parser, name);
@@ -276,7 +326,8 @@ export const MathtoolsMethods = {
         const open = parser.GetArgument(name);
         const close = parser.GetArgument(name);
         const body = parser.GetArgument(name);
-        MathtoolsUtil.addPairedDelims(parser.configuration, cs, [open, close, body, n]);
+        MathtoolsUtil.addPairedDelims(parser, cs, [open, close, body, n]);
+        parser.Push(parser.itemFactory.create('null'));
     },
     DeclarePairedDelimiterXPP(parser, name) {
         const cs = NewcommandUtil.GetCsNameArgument(parser, name);
@@ -286,14 +337,24 @@ export const MathtoolsMethods = {
         const close = parser.GetArgument(name);
         const post = parser.GetArgument(name);
         const body = parser.GetArgument(name);
-        MathtoolsUtil.addPairedDelims(parser.configuration, cs, [open, close, body, n, pre, post]);
+        MathtoolsUtil.addPairedDelims(parser, cs, [
+            open,
+            close,
+            body,
+            n,
+            pre,
+            post,
+        ]);
+        parser.Push(parser.itemFactory.create('null'));
     },
     CenterColon(parser, _name, center, force = false, thin = false) {
         const options = parser.options.mathtools;
         let mml = parser.create('token', 'mo', {}, ':');
         if (center && (options['centercolon'] || force)) {
             const dy = options['centercolon-offset'];
-            mml = parser.create('node', 'mpadded', [mml], Object.assign({ voffset: dy, height: `+${dy}`, depth: `-${dy}` }, (thin ? { width: options['thincolon-dw'], lspace: options['thincolon-dx'] } : {})));
+            mml = parser.create('node', 'mpadded', [mml], Object.assign({ voffset: dy, height: `+${dy}`, depth: `-${dy}` }, (thin
+                ? { width: options['thincolon-dw'], lspace: options['thincolon-dx'] }
+                : {})));
         }
         parser.Push(mml);
     },
@@ -303,8 +364,11 @@ export const MathtoolsMethods = {
             parser.Push(parser.create('token', 'mo', { texClass: TEXCLASS.REL }, unicode));
         }
         else {
-            tex = '\\mathrel{' + tex.replace(/:/g, '\\MTThinColon').replace(/-/g, '\\mathrel{-}') + '}';
-            parser.string = ParseUtil.addArgs(parser, tex, parser.string.substr(parser.i));
+            tex =
+                '\\mathrel{' +
+                    tex.replace(/:/g, '\\MTThinColon').replace(/-/g, '\\mathrel{-}') +
+                    '}';
+            parser.string = ParseUtil.addArgs(parser, tex, parser.string.substring(parser.i));
             parser.i = 0;
         }
     },
@@ -314,13 +378,21 @@ export const MathtoolsMethods = {
             parser.create('node', 'mpadded', [
                 parser.create('node', 'mpadded', [
                     parser.create('node', 'menclose', [
-                        parser.create('node', 'mspace', [], { height: '.2em', depth: 0, width: '.4em' })
-                    ], { notation: 'updiagonalstrike', 'data-thickness': '.05em', 'data-padding': 0 })
+                        parser.create('node', 'mspace', [], {
+                            height: '.2em',
+                            depth: 0,
+                            width: '.4em',
+                        }),
+                    ], {
+                        notation: 'updiagonalstrike',
+                        'data-thickness': '.05em',
+                        'data-padding': 0,
+                    }),
                 ], { width: 0, lspace: '-.5width', voffset: dy }),
                 parser.create('node', 'mphantom', [
-                    parser.create('token', 'mtext', {}, c)
-                ])
-            ], { width: 0, lspace: '-.5width' })
+                    parser.create('token', 'mtext', {}, c),
+                ]),
+            ], { width: 0, lspace: '-.5width' }),
         ], { texClass: TEXCLASS.REL }));
     },
     SplitFrac(parser, name, display) {
@@ -331,14 +403,14 @@ export const MathtoolsMethods = {
                 parser.create('node', 'mstyle', [
                     num,
                     parser.create('token', 'mi'),
-                    parser.create('token', 'mspace', { width: '1em' })
+                    parser.create('token', 'mspace', { width: '1em' }),
                 ], { scriptlevel: 0 }),
                 parser.create('node', 'mstyle', [
                     parser.create('token', 'mspace', { width: '1em' }),
                     parser.create('token', 'mi'),
-                    den
-                ], { scriptlevel: 0 })
-            ], { linethickness: 0, numalign: 'left', denomalign: 'right' })
+                    den,
+                ], { scriptlevel: 0 }),
+            ], { linethickness: 0, numalign: 'left', denomalign: 'right' }),
         ], { displaystyle: display, scriptlevel: 0 }));
     },
     XMathStrut(parser, name) {
@@ -349,9 +421,9 @@ export const MathtoolsMethods = {
         parser.Push(parser.create('node', 'TeXAtom', [
             parser.create('node', 'mpadded', [
                 parser.create('node', 'mphantom', [
-                    parser.create('token', 'mo', { stretchy: false }, '(')
-                ])
-            ], { width: 0, height: dh + 'height', depth: dd + 'depth' })
+                    parser.create('token', 'mo', { stretchy: false }, '('),
+                ]),
+            ], { width: 0, height: dh + 'height', depth: dd + 'depth' }),
         ], { texClass: TEXCLASS.ORD }));
     },
     Prescript(parser, name) {
@@ -364,7 +436,11 @@ export const MathtoolsMethods = {
         }
         const mml = parser.create('node', 'mmultiscripts', [base]);
         NodeUtil.getChildren(mml).push(null, null);
-        NodeUtil.appendChildren(mml, [parser.create('node', 'mprescripts'), sub, sup]);
+        NodeUtil.appendChildren(mml, [
+            parser.create('node', 'mprescripts'),
+            sub,
+            sup,
+        ]);
         mml.setProperty('fixPrescript', true);
         parser.Push(mml);
     },
@@ -375,7 +451,7 @@ export const MathtoolsMethods = {
         }
         const id = parser.GetArgument(name).trim();
         if (!id) {
-            throw new TexError('InvalidTagFormID', 'Tag form name can\'t be empty');
+            throw new TexError('InvalidTagFormID', "Tag form name can't be empty");
         }
         const format = parser.GetBrackets(name, '');
         const left = parser.GetArgument(name);
@@ -384,6 +460,7 @@ export const MathtoolsMethods = {
             throw new TexError('DuplicateTagForm', 'Duplicate tag form: %1', id);
         }
         tags.mtFormats.set(id, [left, right, format]);
+        parser.Push(parser.itemFactory.create('null'));
     },
     UseTagForm(parser, name) {
         const tags = parser.tags;
@@ -393,12 +470,14 @@ export const MathtoolsMethods = {
         const id = parser.GetArgument(name).trim();
         if (!id) {
             tags.mtCurrent = null;
+            parser.Push(parser.itemFactory.create('null'));
             return;
         }
         if (!tags.mtFormats.has(id)) {
             throw new TexError('UndefinedTagForm', 'Undefined tag form: %1', id);
         }
         tags.mtCurrent = tags.mtFormats.get(id);
+        parser.Push(parser.itemFactory.create('null'));
     },
     SetOptions(parser, name) {
         const options = parser.options.mathtools;
@@ -406,16 +485,27 @@ export const MathtoolsMethods = {
             throw new TexError('ForbiddenMathtoolsSet', '%1 is disabled', name);
         }
         const allowed = {};
-        Object.keys(options).forEach(id => {
-            if (id !== 'pariedDelimiters' && id !== 'tagforms' && id !== 'allow-mathtoolsset') {
+        Object.keys(options).forEach((id) => {
+            if (id !== 'pariedDelimiters' &&
+                id !== 'tagforms' &&
+                id !== 'allow-mathtoolsset') {
                 allowed[id] = 1;
             }
         });
         const args = parser.GetArgument(name);
         const keys = ParseUtil.keyvalOptions(args, allowed, true);
         for (const id of Object.keys(keys)) {
+            if (id === 'legacycolonsymbols' && options[id] !== keys[id]) {
+                if (options[id]) {
+                    parser.configuration.handlers.remove(LEGACYCONFIG, {});
+                }
+                else {
+                    parser.configuration.handlers.add(LEGACYCONFIG, {}, LEGACYPRIORITY);
+                }
+            }
             options[id] = keys[id];
         }
+        parser.Push(parser.itemFactory.create('null'));
     },
     Array: BaseMethods.Array,
     Macro: BaseMethods.Macro,

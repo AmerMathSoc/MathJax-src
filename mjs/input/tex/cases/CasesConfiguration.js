@@ -1,6 +1,7 @@
+import { HandlerType, ConfigurationType } from '../HandlerTypes.js';
 import { Configuration } from '../Configuration.js';
-import { EnvironmentMap, MacroMap } from '../SymbolMap.js';
-import ParseUtil from '../ParseUtil.js';
+import { EnvironmentMap, MacroMap } from '../TokenMap.js';
+import { ParseUtil } from '../ParseUtil.js';
 import BaseMethods from '../base/BaseMethods.js';
 import TexError from '../TexError.js';
 import { BeginItem } from '../base/BaseItems.js';
@@ -33,14 +34,16 @@ export class CasesTags extends AmsTags {
         if (this.currentTag.tag != null)
             return;
         if (this.currentTag.env === 'subnumcases') {
-            if (this.subcounter === 0)
+            if (this.subcounter === 0) {
                 this.counter++;
+            }
             this.subcounter++;
             this.tag(this.formatNumber(this.counter, this.subcounter), false);
         }
         else {
-            if (this.subcounter === 0 || this.currentTag.env !== 'numcases-left')
+            if (this.currentTag.env !== 'numcases-left') {
                 this.counter++;
+            }
             this.tag(this.formatNumber(this.counter), false);
         }
     }
@@ -57,7 +60,7 @@ export const CasesMethods = {
             const table = cases.Last;
             const original = ParseUtil.copyNode(table, parser);
             const left = cases.getProperty('left');
-            EmpheqUtil.left(table, original, left + '\\empheqlbrace\\,', parser, 'numcases-left');
+            EmpheqUtil.left(table, original, left + '\\mmlToken{mo}{\\U{7B}}\\,', parser, 'numcases-left');
             parser.Push(parser.itemFactory.create('end').setProperty('name', begin.getName()));
             return null;
         }
@@ -76,9 +79,13 @@ export const CasesMethods = {
         if (!parser.stack.Top().getProperty('numCases')) {
             return BaseMethods.Entry(parser, name);
         }
-        parser.Push(parser.itemFactory.create('cell').setProperties({ isEntry: true, name: name }));
+        parser.Push(parser.itemFactory
+            .create('cell')
+            .setProperties({ isEntry: true, name: name }));
         const tex = parser.string;
-        let braces = 0, i = parser.i, m = tex.length;
+        let braces = 0;
+        let i = parser.i;
+        const m = tex.length;
         while (i < m) {
             const c = tex.charAt(i);
             if (c === '{') {
@@ -99,7 +106,11 @@ export const CasesMethods = {
             }
             else if (c === '\\' && braces === 0) {
                 const cs = (tex.slice(i + 1).match(/^[a-z]+|./i) || [])[0];
-                if (cs === '\\' || cs === 'cr' || cs === 'end' || cs === 'label') {
+                if (cs === '\\' ||
+                    cs === 'cr' ||
+                    cs === 'end' ||
+                    cs === 'label' ||
+                    cs === undefined) {
                     break;
                 }
                 else {
@@ -110,26 +121,33 @@ export const CasesMethods = {
                 i++;
             }
         }
-        const text = tex.substr(parser.i, i - parser.i).replace(/^\s*/, '');
+        const text = tex.substring(parser.i, i).replace(/^\s*/, '');
         parser.PushAll(ParseUtil.internalMath(parser, text, 0));
         parser.i = i;
-    }
+        return null;
+    },
+    environment(parser, env, func, args) {
+        const item = parser.itemFactory
+            .create('cases-begin')
+            .setProperties({ name: env, end: true });
+        parser.Push(func(parser, item, ...args));
+    },
 };
-new EnvironmentMap('cases-env', EmpheqUtil.environment, {
-    numcases: ['NumCases', 'cases'],
-    subnumcases: ['NumCases', 'cases']
-}, CasesMethods);
+new EnvironmentMap('cases-env', CasesMethods.environment, {
+    numcases: [CasesMethods.NumCases, 'cases'],
+    subnumcases: [CasesMethods.NumCases, 'cases'],
+});
 new MacroMap('cases-macros', {
-    '&': 'Entry'
-}, CasesMethods);
+    '&': CasesMethods.Entry,
+});
 export const CasesConfiguration = Configuration.create('cases', {
-    handler: {
-        environment: ['cases-env'],
-        character: ['cases-macros']
+    [ConfigurationType.HANDLER]: {
+        [HandlerType.ENVIRONMENT]: ['cases-env'],
+        [HandlerType.CHARACTER]: ['cases-macros'],
     },
-    items: {
-        [CasesBeginItem.prototype.kind]: CasesBeginItem
+    [ConfigurationType.ITEMS]: {
+        [CasesBeginItem.prototype.kind]: CasesBeginItem,
     },
-    tags: { 'cases': CasesTags }
+    [ConfigurationType.TAGS]: { cases: CasesTags },
 });
 //# sourceMappingURL=CasesConfiguration.js.map

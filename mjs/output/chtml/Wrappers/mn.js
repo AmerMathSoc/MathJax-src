@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMnMixin } from '../../common/Wrappers/mn.js';
+import { CommonMnMixin, } from '../../common/Wrappers/mn.js';
 import { MmlMn } from '../../../core/MmlTree/MmlNodes/mn.js';
 export const ChtmlMn = (function () {
     var _a;

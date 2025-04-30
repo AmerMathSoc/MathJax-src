@@ -1,43 +1,48 @@
 import { AbstractMathDocument } from '../../core/MathDocument.js';
-import { userOptions, separateOptions, expandable } from '../../util/Options.js';
+import { userOptions, separateOptions, expandable, } from '../../util/Options.js';
 import { HTMLMathItem } from './HTMLMathItem.js';
 import { HTMLMathList } from './HTMLMathList.js';
 import { HTMLDomStrings } from './HTMLDomStrings.js';
 import { STATE } from '../../core/MathItem.js';
 export class HTMLDocument extends AbstractMathDocument {
     constructor(document, adaptor, options) {
-        let [html, dom] = separateOptions(options, HTMLDomStrings.OPTIONS);
+        const [html, dom] = separateOptions(options, HTMLDomStrings.OPTIONS);
         super(document, adaptor, html);
-        this.domStrings = this.options['DomStrings'] || new HTMLDomStrings(dom);
+        this.domStrings =
+            this.options['DomStrings'] || new HTMLDomStrings(dom);
         this.domStrings.adaptor = adaptor;
         this.styles = [];
     }
     findPosition(N, index, delim, nodes) {
         const adaptor = this.adaptor;
-        for (const list of nodes[N]) {
-            let [node, n] = list;
+        const inc = 1 / (nodes[N].length || 1);
+        let i = N;
+        for (const [node, n] of nodes[N]) {
             if (index <= n && adaptor.kind(node) === '#text') {
-                return { node: node, n: Math.max(index, 0), delim: delim };
+                return { i, node, n: Math.max(index, 0), delim };
             }
             index -= n;
+            i += inc;
         }
-        return { node: null, n: 0, delim: delim };
+        return { node: null, n: 0, delim };
     }
     mathItem(item, jax, nodes) {
-        let math = item.math;
-        let start = this.findPosition(item.n, item.start.n, item.open, nodes);
-        let end = this.findPosition(item.n, item.end.n, item.close, nodes);
+        const math = item.math;
+        const start = this.findPosition(item.n, item.start.n, item.open, nodes);
+        const end = this.findPosition(item.n, item.end.n, item.close, nodes);
         return new this.options.MathItem(math, jax, item.display, start, end);
     }
     findMath(options) {
         if (!this.processed.isSet('findMath')) {
             this.adaptor.document = this.document;
-            options = userOptions({ elements: this.options.elements || [this.adaptor.body(this.document)] }, options);
+            options = userOptions({
+                elements: this.options.elements || [this.adaptor.body(this.document)],
+            }, options);
             const containers = this.adaptor.getElements(options.elements, this.document);
             for (const jax of this.inputJax) {
-                const list = (jax.processStrings ?
-                    this.findMathFromStrings(jax, containers) :
-                    this.findMathFromDOM(jax, containers));
+                const list = jax.processStrings
+                    ? this.findMathFromStrings(jax, containers)
+                    : this.findMathFromDOM(jax, containers);
                 this.math.merge(list);
             }
             this.processed.set('findMath');
@@ -88,7 +93,7 @@ export class HTMLDocument extends AbstractMathDocument {
         const adaptor = this.adaptor;
         if (sheet && !adaptor.parent(sheet)) {
             const head = adaptor.head(this.document);
-            let styles = this.findSheet(head, adaptor.getAttribute(sheet, 'id'));
+            const styles = this.findSheet(head, adaptor.getAttribute(sheet, 'id'));
             if (styles) {
                 adaptor.replace(sheet, styles);
             }

@@ -1,1 +1,0 @@
-{"version":3,"file":"xsltFilename.js","sourceRoot":"","sources":["../../../../../ts/input/mathml/mml3/mjs/xsltFilename.ts"],"names":[],"mappings":"AA4BA,MAAM,UAAU,YAAY,CAAC,IAAU;IACrC,MAAM,OAAO,GAAG,IAAI,CAAC,OAAO,CAAC,IAAI,CAAC,OAAO,CAAC,IAAI,GAAG,CAAC,MAAM,CAAC,IAAI,CAAC,GAAG,CAAC,CAAC,QAAQ,CAAC,CAAC,CAAC;IAC9E,OAAO,IAAI,CAAC,OAAO,CAAC,OAAO,EAAE,eAAe,CAAC,CAAC;AAChD,CAAC"}

@@ -1,15 +1,16 @@
 import { AbstractWrapper } from '../../core/Tree/Wrapper.js';
-import { TextNode } from '../../core/MmlTree/MmlNode.js';
+import { TextNode, } from '../../core/MmlTree/MmlNode.js';
 import { unicodeChars } from '../../util/string.js';
 import * as LENGTHS from '../../util/lengths.js';
 import { Styles } from '../../util/Styles.js';
 import { lookup } from '../../util/Options.js';
 import { BBox } from '../../util/BBox.js';
 import { LineBBox } from './LineBBox.js';
-import { NOSTRETCH } from './FontData.js';
+import { DIRECTION, NOSTRETCH, } from './FontData.js';
 const SMALLSIZE = 2 / 18;
-function MathMLSpace(script, size) {
-    return (script ? size < SMALLSIZE ? 0 : SMALLSIZE : size);
+const MOSPACE = 5 / 18;
+function MathMLSpace(script, nodict, size) {
+    return nodict ? MOSPACE : script ? (size < SMALLSIZE ? 0 : SMALLSIZE) : size;
 }
 export const SPACE = {
     [LENGTHS.em(0)]: '0',
@@ -47,15 +48,21 @@ export class CommonWrapper extends AbstractWrapper {
     get breakCount() {
         if (this._breakCount < 0) {
             const node = this.node;
-            this._breakCount = (node.isEmbellished ? this.coreMO().embellishedBreakCount :
-                node.arity < 0 && !node.linebreakContainer &&
-                    this.childNodes[0].isStack ?
-                    this.childNodes[0].breakCount : 0);
+            this._breakCount = node.isEmbellished
+                ? this.coreMO().embellishedBreakCount
+                : node.arity < 0 &&
+                    !node.linebreakContainer &&
+                    this.childNodes[0]
+                        .isStack
+                    ? this.childNodes[0].breakCount
+                    : 0;
         }
         return this._breakCount;
     }
     breakTop(mrow, _child) {
-        return ((this.node.linebreakContainer || !this.parent) ? mrow : this.parent.breakTop(mrow, this));
+        return this.node.linebreakContainer || !this.parent
+            ? mrow
+            : this.parent.breakTop(mrow, this);
     }
     constructor(factory, node, parent = null) {
         super(factory, node);
@@ -98,7 +105,7 @@ export class CommonWrapper extends AbstractWrapper {
         if (this.bboxComputed) {
             return this.bbox;
         }
-        const bbox = (save ? this.bbox : BBox.zero());
+        const bbox = save ? this.bbox : BBox.zero();
         this.computeBBox(bbox);
         this.bboxComputed = save;
         return bbox;
@@ -112,7 +119,7 @@ export class CommonWrapper extends AbstractWrapper {
         const border = ((_a = this.styleData.border) === null || _a === void 0 ? void 0 : _a.width) || [0, 0, 0, 0];
         const obox = bbox.copy();
         for (const [, i, side] of BBox.boxSides) {
-            obox[side] += (padding[i] + border[i]);
+            obox[side] += padding[i] + border[i];
         }
         return obox;
     }
@@ -145,7 +152,7 @@ export class CommonWrapper extends AbstractWrapper {
         if (!this.lineBBox[i]) {
             const n = this.breakCount;
             if (n) {
-                const line = (this.embellishedBBox(i) || this.computeLineBBox(i));
+                const line = this.embellishedBBox(i) || this.computeLineBBox(i);
                 this.lineBBox[i] = line;
                 if (i === 0) {
                     if (!this.node.isKind('mo') && this.node.isEmbellished) {
@@ -177,11 +184,16 @@ export class CommonWrapper extends AbstractWrapper {
     }
     getBreakNode(bbox) {
         var _a, _b;
-        const [i, j] = bbox.start || [0, 0];
+        if (!bbox.start) {
+            return [this, null];
+        }
+        const [i, j] = bbox.start;
         if (this.node.isEmbellished) {
             return [this, this.coreMO()];
         }
-        const childNodes = (((_b = (_a = this.childNodes[0]) === null || _a === void 0 ? void 0 : _a.node) === null || _b === void 0 ? void 0 : _b.isInferred) ? this.childNodes[0].childNodes : this.childNodes);
+        const childNodes = ((_b = (_a = this.childNodes[0]) === null || _a === void 0 ? void 0 : _a.node) === null || _b === void 0 ? void 0 : _b.isInferred)
+            ? this.childNodes[0].childNodes
+            : this.childNodes;
         if (this.node.isToken || !childNodes[i]) {
             return [this, null];
         }
@@ -239,7 +251,8 @@ export class CommonWrapper extends AbstractWrapper {
         let changed = false;
         for (const child of this.childNodes) {
             const cbox = child.getBBox();
-            if (cbox.pwidth && child.setChildPWidths(recompute, w === null ? cbox.w : w, clear)) {
+            if (cbox.pwidth &&
+                child.setChildPWidths(recompute, w === null ? cbox.w : w, clear)) {
                 changed = true;
             }
         }
@@ -276,7 +289,7 @@ export class CommonWrapper extends AbstractWrapper {
         const styleString = this.node.attributes.getExplicit('style');
         if (!styleString)
             return;
-        const style = this.styles = new Styles(styleString);
+        const style = (this.styles = new Styles(styleString));
         for (let i = 0, m = CommonWrapper.removeStyles.length; i < m; i++) {
             const id = CommonWrapper.removeStyles[i];
             if (style.get(id)) {
@@ -311,17 +324,20 @@ export class CommonWrapper extends AbstractWrapper {
                 padding[i] = Math.max(0, this.length2em(p, 1));
             }
         }
-        this.styleData = (hasPadding || hasBorder) ? {
-            padding,
-            border: (hasBorder ? { width, style, color } : null)
-        } : null;
+        this.styleData =
+            hasPadding || hasBorder
+                ? {
+                    padding,
+                    border: hasBorder ? { width, style, color } : null,
+                }
+                : null;
     }
     getVariant() {
         if (!this.node.isToken)
             return;
         const attributes = this.node.attributes;
         let variant = attributes.get('mathvariant');
-        if (attributes.getExplicit('mathvariant')) {
+        if (attributes.hasExplicit('mathvariant')) {
             if (!this.font.getVariant(variant)) {
                 console.warn(`Invalid variant: ${variant}`);
                 variant = 'normal';
@@ -345,7 +361,7 @@ export class CommonWrapper extends AbstractWrapper {
             if (values.fontstyle)
                 values.style = values.fontstyle;
             if (values.weight && values.weight.match(/^\d+$/)) {
-                values.weight = (parseInt(values.weight) > 600 ? 'bold' : 'normal');
+                values.weight = parseInt(values.weight) > 600 ? 'bold' : 'normal';
             }
             if (values.family) {
                 variant = this.explicitVariant(values.family, values.weight, values.style);
@@ -353,8 +369,11 @@ export class CommonWrapper extends AbstractWrapper {
             else {
                 if (this.node.getProperty('variantForm'))
                     variant = '-tex-variant';
-                variant = (CommonWrapper.BOLDVARIANTS[values.weight] || {})[variant] || variant;
-                variant = (CommonWrapper.ITALICVARIANTS[values.style] || {})[variant] || variant;
+                variant =
+                    (CommonWrapper.BOLDVARIANTS[values.weight] || {})[variant] || variant;
+                variant =
+                    (CommonWrapper.ITALICVARIANTS[values.style] || {})[variant] ||
+                        variant;
             }
         }
         this.variant = variant;
@@ -371,27 +390,29 @@ export class CommonWrapper extends AbstractWrapper {
         return '-explicitFont';
     }
     getScale() {
-        let scale = 1, parent = this.parent;
-        let pscale = (parent ? parent.bbox.scale : 1);
-        let attributes = this.node.attributes;
-        let scriptlevel = Math.min(attributes.get('scriptlevel'), 2);
+        let scale = 1;
+        const parent = this.parent;
+        const pscale = parent ? parent.bbox.scale : 1;
+        const attributes = this.node.attributes;
+        const scriptlevel = Math.min(attributes.get('scriptlevel'), 2);
         let fontsize = attributes.get('fontsize');
-        let mathsize = (this.node.isToken || this.node.isKind('mstyle') ?
-            attributes.get('mathsize') : attributes.getInherited('mathsize'));
+        let mathsize = this.node.isToken || this.node.isKind('mstyle')
+            ? attributes.get('mathsize')
+            : attributes.getInherited('mathsize');
         if (scriptlevel !== 0) {
             scale = Math.pow(attributes.get('scriptsizemultiplier'), scriptlevel);
         }
         if (this.removedStyles && this.removedStyles.fontSize && !fontsize) {
             fontsize = this.removedStyles.fontSize;
         }
-        if (fontsize && !attributes.getExplicit('mathsize')) {
+        if (fontsize && !attributes.hasExplicit('mathsize')) {
             mathsize = fontsize;
         }
         if (mathsize !== '1') {
             scale *= this.length2em(mathsize, 1, 1);
         }
         if (scriptlevel !== 0) {
-            let scriptminsize = this.length2em(attributes.get('scriptminsize'), .4, 1);
+            const scriptminsize = this.length2em(attributes.get('scriptminsize'), 0.4, 1);
             if (scale < scriptminsize)
                 scale = scriptminsize;
         }
@@ -402,7 +423,9 @@ export class CommonWrapper extends AbstractWrapper {
         const isTop = this.isTopEmbellished();
         const hasSpacing = this.node.hasSpacingAttributes();
         if (this.jax.options.mathmlSpacing || hasSpacing) {
-            isTop && this.getMathMLSpacing();
+            if (isTop) {
+                this.getMathMLSpacing();
+            }
         }
         else {
             this.getTeXSpacing(isTop, hasSpacing);
@@ -412,16 +435,18 @@ export class CommonWrapper extends AbstractWrapper {
         const node = this.node.coreMO();
         const child = node.coreParent();
         const parent = child.parent;
-        if (!parent || !parent.isKind('mrow') || parent.childNodes.length === 1)
+        if (!parent || !parent.isKind('mrow') || parent.childNodes.length === 1) {
             return;
+        }
+        const noDictDef = node.getProperty('noDictDef');
         const attributes = node.attributes;
-        const isScript = (attributes.get('scriptlevel') > 0);
-        this.bbox.L = (attributes.isSet('lspace') ?
-            Math.max(0, this.length2em(attributes.get('lspace'))) :
-            MathMLSpace(isScript, node.lspace));
-        this.bbox.R = (attributes.isSet('rspace') ?
-            Math.max(0, this.length2em(attributes.get('rspace'))) :
-            MathMLSpace(isScript, node.rspace));
+        const isScript = attributes.get('scriptlevel') > 0;
+        this.bbox.L = attributes.isSet('lspace')
+            ? Math.max(0, this.length2em(attributes.get('lspace')))
+            : MathMLSpace(isScript, noDictDef, node.lspace);
+        this.bbox.R = attributes.isSet('rspace')
+            ? Math.max(0, this.length2em(attributes.get('rspace')))
+            : MathMLSpace(isScript, noDictDef, node.rspace);
         const n = parent.childIndex(child);
         if (n === 0)
             return;
@@ -469,6 +494,15 @@ export class CommonWrapper extends AbstractWrapper {
         }
         return rscale;
     }
+    getRScale() {
+        let rscale = 1;
+        let node = this;
+        while (node) {
+            rscale *= node.bbox.rscale;
+            node = node.parent;
+        }
+        return rscale;
+    }
     getText() {
         let text = '';
         if (this.node.isToken) {
@@ -483,14 +517,14 @@ export class CommonWrapper extends AbstractWrapper {
     canStretch(direction) {
         this.stretch = NOSTRETCH;
         if (this.node.isEmbellished) {
-            let core = this.core();
+            const core = this.core();
             if (core && core.node !== this.node) {
                 if (core.canStretch(direction)) {
                     this.stretch = core.stretch;
                 }
             }
         }
-        return this.stretch.dir !== 0;
+        return this.stretch.dir !== DIRECTION.None;
     }
     getAlignShift() {
         let { indentalign, indentshift, indentalignfirst, indentshiftfirst } = this.node.attributes.getAllAttributes();
@@ -507,10 +541,14 @@ export class CommonWrapper extends AbstractWrapper {
             return ['left', 0];
         }
         if (!align || align === 'auto') {
-            align = this.jax.math.outputData.inlineMarked ? 'left' : this.jax.options.displayAlign;
+            align = this.jax.math.root.getProperty('inlineMarked')
+                ? 'left'
+                : this.jax.options.displayAlign;
         }
         if (!shift || shift === 'auto') {
-            shift = this.jax.math.outputData.inlineMarked ? '0' : this.jax.options.displayIndent;
+            shift = this.jax.math.root.getProperty('inlineMarked')
+                ? '0'
+                : this.jax.options.displayIndent;
         }
         if (indentalign === 'auto') {
             indentalign = align;
@@ -525,15 +563,20 @@ export class CommonWrapper extends AbstractWrapper {
         return [indentalign, indent];
     }
     getAlignX(W, bbox, align) {
-        return (align === 'right' ? W - (bbox.w + bbox.R) * bbox.rscale :
-            align === 'left' ? bbox.L * bbox.rscale :
-                (W - bbox.w * bbox.rscale) / 2);
+        return align === 'right'
+            ? W - (bbox.w + bbox.R) * bbox.rscale
+            : align === 'left'
+                ? bbox.L * bbox.rscale
+                : (W - bbox.w * bbox.rscale) / 2;
     }
     getAlignY(H, D, h, d, align) {
-        return (align === 'top' ? H - h :
-            align === 'bottom' ? d - D :
-                align === 'center' ? ((H - h) - (D - d)) / 2 :
-                    0);
+        return align === 'top'
+            ? H - h
+            : align === 'bottom'
+                ? d - D
+                : align === 'center'
+                    ? (H - h - (D - d)) / 2
+                    : 0;
     }
     getWrapWidth(i) {
         return this.childNodes[i].getBBox().w;
@@ -556,7 +599,9 @@ export class CommonWrapper extends AbstractWrapper {
         }
         const t = this.font.params.rule_thickness;
         const factor = lookup(length, { medium: 1, thin: 2 / 3, thick: 5 / 3 }, 0);
-        return factor ? factor * t : LENGTHS.length2em(length, size, scale, this.jax.pxPerEm);
+        return factor
+            ? factor * t
+            : LENGTHS.length2em(length, size, scale, this.jax.pxPerEm);
     }
     unicodeChars(text, name = this.variant) {
         let chars = unicodeChars(text);
@@ -600,14 +645,24 @@ export class CommonWrapper extends AbstractWrapper {
 CommonWrapper.kind = 'unknown';
 CommonWrapper.styles = {};
 CommonWrapper.removeStyles = [
-    'fontSize', 'fontFamily', 'fontWeight',
-    'fontStyle', 'fontVariant', 'font'
+    'fontSize',
+    'fontFamily',
+    'fontWeight',
+    'fontStyle',
+    'fontVariant',
+    'font',
 ];
 CommonWrapper.skipAttributes = {
-    fontfamily: true, fontsize: true, fontweight: true, fontstyle: true,
-    color: true, background: true,
-    'class': true, href: true, style: true,
-    xmlns: true
+    fontfamily: true,
+    fontsize: true,
+    fontweight: true,
+    fontstyle: true,
+    color: true,
+    background: true,
+    class: true,
+    href: true,
+    style: true,
+    xmlns: true,
 };
 CommonWrapper.BOLDVARIANTS = {
     bold: {
@@ -616,7 +671,7 @@ CommonWrapper.BOLDVARIANTS = {
         fraktur: 'bold-fraktur',
         script: 'bold-script',
         'sans-serif': 'bold-sans-serif',
-        'sans-serif-italic': 'sans-serif-bold-italic'
+        'sans-serif-italic': 'sans-serif-bold-italic',
     },
     normal: {
         bold: 'normal',
@@ -624,21 +679,21 @@ CommonWrapper.BOLDVARIANTS = {
         'bold-fraktur': 'fraktur',
         'bold-script': 'script',
         'bold-sans-serif': 'sans-serif',
-        'sans-serif-bold-italic': 'sans-serif-italic'
-    }
+        'sans-serif-bold-italic': 'sans-serif-italic',
+    },
 };
 CommonWrapper.ITALICVARIANTS = {
     italic: {
         normal: 'italic',
         bold: 'bold-italic',
         'sans-serif': 'sans-serif-italic',
-        'bold-sans-serif': 'sans-serif-bold-italic'
+        'bold-sans-serif': 'sans-serif-bold-italic',
     },
     normal: {
         italic: 'normal',
         'bold-italic': 'bold',
         'sans-serif-italic': 'sans-serif',
-        'sans-serif-bold-italic': 'bold-sans-serif'
-    }
+        'sans-serif-bold-italic': 'bold-sans-serif',
+    },
 };
 //# sourceMappingURL=Wrapper.js.map

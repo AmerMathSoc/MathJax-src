@@ -9,6 +9,6 @@ Entities.add({
     kcy: '\u043A',
     kgreen: '\u0138',
     khcy: '\u0445',
-    kjcy: '\u045C'
+    kjcy: '\u045C',
 }, 'k');
 //# sourceMappingURL=k.js.map

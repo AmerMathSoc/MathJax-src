@@ -10,29 +10,31 @@ export function NodeMixin(Base, options = {}) {
             constructor(...args) {
                 super(args[0]);
                 this.canMeasureNodes = false;
-                let CLASS = this.constructor;
+                const CLASS = this.constructor;
                 this.options = userOptions(defaultOptions({}, CLASS.OPTIONS), args[1]);
             }
             fontSize(node) {
-                return (options.badCSS ? this.options.fontSize : super.fontSize(node));
+                return options.badCSS ? this.options.fontSize : super.fontSize(node);
             }
             fontFamily(node) {
-                return (options.badCSS ? this.options.fontFamily : super.fontFamily(node));
+                return options.badCSS ? this.options.fontFamily : super.fontFamily(node);
             }
             nodeSize(node, em = 1, local = null) {
                 if (!options.badSizes) {
                     return super.nodeSize(node, em, local);
                 }
                 const text = this.textContent(node);
-                const non = Array.from(text.replace(NodeAdaptor.cjkPattern, '')).length;
+                const non = Array.from(text.replace(_a.cjkPattern, '')).length;
                 const CJK = Array.from(text).length - non;
                 return [
                     CJK * this.options.cjkCharWidth + non * this.options.unknownCharWidth,
-                    this.options.unknownCharHeight
+                    this.options.unknownCharHeight,
                 ];
             }
             nodeBBox(node) {
-                return (options.badSizes ? { left: 0, right: 0, top: 0, bottom: 0 } : super.nodeBBox(node));
+                return options.badSizes
+                    ? { left: 0, right: 0, top: 0, bottom: 0 }
+                    : super.nodeBBox(node);
             }
         },
         _a.OPTIONS = Object.assign(Object.assign({}, (options.badCSS ? {
@@ -60,7 +62,7 @@ export function NodeMixin(Base, options = {}) {
             '\u{1B000}-\u{1B001}',
             '\u{1F200}-\u{1F251}',
             '\u{20000}-\u{3FFFD}',
-            ']'
+            ']',
         ].join(''), 'gu'),
         _a;
 }

@@ -24,6 +24,6 @@ Entities.add({
     hslash: '\u210F',
     hstrok: '\u0127',
     hybull: '\u2043',
-    hyphen: '\u2010'
+    hyphen: '\u2010',
 }, 'h');
 //# sourceMappingURL=h.js.map

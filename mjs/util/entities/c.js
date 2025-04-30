@@ -86,6 +86,6 @@ Entities.add({
     cuwed: '\u22CF',
     cwconint: '\u2232',
     cwint: '\u2231',
-    cylcty: '\u232D'
+    cylcty: '\u232D',
 }, 'c');
 //# sourceMappingURL=c.js.map

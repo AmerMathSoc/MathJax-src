@@ -14,24 +14,22 @@ export class SerializedMmlVisitor extends MmlVisitor {
         return node.getSerializedHTML();
     }
     visitInferredMrowNode(node, space) {
-        let mml = [];
+        const mml = [];
         for (const child of node.childNodes) {
             mml.push(this.visitNode(child, space));
         }
         return mml.join('\n');
     }
     visitAnnotationNode(node, space) {
-        return space + '<annotation' + this.getAttributes(node) + '>'
-            + this.childNodeMml(node, '', '')
-            + '</annotation>';
+        const children = this.childNodeMml(node, '', '');
+        return `${space}<annotation${this.getAttributes(node)}>${children}</annotation>`;
     }
     visitDefault(node, space) {
-        let kind = this.getKind(node);
-        let [nl, endspace] = (node.isToken || node.childNodes.length === 0 ? ['', ''] : ['\n', space]);
+        const kind = this.getKind(node);
+        const [nl, endspace] = node.isToken || node.childNodes.length === 0 ? ['', ''] : ['\n', space];
         const children = this.childNodeMml(node, space + '  ', nl);
-        return space + '<' + kind + this.getAttributes(node) + '>'
-            + (children.match(/\S/) ? nl + children + endspace : '')
-            + '</' + kind + '>';
+        const childNode = children.match(/\S/) ? nl + children + endspace : '';
+        return `${space}<${kind}${this.getAttributes(node)}>${childNode}</${kind}>`;
     }
     childNodeMml(node, space, nl) {
         let mml = '';
@@ -54,8 +52,9 @@ export class SerializedMmlVisitor extends MmlVisitor {
     quoteHTML(value) {
         return value
             .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/\"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
             .replace(/[\uD800-\uDBFF]./g, toEntity)
             .replace(/[\u0080-\uD7FF\uE000-\uFFFF]/g, toEntity);
     }

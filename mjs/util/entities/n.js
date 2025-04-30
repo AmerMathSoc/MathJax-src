@@ -192,6 +192,6 @@ Entities.add({
     nwArr: '\u21D6',
     nwarhk: '\u2923',
     nwarrow: '\u2196',
-    nwnear: '\u2927'
+    nwnear: '\u2927',
 }, 'n');
 //# sourceMappingURL=n.js.map

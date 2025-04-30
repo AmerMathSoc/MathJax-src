@@ -7,6 +7,6 @@ Entities.add({
     jcirc: '\u0135',
     jcy: '\u0439',
     jsercy: '\u0458',
-    jukcy: '\u0454'
+    jukcy: '\u0454',
 }, 'j');
 //# sourceMappingURL=j.js.map

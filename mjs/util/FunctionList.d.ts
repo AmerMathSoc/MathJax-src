@@ -1,7 +1,9 @@
 import { PrioritizedList, PrioritizedListItem } from './PrioritizedList.js';
-export interface FunctionListItem extends PrioritizedListItem<Function> {
+type AnyFunction = (...args: unknown[]) => unknown;
+export interface FunctionListItem extends PrioritizedListItem<AnyFunction> {
 }
-export declare class FunctionList extends PrioritizedList<Function> {
+export declare class FunctionList extends PrioritizedList<AnyFunction> {
     execute(...data: any[]): boolean;
-    asyncExecute(...data: any[]): Promise<void>;
+    asyncExecute(...data: any[]): Promise<boolean>;
 }
+export {};

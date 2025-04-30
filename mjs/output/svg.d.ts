@@ -5,14 +5,14 @@ import { MathItem } from '../core/MathItem.js';
 import { SvgWrapper, SvgWrapperClass } from './svg/Wrapper.js';
 import { SvgWrapperFactory } from './svg/WrapperFactory.js';
 import { SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass } from './svg/FontData.js';
-import { StyleList as CssStyleList } from '../util/StyleList.js';
+import { StyleJson } from '../util/StyleJson.js';
 import { FontCache } from './svg/FontCache.js';
 export declare const SVGNS = "http://www.w3.org/2000/svg";
 export declare const XLINKNS = "http://www.w3.org/1999/xlink";
 export declare class SVG<N, T, D> extends CommonOutputJax<N, T, D, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>, SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass> {
     static NAME: string;
     static OPTIONS: OptionList;
-    static commonStyles: CssStyleList;
+    static commonStyles: StyleJson;
     static FONTCACHEID: string;
     static STYLESHEETID: string;
     get forceInlineBreaks(): boolean;
@@ -28,6 +28,7 @@ export declare class SVG<N, T, D> extends CommonOutputJax<N, T, D, SvgWrapper<N,
     styleSheet(html: MathDocument<N, T, D>): N;
     pageElements(html: MathDocument<N, T, D>): N;
     protected findCache(html: MathDocument<N, T, D>): boolean;
+    protected getInitialScale(): number;
     processMath(wrapper: SvgWrapper<N, T, D>, parent: N): void;
     protected createRoot(wrapper: SvgWrapper<N, T, D>): [N, N];
     protected createSVG(h: number, d: number, w: number): [N, N];

@@ -18,7 +18,7 @@ export class AbstractExplorer {
         event.cancelBubble = true;
     }
     static create(document, pool, region, node, ...rest) {
-        let explorer = new this(document, pool, region, node, ...rest);
+        const explorer = new this(document, pool, region, node, ...rest);
         return explorer;
     }
     constructor(document, pool, region, node, ..._rest) {
@@ -56,16 +56,16 @@ export class AbstractExplorer {
         }
     }
     AddEvents() {
-        for (let [eventkind, eventfunc] of this.events) {
+        for (const [eventkind, eventfunc] of this.events) {
             this.node.addEventListener(eventkind, eventfunc);
         }
     }
     RemoveEvents() {
-        for (let [eventkind, eventfunc] of this.events) {
+        for (const [eventkind, eventfunc] of this.events) {
             this.node.removeEventListener(eventkind, eventfunc);
         }
     }
-    Update(force = false) { }
+    Update(_force = false) { }
     stopEvent(event) {
         if (this.stoppable) {
             AbstractExplorer.stopEvent(event);

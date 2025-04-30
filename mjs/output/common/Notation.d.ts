@@ -1,6 +1,8 @@
 import { CommonWrapper } from './Wrapper.js';
 import { CommonMenclose } from './Wrappers/menclose.js';
-export declare const ARROWX = 4, ARROWDX = 1, ARROWY = 2;
+export declare const ARROWX = 4;
+export declare const ARROWDX = 1;
+export declare const ARROWY = 2;
 export declare const THICKNESS = 0.067;
 export declare const PADDING = 0.2;
 export declare const SOLID: string;
@@ -48,7 +50,7 @@ export declare const diagonalArrowDef: {
 export declare const arrowBBox: {
     [name: string]: BBoxExtender<Menclose>;
 };
-export declare const CommonBorder: <W extends Menclose, N>(render: Renderer<W, N>) => DefPairF<"left" | "top" | "bottom" | "right", W, N>;
+export declare const CommonBorder: <W extends Menclose, N>(render: Renderer<W, N>) => DefPairF<Side, W, N>;
 export declare const CommonBorder2: <W extends Menclose, N>(render: Renderer<W, N>) => (name: string, side1: Side, side2: Side) => DefPair<W, N>;
 export declare const CommonDiagonalStrike: <W extends Menclose, N>(render: (sname: string) => Renderer<W, N>) => DefPairF<string, W, N>;
 export declare const CommonDiagonalArrow: <W extends Menclose, N>(render: Renderer<W, N>) => DefPairF<string, W, N>;

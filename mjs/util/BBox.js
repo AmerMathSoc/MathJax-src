@@ -8,8 +8,8 @@ export class BBox {
     }
     constructor(def = { w: 0, h: -BIGDIMEN, d: -BIGDIMEN }) {
         this.w = def.w || 0;
-        this.h = ('h' in def ? def.h : -BIGDIMEN);
-        this.d = ('d' in def ? def.d : -BIGDIMEN);
+        this.h = 'h' in def ? def.h : -BIGDIMEN;
+        this.d = 'd' in def ? def.d : -BIGDIMEN;
         this.L = this.R = this.ic = this.oc = this.sk = this.dx = 0;
         this.scale = this.rscale = 1;
         this.pwidth = '';
@@ -33,10 +33,10 @@ export class BBox {
         this.d *= scale;
     }
     combine(cbox, x = 0, y = 0) {
-        let rscale = cbox.rscale;
-        let w = x + rscale * (cbox.w + cbox.L + cbox.R);
-        let h = y + rscale * cbox.h;
-        let d = rscale * cbox.d - y;
+        const rscale = cbox.rscale;
+        const w = x + rscale * (cbox.w + cbox.L + cbox.R);
+        const h = y + rscale * cbox.h;
+        const d = rscale * cbox.d - y;
         if (w > this.w)
             this.w = w;
         if (h > this.h)
@@ -45,7 +45,7 @@ export class BBox {
             this.d = d;
     }
     append(cbox) {
-        let scale = cbox.rscale;
+        const scale = cbox.rscale;
         this.w += scale * (cbox.w + cbox.L + cbox.R);
         if (scale * cbox.h > this.h) {
             this.h = scale * cbox.h;
@@ -70,6 +70,9 @@ export class BBox {
 }
 BBox.fullWidth = '100%';
 BBox.boxSides = [
-    ['Top', 0, 'h'], ['Right', 1, 'w'], ['Bottom', 2, 'd'], ['Left', 3, 'w']
+    ['Top', 0, 'h'],
+    ['Right', 1, 'w'],
+    ['Bottom', 2, 'd'],
+    ['Left', 3, 'w'],
 ];
 //# sourceMappingURL=BBox.js.map

@@ -55,6 +55,6 @@ Entities.add({
     gtrless: '\u2277',
     gtrsim: '\u2273',
     gvertneqq: '\u2269\uFE00',
-    gvnE: '\u2269\uFE00'
+    gvnE: '\u2269\uFE00',
 }, 'g');
 //# sourceMappingURL=g.js.map

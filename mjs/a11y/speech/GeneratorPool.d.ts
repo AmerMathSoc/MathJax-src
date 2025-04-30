@@ -1,0 +1,34 @@
+import { OptionList } from '../../util/Options.js';
+import { LiveRegion } from '../explorer/Region.js';
+import { InPlace } from '../speech/SpeechUtil.js';
+import { DOMAdaptor } from '../../core/DOMAdaptor.js';
+import { MathItem } from '../../core/MathItem.js';
+import { WorkerHandler } from './WebWorker.js';
+export declare class GeneratorPool<N, T, D> {
+    private webworker;
+    private _element;
+    set element(element: Element);
+    get element(): Element;
+    promise: Promise<void>;
+    adaptor: DOMAdaptor<N, T, D>;
+    private _options;
+    set options(options: OptionList);
+    get options(): OptionList;
+    private _init;
+    init(options: OptionList, adaptor: DOMAdaptor<N, T, D>, webworker: WorkerHandler<N, T, D>): void;
+    update(options: OptionList): void;
+    Speech(item: MathItem<N, T, D>): Promise<void>;
+    cancel(item: MathItem<N, T, D>): void;
+    summary(node: N): void;
+    CleanUp(node: N): void;
+    private lastSpeech;
+    private lastMove_;
+    get lastMove(): InPlace;
+    set lastMove(move: InPlace);
+    updateRegions(node: N, speechRegion: LiveRegion, brailleRegion: LiveRegion): void;
+    private getOptions;
+    nextRules(item: MathItem<N, T, D>): Promise<void>;
+    nextStyle(node: N, item: MathItem<N, T, D>): Promise<void>;
+    getLabel(node: N, _center?: string, sep?: string): string;
+    depth(node: N, root: N, actionable: boolean): void;
+}

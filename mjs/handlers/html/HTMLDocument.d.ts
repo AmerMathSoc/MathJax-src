@@ -6,12 +6,12 @@ import { HTMLDomStrings } from './HTMLDomStrings.js';
 import { DOMAdaptor } from '../../core/DOMAdaptor.js';
 import { InputJax } from '../../core/InputJax.js';
 import { ProtoItem, Location } from '../../core/MathItem.js';
-import { StyleList } from '../../util/StyleList.js';
+import { StyleJson } from '../../util/StyleJson.js';
 export type HTMLNodeArray<N, T> = [N | T, number][][];
 export declare class HTMLDocument<N, T, D> extends AbstractMathDocument<N, T, D> {
     static KIND: string;
     static OPTIONS: OptionList;
-    protected styles: StyleList[];
+    protected styles: StyleJson[];
     domStrings: HTMLDomStrings<N, T, D>;
     constructor(document: any, adaptor: DOMAdaptor<N, T, D>, options: OptionList);
     protected findPosition(N: number, index: number, delim: string, nodes: HTMLNodeArray<N, T>): Location<N, T>;
@@ -26,6 +26,6 @@ export declare class HTMLDocument<N, T, D> extends AbstractMathDocument<N, T, D>
     removeFromDocument(restore?: boolean): this;
     documentStyleSheet(): N;
     documentPageElements(): N;
-    addStyles(styles: StyleList): void;
-    getStyles(): StyleList[];
+    addStyles(styles: StyleJson): void;
+    getStyles(): StyleJson[];
 }

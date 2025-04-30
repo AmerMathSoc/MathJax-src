@@ -5,10 +5,6 @@ export function SafeMathDocumentMixin(BaseDocument) {
             constructor(...args) {
                 super(...args);
                 this.safe = new this.options.SafeClass(this, this.options.safeOptions);
-                const ProcessBits = this.constructor.ProcessBits;
-                if (!ProcessBits.has('safe')) {
-                    ProcessBits.allocate('safe');
-                }
                 for (const jax of this.inputJax) {
                     if (jax.name.match(/MathML/)) {
                         jax.mathml.filterAttribute = this.safe.mmlAttribute.bind(this.safe);

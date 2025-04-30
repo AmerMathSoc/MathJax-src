@@ -1,5 +1,5 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonTextNodeMixin } from '../../common/Wrappers/TextNode.js';
+import { CommonTextNodeMixin, } from '../../common/Wrappers/TextNode.js';
 import { TextNode } from '../../../core/MmlTree/MmlNode.js';
 export const ChtmlTextNode = (function () {
     var _a;
@@ -15,13 +15,12 @@ export const ChtmlTextNode = (function () {
                     return;
                 const bbox = this.getBBox();
                 if (variant === '-explicitFont') {
-                    const { scale } = this.parent.getBBox();
-                    adaptor.append(parent, this.jax.unknownText(text, variant, bbox.w, scale));
+                    adaptor.append(parent, this.jax.unknownText(text, variant, bbox.w));
                 }
                 else {
                     let utext = '';
                     const chars = this.remappedText(text, variant);
-                    const H = (chars.length > 1 ? this.em(this.parent.getBBox().h) : '');
+                    const H = chars.length > 1 ? this.em(this.parent.getBBox().h) : '';
                     const m = chars.length;
                     for (let i = 0; i < m; i++) {
                         const n = chars[i];
@@ -32,9 +31,7 @@ export const ChtmlTextNode = (function () {
                         else {
                             utext = this.addUtext(utext, variant, parent);
                             const font = data.ff || (data.f ? `${this.font.cssFontPrefix}-${data.f}` : '');
-                            const node = adaptor.append(parent, this.html('mjx-c', { class: this.char(n) + (font ? ' ' + font : '') }, [
-                                this.text(data.c || String.fromCodePoint(n))
-                            ]));
+                            const node = adaptor.append(parent, this.html('mjx-c', { class: this.char(n) + (font ? ' ' + font : '') }, [this.text(data.c || String.fromCodePoint(n))]));
                             if (i < m - 1 || bbox.oc) {
                                 adaptor.setAttribute(node, 'noic', 'true');
                             }
@@ -60,12 +57,12 @@ export const ChtmlTextNode = (function () {
             'mjx-c': {
                 display: 'inline-block',
                 width: 0,
-                'text-align': 'right'
+                'text-align': 'right',
             },
             'mjx-utext': {
                 display: 'inline-block',
-                padding: '.75em 0 .2em 0'
-            }
+                padding: '.75em 0 .2em 0',
+            },
         },
         _a;
 })();

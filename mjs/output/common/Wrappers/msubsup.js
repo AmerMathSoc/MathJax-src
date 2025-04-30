@@ -5,7 +5,7 @@ export function CommonMsubMixin(Base) {
                 return this.childNodes[this.node.sub];
             }
             getOffset() {
-                const x = (this.baseIsChar ? 0 : this.getAdjustedIc());
+                const x = this.baseIsChar ? 0 : this.getAdjustedIc();
                 return [x, -this.getV()];
             }
         },
@@ -36,6 +36,9 @@ export function CommonMsubsupMixin(Base) {
             get supChild() {
                 return this.childNodes[this.node.sup];
             }
+            get scriptChild() {
+                return this.supChild;
+            }
             getUVQ(subbox = this.subChild.getOuterBBox(), supbox = this.supChild.getOuterBBox()) {
                 const base = this.baseCore;
                 const bbox = base.getLineBBox(base.breakCount);
@@ -45,11 +48,13 @@ export function CommonMsubsupMixin(Base) {
                 const t = 3 * tex.rule_thickness;
                 const subscriptshift = this.length2em(this.node.attributes.get('subscriptshift'), tex.sub2);
                 const drop = this.baseCharZero(bbox.d * this.baseScale + tex.sub_drop * subbox.rscale);
+                const supd = supbox.d * supbox.rscale;
+                const subh = subbox.h * subbox.rscale;
                 let [u, v] = [this.getU(), Math.max(drop, subscriptshift)];
-                let q = (u - supbox.d * supbox.rscale) - (subbox.h * subbox.rscale - v);
+                let q = u - supd - (subh - v);
                 if (q < t) {
                     v += t - q;
-                    const p = (4 / 5) * tex.x_height - (u - supbox.d * supbox.rscale);
+                    const p = (4 / 5) * tex.x_height - (u - supd);
                     if (p > 0) {
                         u += p;
                         v -= p;
@@ -57,12 +62,15 @@ export function CommonMsubsupMixin(Base) {
                 }
                 u = Math.max(this.length2em(this.node.attributes.get('superscriptshift'), u), u);
                 v = Math.max(this.length2em(this.node.attributes.get('subscriptshift'), v), v);
-                q = (u - supbox.d * supbox.rscale) - (subbox.h * subbox.rscale - v);
+                q = u - supd - (subh - v);
                 this.UVQ = [u, -v, q];
                 return this.UVQ;
             }
             appendScripts(bbox) {
-                const [subbox, supbox] = [this.subChild.getOuterBBox(), this.supChild.getOuterBBox()];
+                const [subbox, supbox] = [
+                    this.subChild.getOuterBBox(),
+                    this.supChild.getOuterBBox(),
+                ];
                 const w = this.getBaseWidth();
                 const x = this.getAdjustedIc();
                 const [u, v] = this.getUVQ();

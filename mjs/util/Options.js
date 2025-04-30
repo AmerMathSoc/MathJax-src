@@ -1,7 +1,8 @@
 const OBJECT = {}.constructor;
 export function isObject(obj) {
-    return typeof obj === 'object' && obj !== null &&
-        (obj.constructor === OBJECT || obj.constructor === Expandable);
+    return (typeof obj === 'object' &&
+        obj !== null &&
+        (obj.constructor === OBJECT || obj.constructor === Expandable));
 }
 export const APPEND = '[+]';
 export const REMOVE = '[-]';
@@ -12,7 +13,7 @@ export const OPTIONS = {
             throw new Error(message);
         }
         console.warn('MathJax: ' + message);
-    }
+    },
 };
 export class Expandable {
 }
@@ -29,10 +30,10 @@ export function keys(def) {
     return Object.keys(def).concat(Object.getOwnPropertySymbols(def));
 }
 export function copy(def) {
-    let props = {};
+    const props = {};
     for (const key of keys(def)) {
-        let prop = Object.getOwnPropertyDescriptor(def, key);
-        let value = prop.value;
+        const prop = Object.getOwnPropertyDescriptor(def, key);
+        const value = prop.value;
         if (Array.isArray(value)) {
             prop.value = insert([], value, false);
         }
@@ -54,16 +55,22 @@ export function insert(dst, src, warn = true) {
             OPTIONS.optionError(`Invalid option "${key}" (no default value).`, key);
             continue;
         }
-        let sval = src[key], dval = dst[key];
-        if (isObject(sval) && dval !== null &&
+        const sval = src[key];
+        let dval = dst[key];
+        if (isObject(sval) &&
+            dval !== null &&
             (typeof dval === 'object' || typeof dval === 'function')) {
             const ids = keys(sval);
             if (Array.isArray(dval) &&
-                ((ids.length === 1 && (ids[0] === APPEND || ids[0] === REMOVE) && Array.isArray(sval[ids[0]])) ||
-                    (ids.length === 2 && ids.sort().join(',') === APPEND + ',' + REMOVE &&
-                        Array.isArray(sval[APPEND]) && Array.isArray(sval[REMOVE])))) {
+                ((ids.length === 1 &&
+                    (ids[0] === APPEND || ids[0] === REMOVE) &&
+                    Array.isArray(sval[ids[0]])) ||
+                    (ids.length === 2 &&
+                        ids.sort().join(',') === APPEND + ',' + REMOVE &&
+                        Array.isArray(sval[APPEND]) &&
+                        Array.isArray(sval[REMOVE])))) {
                 if (sval[REMOVE]) {
-                    dval = dst[key] = dval.filter(x => sval[REMOVE].indexOf(x) < 0);
+                    dval = dst[key] = dval.filter((x) => sval[REMOVE].indexOf(x) < 0);
                 }
                 if (sval[APPEND]) {
                     dst[key] = [...dval, ...sval[APPEND]];
@@ -87,17 +94,17 @@ export function insert(dst, src, warn = true) {
     return dst;
 }
 export function defaultOptions(options, ...defs) {
-    defs.forEach(def => insert(options, def, false));
+    defs.forEach((def) => insert(options, def, false));
     return options;
 }
 export function userOptions(options, ...defs) {
-    defs.forEach(def => insert(options, def, true));
+    defs.forEach((def) => insert(options, def, true));
     return options;
 }
 export function selectOptions(options, ...keys) {
-    let subset = {};
+    const subset = {};
     for (const key of keys) {
-        if (options.hasOwnProperty(key)) {
+        if (Object.hasOwn(options, key)) {
             subset[key] = options[key];
         }
     }
@@ -107,9 +114,9 @@ export function selectOptionsFromKeys(options, object) {
     return selectOptions(options, ...Object.keys(object));
 }
 export function separateOptions(options, ...objects) {
-    let results = [];
+    const results = [];
     for (const object of objects) {
-        let exists = {}, missing = {};
+        const exists = {}, missing = {};
         for (const key of Object.keys(options || {})) {
             (object[key] === undefined ? missing : exists)[key] = options[key];
         }
@@ -120,6 +127,6 @@ export function separateOptions(options, ...objects) {
     return results;
 }
 export function lookup(name, lookup, def = null) {
-    return (lookup.hasOwnProperty(name) ? lookup[name] : def);
+    return Object.hasOwn(lookup, name) ? lookup[name] : def;
 }
 //# sourceMappingURL=Options.js.map

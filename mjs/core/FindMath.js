@@ -1,7 +1,7 @@
 import { userOptions, defaultOptions } from '../util/Options.js';
 export class AbstractFindMath {
     constructor(options) {
-        let CLASS = this.constructor;
+        const CLASS = this.constructor;
         this.options = userOptions(defaultOptions({}, CLASS.OPTIONS), options);
     }
 }

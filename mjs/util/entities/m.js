@@ -33,6 +33,6 @@ Entities.add({
     models: '\u22A7',
     mp: '\u2213',
     mstpos: '\u223E',
-    mumap: '\u22B8'
+    mumap: '\u22B8',
 }, 'm');
 //# sourceMappingURL=m.js.map

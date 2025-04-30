@@ -1,5 +1,5 @@
 import { SvgWrapper } from '../Wrapper.js';
-import { CommonMspaceMixin } from '../../common/Wrappers/mspace.js';
+import { CommonMspaceMixin, } from '../../common/Wrappers/mspace.js';
 import { MmlMspace } from '../../../core/MmlTree/MmlNodes/mspace.js';
 export const SvgMspace = (function () {
     var _a;

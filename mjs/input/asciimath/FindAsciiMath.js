@@ -7,23 +7,25 @@ export class FindAsciiMath extends AbstractFindMath {
         this.getPatterns();
     }
     getPatterns() {
-        let options = this.options;
-        let starts = [];
+        const options = this.options;
+        const starts = [];
         this.end = {};
         options['delimiters'].forEach((delims) => this.addPattern(starts, delims, false));
         this.start = new RegExp(starts.join('|'), 'g');
-        this.hasPatterns = (starts.length > 0);
+        this.hasPatterns = starts.length > 0;
     }
     addPattern(starts, delims, display) {
-        let [open, close] = delims;
+        const [open, close] = delims;
         starts.push(quotePattern(open));
         this.end[open] = [close, display, new RegExp(quotePattern(close), 'g')];
     }
     findEnd(text, n, start, end) {
-        let [, display, pattern] = end;
-        let i = pattern.lastIndex = start.index + start[0].length;
-        let match = pattern.exec(text);
-        return (!match ? null : protoItem(start[0], text.substr(i, match.index - i), match[0], n, start.index, match.index + match[0].length, display));
+        const [, display, pattern] = end;
+        const i = (pattern.lastIndex = start.index + start[0].length);
+        const match = pattern.exec(text);
+        return !match
+            ? null
+            : protoItem(start[0], match.index < i ? '' : text.substring(i, match.index), match[0], n, start.index, match.index + match[0].length, display);
     }
     findMathInString(math, n, text) {
         let start, match;
@@ -37,7 +39,7 @@ export class FindAsciiMath extends AbstractFindMath {
         }
     }
     findMath(strings) {
-        let math = [];
+        const math = [];
         if (this.hasPatterns) {
             for (let i = 0, m = strings.length; i < m; i++) {
                 this.findMathInString(math, i, strings[i]);

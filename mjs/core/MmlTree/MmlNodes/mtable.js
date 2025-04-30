@@ -1,10 +1,10 @@
-import { AbstractMmlNode, TEXCLASS, indentAttributes } from '../MmlNode.js';
+import { AbstractMmlNode, TEXCLASS, indentAttributes, } from '../MmlNode.js';
 import { split } from '../../../util/string.js';
 export class MmlMtable extends AbstractMmlNode {
     constructor() {
         super(...arguments);
         this.properties = {
-            useHeight: true
+            useHeight: true,
         };
         this.texclass = TEXCLASS.ORD;
     }
@@ -22,8 +22,8 @@ export class MmlMtable extends AbstractMmlNode {
             if (attributes[name]) {
                 this.attributes.setInherited(name, attributes[name][1]);
             }
-            if (this.attributes.getExplicit(name) !== undefined) {
-                delete (this.attributes.getAllAttributes())[name];
+            if (this.attributes.hasExplicit(name)) {
+                this.attributes.unset(name);
             }
         }
         super.setInheritedAttributes(attributes, display, level, prime);
@@ -31,16 +31,15 @@ export class MmlMtable extends AbstractMmlNode {
     setChildInheritedAttributes(attributes, display, level, _prime) {
         for (const child of this.childNodes) {
             if (!child.isKind('mtr')) {
-                this.replaceChild(this.factory.create('mtr'), child)
-                    .appendChild(child);
+                this.replaceChild(this.factory.create('mtr'), child).appendChild(child);
             }
         }
-        level = this.getProperty('scriptlevel') || level;
-        display = !!(this.attributes.getExplicit('displaystyle') || this.attributes.getDefault('displaystyle'));
+        display = !!(this.attributes.getExplicit('displaystyle') ||
+            this.attributes.getDefault('displaystyle'));
         attributes = this.addInheritedAttributes(attributes, {
             columnalign: this.attributes.get('columnalign'),
             rowalign: 'center',
-            'data-break-align': this.attributes.get('data-break-align')
+            'data-break-align': this.attributes.get('data-break-align'),
         });
         const cramped = this.attributes.getExplicit('data-cramped');
         const ralign = split(this.attributes.get('rowalign'));
@@ -70,7 +69,9 @@ export class MmlMtable extends AbstractMmlNode {
                 if (!options['fixMtables']) {
                     child.parent.removeChild(child);
                     child.parent = this;
-                    isMtd && mtr.appendChild(factory.create('mtd'));
+                    if (isMtd) {
+                        mtr.appendChild(factory.create('mtd'));
+                    }
                     const merror = child.mError('Children of ' + this.kind + ' must be mtr or mlabeledtr', options, isMtd);
                     mtr.childNodes[mtr.childNodes.length - 1].appendChild(merror);
                 }

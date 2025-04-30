@@ -1,13 +1,15 @@
 import { ChtmlWrapper } from '../Wrapper.js';
-import { CommonMspaceMixin } from '../../common/Wrappers/mspace.js';
+import { CommonMspaceMixin, } from '../../common/Wrappers/mspace.js';
 import { MmlMspace } from '../../../core/MmlTree/MmlNodes/mspace.js';
 export const ChtmlMspace = (function () {
     var _a;
     const Base = CommonMspaceMixin(ChtmlWrapper);
     return _a = class ChtmlMspace extends Base {
             toCHTML(parents) {
-                parents.length > 1 && parents.forEach(dom => this.adaptor.append(dom, this.html('mjx-linestrut')));
-                let chtml = this.standardChtmlNodes(parents);
+                if (parents.length > 1) {
+                    parents.forEach((dom) => this.adaptor.append(dom, this.html('mjx-linestrut')));
+                }
+                const chtml = this.standardChtmlNodes(parents);
                 let { w, h, d } = this.getBBox();
                 if (w < 0) {
                     this.adaptor.setStyle(chtml[0], 'marginRight', this.em(w));
