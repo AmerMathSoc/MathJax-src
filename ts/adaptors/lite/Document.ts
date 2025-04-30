@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2018-2023 The MathJax Consortium
+ *  Copyright (c) 2018-2024 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,18 +16,25 @@
  */
 
 /**
- * @fileoverview  Implements a lightweight DOM adaptor
+ * @file  Implements a lightweight DOM adaptor
  *
  * @author dpvc@mathjax.org (Davide Cervone)
  */
 
-import {LiteElement} from './Element.js';
+import { LiteElement } from './Element.js';
+import { LiteWindow } from './Window.js';
+
+export type LiteListener = (event: any) => void;
 
 /************************************************************/
 /**
  * Implements a lightweight Document replacement
  */
 export class LiteDocument {
+  /**
+   * The document's parent window
+   */
+  public defaultView: LiteWindow = null;
   /**
    * The document's <html> element
    */
@@ -42,25 +49,56 @@ export class LiteDocument {
   public body: LiteElement;
 
   /**
-   * the DOCTYPE comment
+   * The DOCTYPE comment
    */
   public type: string;
 
   /**
-   * The kind is always #document
+   * The listeners for postMessage() calls
    */
-  public get kind() {
+  public listeners: LiteListener[] = [];
+
+  /**
+   * The kind is always #document
+   *
+   * @returns {string} The document string.
+   */
+  public get kind(): string {
     return '#document';
   }
 
   /**
-   * @constructor
+   * @class
+   * @param {LiteWindow} window   The window for the document (if given)
    */
-  constructor() {
+  constructor(window: LiteWindow = null) {
     this.root = new LiteElement('html', {}, [
-      this.head = new LiteElement('head'),
-      this.body = new LiteElement('body')
+      (this.head = new LiteElement('head')),
+      (this.body = new LiteElement('body')),
     ]);
     this.type = '';
+    this.defaultView = window;
+  }
+
+  /**
+   * @param {string} kind                    The event type to listen for
+   * @param {(event: any) => void} listener  The listener function
+   */
+  public addEventListener(kind: string, listener: (event: any) => void) {
+    if (kind === 'message') {
+      this.listeners.push(listener);
+    }
+  }
+
+  /**
+   * @param {any} msg        The message to send
+   * @param {string} domain  The domain to use for the message
+   */
+  public postMessage(msg: any, domain: string) {
+    new Promise(() => {
+      for (const listener of this.listeners) {
+        listener({ data: msg, origin: domain });
+      }
+    });
   }
 }

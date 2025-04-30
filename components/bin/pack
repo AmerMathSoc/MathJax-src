@@ -2,7 +2,7 @@
 
 /*************************************************************
  *
- *  Copyright (c) 2018-2023 The MathJax Consortium
+ *  Copyright (c) 2018-2024 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -40,10 +40,11 @@ const bundle = (process.argv[3] || 'bundle');
 
 /**
  * @param {string} name    The file name to turn into a Regular expression
+ * @param {string} tail    Additional regexp to include after the file path
  * @return {RegExp}        The regular expression for the name,
  */
-function fileRegExp(name) {
-  return new RegExp(name.replace(/([\\.{}[\]()?*^$])/g, '\\$1'), 'g');
+function fileRegExp(name, tail = '') {
+  return new RegExp(name.replace(/([\\.{}[\]()?*^$])/g, '\\$1') + tail, 'g');
 }
 
 /**
@@ -63,7 +64,7 @@ const mjPath = path.dirname(compPath);
 const jsPath = path.join(__dirname, '..', '..', target);
 const compRE = fileRegExp(compPath);
 const rootRE = fileRegExp(path.dirname(jsPath));
-const nodeRE = fileRegExp(nodePath);
+const nodeRE = fileRegExp(nodePath, '(?:/\\.pnpm/.*?/node_modules)?');
 const fontRE = new RegExp('^.*\\/(mathjax-[^\/-]*)(?:-font)?\/(build|[cm]js)');
 
 /**
@@ -73,12 +74,17 @@ const fontRE = new RegExp('^.*\\/(mathjax-[^\/-]*)(?:-font)?\/(build|[cm]js)');
 async function readJSON(dir) {
   return new Promise((ok, fail) => {
     const buffer = [];
-    const child = spawn('npx', [
+    const child = spawn('pnpm', [
       'webpack', '--env', `dir=${dir}`, '--env', `bundle=${bundle}`, '--json',
       '-c', path.relative('.', path.join(compPath, 'webpack.config.' + target))
     ]);
     child.stdout.on('data', (data) => buffer.push(String(data)));
-    child.stdout.on('close', (code) => {
+    child.stderr.on('data', (data) => console.error(String(data)));
+    child.on('close', (code) => {
+      if (code !== 0) {
+        fail('Webpack failed with code ' + code);
+        return;
+      }
       const json = JSON.parse(buffer.join(''));
       if (json.errors && json.errors.length) {
         fail(json.errors[0].message);
@@ -104,6 +110,7 @@ async function webpackLib(dir) {
     if (!config) return;
     const jsdir = (config.js ? path.resolve(dir, config.js).replace(/js$/, target) : jsPath);
     const jsRE = fileRegExp(jsdir);
+    const jsRE2 = (config.js ? fileRegExp(path.resolve(dir, config.js)) : /^$/);
     const libRE = fileRegExp(path.resolve(jsdir, '..', 'components'));
 
     //
@@ -124,14 +131,15 @@ async function webpackLib(dir) {
     }
     const list = [];
     for (const module of modules) {
-      if (module.moduleType.match(/javascript/)) {
+      if (module.moduleType.match(/javascript|json/)) {
         let name = (module.nameForCondition || module.name)
             .replace(compRE, '[components]')
             .replace(nodeRE, '[node]')
             .replace(rootRE, '[mathjax]')
             .replace(fontRE, '[$1]/$2')
             .replace(jsRE,   '[js]')
-            .replace(libRE,  '[lib]');
+            .replace(jsRE2,  '[js]')
+            .replace(libRE,  '[build]');
         if (name.charAt(0) !== '.' && name.charAt(0) !== '[') {
           name = path.relative(dir, name);
         }

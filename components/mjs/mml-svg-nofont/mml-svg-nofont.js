@@ -4,9 +4,9 @@ import '../core/core.js';
 import '../input/mml/mml.js';
 import {loadFont} from '../output/svg/svg.js';
 import '../ui/menu/menu.js';
-import {checkSre} from '../a11y/util.js';
+import '../a11y/util.js';
 
-Loader.preLoad(
+Loader.preLoaded(
   'loader', 'startup',
   'core',
   'input/mml',
@@ -15,4 +15,4 @@ Loader.preLoad(
 );
 Loader.saveVersion('mml-svg-nofont');
 
-loadFont(checkSre(startup));
+loadFont(startup);

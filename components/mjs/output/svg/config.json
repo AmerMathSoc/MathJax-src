@@ -4,16 +4,16 @@
     "targets": [
       "output/svg.ts",
       "output/svg",
+      "output/common.ts",
       "output/common"
-    ],
-    "exclude": [
-      "output/svg/ts5",
-      "output/svg/ts6"
     ]
   },
   "webpack": {
     "name": "output/svg",
-    "libs": ["components/src/core/lib"],
+    "libs": [
+      "components/src/core/lib",
+      "components/src/startup/lib"
+    ],
     "font": false
   }
 }

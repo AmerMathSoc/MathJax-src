@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2018-2023 The MathJax Consortium
+ *  Copyright (c) 2018-2024 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,14 +16,27 @@
  */
 
 /**
- * @fileoverview  Implements a lightweight HTML Element replacement
+ * @file  Implements a lightweight HTML Element replacement
  *
  * @author dpvc@mathjax.org (Davide Cervone)
  */
 
-import {OptionList} from '../../util/Options.js';
-import {Styles} from '../../util/Styles.js';
-import {LiteText} from './Text.js';
+import { OptionList } from '../../util/Options.js';
+import { Styles } from '../../util/Styles.js';
+import { LiteText } from './Text.js';
+import { LiteDocument } from './Document.js';
+import { LiteWindow } from './Window.js';
+
+import { asyncLoad } from '../../util/AsyncLoad.js';
+
+/**
+ * A minimal webworker interface
+ */
+interface WebWorker {
+  on(kind: string, listener: (event: Event) => void): void;
+  postMessage(msg: any): void;
+  terminate(): void;
+}
 
 /**
  * Type for attribute lists
@@ -34,7 +47,6 @@ export type LiteAttributeList = OptionList;
  * Type for generic nodes in LiteAdaptor
  */
 export type LiteNode = LiteElement | LiteText;
-
 
 /************************************************************/
 /**
@@ -70,15 +82,104 @@ export class LiteElement {
    * @param {string} kind  The type of node to create
    * @param {LiteAttributeList} attributes  The list of attributes to set (if any)
    * @param {LiteNode[]} children  The children for the node (if any)
-   * @constructor
+   * @class
    */
-  constructor(kind: string, attributes: LiteAttributeList = {}, children: LiteNode[] = []) {
+  constructor(
+    kind: string,
+    attributes: LiteAttributeList = {},
+    children: LiteNode[] = []
+  ) {
     this.kind = kind;
-    this.attributes = {...attributes};
+    this.attributes = { ...attributes };
     this.children = [...children];
     for (const child of this.children) {
       child.parent = this;
     }
     this.styles = null;
+  }
+}
+
+/**
+ * An implemenation of an iframe that has enough to handle message passing
+ * as used in the web-worker code for SRE
+ */
+export class LiteIFrame extends LiteElement {
+  /**
+   * The src field for the iframe
+   */
+  public src: string = '';
+
+  /**
+   * The window for the iframe
+   */
+  public contentWindow: LiteWindow;
+
+  /**
+   * Options passed by the web-worker code
+   */
+  public options: OptionList = {};
+
+  /**
+   * @class
+   * @param {string} kind                    The kind (should be 'iframe')
+   * @param {LiteAttributeList} attributes   The list of attributes to set
+   * @param {LiteNode[]} children            The childnodes (should be empty)
+   */
+  constructor(
+    kind: string,
+    attributes: LiteAttributeList = {},
+    children: LiteNode[] = []
+  ) {
+    super(kind, attributes, children);
+    this.contentWindow = new LiteWindow();
+  }
+
+  /**
+   * Implements loading the worker script (only called when the id is a worker-handler id)
+   *
+   * @param {LiteDocument} parent   The document where the iframe lives
+   */
+  public async loadWorker(parent: LiteDocument) {
+    //
+    // Subclass the Worker from node:worder_threads to include
+    //  addEventListener and postMessage methods
+    //
+    const { Worker } = await asyncLoad('node:worker_threads');
+    class LiteWorker {
+      protected worker: WebWorker;
+      constructor(url: string, options: OptionList = {}) {
+        this.worker = new Worker(url, options);
+      }
+      addEventListener(kind: string, listener: (event: any) => void) {
+        this.worker.on(kind, listener);
+      }
+      postMessage(msg: any) {
+        this.worker.postMessage({ data: msg, origin: '*' });
+      }
+      terminate() {
+        this.worker.terminate();
+      }
+    }
+    //
+    // Set the context for the fake iframe code
+    //
+    const hash = [
+      '*',
+      `${this.options.path}/${this.options.worker}`,
+      this.options.debug,
+    ];
+    const { WorkerPool, setContext } = await asyncLoad(
+      `${this.options.path}/speech-workerpool.js`
+    );
+    setContext({
+      Worker: LiteWorker,
+      window: this.contentWindow,
+      parent: parent,
+      hash: hash.map((part) => encodeURIComponent(part)).join('&'),
+    });
+    //
+    // Make the WorkerPool and start it
+    //
+    WorkerPool.Create().Start();
   }
 }

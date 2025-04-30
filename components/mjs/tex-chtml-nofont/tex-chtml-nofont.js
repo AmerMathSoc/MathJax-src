@@ -4,9 +4,9 @@ import '../core/core.js';
 import '../input/tex/tex.js';
 import {loadFont} from '../output/chtml/chtml.js';
 import '../ui/menu/menu.js';
-import {checkSre} from '../a11y/util.js';
+import '../a11y/util.js';
 
-Loader.preLoad(
+Loader.preLoaded(
   'core',
   'input/tex',
   'output/chtml',
@@ -14,4 +14,4 @@ Loader.preLoad(
 );
 Loader.saveVersion('tex-chtml-nofont');
 
-loadFont(checkSre(startup));
+loadFont(startup);

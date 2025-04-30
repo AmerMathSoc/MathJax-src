@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2018-2023 The MathJax Consortium
+ *  Copyright (c) 2018-2024 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
  */
 
 /**
- * @fileoverview  Implements a lightweight DOM adaptor
+ * @file  Implements a lightweight DOM adaptor
  *
  * @author dpvc@mathjax.org (Davide Cervone)
  */
 
-import {LiteElement} from './Element.js';
-import {LiteDocument} from './Document.js';
-import {LiteList} from './List.js';
-import {LiteParser} from './Parser.js';
+import { LiteElement } from './Element.js';
+import { LiteDocument } from './Document.js';
+import { LiteList } from './List.js';
+import { LiteParser } from './Parser.js';
 
 /************************************************************/
 /**
@@ -54,16 +54,38 @@ export class LiteWindow {
   /**
    * The DocumentFragment class
    */
-  public DocumentFragment: typeof LiteList  = LiteList;
+  public DocumentFragment: typeof LiteList = LiteList;
   /**
    * The Document class
    */
-  public Document: typeof LiteDocument  = LiteDocument;
+  public Document: typeof LiteDocument = LiteDocument;
 
   /**
    * Create the LiteWindow and its LiteDocument
    */
   constructor() {
-    this.document = new LiteDocument();
+    this.document = new LiteDocument(this);
+  }
+
+  /**
+   * Post a message to the window (by posting to the document);
+   *
+   * @param {any} msg         The message to post
+   * @param {string} domain   The message domain
+   */
+  postMessage(msg: any, domain: string) {
+    this.document.postMessage(msg, domain);
+  }
+
+  /**
+   * Add a message listener
+   *
+   * @param {string} kind                  The event type to listen for (only message is supported)
+   * @param {(ev: any) => void} listener   The listener to install
+   */
+  addEventListener(kind: string, listener: (event: any) => void) {
+    if (kind === 'message') {
+      this.document.listeners.push(listener);
+    }
   }
 }

@@ -1,9 +1,10 @@
 import {combineDefaults, combineWithMathJax} from '#js/components/global.js';
-import {Package} from "#js/components/package.js";
+import {Package} from '#js/components/package.js';
+import {hasWindow} from '#js/util/context.js';
 
-export const FONTPATH = (typeof document === 'undefined' ?
-                         '@mathjax/%%FONT%%-font' :
-                         'https://cdn.jsdelivr.net/npm/%%FONT%%-font');
+export const FONTPATH = hasWindow ?
+                        'https://cdn.jsdelivr.net/npm/@mathjax/%%FONT%%-font':
+                        '@mathjax/%%FONT%%-font';
 
 export const OutputUtil = {
   config(jax, jaxClass, defaultFont, fontClass) {
@@ -27,17 +28,18 @@ export const OutputUtil = {
         });
         font = `[${name}]`;
       }
-      const name = font.substr(1, font.length - 2);
+      const name = font.substring(1, font.length - 1);
 
       if (name !== defaultFont) {
 
-        combineDefaults(MathJax.config.loader, `output/${jax}`, {
-          checkReady() {
-            return MathJax.loader.load(`${font}/${jax}`).catch(err => console.log(err));
-          }
-        });
+        MathJax.loader.addPackageData(`output/${jax}`, {extraLoads: [`${font}/${jax}`]});
 
       } else {
+
+        const extraLoads = MathJax.config.loader[`${font}/${jax}`]?.extraLoads;
+        if (extraLoads) {
+          MathJax.loader.addPackageData(`output/${jax}`, {extraLoads});
+        }
 
         combineWithMathJax({_: {
           output: {
@@ -62,7 +64,7 @@ export const OutputUtil = {
         });
         if (jax === 'chtml') {
           combineDefaults(MathJax.config, jax, {
-            fontURL: Package.resolvePath(`${font}/${jax}/woff`, false),
+            fontURL: Package.resolvePath(`${font}/${jax}/woff2`, false),
           });
         }
 
@@ -76,16 +78,14 @@ export const OutputUtil = {
 
   },
 
-  loadFont(startup, jax, font, preload) {
+  loadFont(startup, jax, font, preloaded) {
     if (!MathJax.loader) {
-      return Promise.resolve();
+      return startup;
     }
-    if (preload) {
-      MathJax.loader.preLoad(`[${font}]/${jax}`);
+    if (preloaded) {
+      MathJax.loader.preLoaded(`[${font}]/${jax}`);
     }
-    const check = MathJax.config.loader[`output/${jax}`];
-    const start = (check && check.checkReady ? check.checkReady().then(startup) : startup());
-    return start.catch(err => console.log(err));
+    return Package.loadPromise(`output/${jax}`).then(startup);
   }
 
 };

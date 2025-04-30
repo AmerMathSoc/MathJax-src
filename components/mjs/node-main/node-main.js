@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2019-2023 The MathJax Consortium
+ *  Copyright (c) 2019-2024 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -34,33 +34,35 @@ const dir = global.MathJax.config.__dirname;   // set up by node-main.mjs or nod
  * Set up the initial configuration
  */
 combineDefaults(MathJax.config, 'loader', {
+  paths: {'mathjax-newcm': 'mathjax-newcm-font'},
   require: eval("(file) => import(file)"),   // use dynamic imports
   failed: (err) => {throw err}               // pass on error message to init()'s catch function
 });
+combineDefaults(MathJax.config, 'output', {font: 'mathjax-newcm'});
 
 /*
  * Mark the preloaded components
  */
-Loader.preLoad('loader', 'startup', 'core', 'adaptors/liteDOM');
+Loader.preLoaded('loader', 'startup', 'core', 'adaptors/liteDOM');
 
 if (path.basename(dir) === 'node-main') {
   CONFIG.paths.esm = CONFIG.paths.mathjax;
-  CONFIG.paths.sre = '[esm]/sre/mathmaps';
+  CONFIG.paths.sre = '[esm]/sre';
   CONFIG.paths.mathjax = path.dirname(dir);
   combineDefaults(CONFIG, 'source', source);
-  //
-  //  Set the asynchronous loader to use the js directory, so we can load
-  //  other files like entity definitions
-  //
-  const ROOT = path.resolve(dir, '..', '..', '..', path.basename(path.dirname(dir)));
-  const REQUIRE = MathJax.config.loader.require;
-  MathJax._.mathjax.mathjax.asyncLoad = function (name) {
-    return REQUIRE(name.charAt(0) === '.' ? path.resolve(ROOT, name) :
-                   name.charAt(0) === '[' ? Package.resolvePath(name) : name);
-  };
 } else {
   CONFIG.paths.mathjax = dir;
 }
+//
+//  Set the asynchronous loader to use the js directory, so we can load
+//  other files like entity definitions
+//
+const ROOT = path.resolve(dir, '..', '..', '..', path.basename(path.dirname(dir)));
+const REQUIRE = MathJax.config.loader.require;
+MathJax._.mathjax.mathjax.asyncLoad = function (name) {
+  return REQUIRE(name.charAt(0) === '.' ? path.resolve(ROOT, name) :
+                 name.charAt(0) === '[' ? Package.resolvePath(name) : name);
+};
 
 /*
  * The initialization function.  Use as:

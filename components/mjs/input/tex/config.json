@@ -7,12 +7,12 @@
       "input/tex/base",
       "input/tex/ams",
       "input/tex/newcommand",
+      "input/tex/textmacros",
       "input/tex/noundefined",
       "input/tex/require",
       "input/tex/autoload",
       "input/tex/configmacros"
     ],
-    "exclude": ["input/tex/AllPackages.ts"],
     "excludeSubdirs": true
   },
   "webpack": {

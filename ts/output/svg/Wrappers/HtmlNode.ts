@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  Copyright (c) 2022-2023 The MathJax Consortium
+ *  Copyright (c) 2022-2024 The MathJax Consortium
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,19 +16,16 @@
  */
 
 /**
- * @fileoverview  Implements the SvgHtmlNode wrapper for the HtmlNode object
+ * @file  Implements the SvgHtmlNode wrapper for the HtmlNode object
  *
  * @author dpvc@mathjax.org (Davide Cervone)
  */
 
-import {SVG} from '../../svg.js';
-import {SvgWrapper, SvgWrapperClass} from '../Wrapper.js';
-import {SvgWrapperFactory} from '../WrapperFactory.js';
-import {SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass} from '../FontData.js';
-import {CommonHtmlNode, CommonHtmlNodeClass, CommonHtmlNodeMixin} from '../../common/Wrappers/HtmlNode.js';
-import {MmlNode} from '../../../core/MmlTree/MmlNode.js';
-import {HtmlNode} from '../../../core/MmlTree/MmlNodes/HtmlNode.js';
-import {StyleList} from '../../../util/StyleList.js';
+import { SvgWrapper } from '../Wrapper.js';
+import { SvgWrapperFactory } from '../WrapperFactory.js';
+import { SvgXmlNode, SvgXmlNodeNTD, SvgXmlNodeClass } from './semantics.js';
+import { MmlNode } from '../../../core/MmlTree/MmlNode.js';
+import { HtmlNode } from '../../../core/MmlTree/MmlNodes/HtmlNode.js';
 
 /*****************************************************************/
 /**
@@ -38,11 +35,7 @@ import {StyleList} from '../../../util/StyleList.js';
  * @template T  The Text node class
  * @template D  The Document class
  */
-export interface SvgHtmlNodeNTD<N, T, D> extends SvgWrapper<N, T, D>, CommonHtmlNode<
-  N, T, D,
-  SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>,
-  SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass
-> {}
+export interface SvgHtmlNodeNTD<N, T, D> extends SvgXmlNodeNTD<N, T, D> {}
 
 /**
  * The SvgHtmlNodeClass interface for the SVG HtmlNode wrapper
@@ -51,14 +44,13 @@ export interface SvgHtmlNodeNTD<N, T, D> extends SvgWrapper<N, T, D>, CommonHtml
  * @template T  The Text node class
  * @template D  The Document class
  */
-export interface SvgHtmlNodeClass<N, T, D> extends SvgWrapperClass<N, T, D>, CommonHtmlNodeClass<
-  N, T, D,
-  SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>,
-  SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass
-> {
-  new(factory: SvgWrapperFactory<N, T, D>, node: MmlNode, parent?: SvgWrapper<N, T, D>): SvgHtmlNodeNTD<N, T, D>;
+export interface SvgHtmlNodeClass<N, T, D> extends SvgXmlNodeClass<N, T, D> {
+  new (
+    factory: SvgWrapperFactory<N, T, D>,
+    node: MmlNode,
+    parent?: SvgWrapper<N, T, D>
+  ): SvgHtmlNodeNTD<N, T, D>;
 }
-
 
 /*****************************************************************/
 
@@ -66,61 +58,16 @@ export interface SvgHtmlNodeClass<N, T, D> extends SvgWrapperClass<N, T, D>, Com
  * The SvgHtmlNode wrapper class for the MmlHtmlNode class
  */
 export const SvgHtmlNode = (function <N, T, D>(): SvgHtmlNodeClass<N, T, D> {
-
-  const Base = CommonHtmlNodeMixin<
-      N, T, D,
-      SVG<N, T, D>, SvgWrapper<N, T, D>, SvgWrapperFactory<N, T, D>, SvgWrapperClass<N, T, D>,
-      SvgCharOptions, SvgVariantData, SvgDelimiterData, SvgFontData, SvgFontDataClass,
-      SvgHtmlNodeClass<N, T, D>
-    >(SvgWrapper);
-
-  // Avoid message about base constructors not having the same type
-  //   (they should both be SvgWrapper<N, T, D>, but are thought of as different by typescript)
-  // @ts-ignore
-  return class SvgHtmlNode extends Base implements SvgHtmlNodeNTD<N, T, D> {
-
+  return class SvgHtmlNode
+    // @ts-expect-error Avoid message about SvgXmlNode constructors not having
+    // the same type (they should both be SvgWrapper<N, T, D>, but are thought
+    // of as different by typescript)
+    extends SvgXmlNode
+    implements SvgHtmlNodeNTD<N, T, D>
+  {
     /**
      * @override
      */
     public static kind = HtmlNode.prototype.kind;
-
-    /**
-     * @override
-     */
-    public static styles: StyleList = {
-      'foreignObject[data-mjx-html]': {
-        overflow: 'visible'
-      },
-      'mjx-html': {
-        display: 'inline-block',
-        'line-height': 'normal',
-        'text-align': 'initial',
-      },
-      'mjx-html-holder': {
-        display: 'block',
-        position: 'absolute',
-        width: '100%',
-        height: '100%'
-      }
-    };
-
-    /**
-     * @override
-     */
-    public toSVG(parents: N[]) {
-      const metrics = this.jax.math.metrics;
-      const em = metrics.em * metrics.scale;
-      const scale = this.fixed(1 / em);
-      const {w, h, d} = this.getBBox();
-      this.dom = [this.adaptor.append(parents[0], this.svg('foreignObject', {
-        'data-mjx-html': true,
-        y: this.jax.fixed(-h * em) + 'px',
-        width: this.jax.fixed(w * em) + 'px',
-        height: this.jax.fixed((h + d) * em) + 'px',
-        transform: `scale(${scale}) matrix(1 0 0 -1 0 0)`
-      }, [this.getHTML()])) as N];
-    }
-
   };
-
 })<any, any, any>();

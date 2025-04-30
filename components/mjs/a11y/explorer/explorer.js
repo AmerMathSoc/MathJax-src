@@ -1,17 +1,8 @@
 import './lib/explorer.js';
 
-import {combineDefaults} from '#js/components/global.js';
 import {ExplorerHandler} from '#js/a11y/explorer.js';
+import {hasWindow} from '#js/util/context.js';
 
-if (MathJax.startup && typeof window !== 'undefined') {
-  if (MathJax.config.options && MathJax.config.options.enableExplorer !== false) {
-    combineDefaults(MathJax.config, 'options', {
-      menuOptions: {
-        settings: {
-          explorer: true
-        }
-      }
-    });
-  }
+if (MathJax.startup && hasWindow) {
   MathJax.startup.extendHandler(handler => ExplorerHandler(handler));
 }
